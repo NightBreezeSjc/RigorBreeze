@@ -1,0 +1,19 @@
+{
+  "workflowVersion": 1,
+  "phase": "baseline",
+  "activeTask": null,
+  "approvals": {
+    "task": {
+      "valid": false,
+      "digest": null,
+      "approvedAt": null
+    },
+    "dependencies": [],
+    "migrations": []
+  },
+  "red": null,
+  "verification": null,
+  "attestations": {},
+  "lastClosed": null,
+  "updatedAt": "2026-07-22T15:20:10+08:00"
+}
