@@ -1,0 +1,125 @@
+version = 4
+
+[policy]
+local_mode = "advisory"
+test_paths = ["home-api/src/test", "home-ui/src", "home-uniapp/src"]
+source_paths = ["home-api", "home-ui/src", "home-uniapp/src"]
+migration_paths = ["migration", "migrations", "db/migration", "script/sql"]
+
+[profiles]
+affected = ["format", "lint", "typecheck", "unit", "secret"]
+full = [
+  "format",
+  "lint",
+  "typecheck",
+  "unit",
+  "integration",
+  "e2e",
+  "contract",
+  "secret",
+  "dependency",
+  "license",
+  "sbom",
+  "migration",
+  "build",
+  "playwright",
+  "acceptance",
+]
+
+[parallel]
+base_branch = "main"
+worktree_root = ""
+
+[automation]
+level = "manual"
+remote = "origin"
+protected_branches = ["main", "master"]
+commit_message = "{task_id}: {title}"
+
+[[checks]]
+id = "format"
+command = ["node", "scripts/govkit-check.mjs", "--group", "format"]
+timeout = 900
+
+[[checks]]
+id = "lint"
+command = ["node", "scripts/govkit-check.mjs", "--group", "lint"]
+timeout = 900
+
+[[checks]]
+id = "typecheck"
+command = ["node", "scripts/govkit-check.mjs", "--group", "typecheck"]
+timeout = 1200
+
+[[checks]]
+id = "unit"
+command = ["node", "scripts/govkit-check.mjs", "--group", "test"]
+timeout = 1800
+
+[[checks]]
+id = "integration"
+command = ["node", "scripts/govkit-check.mjs", "--group", "integration"]
+timeout = 1800
+
+[[checks]]
+id = "e2e"
+command = ["node", "scripts/govkit-check.mjs", "--group", "e2e"]
+timeout = 1800
+report = "reports/e2e.json"
+
+[[checks]]
+id = "contract"
+command = ["node", "scripts/govkit-check.mjs", "--group", "contract"]
+timeout = 900
+
+[[checks]]
+id = "secret"
+command = ["gitleaks", "detect", "--no-banner", "--redact", "--report-format", "json", "--report-path", "reports/gitleaks.json"]
+timeout = 900
+report = "reports/gitleaks.json"
+
+[[checks]]
+id = "dependency"
+command = ["node", "scripts/govkit-check.mjs", "--group", "dependency"]
+timeout = 1800
+report = "reports/dependency.json"
+
+[[checks]]
+id = "license"
+command = ["node", "scripts/govkit-check.mjs", "--group", "license"]
+timeout = 900
+report = "reports/license.json"
+
+[[checks]]
+id = "sbom"
+command = ["node", "scripts/govkit-check.mjs", "--group", "sbom"]
+timeout = 900
+report = "reports/sbom.json"
+artifacts = ["artifacts/sbom.json"]
+
+[[checks]]
+id = "migration"
+command = ["node", "scripts/govkit-check.mjs", "--group", "migration"]
+timeout = 1800
+report = "reports/migration.json"
+
+[[checks]]
+id = "build"
+command = ["node", "scripts/govkit-check.mjs", "--group", "build"]
+timeout = 3600
+report = "reports/build.json"
+artifacts = ["artifacts/application.tar"]
+
+[[checks]]
+id = "playwright"
+command = ["npx", "playwright", "test", "--reporter=json"]
+cwd = "home-ui"
+timeout = 1800
+report = "reports/playwright.json"
+env = { PLAYWRIGHT_JSON_OUTPUT_NAME = "../reports/playwright.json" }
+
+[[checks]]
+id = "acceptance"
+command = ["node", "scripts/govkit-check.mjs", "--group", "acceptance"]
+timeout = 1800
+report = "reports/acceptance.json"

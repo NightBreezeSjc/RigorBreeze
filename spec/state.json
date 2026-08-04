@@ -1,5 +1,5 @@
 {
-  "workflowVersion": 1,
+  "workflowVersion": 4,
   "phase": "baseline",
   "activeTask": null,
   "approvals": {
@@ -9,11 +9,12 @@
       "approvedAt": null
     },
     "dependencies": [],
-    "migrations": []
+    "migrations": [],
+    "overlaps": []
   },
   "red": null,
   "verification": null,
-  "attestations": {},
   "lastClosed": null,
-  "updatedAt": "2026-07-22T15:20:10+08:00"
+  "updatedAt": "2026-07-22T15:20:10+08:00",
+  "warnings": []
 }

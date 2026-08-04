@@ -1,6 +1,7 @@
 # Production Spec Index
 
 This tree keeps one human-authored Markdown file per active change. Machine state and evidence are JSON.
+Project quality policy and executable profiles live in `../rigorbreeze.toml`.
 
 Authority order:
 

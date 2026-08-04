@@ -1,0 +1,44 @@
+stages:
+  - verify
+  - release
+
+variables:
+  PIP_DISABLE_PIP_VERSION_CHECK: "1"
+
+production-flow:merge:
+  stage: verify
+  image: python:3.12
+  script:
+    - python3 scripts/rigorbreeze.py doctor
+    - python3 scripts/rigorbreeze.py --mode enforced verify --profile full
+    - python3 scripts/rigorbreeze.py --mode enforced check merge
+  artifacts:
+    when: always
+    paths:
+      - spec/evidence/
+      - reports/
+      - artifacts/
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+
+production-flow:release:
+  stage: release
+  image: python:3.12
+  script:
+    - python3 scripts/rigorbreeze.py doctor
+    - python3 scripts/rigorbreeze.py --mode enforced verify --profile full
+    - python3 scripts/rigorbreeze.py --mode enforced check release
+  artifacts:
+    when: always
+    paths:
+      - spec/evidence/
+      - reports/
+      - artifacts/
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      when: manual
+  environment:
+    name: production
+
+# Configure GitLab so merge requests require a successful pipeline, the default
+# branch is protected, and only authorized maintainers can run the production job.

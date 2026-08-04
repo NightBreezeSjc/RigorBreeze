@@ -1,0 +1,4 @@
+interface:
+  display_name: "RigorBreeze"
+  short_description: "Evidence-backed delivery for solo Codex projects"
+  default_prompt: "Use $rigorbreeze to inspect this project, recover the current state, and run the next evidence-backed delivery step."

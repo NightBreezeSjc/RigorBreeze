@@ -1,4 +1,0 @@
-interface:
-  display_name: "Codex Production Flow"
-  short_description: "Auditable spec-to-production delivery gates"
-  default_prompt: "Use $codex-production-flow to initialize and run a production-grade spec-driven delivery workflow in this project."

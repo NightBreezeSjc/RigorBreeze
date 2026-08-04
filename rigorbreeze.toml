@@ -1,0 +1,60 @@
+version = 4
+
+[policy]
+local_mode = "advisory"
+test_paths = ["rigorbreeze/scripts/tests"]
+source_paths = ["rigorbreeze/scripts"]
+migration_paths = ["migration", "migrations"]
+
+[profiles]
+affected = ["format", "lint", "unit", "secret"]
+full = [
+  "format",
+  "lint",
+  "unit",
+  "contract",
+  "secret",
+  "build",
+  "acceptance",
+]
+
+[parallel]
+base_branch = ""
+worktree_root = ""
+
+[automation]
+level = "manual"
+remote = "origin"
+protected_branches = ["main", "master"]
+commit_message = "{task_id}: {title}"
+
+[[checks]]
+id = "format"
+command = ["python3", "-m", "ruff", "format", "--check", "rigorbreeze/scripts"]
+
+[[checks]]
+id = "lint"
+command = ["python3", "-m", "ruff", "check", "rigorbreeze/scripts"]
+
+[[checks]]
+id = "unit"
+command = ["python3", "-m", "unittest", "discover", "-s", "rigorbreeze/scripts/tests", "-v"]
+timeout = 120
+
+[[checks]]
+id = "contract"
+command = ["python3", "-m", "py_compile", "rigorbreeze/scripts/flow.py"]
+
+[[checks]]
+id = "secret"
+command = ["python3", "-c", "import pathlib,re,sys; files=[p for p in pathlib.Path('.').rglob('*') if p.is_file() and '.git' not in p.parts and 'tests' not in p.parts and p.name != 'rigorbreeze.toml']; pattern=re.compile(r'(?i)(api[_-]?key|token|password|secret)\\s*[:=]\\s*\\S{20,}'); hits=[str(p) for p in files if pattern.search(p.read_text(errors='ignore'))]; print('\\n'.join(hits)); sys.exit(bool(hits))"]
+
+[[checks]]
+id = "build"
+command = ["python3", "-c", "import pathlib,zipfile; out=pathlib.Path('artifacts/rigorbreeze.zip'); out.parent.mkdir(exist_ok=True); files=[p for p in pathlib.Path('rigorbreeze').rglob('*') if p.is_file() and '__pycache__' not in p.parts]; z=zipfile.ZipFile(out,'w',zipfile.ZIP_DEFLATED); [z.write(p,p.as_posix()) for p in files]; z.close()"]
+artifacts = ["artifacts/rigorbreeze.zip"]
+
+[[checks]]
+id = "acceptance"
+command = ["python3", "-m", "unittest", "discover", "-s", "rigorbreeze/scripts/tests", "-v"]
+timeout = 120

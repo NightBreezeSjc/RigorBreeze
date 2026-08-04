@@ -1,0 +1,32 @@
+version = 4
+
+[policy]
+local_mode = "advisory"
+test_paths = ["tests", "test", "__tests__", "src/test"]
+source_paths = ["src", "app", "lib"]
+migration_paths = ["migration", "migrations", "alembic", "flyway", "liquibase", "versions"]
+
+[profiles]
+affected = ["lint", "unit", "secret"]
+full = ["lint", "unit", "secret", "build"]
+
+[parallel]
+base_branch = ""
+worktree_root = ""
+
+[automation]
+level = "manual"
+remote = "origin"
+protected_branches = ["main", "master"]
+commit_message = "{task_id}: {title}"
+
+# Keep only checks the project actually uses. Add conditional checks such as
+# typecheck, integration, e2e, dependency, migration, or playwright when they
+# protect a real capability. Every ID listed above needs a command:
+#
+# [[checks]]
+# id = "unit"
+# command = ["python3", "-m", "unittest", "discover", "-v"]
+# timeout = 900
+# report = "reports/unit.json"
+#

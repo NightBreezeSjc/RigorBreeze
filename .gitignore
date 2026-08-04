@@ -5,6 +5,8 @@ __pycache__/
 .vscode/
 .pytest_cache/
 .ruff_cache/
+.omx/
 .coverage
 dist/
 build/
+/artifacts/

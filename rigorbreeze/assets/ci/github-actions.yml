@@ -1,0 +1,50 @@
+name: production-flow
+
+on:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      release:
+        description: Run the protected release gate
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  enforced-full-profile:
+    name: enforced-full-profile
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate workflow configuration and state
+        run: python3 scripts/rigorbreeze.py doctor
+      - name: Run configured checks in policy order
+        run: python3 scripts/rigorbreeze.py --mode enforced verify --profile full
+      - name: Enforce merge evidence
+        if: github.event_name == 'pull_request'
+        run: python3 scripts/rigorbreeze.py --mode enforced check merge
+      - name: Enforce protected release evidence
+        if: github.event_name == 'workflow_dispatch' && inputs.release
+        run: python3 scripts/rigorbreeze.py --mode enforced check release
+      - name: Preserve machine evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-flow-${{ github.sha }}
+          path: |
+            spec/evidence/
+            reports/
+            artifacts/
+          if-no-files-found: warn
+
+# Repository configuration still matters:
+# - require the "enforced-full-profile" check before merging into main;
+# - block direct pushes to main;
+# - protect the production environment and require manual approval;
+# - keep push, merge, tag, and release as explicit human actions.
