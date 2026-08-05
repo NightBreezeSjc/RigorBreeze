@@ -124,6 +124,8 @@ Evidence JSON may store:
 - Git HEAD and timestamp;
 - runtime, review, security, migration, second-human, and incident evidence references.
 
+Within one profile invocation, `checkRuns[*].reusedFromCheckId` may identify the earlier check whose identical process result was reused. It is execution provenance only: the later check retains its own pass/fail, report, artifacts, category, and timestamp. Its absence preserves compatibility with existing schema-v4 evidence.
+
 Stable schema-v4 sections are `baseline`, `checkRuns`, `tddChain`,
 `artifacts`, `acceptance`, `release`, `automation`, `practice`, `red`, and
 `verifications`, plus `closure` for completed, abandoned, or reconciled outcomes. Release

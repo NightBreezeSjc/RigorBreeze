@@ -503,7 +503,7 @@ def build_parser() -> argparse.ArgumentParser:
     live = subparsers.add_parser("run", help="run live Codex behavior evaluations")
     live.add_argument("--contract", type=Path, default=DEFAULT_CONTRACT)
     live.add_argument("--skill", type=Path, default=REPO_ROOT / "rigorbreeze")
-    live.add_argument("--version", default="0.9.0")
+    live.add_argument("--version", default="0.9.2")
     live.add_argument("--repetitions", type=int, default=2)
     live.add_argument("--case", help="run one scenario while debugging the suite")
     live.add_argument("--codex", default="codex")

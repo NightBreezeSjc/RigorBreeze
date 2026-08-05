@@ -55,6 +55,7 @@ from flow_policy import (  # noqa: E402
     refresh_approval,
     report_record,
     save_state,
+    secret_content_scan,
     secret_content_paths,
     staged_files,
     task_change_paths,
@@ -114,6 +115,7 @@ from flow_state import (  # noqa: E402
     sha256_bytes,
     spec_root,
     state_path,
+    subprocess_text,
     task_digest,
     task_path,
     task_template,
@@ -1072,6 +1074,10 @@ def command_verify_profile(root: Path, profile: str, requested_mode: str | None)
             )
     checks = config["_checks"]
     records: list[dict[str, Any]] = []
+    executions: dict[
+        tuple[tuple[str, ...], str, tuple[tuple[str, str], ...], int],
+        tuple[subprocess.CompletedProcess[str], int, str],
+    ] = {}
     passed = True
     for check_id in check_ids:
         check = checks.get(check_id)
@@ -1107,28 +1113,52 @@ def command_verify_profile(root: Path, profile: str, requested_mode: str | None)
             records.append(record)
             evidence["checkRuns"].append(record)
             continue
-        started = time.monotonic()
-        try:
-            result = subprocess.run(
-                check["command"],
-                cwd=resolve_project_path(
-                    root, check.get("cwd", "."), f"check {check_id} cwd"
-                ),
-                env={**os.environ, **check.get("env", {})},
-                text=True,
-                encoding="utf-8",
-                capture_output=True,
-                timeout=check.get("timeout", 900),
-            )
-        except FileNotFoundError as exc:
-            result = subprocess.CompletedProcess(check["command"], 127, "", str(exc))
-        except subprocess.TimeoutExpired as exc:
-            result = subprocess.CompletedProcess(
-                check["command"],
-                124,
-                exc.stdout or "",
-                f"timed out after {check.get('timeout', 900)} seconds",
-            )
+        resolved_cwd = resolve_project_path(
+            root, check.get("cwd", "."), f"check {check_id} cwd"
+        )
+        effective_env = {**os.environ, **check.get("env", {})}
+        timeout = check.get("timeout", 900)
+        signature = (
+            tuple(check["command"]),
+            str(resolved_cwd),
+            tuple(sorted(effective_env.items())),
+            timeout,
+        )
+        reused_from: str | None = None
+        cached = executions.get(signature)
+        if cached:
+            result, _original_duration, reused_from = cached
+            duration_ms = 0
+        else:
+            started = time.monotonic()
+            try:
+                result = subprocess.run(
+                    check["command"],
+                    cwd=resolved_cwd,
+                    env=effective_env,
+                    text=True,
+                    encoding="utf-8",
+                    capture_output=True,
+                    timeout=timeout,
+                )
+            except FileNotFoundError as exc:
+                result = subprocess.CompletedProcess(
+                    check["command"], 127, "", str(exc)
+                )
+            except subprocess.TimeoutExpired as exc:
+                timeout_message = f"timed out after {timeout} seconds"
+                result = subprocess.CompletedProcess(
+                    check["command"],
+                    124,
+                    subprocess_text(exc.stdout),
+                    "\n".join(
+                        part
+                        for part in (subprocess_text(exc.stderr), timeout_message)
+                        if part
+                    ),
+                )
+            duration_ms = round((time.monotonic() - started) * 1000)
+            executions[signature] = (result, duration_ms, check_id)
         output = ((result.stdout or "") + (result.stderr or "")).strip()
         check_passed = result.returncode == 0
         report: dict[str, Any] | None = None
@@ -1161,7 +1191,7 @@ def command_verify_profile(root: Path, profile: str, requested_mode: str | None)
             "command": [redact(part) for part in check["command"]],
             "exitCode": result.returncode,
             "passed": check_passed,
-            "durationMs": round((time.monotonic() - started) * 1000),
+            "durationMs": duration_ms,
             "summary": redact(output[-2000:]),
             "report": report,
             "artifacts": [item["sha256"] for item in artifacts],
@@ -1170,6 +1200,8 @@ def command_verify_profile(root: Path, profile: str, requested_mode: str | None)
             "head": current_head(root) if is_git_repo(root) else None,
             "recordedAt": now_iso(),
         }
+        if reused_from:
+            record["reusedFromCheckId"] = reused_from
         records.append(record)
         evidence["checkRuns"].append(record)
         passed = passed and check_passed
@@ -1486,10 +1518,14 @@ def command_check(root: Path, gate: str, requested_mode: str | None = None) -> N
         secrets = [path for path in paths if is_secret_path(path)]
         if secrets:
             raise FlowError("secret paths are forbidden: " + ", ".join(secrets))
-        secret_content = secret_content_paths(root, paths)
+        secret_content, secret_exemptions = secret_content_scan(root, paths)
         if secret_content:
             raise FlowError(
                 "secret-like content detected: " + ", ".join(secret_content)
+            )
+        if secret_exemptions:
+            print(
+                "synthetic secret fixture exemptions: " + ", ".join(secret_exemptions)
             )
         dependencies = [path for path in paths if is_dependency_path(path)]
         if dependencies and not state["approvals"]["dependencies"]:
@@ -1511,8 +1547,8 @@ def command_check(root: Path, gate: str, requested_mode: str | None = None) -> N
             raise FlowError(
                 "staged files are outside approved scope: " + ", ".join(out_of_scope)
             )
-        if not verification_current(root, state):
-            raise FlowError("verification is missing or stale")
+        if not configured_verification_current(root, state):
+            raise FlowError("configured affected/full verification is missing or stale")
     elif gate == "merge":
         if active:
             ensure_delivery_quality(root, state)

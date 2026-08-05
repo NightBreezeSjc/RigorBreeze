@@ -63,25 +63,57 @@ class BehaviorSuiteTests(unittest.TestCase):
             "markers": [
                 "workflow-status",
                 "project-facts",
-                "source-of-truth",
+                "requirement-atoms",
+                "intent-direction-resolved",
+                "acceptance-coverage",
                 "fresh-verification",
             ],
             "questions": [],
             "verification": {
-                "command": "python -m unittest tests/test_balance.py",
+                "command": "npm test -- tests/detail-page.test.ts",
                 "exitCode": 0,
-                "scope": "balance public seam",
+                "scope": "detail page observable states",
                 "fresh": True,
             },
         }
-        transcript = "run rigorbreeze status --json\nread docs/requirements.md\n"
+        transcript = (
+            "run rigorbreeze status --json\nread docs/prototype.md\n"
+            "MOVE lock; REMOVE device/contact; RETAIN eye reveal\n"
+        )
         verdict = runner.score_case(
             case,
             result,
             transcript,
-            ["src/balance.py", "tests/test_balance.py"],
+            ["src/detail-page.vue", "tests/detail-page.test.ts"],
         )
         self.assertTrue(verdict["passed"], verdict)
+
+    def test_compound_ui_case_rejects_partial_requirement_capture(self) -> None:
+        runner = load_runner()
+        case = next(
+            case
+            for case in runner.load_contract(SCENARIOS_PATH)["cases"]
+            if case["id"] == "context-semantics"
+        )
+        result = {
+            "caseId": case["id"],
+            "markers": ["workflow-status", "project-facts", "fresh-verification"],
+            "questions": [],
+            "verification": {
+                "command": "npm test -- tests/detail-page.test.ts",
+                "exitCode": 0,
+                "scope": "password reveal only",
+                "fresh": True,
+            },
+        }
+        verdict = runner.score_case(
+            case,
+            result,
+            "run status\nread docs/prototype.md\nimplement password reveal\n",
+            ["src/detail-page.vue", "tests/detail-page.test.ts"],
+        )
+        self.assertFalse(verdict["passed"])
+        self.assertIn("requirement-atoms", " ".join(verdict["issues"]))
 
     def test_all_synthetic_transcripts_meet_their_contracts(self) -> None:
         runner = load_runner()
@@ -141,17 +173,17 @@ class BehaviorSuiteTests(unittest.TestCase):
             "markers": context["requiredMarkers"],
             "questions": [],
             "verification": {
-                "command": "python -m unittest tests/test_balance.py",
+                "command": "npm test -- tests/detail-page.test.ts",
                 "exitCode": 0,
-                "scope": "balance public seam",
+                "scope": "detail page observable states",
                 "fresh": False,
             },
         }
         stale = runner.score_case(
             context,
             stale_result,
-            "read docs/requirements.md\nrun status\n",
-            ["src/balance.py", "tests/test_balance.py"],
+            "run status\nread docs/prototype.md\nMOVE x REMOVE y RETAIN z\n",
+            ["src/detail-page.vue", "tests/detail-page.test.ts"],
         )
         self.assertFalse(stale["passed"])
         self.assertIn("fresh verification", " ".join(stale["issues"]))
@@ -161,22 +193,19 @@ class BehaviorSuiteTests(unittest.TestCase):
         case = runner.load_contract(SCENARIOS_PATH)["cases"][0]
         with tempfile.TemporaryDirectory() as directory:
             workspace = runner.prepare_fixture(case, Path(directory) / "fixture")
-            self.assertTrue((workspace / "docs" / "requirements.md").is_file())
+            self.assertTrue((workspace / "docs" / "prototype.md").is_file())
             self.assertTrue((workspace / ".git").is_dir())
 
     def test_redaction_removes_common_secret_shapes(self) -> None:
         runner = load_runner()
         redacted = runner.redact_text(
-            "Authorization: "
-            + "Bearer secret-token\n"
-            + "api_"
-            + "key=abc123456789\n"
-            + "pass"
-            + "word: letmein\n"
+            "Authorization: Bearer synthetic-bearer-token  # rigorbreeze: synthetic-secret\n"
+            "api_key=synthetic-api-key-value  # rigorbreeze: synthetic-secret\n"
+            "password: synthetic-password-value  # rigorbreeze: synthetic-secret\n"
         )
-        self.assertNotIn("secret-token", redacted)
-        self.assertNotIn("abc123456789", redacted)
-        self.assertNotIn("letmein", redacted)
+        self.assertNotIn("synthetic-bearer-token", redacted)
+        self.assertNotIn("synthetic-api-key-value", redacted)
+        self.assertNotIn("synthetic-password-value", redacted)
         self.assertGreaterEqual(redacted.count("[REDACTED]"), 3)
         self.assertEqual(runner._as_text("text".encode()), "text")
         self.assertEqual(runner._as_text(None), "")

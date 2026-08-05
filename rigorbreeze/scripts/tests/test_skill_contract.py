@@ -35,7 +35,7 @@ class SkillContractTests(unittest.TestCase):
 
         shared_contract = (
             "$rigorbreeze",
-            "v0.9.0",
+            "v0.9.2",
             "nightbreezesjc/rigorbreeze",
             "npx skills@latest add nightbreezesjc/rigorbreeze --skill rigorbreeze -g -a codex -y",
             "python3 scripts/rigorbreeze.py status --json",
@@ -144,6 +144,10 @@ class SkillContractTests(unittest.TestCase):
 
         required_skill_phrases = (
             "semantic self-review",
+            "observable atoms",
+            "final-state checklist",
+            "current defect",
+            "desired result",
             "fresh verification",
             "exit status",
             "review feedback",
@@ -160,6 +164,9 @@ class SkillContractTests(unittest.TestCase):
 
         for phrase in (
             "semantic self-review",
+            "observable atoms",
+            "current defect",
+            "desired result",
             "fresh verification",
             "review feedback",
             "three failed hypotheses",

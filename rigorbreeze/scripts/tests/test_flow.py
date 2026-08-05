@@ -358,6 +358,135 @@ Risk: L1
         blocked = self.run_flow("--mode", "enforced", "check", "commit", expected=2)
         self.assertIn("secret-like content", blocked.stderr.lower())
 
+    def test_commit_gate_allows_only_same_line_marked_synthetic_test_secret(
+        self,
+    ) -> None:
+        self.init_git()
+        self.run_flow("init")
+        self.write_full_config()
+        self.run_flow("new", "TASK-001", "--title", "One slice", "--risk", "L0")
+        self.complete_task()
+        self.run_flow("approve", "task")
+        fixture = self.root / "tests" / "test_redaction.py"
+        fixture.parent.mkdir()
+        fixture.write_text(
+            "API_KEY = 'fixture-secret-value-12345'  # rigorbreeze: synthetic-secret\n",
+            encoding="utf-8",
+        )
+        self.run_flow("--mode", "enforced", "verify", "--profile", "affected")
+        subprocess.run(["git", "add", "."], cwd=self.root, check=True)
+
+        allowed = self.run_flow("--mode", "enforced", "check", "commit")
+        self.assertIn("tests/test_redaction.py:1", allowed.stdout)
+        self.assertNotIn("fixture-secret-value", allowed.stdout)
+
+        fixture.write_text(
+            "API_KEY = 'fixture-secret-value-12345'  # rigorbreeze: synthetic-secret\n"
+            "PASSWORD = 'another-unmarked-secret-12345'\n",
+            encoding="utf-8",
+        )
+        self.run_flow("--mode", "enforced", "verify", "--profile", "affected")
+        subprocess.run(["git", "add", "."], cwd=self.root, check=True)
+        unmarked = self.run_flow("--mode", "enforced", "check", "commit", expected=2)
+        self.assertIn("secret-like content", unmarked.stderr.lower())
+
+    def test_synthetic_secret_marker_cannot_escape_test_or_secret_path_boundaries(
+        self,
+    ) -> None:
+        self.init_git()
+        self.run_flow("init")
+        self.write_full_config()
+        self.run_flow("new", "TASK-001", "--title", "One slice", "--risk", "L0")
+        self.complete_task()
+        self.run_flow("approve", "task")
+        outside = self.root / "app.py"
+        outside.write_text(
+            "API_KEY = 'fixture-secret-value-12345'  # rigorbreeze: synthetic-secret\n",
+            encoding="utf-8",
+        )
+        self.run_flow("--mode", "enforced", "verify", "--profile", "affected")
+        subprocess.run(["git", "add", "."], cwd=self.root, check=True)
+        blocked_outside = self.run_flow(
+            "--mode", "enforced", "check", "commit", expected=2
+        )
+        self.assertIn("secret-like content", blocked_outside.stderr.lower())
+
+        subprocess.run(
+            ["git", "reset", "-q", "HEAD", "app.py"], cwd=self.root, check=True
+        )
+        outside.unlink()
+        secret_path = self.root / "tests" / "secrets" / "fixture.py"
+        secret_path.parent.mkdir(parents=True)
+        secret_path.write_text(
+            "API_KEY = 'fixture-secret-value-12345'  # rigorbreeze: synthetic-secret\n",
+            encoding="utf-8",
+        )
+        self.run_flow("--mode", "enforced", "verify", "--profile", "affected")
+        subprocess.run(["git", "add", "."], cwd=self.root, check=True)
+        blocked_path = self.run_flow(
+            "--mode", "enforced", "check", "commit", expected=2
+        )
+        self.assertIn("secret paths are forbidden", blocked_path.stderr.lower())
+
+    def test_synthetic_secret_marker_does_not_bypass_configured_secret_check(
+        self,
+    ) -> None:
+        self.init_git()
+        self.run_flow("init")
+        self.write_full_config()
+        config = self.root / "rigorbreeze.toml"
+        passing = 'id = "secret"\ncommand = ' + json.dumps(
+            [sys.executable, "-c", "print('passed')"]
+        )
+        failing = 'id = "secret"\ncommand = ' + json.dumps(
+            [
+                sys.executable,
+                "-c",
+                "raise SystemExit('configured secret scanner failed')",
+            ]
+        )
+        config_text = config.read_text(encoding="utf-8")
+        self.assertIn(passing, config_text)
+        config.write_text(
+            config_text.replace(passing, failing, 1),
+            encoding="utf-8",
+        )
+        self.commit_all("configure failing secret scanner")
+        self.run_flow("new", "TASK-001", "--title", "One slice", "--risk", "L0")
+        self.complete_task()
+        self.run_flow("approve", "task")
+        fixture = self.root / "tests" / "test_redaction.py"
+        fixture.parent.mkdir()
+        fixture.write_text(
+            "API_KEY = 'fixture-secret-value-12345'  # rigorbreeze: synthetic-secret\n",
+            encoding="utf-8",
+        )
+
+        result = self.run_flow(
+            "--mode", "enforced", "verify", "--profile", "affected", expected=1
+        )
+
+        self.assertIn("failed", result.stdout.lower())
+
+    def test_commit_gate_requires_configured_profile_verification(self) -> None:
+        self.init_git()
+        self.run_flow("init")
+        self.write_full_config()
+        self.run_flow("new", "TASK-001", "--title", "One slice", "--risk", "L0")
+        self.complete_task()
+        self.run_flow("approve", "task")
+        (self.root / "app.py").write_text("VALUE = 1\n", encoding="utf-8")
+        self.run_flow("--mode", "enforced", "verify", "--profile", "affected")
+        state_path = self.state_path()
+        state = json.loads(state_path.read_text(encoding="utf-8"))
+        state["verification"]["configured"] = False
+        state["verification"]["profile"] = "targeted"
+        state_path.write_text(json.dumps(state), encoding="utf-8")
+        subprocess.run(["git", "add", "."], cwd=self.root, check=True)
+
+        blocked = self.run_flow("--mode", "enforced", "check", "commit", expected=2)
+        self.assertIn("configured", blocked.stderr.lower())
+
     def test_archive_moves_the_single_task_without_copying_it(self) -> None:
         self.init_git()
         self.run_flow("init")

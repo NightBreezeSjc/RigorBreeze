@@ -2,6 +2,15 @@
 
 English · [简体中文](ci-gates.zh-CN.md)
 
+## Contents
+
+- [Principle](#principle)
+- [Minimum pipeline](#minimum-pipeline)
+- [GitLab](#gitlab)
+- [GitHub Actions](#github-actions)
+- [Artifact identity](#artifact-identity)
+- [Enforcement boundary](#enforcement-boundary)
+
 ## Principle
 
 Keep policy in `scripts/rigorbreeze.py` plus `rigorbreeze.toml` and call the same
@@ -28,6 +37,10 @@ changes additionally require `dependency`, `license`, and `sbom` with non-empty
 reports; migration changes require `migration` with its report. Browser UI and
 other unrelated capabilities remain conditional and require no N/A paperwork.
 Required failures block merge and release.
+
+An ordinary commit is a narrower checkpoint: it requires current configured `affected` or `full` evidence, and never accepts targeted exploration. Existing fresh evidence is reused. Normal L1/L2 archive, merge, and direct integration-branch delivery still require `full` plus applicable acceptance and review. Maintainer live Agent behavior runs are release-candidate evidence only; commit, configured `full`, and CI never invoke them.
+
+Inside one profile invocation only, an identical argv, resolved cwd, effective environment, and timeout executes once. Reusing the process does not reuse policy: each check independently validates its report and artifacts and records `reusedFromCheckId`.
 
 ## GitLab
 
@@ -66,6 +79,8 @@ gate and artifact carrier, not a resident deployment state machine.
 Local mode defaults to advisory. Local hooks can remind but are not the
 authority. Remote required checks and protected environments are the
 non-bypassable merge/release boundary.
+
+The built-in staged-content heuristic may ignore a same-line `rigorbreeze: synthetic-secret` marker only below configured test paths. This never exempts secret-like file paths or project-configured Gitleaks/secret adapters, which remain authoritative.
 
 Before the first enforced L1/L2 approval, `workflowBaseline.status` must be
 `current` on the configured base branch. A task-branch runner commit is not a

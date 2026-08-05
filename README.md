@@ -13,7 +13,7 @@ English · [简体中文](README.zh-CN.md)
 
 RigorBreeze turns a conversation into one approved task contract, observed TDD evidence, configured quality checks, real-runtime acceptance, and a recoverable delivery record. It is deliberately smaller than a full project-management system: one task Markdown, one machine evidence file, and no document maze.
 
-> **Public Preview:** v0.9.0 is usable today and closes real-delivery gaps around workflow baselines, stale integrated tasks, post-archive delivery, incomplete prompts, repeated external operations, and Agent behavior under pressure. It has not yet completed the validation required for v1.0, so interfaces may still change in response to further delivery evidence.
+> **Public Preview:** v0.9.2 is usable today and closes real-delivery gaps around workflow baselines, stale integrated tasks, post-archive delivery, incomplete or compound prompts, repeated external operations, Agent behavior under pressure, and avoidable local verification friction. It has not yet completed the validation required for v1.0, so interfaces may still change in response to further delivery evidence.
 
 ## Why this exists
 
@@ -110,11 +110,11 @@ You make three kinds of judgment: approve the intended outcome, accept the real 
 
 You do not need to write a perfect prompt or prepend a persona such as “act as a unicorn CTO.” RigorBreeze recovers project facts, current behavior, architecture paths, invariants and data-freshness/fallback semantics itself. It asks only when evidence cannot determine an intent that would materially change the result. For external Git, deployment, developer-tool or platform writes, it first reports what is already completed, the current immutable identifiers, the one remaining action and stop conditions so an old checklist is not replayed.
 
-Before approval, RigorBreeze checks the task for placeholders, contradictions, an oversized slice, and ambiguous outcome/source/fallback semantics. Completion claims must name a fresh command, exit status, and covered scope. Review suggestions are checked against repository reality and YAGNI, while three failed hypotheses for the same defect trigger an architecture stop instead of a fourth speculative patch. Maintainers validate these rules with six synthetic Agent-pressure scenarios; the suite is not installed into user projects and never calls a model from CI.
+Before approval, RigorBreeze checks the task for placeholders, contradictions, an oversized slice, and ambiguous outcome/source/fallback semantics. Compound requests become observable ADD/REMOVE/MOVE/RETAIN/REPLACE atoms, each mapped to acceptance or explicit exclusion. For UI changes, the final-state checklist covers presence, absence, order/location, and retained behavior; negative wording is resolved as either a current defect or desired result from evidence, with one short question only when the direction remains outcome-changing. Completion claims must name a fresh command, exit status, and covered scope. Review suggestions are checked against repository reality and YAGNI, while three failed hypotheses for the same defect trigger an architecture stop instead of a fourth speculative patch. Maintainers validate these rules with six synthetic Agent-pressure scenarios; the suite is not installed into user projects and never calls a model from CI.
 
 Allowed Scope entries are repository-relative paths, directory prefixes, or globs; `*` matches one path segment and `**` crosses directories. Acceptance criteria use unique machine-readable IDs. A contract cannot be reapproved over production changes: restore the approved contract and finish, or revert those changes before amending the same outcome. A new user outcome or acceptance condition becomes a dependent slice.
 
-After initialization and project-check configuration, establish a human-controlled Git baseline before the first enforced L1/L2 approval. `status --json` reports the exact base-branch state under `workflowBaseline`. When the user explicitly authorizes it, Codex may run `automate commit --once --workflow-baseline --expected-head <SHA>`; it stages only managed workflow files, rejects mixed product changes and secrets, and does not persist Git authority. The installed Skill always checks through its bundled v0.9.0 runner, reports missing or modified components separately, and does not overwrite it while an implementation task is active.
+After initialization and project-check configuration, establish a human-controlled Git baseline before the first enforced L1/L2 approval. `status --json` reports the exact base-branch state under `workflowBaseline`. When the user explicitly authorizes it, Codex may run `automate commit --once --workflow-baseline --expected-head <SHA>`; it stages only managed workflow files, rejects mixed product changes and secrets, and does not persist Git authority. The installed Skill always checks through its bundled v0.9.2 runner, reports missing or modified components separately, and does not overwrite it while an implementation task is active.
 
 After initialization, the project contains:
 
@@ -240,7 +240,7 @@ For a manual install, remove only the `rigorbreeze` directory or symlink from yo
 
 ## Public Preview and v1.0
 
-v0.9.0 keeps the minimal Spec Tree and existing command surface while making four execution rules pressure-testable: semantic self-review, fresh proof before completion claims, skeptical review handling, and an architecture stop after three failed hypotheses. Historical reconciliation records missing proof honestly, and closed tasks no longer expose stale actions. Maturity beyond preview must still come from repeated real use rather than more features.
+v0.9.2 keeps the minimal Spec Tree and existing command surface while making compound-request interpretation pressure-testable: the existing semantics scenario now rejects partial capture of move/remove/retain operations and ambiguous negation. It retains v0.9.1's process-local check reuse, risk-minimal commit evidence, and explicit release-candidate Agent evaluations. Historical reconciliation records missing proof honestly, and closed tasks no longer expose stale actions. Maturity beyond preview must still come from repeated real use rather than more features.
 
 Before v1.0, the workflow must complete and learn from:
 

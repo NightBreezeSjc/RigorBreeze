@@ -1,0 +1,1699 @@
+{
+  "workflowVersion": 4,
+  "taskId": "RB-LOW-FRICTION-091",
+  "baseline": {
+    "taskDigest": "5dfe1aef97b59d6d208fba08d4ee7f2f02d260df57e3d9105350a5ac07d66495",
+    "head": "d3f1adde4f76662793dd06d8ae34e26df15254a9",
+    "projectFingerprint": "e658341ccca7ec865fda5877c1873f620c6724a984595c158f778764a6c39671",
+    "configDigest": "29e4313a1131a04a40744798b88740046122394a3b05daff60b9a73c50db1f43",
+    "workingTreePaths": [
+      "AGENTS.md",
+      "CHANGELOG.md",
+      "CHANGELOG.zh-CN.md",
+      "CONTRIBUTING.md",
+      "CONTRIBUTING.zh-CN.md",
+      "README.md",
+      "README.zh-CN.md",
+      "Skill演进与实践记录.md",
+      "rigorbreeze.toml",
+      "rigorbreeze/SKILL.md",
+      "rigorbreeze/references/ci-gates.md",
+      "rigorbreeze/references/ci-gates.zh-CN.md",
+      "rigorbreeze/references/handbook.md",
+      "rigorbreeze/references/handbook.zh-CN.md",
+      "rigorbreeze/references/spec-tree.md",
+      "rigorbreeze/references/spec-tree.zh-CN.md",
+      "rigorbreeze/scripts/tests/test_flow.py",
+      "rigorbreeze/scripts/tests/test_flow_v2.py",
+      "rigorbreeze/scripts/tests/test_flow_v4.py",
+      "rigorbreeze/scripts/tests/test_skill_contract.py",
+      "spec/changes/RB-LOW-FRICTION-091.md",
+      "tests/behavior/run.py",
+      "tests/behavior/test_behavior.py"
+    ],
+    "workingTreeDigests": {
+      "AGENTS.md": "135463c588803a22ed0870460d47e3c960c8e6e6ab066ad84820219dbaba77e8",
+      "CHANGELOG.md": "d96fa07e6d21be7346057abf01f13aaa7ad3654a80808711e312e8e0d9de51a8",
+      "CHANGELOG.zh-CN.md": "3095fa40ea0b5c1b3ee4e5f3bea1d4d198ef5636b990926bc4463d8721dace31",
+      "CONTRIBUTING.md": "473ca77cef7349fe8612296939f5586d467f653b12ee0cf3e34aa06f4ac5a515",
+      "CONTRIBUTING.zh-CN.md": "8e2487e7856324144b1a50a63f6b1a0268d809bcc66ce9c42c1db86e1fc97b44",
+      "README.md": "0cc4b0caa61bcbae5d4e68ef344d81c7468418ab137fcadd1d1f192fa0d9844f",
+      "README.zh-CN.md": "91ce0ae5fedb13c645fca1182c31d9f281ca9ee46a578a825338c025f25cbb54",
+      "Skill演进与实践记录.md": "0b363b832749a571768f986d79c96fcbcb6a6a2e4b77b04d8d8b8b85eaa0cef9",
+      "rigorbreeze.toml": "29e4313a1131a04a40744798b88740046122394a3b05daff60b9a73c50db1f43",
+      "rigorbreeze/SKILL.md": "14d741bf2b71b9c994924284339238b0370e4ca7c819a1ff8e8751df7c04b1a2",
+      "rigorbreeze/references/ci-gates.md": "19d0388e75bcfe971f0b6a2b133d69d0188db0096158bf15e25afd8ba9969c56",
+      "rigorbreeze/references/ci-gates.zh-CN.md": "65b2a3c823c791e57ce0061dee860db70dca69509620500dffa36d1431194a7a",
+      "rigorbreeze/references/handbook.md": "d07ecb5d3f32d18e78b8de2a0b95fed164edd5979c8b0286a76dd38d92b97200",
+      "rigorbreeze/references/handbook.zh-CN.md": "05202005407a73f53e3e7781d8db02c94f307b759d115b02299c5fb3bb23c9b2",
+      "rigorbreeze/references/spec-tree.md": "f2d89ae21a3b0f0cb48c9e4737d75ffafc5a903662e770952407e3855b2dad8e",
+      "rigorbreeze/references/spec-tree.zh-CN.md": "12d84dfd9cd72a192f5d605553e1afcdc31a5a9844ef8e40087def41c26ea9c6",
+      "rigorbreeze/scripts/tests/test_flow.py": "df52849b18400e2922704e310af568f1698d2c0d40a810d78bcdd43a9d60e0be",
+      "rigorbreeze/scripts/tests/test_flow_v2.py": "b08056250d8da363d350ee8d66c9c8abc09371b4aff2d046ed9fe699129167cd",
+      "rigorbreeze/scripts/tests/test_flow_v4.py": "6b41c93edc99307f3be46042ccc49a5e5c0c373369f4a33721e07145535f11f4",
+      "rigorbreeze/scripts/tests/test_skill_contract.py": "34f113298159216848df029b4da9d534ba44760d0e155ae38ca304749dcfd3eb",
+      "spec/changes/RB-LOW-FRICTION-091.md": "5dfe1aef97b59d6d208fba08d4ee7f2f02d260df57e3d9105350a5ac07d66495",
+      "tests/behavior/run.py": "da56dbac9e741daf4dea61af7a9c7fa31f96415f4f72d41fddc51a83c868349c",
+      "tests/behavior/test_behavior.py": "507590c0ac52a51746053cd9b397fedfb861d5912d2b674360f90136409cae0f"
+    },
+    "approvedAt": "2026-08-05T14:17:20+08:00"
+  },
+  "red": [
+    {
+      "requirement": "REQ-001",
+      "command": [
+        "/usr/bin/env",
+        "RIGORBREEZE_TEST_FILE=rigorbreeze/scripts/tests/test_flow_v2.py",
+        "PYTHONPATH=rigorbreeze/scripts/tests:rigorbreeze/scripts",
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "-v",
+        "test_flow_v2.FlowV2Tests.test_timeout_output_normalizes_bytes_text_and_none"
+      ],
+      "exitCode": 1,
+      "expectedPattern": "subprocess_text",
+      "testDigests": {
+        "rigorbreeze/scripts/tests/test_flow_v2.py": "7e56651740f3fcedb8eb4a63b316ebb545305363a594695e27451974460d912b"
+      },
+      "summary": "test_timeout_output_normalizes_bytes_text_and_none (test_flow_v2.FlowV2Tests.test_timeout_output_normalizes_bytes_text_and_none) ... ERROR\n\n======================================================================\nERROR: test_timeout_output_normalizes_bytes_text_and_none (test_flow_v2.FlowV2Tests.test_timeout_output_normalizes_bytes_text_and_none)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/songjincheng/LinGang-housing/rigorbreeze/rigorbreeze/scripts/tests/test_flow_v2.py\", line 300, in test_timeout_output_normalizes_bytes_text_and_none\n    self.assertEqual(flow_state.subprocess_text(b\"partial\\xff\"), \"partial�\")\n                     ^^^^^^^^^^^^^^^^^^^^^^^^^^\nAttributeError: module 'flow_state' has no attribute 'subprocess_text'\n\n----------------------------------------------------------------------\nRan 1 test in 0.006s\n\nFAILED (errors=1)",
+      "taskDigest": "3aefacd3c8805438c80ff393f6edf248507998c6c542cf4807d0bc773d7cfbe4",
+      "projectFingerprint": "ce9d7dac10022ef36a522d34e2d7862f733b3488ca6752d8ac3078c191c4832b",
+      "head": "d3f1adde4f76662793dd06d8ae34e26df15254a9",
+      "observedAt": "2026-08-05T13:54:04+08:00"
+    },
+    {
+      "requirement": "REQ-002",
+      "command": [
+        "/usr/bin/env",
+        "RIGORBREEZE_TEST_FILE=rigorbreeze/scripts/tests/test_flow_v2.py",
+        "PYTHONPATH=rigorbreeze/scripts/tests:rigorbreeze/scripts",
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "-v",
+        "test_flow_v2.FlowV2Tests.test_identical_profile_checks_execute_once_and_keep_distinct_records"
+      ],
+      "exitCode": 1,
+      "expectedPattern": "'xx' != 'x'",
+      "testDigests": {
+        "rigorbreeze/scripts/tests/test_flow_v2.py": "7e56651740f3fcedb8eb4a63b316ebb545305363a594695e27451974460d912b"
+      },
+      "summary": "test_identical_profile_checks_execute_once_and_keep_distinct_records (test_flow_v2.FlowV2Tests.test_identical_profile_checks_execute_once_and_keep_distinct_records) ... FAIL\n\n======================================================================\nFAIL: test_identical_profile_checks_execute_once_and_keep_distinct_records (test_flow_v2.FlowV2Tests.test_identical_profile_checks_execute_once_and_keep_distinct_records)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/songjincheng/LinGang-housing/rigorbreeze/rigorbreeze/scripts/tests/test_flow_v2.py\", line 387, in test_identical_profile_checks_execute_once_and_keep_distinct_records\n    self.assertEqual(counter.read_text(), \"x\")\n    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: 'xx' != 'x'\n- xx\n? -\n+ x\n\n\n----------------------------------------------------------------------\nRan 1 test in 0.546s\n\nFAILED (failures=1)",
+      "taskDigest": "3aefacd3c8805438c80ff393f6edf248507998c6c542cf4807d0bc773d7cfbe4",
+      "projectFingerprint": "ce9d7dac10022ef36a522d34e2d7862f733b3488ca6752d8ac3078c191c4832b",
+      "head": "d3f1adde4f76662793dd06d8ae34e26df15254a9",
+      "observedAt": "2026-08-05T13:55:34+08:00"
+    },
+    {
+      "requirement": "REQ-004",
+      "command": [
+        "/usr/bin/env",
+        "RIGORBREEZE_TEST_FILE=rigorbreeze/scripts/tests/test_flow.py",
+        "PYTHONPATH=rigorbreeze/scripts/tests:rigorbreeze/scripts",
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "-v",
+        "test_flow.FlowCliTests.test_commit_gate_allows_only_same_line_marked_synthetic_test_secret"
+      ],
+      "exitCode": 1,
+      "expectedPattern": "secret-like content detected",
+      "testDigests": {
+        "rigorbreeze/scripts/tests/test_flow.py": "7a5097cfca1571a4cadd1878a64f6f1e231f1af0232291f60379b579d2e547e8"
+      },
+      "summary": "test_commit_gate_allows_only_same_line_marked_synthetic_test_secret (test_flow.FlowCliTests.test_commit_gate_allows_only_same_line_marked_synthetic_test_secret) ... FAIL\n\n======================================================================\nFAIL: test_commit_gate_allows_only_same_line_marked_synthetic_test_secret (test_flow.FlowCliTests.test_commit_gate_allows_only_same_line_marked_synthetic_test_secret)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/songjincheng/LinGang-housing/rigorbreeze/rigorbreeze/scripts/tests/test_flow.py\", line 379, in test_commit_gate_allows_only_same_line_marked_synthetic_test_secret\n    allowed = self.run_flow(\"--mode\", \"enforced\", \"check\", \"commit\")\n  File \"/Users/songjincheng/LinGang-housing/rigorbreeze/rigorbreeze/scripts/tests/flow_test_support.py\", line 34, in run_flow\n    self.fail(\n    ~~~~~~~~~^\n        f\"flow command returned {result.returncode}, expected {expected}\\n\"\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n        f\"stdout:\\n{result.stdout}\\nstderr:\\n{result.stderr}\"\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\nAssertionError: flow command returned 2, expected 0\nstdout:\n\nstderr:\nERROR: secret-like content detected: tests/test_redaction.py\n\n\n----------------------------------------------------------------------\nRan 1 test in 1.216s\n\nFAILED (failures=1)",
+      "taskDigest": "3aefacd3c8805438c80ff393f6edf248507998c6c542cf4807d0bc773d7cfbe4",
+      "projectFingerprint": "ce9d7dac10022ef36a522d34e2d7862f733b3488ca6752d8ac3078c191c4832b",
+      "head": "d3f1adde4f76662793dd06d8ae34e26df15254a9",
+      "observedAt": "2026-08-05T13:55:55+08:00"
+    },
+    {
+      "requirement": "REQ-006",
+      "command": [
+        "/usr/bin/env",
+        "RIGORBREEZE_TEST_FILE=rigorbreeze/scripts/tests/test_flow.py",
+        "PYTHONPATH=rigorbreeze/scripts/tests:rigorbreeze/scripts",
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "-v",
+        "test_flow.FlowCliTests.test_commit_gate_requires_configured_profile_verification"
+      ],
+      "exitCode": 1,
+      "expectedPattern": "returned 0, expected 2",
+      "testDigests": {
+        "rigorbreeze/scripts/tests/test_flow.py": "7a5097cfca1571a4cadd1878a64f6f1e231f1af0232291f60379b579d2e547e8"
+      },
+      "summary": "test_commit_gate_requires_configured_profile_verification (test_flow.FlowCliTests.test_commit_gate_requires_configured_profile_verification) ... FAIL\n\n======================================================================\nFAIL: test_commit_gate_requires_configured_profile_verification (test_flow.FlowCliTests.test_commit_gate_requires_configured_profile_verification)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/songjincheng/LinGang-housing/rigorbreeze/rigorbreeze/scripts/tests/test_flow.py\", line 447, in test_commit_gate_requires_configured_profile_verification\n    blocked = self.run_flow(\"--mode\", \"enforced\", \"check\", \"commit\", expected=2)\n  File \"/Users/songjincheng/LinGang-housing/rigorbreeze/rigorbreeze/scripts/tests/flow_test_support.py\", line 34, in run_flow\n    self.fail(\n    ~~~~~~~~~^\n        f\"flow command returned {result.returncode}, expected {expected}\\n\"\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n        f\"stdout:\\n{result.stdout}\\nstderr:\\n{result.stderr}\"\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\nAssertionError: flow command returned 0, expected 2\nstdout:\ncheck commit: passed\n\nstderr:\n\n\n----------------------------------------------------------------------\nRan 1 test in 1.604s\n\nFAILED (failures=1)",
+      "taskDigest": "3aefacd3c8805438c80ff393f6edf248507998c6c542cf4807d0bc773d7cfbe4",
+      "projectFingerprint": "ce9d7dac10022ef36a522d34e2d7862f733b3488ca6752d8ac3078c191c4832b",
+      "head": "d3f1adde4f76662793dd06d8ae34e26df15254a9",
+      "observedAt": "2026-08-05T13:56:16+08:00"
+    },
+    {
+      "requirement": "REQ-001",
+      "command": [
+        "/usr/bin/env",
+        "RIGORBREEZE_TEST_FILE=rigorbreeze/scripts/tests/test_flow_v2.py",
+        "PYTHONPATH=rigorbreeze/scripts/tests:rigorbreeze/scripts",
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "-v",
+        "test_flow_v2.FlowV2Tests.test_timeout_output_normalizes_bytes_text_and_none"
+      ],
+      "exitCode": 1,
+      "expectedPattern": "subprocess_text",
+      "testDigests": {
+        "rigorbreeze/scripts/tests/test_flow_v2.py": "b08056250d8da363d350ee8d66c9c8abc09371b4aff2d046ed9fe699129167cd"
+      },
+      "summary": "test_timeout_output_normalizes_bytes_text_and_none (test_flow_v2.FlowV2Tests.test_timeout_output_normalizes_bytes_text_and_none) ... ERROR\n\n======================================================================\nERROR: test_timeout_output_normalizes_bytes_text_and_none (test_flow_v2.FlowV2Tests.test_timeout_output_normalizes_bytes_text_and_none)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/songjincheng/LinGang-housing/rigorbreeze/rigorbreeze/scripts/tests/test_flow_v2.py\", line 300, in test_timeout_output_normalizes_bytes_text_and_none\n    self.assertEqual(flow_state.subprocess_text(b\"partial\\xff\"), \"partial�\")\n                     ^^^^^^^^^^^^^^^^^^^^^^^^^^\nAttributeError: module 'flow_state' has no attribute 'subprocess_text'\n\n----------------------------------------------------------------------\nRan 1 test in 0.002s\n\nFAILED (errors=1)",
+      "taskDigest": "f0926ef0f722a73f6fe7dd53c3f08de71f791c8e90cdf66fa57236add3426ee3",
+      "projectFingerprint": "decd359cfce284fdd3c17280ede4195970187b4f7a91062a687954c8d09a63fe",
+      "head": "d3f1adde4f76662793dd06d8ae34e26df15254a9",
+      "observedAt": "2026-08-05T14:05:34+08:00"
+    },
+    {
+      "requirement": "REQ-002",
+      "command": [
+        "/usr/bin/env",
+        "RIGORBREEZE_TEST_FILE=rigorbreeze/scripts/tests/test_flow_v2.py",
+        "PYTHONPATH=rigorbreeze/scripts/tests:rigorbreeze/scripts",
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "-v",
+        "test_flow_v2.FlowV2Tests.test_identical_profile_checks_execute_once_and_keep_distinct_records"
+      ],
+      "exitCode": 1,
+      "expectedPattern": "'xx' != 'x'",
+      "testDigests": {
+        "rigorbreeze/scripts/tests/test_flow_v2.py": "b08056250d8da363d350ee8d66c9c8abc09371b4aff2d046ed9fe699129167cd"
+      },
+      "summary": "test_identical_profile_checks_execute_once_and_keep_distinct_records (test_flow_v2.FlowV2Tests.test_identical_profile_checks_execute_once_and_keep_distinct_records) ... FAIL\n\n======================================================================\nFAIL: test_identical_profile_checks_execute_once_and_keep_distinct_records (test_flow_v2.FlowV2Tests.test_identical_profile_checks_execute_once_and_keep_distinct_records)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/songjincheng/LinGang-housing/rigorbreeze/rigorbreeze/scripts/tests/test_flow_v2.py\", line 387, in test_identical_profile_checks_execute_once_and_keep_distinct_records\n    self.assertEqual(counter.read_text(), \"x\")\n    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: 'xx' != 'x'\n- xx\n? -\n+ x\n\n\n----------------------------------------------------------------------\nRan 1 test in 1.047s\n\nFAILED (failures=1)",
+      "taskDigest": "f0926ef0f722a73f6fe7dd53c3f08de71f791c8e90cdf66fa57236add3426ee3",
+      "projectFingerprint": "decd359cfce284fdd3c17280ede4195970187b4f7a91062a687954c8d09a63fe",
+      "head": "d3f1adde4f76662793dd06d8ae34e26df15254a9",
+      "observedAt": "2026-08-05T14:05:36+08:00"
+    },
+    {
+      "requirement": "REQ-004",
+      "command": [
+        "/usr/bin/env",
+        "RIGORBREEZE_TEST_FILE=rigorbreeze/scripts/tests/test_flow.py",
+        "PYTHONPATH=rigorbreeze/scripts/tests:rigorbreeze/scripts",
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "-v",
+        "test_flow.FlowCliTests.test_commit_gate_allows_only_same_line_marked_synthetic_test_secret"
+      ],
+      "exitCode": 1,
+      "expectedPattern": "secret-like content detected",
+      "testDigests": {
+        "rigorbreeze/scripts/tests/test_flow.py": "2d1667f5930173438d8b8118272a3bad0b05e7ed6d4d3f6f90ce0607e23e8e78"
+      },
+      "summary": "test_commit_gate_allows_only_same_line_marked_synthetic_test_secret (test_flow.FlowCliTests.test_commit_gate_allows_only_same_line_marked_synthetic_test_secret) ... FAIL\n\n======================================================================\nFAIL: test_commit_gate_allows_only_same_line_marked_synthetic_test_secret (test_flow.FlowCliTests.test_commit_gate_allows_only_same_line_marked_synthetic_test_secret)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/songjincheng/LinGang-housing/rigorbreeze/rigorbreeze/scripts/tests/test_flow.py\", line 379, in test_commit_gate_allows_only_same_line_marked_synthetic_test_secret\n    allowed = self.run_flow(\"--mode\", \"enforced\", \"check\", \"commit\")\n  File \"/Users/songjincheng/LinGang-housing/rigorbreeze/rigorbreeze/scripts/tests/flow_test_support.py\", line 34, in run_flow\n    self.fail(\n    ~~~~~~~~~^\n        f\"flow command returned {result.returncode}, expected {expected}\\n\"\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n        f\"stdout:\\n{result.stdout}\\nstderr:\\n{result.stderr}\"\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\nAssertionError: flow command returned 2, expected 0\nstdout:\n\nstderr:\nERROR: secret-like content detected: tests/test_redaction.py\n\n\n----------------------------------------------------------------------\nRan 1 test in 1.853s\n\nFAILED (failures=1)",
+      "taskDigest": "f0926ef0f722a73f6fe7dd53c3f08de71f791c8e90cdf66fa57236add3426ee3",
+      "projectFingerprint": "decd359cfce284fdd3c17280ede4195970187b4f7a91062a687954c8d09a63fe",
+      "head": "d3f1adde4f76662793dd06d8ae34e26df15254a9",
+      "observedAt": "2026-08-05T14:05:38+08:00"
+    },
+    {
+      "requirement": "REQ-006",
+      "command": [
+        "/usr/bin/env",
+        "RIGORBREEZE_TEST_FILE=rigorbreeze/scripts/tests/test_flow.py",
+        "PYTHONPATH=rigorbreeze/scripts/tests:rigorbreeze/scripts",
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "-v",
+        "test_flow.FlowCliTests.test_commit_gate_requires_configured_profile_verification"
+      ],
+      "exitCode": 1,
+      "expectedPattern": "returned 0, expected 2",
+      "testDigests": {
+        "rigorbreeze/scripts/tests/test_flow.py": "2d1667f5930173438d8b8118272a3bad0b05e7ed6d4d3f6f90ce0607e23e8e78"
+      },
+      "summary": "test_commit_gate_requires_configured_profile_verification (test_flow.FlowCliTests.test_commit_gate_requires_configured_profile_verification) ... FAIL\n\n======================================================================\nFAIL: test_commit_gate_requires_configured_profile_verification (test_flow.FlowCliTests.test_commit_gate_requires_configured_profile_verification)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/songjincheng/LinGang-housing/rigorbreeze/rigorbreeze/scripts/tests/test_flow.py\", line 490, in test_commit_gate_requires_configured_profile_verification\n    blocked = self.run_flow(\"--mode\", \"enforced\", \"check\", \"commit\", expected=2)\n  File \"/Users/songjincheng/LinGang-housing/rigorbreeze/rigorbreeze/scripts/tests/flow_test_support.py\", line 34, in run_flow\n    self.fail(\n    ~~~~~~~~~^\n        f\"flow command returned {result.returncode}, expected {expected}\\n\"\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n        f\"stdout:\\n{result.stdout}\\nstderr:\\n{result.stderr}\"\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\nAssertionError: flow command returned 0, expected 2\nstdout:\ncheck commit: passed\n\nstderr:\n\n\n----------------------------------------------------------------------\nRan 1 test in 2.161s\n\nFAILED (failures=1)",
+      "taskDigest": "f0926ef0f722a73f6fe7dd53c3f08de71f791c8e90cdf66fa57236add3426ee3",
+      "projectFingerprint": "decd359cfce284fdd3c17280ede4195970187b4f7a91062a687954c8d09a63fe",
+      "head": "d3f1adde4f76662793dd06d8ae34e26df15254a9",
+      "observedAt": "2026-08-05T14:05:41+08:00"
+    },
+    {
+      "requirement": "REQ-001",
+      "command": [
+        "/usr/bin/env",
+        "RIGORBREEZE_TEST_FILE=rigorbreeze/scripts/tests/test_flow_v2.py",
+        "PYTHONPATH=rigorbreeze/scripts/tests:rigorbreeze/scripts",
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "-v",
+        "test_flow_v2.FlowV2Tests.test_timeout_output_normalizes_bytes_text_and_none"
+      ],
+      "exitCode": 1,
+      "expectedPattern": "subprocess_text",
+      "testDigests": {
+        "rigorbreeze/scripts/tests/test_flow_v2.py": "b08056250d8da363d350ee8d66c9c8abc09371b4aff2d046ed9fe699129167cd"
+      },
+      "summary": "test_timeout_output_normalizes_bytes_text_and_none (test_flow_v2.FlowV2Tests.test_timeout_output_normalizes_bytes_text_and_none) ... ERROR\n\n======================================================================\nERROR: test_timeout_output_normalizes_bytes_text_and_none (test_flow_v2.FlowV2Tests.test_timeout_output_normalizes_bytes_text_and_none)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/songjincheng/LinGang-housing/rigorbreeze/rigorbreeze/scripts/tests/test_flow_v2.py\", line 300, in test_timeout_output_normalizes_bytes_text_and_none\n    self.assertEqual(flow_state.subprocess_text(b\"partial\\xff\"), \"partial�\")\n                     ^^^^^^^^^^^^^^^^^^^^^^^^^^\nAttributeError: module 'flow_state' has no attribute 'subprocess_text'\n\n----------------------------------------------------------------------\nRan 1 test in 0.003s\n\nFAILED (errors=1)",
+      "taskDigest": "f790fce6cf6f5d548da40635cb04007256777fe9558396d8ebd439241fad2533",
+      "projectFingerprint": "d5601ab536cb03f90f682b0726030ccdd178e78783900bb92af5e7eef76773df",
+      "head": "d3f1adde4f76662793dd06d8ae34e26df15254a9",
+      "observedAt": "2026-08-05T14:08:46+08:00"
+    },
+    {
+      "requirement": "REQ-002",
+      "command": [
+        "/usr/bin/env",
+        "RIGORBREEZE_TEST_FILE=rigorbreeze/scripts/tests/test_flow_v2.py",
+        "PYTHONPATH=rigorbreeze/scripts/tests:rigorbreeze/scripts",
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "-v",
+        "test_flow_v2.FlowV2Tests.test_identical_profile_checks_execute_once_and_keep_distinct_records"
+      ],
+      "exitCode": 1,
+      "expectedPattern": "'xx' != 'x'",
+      "testDigests": {
+        "rigorbreeze/scripts/tests/test_flow_v2.py": "b08056250d8da363d350ee8d66c9c8abc09371b4aff2d046ed9fe699129167cd"
+      },
+      "summary": "test_identical_profile_checks_execute_once_and_keep_distinct_records (test_flow_v2.FlowV2Tests.test_identical_profile_checks_execute_once_and_keep_distinct_records) ... FAIL\n\n======================================================================\nFAIL: test_identical_profile_checks_execute_once_and_keep_distinct_records (test_flow_v2.FlowV2Tests.test_identical_profile_checks_execute_once_and_keep_distinct_records)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/songjincheng/LinGang-housing/rigorbreeze/rigorbreeze/scripts/tests/test_flow_v2.py\", line 387, in test_identical_profile_checks_execute_once_and_keep_distinct_records\n    self.assertEqual(counter.read_text(), \"x\")\n    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: 'xx' != 'x'\n- xx\n? -\n+ x\n\n\n----------------------------------------------------------------------\nRan 1 test in 0.812s\n\nFAILED (failures=1)",
+      "taskDigest": "f790fce6cf6f5d548da40635cb04007256777fe9558396d8ebd439241fad2533",
+      "projectFingerprint": "d5601ab536cb03f90f682b0726030ccdd178e78783900bb92af5e7eef76773df",
+      "head": "d3f1adde4f76662793dd06d8ae34e26df15254a9",
+      "observedAt": "2026-08-05T14:08:48+08:00"
+    },
+    {
+      "requirement": "REQ-004",
+      "command": [
+        "/usr/bin/env",
+        "RIGORBREEZE_TEST_FILE=rigorbreeze/scripts/tests/test_flow.py",
+        "PYTHONPATH=rigorbreeze/scripts/tests:rigorbreeze/scripts",
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "-v",
+        "test_flow.FlowCliTests.test_commit_gate_allows_only_same_line_marked_synthetic_test_secret"
+      ],
+      "exitCode": 1,
+      "expectedPattern": "secret-like content detected",
+      "testDigests": {
+        "rigorbreeze/scripts/tests/test_flow.py": "df52849b18400e2922704e310af568f1698d2c0d40a810d78bcdd43a9d60e0be"
+      },
+      "summary": "test_commit_gate_allows_only_same_line_marked_synthetic_test_secret (test_flow.FlowCliTests.test_commit_gate_allows_only_same_line_marked_synthetic_test_secret) ... FAIL\n\n======================================================================\nFAIL: test_commit_gate_allows_only_same_line_marked_synthetic_test_secret (test_flow.FlowCliTests.test_commit_gate_allows_only_same_line_marked_synthetic_test_secret)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/songjincheng/LinGang-housing/rigorbreeze/rigorbreeze/scripts/tests/test_flow.py\", line 379, in test_commit_gate_allows_only_same_line_marked_synthetic_test_secret\n    allowed = self.run_flow(\"--mode\", \"enforced\", \"check\", \"commit\")\n  File \"/Users/songjincheng/LinGang-housing/rigorbreeze/rigorbreeze/scripts/tests/flow_test_support.py\", line 34, in run_flow\n    self.fail(\n    ~~~~~~~~~^\n        f\"flow command returned {result.returncode}, expected {expected}\\n\"\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n        f\"stdout:\\n{result.stdout}\\nstderr:\\n{result.stderr}\"\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\nAssertionError: flow command returned 2, expected 0\nstdout:\n\nstderr:\nERROR: secret-like content detected: tests/test_redaction.py\n\n\n----------------------------------------------------------------------\nRan 1 test in 1.342s\n\nFAILED (failures=1)",
+      "taskDigest": "f790fce6cf6f5d548da40635cb04007256777fe9558396d8ebd439241fad2533",
+      "projectFingerprint": "d5601ab536cb03f90f682b0726030ccdd178e78783900bb92af5e7eef76773df",
+      "head": "d3f1adde4f76662793dd06d8ae34e26df15254a9",
+      "observedAt": "2026-08-05T14:08:49+08:00"
+    },
+    {
+      "requirement": "REQ-006",
+      "command": [
+        "/usr/bin/env",
+        "RIGORBREEZE_TEST_FILE=rigorbreeze/scripts/tests/test_flow.py",
+        "PYTHONPATH=rigorbreeze/scripts/tests:rigorbreeze/scripts",
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "-v",
+        "test_flow.FlowCliTests.test_commit_gate_requires_configured_profile_verification"
+      ],
+      "exitCode": 1,
+      "expectedPattern": "returned 0, expected 2",
+      "testDigests": {
+        "rigorbreeze/scripts/tests/test_flow.py": "df52849b18400e2922704e310af568f1698d2c0d40a810d78bcdd43a9d60e0be"
+      },
+      "summary": "test_commit_gate_requires_configured_profile_verification (test_flow.FlowCliTests.test_commit_gate_requires_configured_profile_verification) ... FAIL\n\n======================================================================\nFAIL: test_commit_gate_requires_configured_profile_verification (test_flow.FlowCliTests.test_commit_gate_requires_configured_profile_verification)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/songjincheng/LinGang-housing/rigorbreeze/rigorbreeze/scripts/tests/test_flow.py\", line 487, in test_commit_gate_requires_configured_profile_verification\n    blocked = self.run_flow(\"--mode\", \"enforced\", \"check\", \"commit\", expected=2)\n  File \"/Users/songjincheng/LinGang-housing/rigorbreeze/rigorbreeze/scripts/tests/flow_test_support.py\", line 34, in run_flow\n    self.fail(\n    ~~~~~~~~~^\n        f\"flow command returned {result.returncode}, expected {expected}\\n\"\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n        f\"stdout:\\n{result.stdout}\\nstderr:\\n{result.stderr}\"\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\nAssertionError: flow command returned 0, expected 2\nstdout:\ncheck commit: passed\n\nstderr:\n\n\n----------------------------------------------------------------------\nRan 1 test in 1.562s\n\nFAILED (failures=1)",
+      "taskDigest": "f790fce6cf6f5d548da40635cb04007256777fe9558396d8ebd439241fad2533",
+      "projectFingerprint": "d5601ab536cb03f90f682b0726030ccdd178e78783900bb92af5e7eef76773df",
+      "head": "d3f1adde4f76662793dd06d8ae34e26df15254a9",
+      "observedAt": "2026-08-05T14:08:52+08:00"
+    },
+    {
+      "requirement": "REQ-001",
+      "command": [
+        "/usr/bin/env",
+        "RIGORBREEZE_TEST_FILE=rigorbreeze/scripts/tests/test_flow_v2.py",
+        "PYTHONPATH=rigorbreeze/scripts/tests:rigorbreeze/scripts",
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "-v",
+        "test_flow_v2.FlowV2Tests.test_timeout_output_normalizes_bytes_text_and_none"
+      ],
+      "exitCode": 1,
+      "expectedPattern": "subprocess_text",
+      "testDigests": {
+        "rigorbreeze/scripts/tests/test_flow_v2.py": "b08056250d8da363d350ee8d66c9c8abc09371b4aff2d046ed9fe699129167cd"
+      },
+      "summary": "test_timeout_output_normalizes_bytes_text_and_none (test_flow_v2.FlowV2Tests.test_timeout_output_normalizes_bytes_text_and_none) ... ERROR\n\n======================================================================\nERROR: test_timeout_output_normalizes_bytes_text_and_none (test_flow_v2.FlowV2Tests.test_timeout_output_normalizes_bytes_text_and_none)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/songjincheng/LinGang-housing/rigorbreeze/rigorbreeze/scripts/tests/test_flow_v2.py\", line 300, in test_timeout_output_normalizes_bytes_text_and_none\n    self.assertEqual(flow_state.subprocess_text(b\"partial\\xff\"), \"partial�\")\n                     ^^^^^^^^^^^^^^^^^^^^^^^^^^\nAttributeError: module 'flow_state' has no attribute 'subprocess_text'\n\n----------------------------------------------------------------------\nRan 1 test in 0.002s\n\nFAILED (errors=1)",
+      "taskDigest": "5dfe1aef97b59d6d208fba08d4ee7f2f02d260df57e3d9105350a5ac07d66495",
+      "projectFingerprint": "e658341ccca7ec865fda5877c1873f620c6724a984595c158f778764a6c39671",
+      "head": "d3f1adde4f76662793dd06d8ae34e26df15254a9",
+      "observedAt": "2026-08-05T14:17:21+08:00"
+    },
+    {
+      "requirement": "REQ-002",
+      "command": [
+        "/usr/bin/env",
+        "RIGORBREEZE_TEST_FILE=rigorbreeze/scripts/tests/test_flow_v2.py",
+        "PYTHONPATH=rigorbreeze/scripts/tests:rigorbreeze/scripts",
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "-v",
+        "test_flow_v2.FlowV2Tests.test_identical_profile_checks_execute_once_and_keep_distinct_records"
+      ],
+      "exitCode": 1,
+      "expectedPattern": "'xx' != 'x'",
+      "testDigests": {
+        "rigorbreeze/scripts/tests/test_flow_v2.py": "b08056250d8da363d350ee8d66c9c8abc09371b4aff2d046ed9fe699129167cd"
+      },
+      "summary": "test_identical_profile_checks_execute_once_and_keep_distinct_records (test_flow_v2.FlowV2Tests.test_identical_profile_checks_execute_once_and_keep_distinct_records) ... FAIL\n\n======================================================================\nFAIL: test_identical_profile_checks_execute_once_and_keep_distinct_records (test_flow_v2.FlowV2Tests.test_identical_profile_checks_execute_once_and_keep_distinct_records)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/songjincheng/LinGang-housing/rigorbreeze/rigorbreeze/scripts/tests/test_flow_v2.py\", line 387, in test_identical_profile_checks_execute_once_and_keep_distinct_records\n    self.assertEqual(counter.read_text(), \"x\")\n    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: 'xx' != 'x'\n- xx\n? -\n+ x\n\n\n----------------------------------------------------------------------\nRan 1 test in 0.645s\n\nFAILED (failures=1)",
+      "taskDigest": "5dfe1aef97b59d6d208fba08d4ee7f2f02d260df57e3d9105350a5ac07d66495",
+      "projectFingerprint": "e658341ccca7ec865fda5877c1873f620c6724a984595c158f778764a6c39671",
+      "head": "d3f1adde4f76662793dd06d8ae34e26df15254a9",
+      "observedAt": "2026-08-05T14:17:22+08:00"
+    },
+    {
+      "requirement": "REQ-004",
+      "command": [
+        "/usr/bin/env",
+        "RIGORBREEZE_TEST_FILE=rigorbreeze/scripts/tests/test_flow.py",
+        "PYTHONPATH=rigorbreeze/scripts/tests:rigorbreeze/scripts",
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "-v",
+        "test_flow.FlowCliTests.test_commit_gate_allows_only_same_line_marked_synthetic_test_secret"
+      ],
+      "exitCode": 1,
+      "expectedPattern": "secret-like content detected",
+      "testDigests": {
+        "rigorbreeze/scripts/tests/test_flow.py": "df52849b18400e2922704e310af568f1698d2c0d40a810d78bcdd43a9d60e0be"
+      },
+      "summary": "test_commit_gate_allows_only_same_line_marked_synthetic_test_secret (test_flow.FlowCliTests.test_commit_gate_allows_only_same_line_marked_synthetic_test_secret) ... FAIL\n\n======================================================================\nFAIL: test_commit_gate_allows_only_same_line_marked_synthetic_test_secret (test_flow.FlowCliTests.test_commit_gate_allows_only_same_line_marked_synthetic_test_secret)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/songjincheng/LinGang-housing/rigorbreeze/rigorbreeze/scripts/tests/test_flow.py\", line 379, in test_commit_gate_allows_only_same_line_marked_synthetic_test_secret\n    allowed = self.run_flow(\"--mode\", \"enforced\", \"check\", \"commit\")\n  File \"/Users/songjincheng/LinGang-housing/rigorbreeze/rigorbreeze/scripts/tests/flow_test_support.py\", line 34, in run_flow\n    self.fail(\n    ~~~~~~~~~^\n        f\"flow command returned {result.returncode}, expected {expected}\\n\"\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n        f\"stdout:\\n{result.stdout}\\nstderr:\\n{result.stderr}\"\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\nAssertionError: flow command returned 2, expected 0\nstdout:\n\nstderr:\nERROR: secret-like content detected: tests/test_redaction.py\n\n\n----------------------------------------------------------------------\nRan 1 test in 1.211s\n\nFAILED (failures=1)",
+      "taskDigest": "5dfe1aef97b59d6d208fba08d4ee7f2f02d260df57e3d9105350a5ac07d66495",
+      "projectFingerprint": "e658341ccca7ec865fda5877c1873f620c6724a984595c158f778764a6c39671",
+      "head": "d3f1adde4f76662793dd06d8ae34e26df15254a9",
+      "observedAt": "2026-08-05T14:17:23+08:00"
+    },
+    {
+      "requirement": "REQ-006",
+      "command": [
+        "/usr/bin/env",
+        "RIGORBREEZE_TEST_FILE=rigorbreeze/scripts/tests/test_flow.py",
+        "PYTHONPATH=rigorbreeze/scripts/tests:rigorbreeze/scripts",
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "-v",
+        "test_flow.FlowCliTests.test_commit_gate_requires_configured_profile_verification"
+      ],
+      "exitCode": 1,
+      "expectedPattern": "returned 0, expected 2",
+      "testDigests": {
+        "rigorbreeze/scripts/tests/test_flow.py": "df52849b18400e2922704e310af568f1698d2c0d40a810d78bcdd43a9d60e0be"
+      },
+      "summary": "test_commit_gate_requires_configured_profile_verification (test_flow.FlowCliTests.test_commit_gate_requires_configured_profile_verification) ... FAIL\n\n======================================================================\nFAIL: test_commit_gate_requires_configured_profile_verification (test_flow.FlowCliTests.test_commit_gate_requires_configured_profile_verification)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/songjincheng/LinGang-housing/rigorbreeze/rigorbreeze/scripts/tests/test_flow.py\", line 487, in test_commit_gate_requires_configured_profile_verification\n    blocked = self.run_flow(\"--mode\", \"enforced\", \"check\", \"commit\", expected=2)\n  File \"/Users/songjincheng/LinGang-housing/rigorbreeze/rigorbreeze/scripts/tests/flow_test_support.py\", line 34, in run_flow\n    self.fail(\n    ~~~~~~~~~^\n        f\"flow command returned {result.returncode}, expected {expected}\\n\"\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n        f\"stdout:\\n{result.stdout}\\nstderr:\\n{result.stderr}\"\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\nAssertionError: flow command returned 0, expected 2\nstdout:\ncheck commit: passed\n\nstderr:\n\n\n----------------------------------------------------------------------\nRan 1 test in 1.373s\n\nFAILED (failures=1)",
+      "taskDigest": "5dfe1aef97b59d6d208fba08d4ee7f2f02d260df57e3d9105350a5ac07d66495",
+      "projectFingerprint": "e658341ccca7ec865fda5877c1873f620c6724a984595c158f778764a6c39671",
+      "head": "d3f1adde4f76662793dd06d8ae34e26df15254a9",
+      "observedAt": "2026-08-05T14:17:25+08:00"
+    }
+  ],
+  "verifications": [
+    {
+      "toolVersion": "0.9.1",
+      "profile": "full",
+      "configured": true,
+      "mode": "enforced",
+      "checks": [
+        "format",
+        "lint",
+        "unit",
+        "contract",
+        "secret",
+        "build",
+        "acceptance"
+      ],
+      "passed": true,
+      "taskDigest": "5dfe1aef97b59d6d208fba08d4ee7f2f02d260df57e3d9105350a5ac07d66495",
+      "projectFingerprint": "3b285d336e1319782b8f61d3c10d14d0097b4cc07154bc5f037ea5b4300e3c89",
+      "configDigest": "29e4313a1131a04a40744798b88740046122394a3b05daff60b9a73c50db1f43",
+      "head": "d3f1adde4f76662793dd06d8ae34e26df15254a9",
+      "verifiedAt": "2026-08-05T14:24:20+08:00"
+    },
+    {
+      "toolVersion": "0.9.1",
+      "profile": "full",
+      "configured": true,
+      "mode": "enforced",
+      "checks": [
+        "format",
+        "lint",
+        "unit",
+        "contract",
+        "secret",
+        "build",
+        "acceptance"
+      ],
+      "passed": true,
+      "taskDigest": "5dfe1aef97b59d6d208fba08d4ee7f2f02d260df57e3d9105350a5ac07d66495",
+      "projectFingerprint": "3b285d336e1319782b8f61d3c10d14d0097b4cc07154bc5f037ea5b4300e3c89",
+      "configDigest": "29e4313a1131a04a40744798b88740046122394a3b05daff60b9a73c50db1f43",
+      "head": "d3f1adde4f76662793dd06d8ae34e26df15254a9",
+      "verifiedAt": "2026-08-05T14:27:52+08:00"
+    },
+    {
+      "toolVersion": "0.9.1",
+      "profile": "full",
+      "configured": true,
+      "mode": "enforced",
+      "checks": [
+        "format",
+        "lint",
+        "unit",
+        "contract",
+        "secret",
+        "build",
+        "acceptance"
+      ],
+      "passed": true,
+      "taskDigest": "5dfe1aef97b59d6d208fba08d4ee7f2f02d260df57e3d9105350a5ac07d66495",
+      "projectFingerprint": "3b285d336e1319782b8f61d3c10d14d0097b4cc07154bc5f037ea5b4300e3c89",
+      "configDigest": "29e4313a1131a04a40744798b88740046122394a3b05daff60b9a73c50db1f43",
+      "head": "d3f1adde4f76662793dd06d8ae34e26df15254a9",
+      "verifiedAt": "2026-08-05T14:54:55+08:00"
+    }
+  ],
+  "checkRuns": [
+    {
+      "checkId": "format",
+      "category": "static-quality",
+      "profile": "full",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-m",
+        "ruff",
+        "format",
+        "--check",
+        "rigorbreeze/scripts",
+        "tests/behavior"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 52,
+      "summary": "15 files already formatted",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "5dfe1aef97b59d6d208fba08d4ee7f2f02d260df57e3d9105350a5ac07d66495",
+      "projectFingerprint": "3b285d336e1319782b8f61d3c10d14d0097b4cc07154bc5f037ea5b4300e3c89",
+      "head": "d3f1adde4f76662793dd06d8ae34e26df15254a9",
+      "recordedAt": "2026-08-05T14:22:11+08:00"
+    },
+    {
+      "checkId": "lint",
+      "category": "static-quality",
+      "profile": "full",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-m",
+        "ruff",
+        "check",
+        "rigorbreeze/scripts",
+        "tests/behavior"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 26,
+      "summary": "All checks passed!",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "5dfe1aef97b59d6d208fba08d4ee7f2f02d260df57e3d9105350a5ac07d66495",
+      "projectFingerprint": "3b285d336e1319782b8f61d3c10d14d0097b4cc07154bc5f037ea5b4300e3c89",
+      "head": "d3f1adde4f76662793dd06d8ae34e26df15254a9",
+      "recordedAt": "2026-08-05T14:22:11+08:00"
+    },
+    {
+      "checkId": "unit",
+      "category": "behavior",
+      "profile": "full",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "rigorbreeze/scripts/tests",
+        "-v"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 129424,
+      "summary": "irst_run_cli_commands_exist (test_skill_contract.SkillContractTests.test_documented_first_run_cli_commands_exist) ... ok\ntest_every_user_facing_english_document_has_chinese (test_skill_contract.SkillContractTests.test_every_user_facing_english_document_has_chinese) ... ok\ntest_installable_skill_excludes_repository_documents (test_skill_contract.SkillContractTests.test_installable_skill_excludes_repository_documents) ... ok\ntest_installable_skill_has_no_project_specific_policy (test_skill_contract.SkillContractTests.test_installable_skill_has_no_project_specific_policy) ... ok\ntest_long_references_have_a_table_of_contents (test_skill_contract.SkillContractTests.test_long_references_have_a_table_of_contents) ... ok\ntest_public_markdown_relative_links_resolve (test_skill_contract.SkillContractTests.test_public_markdown_relative_links_resolve) ... ok\ntest_public_readmes_cover_the_same_first_run_contract (test_skill_contract.SkillContractTests.test_public_readmes_cover_the_same_first_run_contract) ... ok\ntest_repository_has_minimal_open_source_governance (test_skill_contract.SkillContractTests.test_repository_has_minimal_open_source_governance) ... ok\ntest_repository_has_skill_owned_ci (test_skill_contract.SkillContractTests.test_repository_has_skill_owned_ci) ... ok\ntest_skill_completes_context_and_rechecks_follow_up_writes (test_skill_contract.SkillContractTests.test_skill_completes_context_and_rechecks_follow_up_writes) ... ok\ntest_skill_encodes_behavior_reliability_rules_once (test_skill_contract.SkillContractTests.test_skill_encodes_behavior_reliability_rules_once) ... ok\ntest_skill_entrypoint_stays_compact_and_links_every_reference (test_skill_contract.SkillContractTests.test_skill_entrypoint_stays_compact_and_links_every_reference) ... ok\ntest_skill_metadata_matches_public_name (test_skill_contract.SkillContractTests.test_skill_metadata_matches_public_name) ... ok\n\n----------------------------------------------------------------------\nRan 121 tests in 129.359s\n\nOK",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "5dfe1aef97b59d6d208fba08d4ee7f2f02d260df57e3d9105350a5ac07d66495",
+      "projectFingerprint": "3b285d336e1319782b8f61d3c10d14d0097b4cc07154bc5f037ea5b4300e3c89",
+      "head": "d3f1adde4f76662793dd06d8ae34e26df15254a9",
+      "recordedAt": "2026-08-05T14:24:20+08:00"
+    },
+    {
+      "checkId": "contract",
+      "category": "behavior",
+      "profile": "full",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-m",
+        "py_compile",
+        "rigorbreeze/scripts/flow.py"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 40,
+      "summary": "",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "5dfe1aef97b59d6d208fba08d4ee7f2f02d260df57e3d9105350a5ac07d66495",
+      "projectFingerprint": "3b285d336e1319782b8f61d3c10d14d0097b4cc07154bc5f037ea5b4300e3c89",
+      "head": "d3f1adde4f76662793dd06d8ae34e26df15254a9",
+      "recordedAt": "2026-08-05T14:24:20+08:00"
+    },
+    {
+      "checkId": "secret",
+      "category": "secrets",
+      "profile": "full",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-c",
+        "import pathlib,re,sys; files=[p for p in pathlib.Path('.').rglob('*') if p.is_file() and '.git' not in p.parts and 'tests' not in p.parts and p.name != 'rigorbreeze.toml']; pattern=re.compile(r'(?i)(api[_-]?key|token|password|secret)\\s*[:=]\\s*\\S{20,}'); hits=[str(p) for p in files if pattern.search(p.read_text(errors='ignore'))]; print('\\n'.join(hits)); sys.exit(bool(hits))"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 57,
+      "summary": "",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "5dfe1aef97b59d6d208fba08d4ee7f2f02d260df57e3d9105350a5ac07d66495",
+      "projectFingerprint": "3b285d336e1319782b8f61d3c10d14d0097b4cc07154bc5f037ea5b4300e3c89",
+      "head": "d3f1adde4f76662793dd06d8ae34e26df15254a9",
+      "recordedAt": "2026-08-05T14:24:20+08:00"
+    },
+    {
+      "checkId": "build",
+      "category": "build",
+      "profile": "full",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-c",
+        "import pathlib,zipfile; out=pathlib.Path('artifacts/rigorbreeze.zip'); out.parent.mkdir(exist_ok=True); files=[p for p in pathlib.Path('rigorbreeze').rglob('*') if p.is_file() and '__pycache__' not in p.parts]; z=zipfile.ZipFile(out,'w',zipfile.ZIP_DEFLATED); [z.write(p,p.as_posix()) for p in files]; z.close()"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 36,
+      "summary": "",
+      "report": null,
+      "artifacts": [
+        "b78d575ec3506380d5374da2487684b8e023e66fdd8be5ac3c29fc781eff2a76"
+      ],
+      "taskDigest": "5dfe1aef97b59d6d208fba08d4ee7f2f02d260df57e3d9105350a5ac07d66495",
+      "projectFingerprint": "3b285d336e1319782b8f61d3c10d14d0097b4cc07154bc5f037ea5b4300e3c89",
+      "head": "d3f1adde4f76662793dd06d8ae34e26df15254a9",
+      "recordedAt": "2026-08-05T14:24:20+08:00"
+    },
+    {
+      "checkId": "acceptance",
+      "category": "acceptance",
+      "profile": "full",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/behavior",
+        "-v"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 114,
+      "summary": "test_all_synthetic_transcripts_meet_their_contracts (test_behavior.BehaviorSuiteTests.test_all_synthetic_transcripts_meet_their_contracts) ... ok\ntest_contract_has_exactly_six_safe_cases (test_behavior.BehaviorSuiteTests.test_contract_has_exactly_six_safe_cases) ... ok\ntest_contract_rejects_path_escape_and_invalid_regex (test_behavior.BehaviorSuiteTests.test_contract_rejects_path_escape_and_invalid_regex) ... ok\ntest_globs_and_result_versions_cannot_escape_their_boundaries (test_behavior.BehaviorSuiteTests.test_globs_and_result_versions_cannot_escape_their_boundaries) ... ok\ntest_prepare_fixture_stays_inside_requested_root (test_behavior.BehaviorSuiteTests.test_prepare_fixture_stays_inside_requested_root) ... ok\ntest_redaction_removes_common_secret_shapes (test_behavior.BehaviorSuiteTests.test_redaction_removes_common_secret_shapes) ... ok\ntest_score_accepts_fresh_compliant_result (test_behavior.BehaviorSuiteTests.test_score_accepts_fresh_compliant_result) ... ok\ntest_score_rejects_forbidden_action_and_stale_evidence (test_behavior.BehaviorSuiteTests.test_score_rejects_forbidden_action_and_stale_evidence) ... ok\n\n----------------------------------------------------------------------\nRan 8 tests in 0.072s\n\nOK",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "5dfe1aef97b59d6d208fba08d4ee7f2f02d260df57e3d9105350a5ac07d66495",
+      "projectFingerprint": "3b285d336e1319782b8f61d3c10d14d0097b4cc07154bc5f037ea5b4300e3c89",
+      "head": "d3f1adde4f76662793dd06d8ae34e26df15254a9",
+      "recordedAt": "2026-08-05T14:24:20+08:00"
+    },
+    {
+      "checkId": "format",
+      "category": "static-quality",
+      "profile": "full",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-m",
+        "ruff",
+        "format",
+        "--check",
+        "rigorbreeze/scripts",
+        "tests/behavior"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 49,
+      "summary": "15 files already formatted",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "5dfe1aef97b59d6d208fba08d4ee7f2f02d260df57e3d9105350a5ac07d66495",
+      "projectFingerprint": "3b285d336e1319782b8f61d3c10d14d0097b4cc07154bc5f037ea5b4300e3c89",
+      "head": "d3f1adde4f76662793dd06d8ae34e26df15254a9",
+      "recordedAt": "2026-08-05T14:25:38+08:00"
+    },
+    {
+      "checkId": "lint",
+      "category": "static-quality",
+      "profile": "full",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-m",
+        "ruff",
+        "check",
+        "rigorbreeze/scripts",
+        "tests/behavior"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 24,
+      "summary": "All checks passed!",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "5dfe1aef97b59d6d208fba08d4ee7f2f02d260df57e3d9105350a5ac07d66495",
+      "projectFingerprint": "3b285d336e1319782b8f61d3c10d14d0097b4cc07154bc5f037ea5b4300e3c89",
+      "head": "d3f1adde4f76662793dd06d8ae34e26df15254a9",
+      "recordedAt": "2026-08-05T14:25:38+08:00"
+    },
+    {
+      "checkId": "unit",
+      "category": "behavior",
+      "profile": "full",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "rigorbreeze/scripts/tests",
+        "-v"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 133273,
+      "summary": "irst_run_cli_commands_exist (test_skill_contract.SkillContractTests.test_documented_first_run_cli_commands_exist) ... ok\ntest_every_user_facing_english_document_has_chinese (test_skill_contract.SkillContractTests.test_every_user_facing_english_document_has_chinese) ... ok\ntest_installable_skill_excludes_repository_documents (test_skill_contract.SkillContractTests.test_installable_skill_excludes_repository_documents) ... ok\ntest_installable_skill_has_no_project_specific_policy (test_skill_contract.SkillContractTests.test_installable_skill_has_no_project_specific_policy) ... ok\ntest_long_references_have_a_table_of_contents (test_skill_contract.SkillContractTests.test_long_references_have_a_table_of_contents) ... ok\ntest_public_markdown_relative_links_resolve (test_skill_contract.SkillContractTests.test_public_markdown_relative_links_resolve) ... ok\ntest_public_readmes_cover_the_same_first_run_contract (test_skill_contract.SkillContractTests.test_public_readmes_cover_the_same_first_run_contract) ... ok\ntest_repository_has_minimal_open_source_governance (test_skill_contract.SkillContractTests.test_repository_has_minimal_open_source_governance) ... ok\ntest_repository_has_skill_owned_ci (test_skill_contract.SkillContractTests.test_repository_has_skill_owned_ci) ... ok\ntest_skill_completes_context_and_rechecks_follow_up_writes (test_skill_contract.SkillContractTests.test_skill_completes_context_and_rechecks_follow_up_writes) ... ok\ntest_skill_encodes_behavior_reliability_rules_once (test_skill_contract.SkillContractTests.test_skill_encodes_behavior_reliability_rules_once) ... ok\ntest_skill_entrypoint_stays_compact_and_links_every_reference (test_skill_contract.SkillContractTests.test_skill_entrypoint_stays_compact_and_links_every_reference) ... ok\ntest_skill_metadata_matches_public_name (test_skill_contract.SkillContractTests.test_skill_metadata_matches_public_name) ... ok\n\n----------------------------------------------------------------------\nRan 121 tests in 133.205s\n\nOK",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "5dfe1aef97b59d6d208fba08d4ee7f2f02d260df57e3d9105350a5ac07d66495",
+      "projectFingerprint": "3b285d336e1319782b8f61d3c10d14d0097b4cc07154bc5f037ea5b4300e3c89",
+      "head": "d3f1adde4f76662793dd06d8ae34e26df15254a9",
+      "recordedAt": "2026-08-05T14:27:51+08:00"
+    },
+    {
+      "checkId": "contract",
+      "category": "behavior",
+      "profile": "full",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-m",
+        "py_compile",
+        "rigorbreeze/scripts/flow.py"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 39,
+      "summary": "",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "5dfe1aef97b59d6d208fba08d4ee7f2f02d260df57e3d9105350a5ac07d66495",
+      "projectFingerprint": "3b285d336e1319782b8f61d3c10d14d0097b4cc07154bc5f037ea5b4300e3c89",
+      "head": "d3f1adde4f76662793dd06d8ae34e26df15254a9",
+      "recordedAt": "2026-08-05T14:27:51+08:00"
+    },
+    {
+      "checkId": "secret",
+      "category": "secrets",
+      "profile": "full",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-c",
+        "import pathlib,re,sys; files=[p for p in pathlib.Path('.').rglob('*') if p.is_file() and '.git' not in p.parts and 'tests' not in p.parts and p.name != 'rigorbreeze.toml']; pattern=re.compile(r'(?i)(api[_-]?key|token|password|secret)\\s*[:=]\\s*\\S{20,}'); hits=[str(p) for p in files if pattern.search(p.read_text(errors='ignore'))]; print('\\n'.join(hits)); sys.exit(bool(hits))"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 55,
+      "summary": "",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "5dfe1aef97b59d6d208fba08d4ee7f2f02d260df57e3d9105350a5ac07d66495",
+      "projectFingerprint": "3b285d336e1319782b8f61d3c10d14d0097b4cc07154bc5f037ea5b4300e3c89",
+      "head": "d3f1adde4f76662793dd06d8ae34e26df15254a9",
+      "recordedAt": "2026-08-05T14:27:51+08:00"
+    },
+    {
+      "checkId": "build",
+      "category": "build",
+      "profile": "full",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-c",
+        "import pathlib,zipfile; out=pathlib.Path('artifacts/rigorbreeze.zip'); out.parent.mkdir(exist_ok=True); files=[p for p in pathlib.Path('rigorbreeze').rglob('*') if p.is_file() and '__pycache__' not in p.parts]; z=zipfile.ZipFile(out,'w',zipfile.ZIP_DEFLATED); [z.write(p,p.as_posix()) for p in files]; z.close()"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 33,
+      "summary": "",
+      "report": null,
+      "artifacts": [
+        "b78d575ec3506380d5374da2487684b8e023e66fdd8be5ac3c29fc781eff2a76"
+      ],
+      "taskDigest": "5dfe1aef97b59d6d208fba08d4ee7f2f02d260df57e3d9105350a5ac07d66495",
+      "projectFingerprint": "3b285d336e1319782b8f61d3c10d14d0097b4cc07154bc5f037ea5b4300e3c89",
+      "head": "d3f1adde4f76662793dd06d8ae34e26df15254a9",
+      "recordedAt": "2026-08-05T14:27:51+08:00"
+    },
+    {
+      "checkId": "acceptance",
+      "category": "acceptance",
+      "profile": "full",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/behavior",
+        "-v"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 107,
+      "summary": "test_all_synthetic_transcripts_meet_their_contracts (test_behavior.BehaviorSuiteTests.test_all_synthetic_transcripts_meet_their_contracts) ... ok\ntest_contract_has_exactly_six_safe_cases (test_behavior.BehaviorSuiteTests.test_contract_has_exactly_six_safe_cases) ... ok\ntest_contract_rejects_path_escape_and_invalid_regex (test_behavior.BehaviorSuiteTests.test_contract_rejects_path_escape_and_invalid_regex) ... ok\ntest_globs_and_result_versions_cannot_escape_their_boundaries (test_behavior.BehaviorSuiteTests.test_globs_and_result_versions_cannot_escape_their_boundaries) ... ok\ntest_prepare_fixture_stays_inside_requested_root (test_behavior.BehaviorSuiteTests.test_prepare_fixture_stays_inside_requested_root) ... ok\ntest_redaction_removes_common_secret_shapes (test_behavior.BehaviorSuiteTests.test_redaction_removes_common_secret_shapes) ... ok\ntest_score_accepts_fresh_compliant_result (test_behavior.BehaviorSuiteTests.test_score_accepts_fresh_compliant_result) ... ok\ntest_score_rejects_forbidden_action_and_stale_evidence (test_behavior.BehaviorSuiteTests.test_score_rejects_forbidden_action_and_stale_evidence) ... ok\n\n----------------------------------------------------------------------\nRan 8 tests in 0.066s\n\nOK",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "5dfe1aef97b59d6d208fba08d4ee7f2f02d260df57e3d9105350a5ac07d66495",
+      "projectFingerprint": "3b285d336e1319782b8f61d3c10d14d0097b4cc07154bc5f037ea5b4300e3c89",
+      "head": "d3f1adde4f76662793dd06d8ae34e26df15254a9",
+      "recordedAt": "2026-08-05T14:27:52+08:00"
+    },
+    {
+      "checkId": "format",
+      "category": "static-quality",
+      "profile": "full",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-m",
+        "ruff",
+        "format",
+        "--check",
+        "rigorbreeze/scripts",
+        "tests/behavior"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 216,
+      "summary": "15 files already formatted",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "5dfe1aef97b59d6d208fba08d4ee7f2f02d260df57e3d9105350a5ac07d66495",
+      "projectFingerprint": "3b285d336e1319782b8f61d3c10d14d0097b4cc07154bc5f037ea5b4300e3c89",
+      "head": "d3f1adde4f76662793dd06d8ae34e26df15254a9",
+      "recordedAt": "2026-08-05T14:52:41+08:00"
+    },
+    {
+      "checkId": "lint",
+      "category": "static-quality",
+      "profile": "full",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-m",
+        "ruff",
+        "check",
+        "rigorbreeze/scripts",
+        "tests/behavior"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 25,
+      "summary": "All checks passed!",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "5dfe1aef97b59d6d208fba08d4ee7f2f02d260df57e3d9105350a5ac07d66495",
+      "projectFingerprint": "3b285d336e1319782b8f61d3c10d14d0097b4cc07154bc5f037ea5b4300e3c89",
+      "head": "d3f1adde4f76662793dd06d8ae34e26df15254a9",
+      "recordedAt": "2026-08-05T14:52:41+08:00"
+    },
+    {
+      "checkId": "unit",
+      "category": "behavior",
+      "profile": "full",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "rigorbreeze/scripts/tests",
+        "-v"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 133986,
+      "summary": "irst_run_cli_commands_exist (test_skill_contract.SkillContractTests.test_documented_first_run_cli_commands_exist) ... ok\ntest_every_user_facing_english_document_has_chinese (test_skill_contract.SkillContractTests.test_every_user_facing_english_document_has_chinese) ... ok\ntest_installable_skill_excludes_repository_documents (test_skill_contract.SkillContractTests.test_installable_skill_excludes_repository_documents) ... ok\ntest_installable_skill_has_no_project_specific_policy (test_skill_contract.SkillContractTests.test_installable_skill_has_no_project_specific_policy) ... ok\ntest_long_references_have_a_table_of_contents (test_skill_contract.SkillContractTests.test_long_references_have_a_table_of_contents) ... ok\ntest_public_markdown_relative_links_resolve (test_skill_contract.SkillContractTests.test_public_markdown_relative_links_resolve) ... ok\ntest_public_readmes_cover_the_same_first_run_contract (test_skill_contract.SkillContractTests.test_public_readmes_cover_the_same_first_run_contract) ... ok\ntest_repository_has_minimal_open_source_governance (test_skill_contract.SkillContractTests.test_repository_has_minimal_open_source_governance) ... ok\ntest_repository_has_skill_owned_ci (test_skill_contract.SkillContractTests.test_repository_has_skill_owned_ci) ... ok\ntest_skill_completes_context_and_rechecks_follow_up_writes (test_skill_contract.SkillContractTests.test_skill_completes_context_and_rechecks_follow_up_writes) ... ok\ntest_skill_encodes_behavior_reliability_rules_once (test_skill_contract.SkillContractTests.test_skill_encodes_behavior_reliability_rules_once) ... ok\ntest_skill_entrypoint_stays_compact_and_links_every_reference (test_skill_contract.SkillContractTests.test_skill_entrypoint_stays_compact_and_links_every_reference) ... ok\ntest_skill_metadata_matches_public_name (test_skill_contract.SkillContractTests.test_skill_metadata_matches_public_name) ... ok\n\n----------------------------------------------------------------------\nRan 121 tests in 133.919s\n\nOK",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "5dfe1aef97b59d6d208fba08d4ee7f2f02d260df57e3d9105350a5ac07d66495",
+      "projectFingerprint": "3b285d336e1319782b8f61d3c10d14d0097b4cc07154bc5f037ea5b4300e3c89",
+      "head": "d3f1adde4f76662793dd06d8ae34e26df15254a9",
+      "recordedAt": "2026-08-05T14:54:55+08:00"
+    },
+    {
+      "checkId": "contract",
+      "category": "behavior",
+      "profile": "full",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-m",
+        "py_compile",
+        "rigorbreeze/scripts/flow.py"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 40,
+      "summary": "",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "5dfe1aef97b59d6d208fba08d4ee7f2f02d260df57e3d9105350a5ac07d66495",
+      "projectFingerprint": "3b285d336e1319782b8f61d3c10d14d0097b4cc07154bc5f037ea5b4300e3c89",
+      "head": "d3f1adde4f76662793dd06d8ae34e26df15254a9",
+      "recordedAt": "2026-08-05T14:54:55+08:00"
+    },
+    {
+      "checkId": "secret",
+      "category": "secrets",
+      "profile": "full",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-c",
+        "import pathlib,re,sys; files=[p for p in pathlib.Path('.').rglob('*') if p.is_file() and '.git' not in p.parts and 'tests' not in p.parts and p.name != 'rigorbreeze.toml']; pattern=re.compile(r'(?i)(api[_-]?key|token|password|secret)\\s*[:=]\\s*\\S{20,}'); hits=[str(p) for p in files if pattern.search(p.read_text(errors='ignore'))]; print('\\n'.join(hits)); sys.exit(bool(hits))"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 57,
+      "summary": "",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "5dfe1aef97b59d6d208fba08d4ee7f2f02d260df57e3d9105350a5ac07d66495",
+      "projectFingerprint": "3b285d336e1319782b8f61d3c10d14d0097b4cc07154bc5f037ea5b4300e3c89",
+      "head": "d3f1adde4f76662793dd06d8ae34e26df15254a9",
+      "recordedAt": "2026-08-05T14:54:55+08:00"
+    },
+    {
+      "checkId": "build",
+      "category": "build",
+      "profile": "full",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-c",
+        "import pathlib,zipfile; out=pathlib.Path('artifacts/rigorbreeze.zip'); out.parent.mkdir(exist_ok=True); files=[p for p in pathlib.Path('rigorbreeze').rglob('*') if p.is_file() and '__pycache__' not in p.parts]; z=zipfile.ZipFile(out,'w',zipfile.ZIP_DEFLATED); [z.write(p,p.as_posix()) for p in files]; z.close()"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 34,
+      "summary": "",
+      "report": null,
+      "artifacts": [
+        "b78d575ec3506380d5374da2487684b8e023e66fdd8be5ac3c29fc781eff2a76"
+      ],
+      "taskDigest": "5dfe1aef97b59d6d208fba08d4ee7f2f02d260df57e3d9105350a5ac07d66495",
+      "projectFingerprint": "3b285d336e1319782b8f61d3c10d14d0097b4cc07154bc5f037ea5b4300e3c89",
+      "head": "d3f1adde4f76662793dd06d8ae34e26df15254a9",
+      "recordedAt": "2026-08-05T14:54:55+08:00"
+    },
+    {
+      "checkId": "acceptance",
+      "category": "acceptance",
+      "profile": "full",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/behavior",
+        "-v"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 109,
+      "summary": "test_all_synthetic_transcripts_meet_their_contracts (test_behavior.BehaviorSuiteTests.test_all_synthetic_transcripts_meet_their_contracts) ... ok\ntest_contract_has_exactly_six_safe_cases (test_behavior.BehaviorSuiteTests.test_contract_has_exactly_six_safe_cases) ... ok\ntest_contract_rejects_path_escape_and_invalid_regex (test_behavior.BehaviorSuiteTests.test_contract_rejects_path_escape_and_invalid_regex) ... ok\ntest_globs_and_result_versions_cannot_escape_their_boundaries (test_behavior.BehaviorSuiteTests.test_globs_and_result_versions_cannot_escape_their_boundaries) ... ok\ntest_prepare_fixture_stays_inside_requested_root (test_behavior.BehaviorSuiteTests.test_prepare_fixture_stays_inside_requested_root) ... ok\ntest_redaction_removes_common_secret_shapes (test_behavior.BehaviorSuiteTests.test_redaction_removes_common_secret_shapes) ... ok\ntest_score_accepts_fresh_compliant_result (test_behavior.BehaviorSuiteTests.test_score_accepts_fresh_compliant_result) ... ok\ntest_score_rejects_forbidden_action_and_stale_evidence (test_behavior.BehaviorSuiteTests.test_score_rejects_forbidden_action_and_stale_evidence) ... ok\n\n----------------------------------------------------------------------\nRan 8 tests in 0.069s\n\nOK",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "5dfe1aef97b59d6d208fba08d4ee7f2f02d260df57e3d9105350a5ac07d66495",
+      "projectFingerprint": "3b285d336e1319782b8f61d3c10d14d0097b4cc07154bc5f037ea5b4300e3c89",
+      "head": "d3f1adde4f76662793dd06d8ae34e26df15254a9",
+      "recordedAt": "2026-08-05T14:54:55+08:00"
+    }
+  ],
+  "tddChain": [
+    {
+      "requirement": "REQ-001",
+      "red": {
+        "requirement": "REQ-001",
+        "command": [
+          "/usr/bin/env",
+          "RIGORBREEZE_TEST_FILE=rigorbreeze/scripts/tests/test_flow_v2.py",
+          "PYTHONPATH=rigorbreeze/scripts/tests:rigorbreeze/scripts",
+          "python3",
+          "-B",
+          "-m",
+          "unittest",
+          "-v",
+          "test_flow_v2.FlowV2Tests.test_timeout_output_normalizes_bytes_text_and_none"
+        ],
+        "exitCode": 1,
+        "expectedPattern": "subprocess_text",
+        "testDigests": {
+          "rigorbreeze/scripts/tests/test_flow_v2.py": "7e56651740f3fcedb8eb4a63b316ebb545305363a594695e27451974460d912b"
+        },
+        "summary": "test_timeout_output_normalizes_bytes_text_and_none (test_flow_v2.FlowV2Tests.test_timeout_output_normalizes_bytes_text_and_none) ... ERROR\n\n======================================================================\nERROR: test_timeout_output_normalizes_bytes_text_and_none (test_flow_v2.FlowV2Tests.test_timeout_output_normalizes_bytes_text_and_none)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/songjincheng/LinGang-housing/rigorbreeze/rigorbreeze/scripts/tests/test_flow_v2.py\", line 300, in test_timeout_output_normalizes_bytes_text_and_none\n    self.assertEqual(flow_state.subprocess_text(b\"partial\\xff\"), \"partial�\")\n                     ^^^^^^^^^^^^^^^^^^^^^^^^^^\nAttributeError: module 'flow_state' has no attribute 'subprocess_text'\n\n----------------------------------------------------------------------\nRan 1 test in 0.006s\n\nFAILED (errors=1)",
+        "taskDigest": "3aefacd3c8805438c80ff393f6edf248507998c6c542cf4807d0bc773d7cfbe4",
+        "projectFingerprint": "ce9d7dac10022ef36a522d34e2d7862f733b3488ca6752d8ac3078c191c4832b",
+        "head": "d3f1adde4f76662793dd06d8ae34e26df15254a9",
+        "observedAt": "2026-08-05T13:54:04+08:00"
+      },
+      "green": null
+    },
+    {
+      "requirement": "REQ-002",
+      "red": {
+        "requirement": "REQ-002",
+        "command": [
+          "/usr/bin/env",
+          "RIGORBREEZE_TEST_FILE=rigorbreeze/scripts/tests/test_flow_v2.py",
+          "PYTHONPATH=rigorbreeze/scripts/tests:rigorbreeze/scripts",
+          "python3",
+          "-B",
+          "-m",
+          "unittest",
+          "-v",
+          "test_flow_v2.FlowV2Tests.test_identical_profile_checks_execute_once_and_keep_distinct_records"
+        ],
+        "exitCode": 1,
+        "expectedPattern": "'xx' != 'x'",
+        "testDigests": {
+          "rigorbreeze/scripts/tests/test_flow_v2.py": "7e56651740f3fcedb8eb4a63b316ebb545305363a594695e27451974460d912b"
+        },
+        "summary": "test_identical_profile_checks_execute_once_and_keep_distinct_records (test_flow_v2.FlowV2Tests.test_identical_profile_checks_execute_once_and_keep_distinct_records) ... FAIL\n\n======================================================================\nFAIL: test_identical_profile_checks_execute_once_and_keep_distinct_records (test_flow_v2.FlowV2Tests.test_identical_profile_checks_execute_once_and_keep_distinct_records)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/songjincheng/LinGang-housing/rigorbreeze/rigorbreeze/scripts/tests/test_flow_v2.py\", line 387, in test_identical_profile_checks_execute_once_and_keep_distinct_records\n    self.assertEqual(counter.read_text(), \"x\")\n    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: 'xx' != 'x'\n- xx\n? -\n+ x\n\n\n----------------------------------------------------------------------\nRan 1 test in 0.546s\n\nFAILED (failures=1)",
+        "taskDigest": "3aefacd3c8805438c80ff393f6edf248507998c6c542cf4807d0bc773d7cfbe4",
+        "projectFingerprint": "ce9d7dac10022ef36a522d34e2d7862f733b3488ca6752d8ac3078c191c4832b",
+        "head": "d3f1adde4f76662793dd06d8ae34e26df15254a9",
+        "observedAt": "2026-08-05T13:55:34+08:00"
+      },
+      "green": null
+    },
+    {
+      "requirement": "REQ-004",
+      "red": {
+        "requirement": "REQ-004",
+        "command": [
+          "/usr/bin/env",
+          "RIGORBREEZE_TEST_FILE=rigorbreeze/scripts/tests/test_flow.py",
+          "PYTHONPATH=rigorbreeze/scripts/tests:rigorbreeze/scripts",
+          "python3",
+          "-B",
+          "-m",
+          "unittest",
+          "-v",
+          "test_flow.FlowCliTests.test_commit_gate_allows_only_same_line_marked_synthetic_test_secret"
+        ],
+        "exitCode": 1,
+        "expectedPattern": "secret-like content detected",
+        "testDigests": {
+          "rigorbreeze/scripts/tests/test_flow.py": "7a5097cfca1571a4cadd1878a64f6f1e231f1af0232291f60379b579d2e547e8"
+        },
+        "summary": "test_commit_gate_allows_only_same_line_marked_synthetic_test_secret (test_flow.FlowCliTests.test_commit_gate_allows_only_same_line_marked_synthetic_test_secret) ... FAIL\n\n======================================================================\nFAIL: test_commit_gate_allows_only_same_line_marked_synthetic_test_secret (test_flow.FlowCliTests.test_commit_gate_allows_only_same_line_marked_synthetic_test_secret)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/songjincheng/LinGang-housing/rigorbreeze/rigorbreeze/scripts/tests/test_flow.py\", line 379, in test_commit_gate_allows_only_same_line_marked_synthetic_test_secret\n    allowed = self.run_flow(\"--mode\", \"enforced\", \"check\", \"commit\")\n  File \"/Users/songjincheng/LinGang-housing/rigorbreeze/rigorbreeze/scripts/tests/flow_test_support.py\", line 34, in run_flow\n    self.fail(\n    ~~~~~~~~~^\n        f\"flow command returned {result.returncode}, expected {expected}\\n\"\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n        f\"stdout:\\n{result.stdout}\\nstderr:\\n{result.stderr}\"\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\nAssertionError: flow command returned 2, expected 0\nstdout:\n\nstderr:\nERROR: secret-like content detected: tests/test_redaction.py\n\n\n----------------------------------------------------------------------\nRan 1 test in 1.216s\n\nFAILED (failures=1)",
+        "taskDigest": "3aefacd3c8805438c80ff393f6edf248507998c6c542cf4807d0bc773d7cfbe4",
+        "projectFingerprint": "ce9d7dac10022ef36a522d34e2d7862f733b3488ca6752d8ac3078c191c4832b",
+        "head": "d3f1adde4f76662793dd06d8ae34e26df15254a9",
+        "observedAt": "2026-08-05T13:55:55+08:00"
+      },
+      "green": null
+    },
+    {
+      "requirement": "REQ-006",
+      "red": {
+        "requirement": "REQ-006",
+        "command": [
+          "/usr/bin/env",
+          "RIGORBREEZE_TEST_FILE=rigorbreeze/scripts/tests/test_flow.py",
+          "PYTHONPATH=rigorbreeze/scripts/tests:rigorbreeze/scripts",
+          "python3",
+          "-B",
+          "-m",
+          "unittest",
+          "-v",
+          "test_flow.FlowCliTests.test_commit_gate_requires_configured_profile_verification"
+        ],
+        "exitCode": 1,
+        "expectedPattern": "returned 0, expected 2",
+        "testDigests": {
+          "rigorbreeze/scripts/tests/test_flow.py": "7a5097cfca1571a4cadd1878a64f6f1e231f1af0232291f60379b579d2e547e8"
+        },
+        "summary": "test_commit_gate_requires_configured_profile_verification (test_flow.FlowCliTests.test_commit_gate_requires_configured_profile_verification) ... FAIL\n\n======================================================================\nFAIL: test_commit_gate_requires_configured_profile_verification (test_flow.FlowCliTests.test_commit_gate_requires_configured_profile_verification)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/songjincheng/LinGang-housing/rigorbreeze/rigorbreeze/scripts/tests/test_flow.py\", line 447, in test_commit_gate_requires_configured_profile_verification\n    blocked = self.run_flow(\"--mode\", \"enforced\", \"check\", \"commit\", expected=2)\n  File \"/Users/songjincheng/LinGang-housing/rigorbreeze/rigorbreeze/scripts/tests/flow_test_support.py\", line 34, in run_flow\n    self.fail(\n    ~~~~~~~~~^\n        f\"flow command returned {result.returncode}, expected {expected}\\n\"\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n        f\"stdout:\\n{result.stdout}\\nstderr:\\n{result.stderr}\"\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\nAssertionError: flow command returned 0, expected 2\nstdout:\ncheck commit: passed\n\nstderr:\n\n\n----------------------------------------------------------------------\nRan 1 test in 1.604s\n\nFAILED (failures=1)",
+        "taskDigest": "3aefacd3c8805438c80ff393f6edf248507998c6c542cf4807d0bc773d7cfbe4",
+        "projectFingerprint": "ce9d7dac10022ef36a522d34e2d7862f733b3488ca6752d8ac3078c191c4832b",
+        "head": "d3f1adde4f76662793dd06d8ae34e26df15254a9",
+        "observedAt": "2026-08-05T13:56:16+08:00"
+      },
+      "green": null
+    },
+    {
+      "requirement": "REQ-001",
+      "red": {
+        "requirement": "REQ-001",
+        "command": [
+          "/usr/bin/env",
+          "RIGORBREEZE_TEST_FILE=rigorbreeze/scripts/tests/test_flow_v2.py",
+          "PYTHONPATH=rigorbreeze/scripts/tests:rigorbreeze/scripts",
+          "python3",
+          "-B",
+          "-m",
+          "unittest",
+          "-v",
+          "test_flow_v2.FlowV2Tests.test_timeout_output_normalizes_bytes_text_and_none"
+        ],
+        "exitCode": 1,
+        "expectedPattern": "subprocess_text",
+        "testDigests": {
+          "rigorbreeze/scripts/tests/test_flow_v2.py": "b08056250d8da363d350ee8d66c9c8abc09371b4aff2d046ed9fe699129167cd"
+        },
+        "summary": "test_timeout_output_normalizes_bytes_text_and_none (test_flow_v2.FlowV2Tests.test_timeout_output_normalizes_bytes_text_and_none) ... ERROR\n\n======================================================================\nERROR: test_timeout_output_normalizes_bytes_text_and_none (test_flow_v2.FlowV2Tests.test_timeout_output_normalizes_bytes_text_and_none)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/songjincheng/LinGang-housing/rigorbreeze/rigorbreeze/scripts/tests/test_flow_v2.py\", line 300, in test_timeout_output_normalizes_bytes_text_and_none\n    self.assertEqual(flow_state.subprocess_text(b\"partial\\xff\"), \"partial�\")\n                     ^^^^^^^^^^^^^^^^^^^^^^^^^^\nAttributeError: module 'flow_state' has no attribute 'subprocess_text'\n\n----------------------------------------------------------------------\nRan 1 test in 0.002s\n\nFAILED (errors=1)",
+        "taskDigest": "f0926ef0f722a73f6fe7dd53c3f08de71f791c8e90cdf66fa57236add3426ee3",
+        "projectFingerprint": "decd359cfce284fdd3c17280ede4195970187b4f7a91062a687954c8d09a63fe",
+        "head": "d3f1adde4f76662793dd06d8ae34e26df15254a9",
+        "observedAt": "2026-08-05T14:05:34+08:00"
+      },
+      "green": null
+    },
+    {
+      "requirement": "REQ-002",
+      "red": {
+        "requirement": "REQ-002",
+        "command": [
+          "/usr/bin/env",
+          "RIGORBREEZE_TEST_FILE=rigorbreeze/scripts/tests/test_flow_v2.py",
+          "PYTHONPATH=rigorbreeze/scripts/tests:rigorbreeze/scripts",
+          "python3",
+          "-B",
+          "-m",
+          "unittest",
+          "-v",
+          "test_flow_v2.FlowV2Tests.test_identical_profile_checks_execute_once_and_keep_distinct_records"
+        ],
+        "exitCode": 1,
+        "expectedPattern": "'xx' != 'x'",
+        "testDigests": {
+          "rigorbreeze/scripts/tests/test_flow_v2.py": "b08056250d8da363d350ee8d66c9c8abc09371b4aff2d046ed9fe699129167cd"
+        },
+        "summary": "test_identical_profile_checks_execute_once_and_keep_distinct_records (test_flow_v2.FlowV2Tests.test_identical_profile_checks_execute_once_and_keep_distinct_records) ... FAIL\n\n======================================================================\nFAIL: test_identical_profile_checks_execute_once_and_keep_distinct_records (test_flow_v2.FlowV2Tests.test_identical_profile_checks_execute_once_and_keep_distinct_records)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/songjincheng/LinGang-housing/rigorbreeze/rigorbreeze/scripts/tests/test_flow_v2.py\", line 387, in test_identical_profile_checks_execute_once_and_keep_distinct_records\n    self.assertEqual(counter.read_text(), \"x\")\n    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: 'xx' != 'x'\n- xx\n? -\n+ x\n\n\n----------------------------------------------------------------------\nRan 1 test in 1.047s\n\nFAILED (failures=1)",
+        "taskDigest": "f0926ef0f722a73f6fe7dd53c3f08de71f791c8e90cdf66fa57236add3426ee3",
+        "projectFingerprint": "decd359cfce284fdd3c17280ede4195970187b4f7a91062a687954c8d09a63fe",
+        "head": "d3f1adde4f76662793dd06d8ae34e26df15254a9",
+        "observedAt": "2026-08-05T14:05:36+08:00"
+      },
+      "green": null
+    },
+    {
+      "requirement": "REQ-004",
+      "red": {
+        "requirement": "REQ-004",
+        "command": [
+          "/usr/bin/env",
+          "RIGORBREEZE_TEST_FILE=rigorbreeze/scripts/tests/test_flow.py",
+          "PYTHONPATH=rigorbreeze/scripts/tests:rigorbreeze/scripts",
+          "python3",
+          "-B",
+          "-m",
+          "unittest",
+          "-v",
+          "test_flow.FlowCliTests.test_commit_gate_allows_only_same_line_marked_synthetic_test_secret"
+        ],
+        "exitCode": 1,
+        "expectedPattern": "secret-like content detected",
+        "testDigests": {
+          "rigorbreeze/scripts/tests/test_flow.py": "2d1667f5930173438d8b8118272a3bad0b05e7ed6d4d3f6f90ce0607e23e8e78"
+        },
+        "summary": "test_commit_gate_allows_only_same_line_marked_synthetic_test_secret (test_flow.FlowCliTests.test_commit_gate_allows_only_same_line_marked_synthetic_test_secret) ... FAIL\n\n======================================================================\nFAIL: test_commit_gate_allows_only_same_line_marked_synthetic_test_secret (test_flow.FlowCliTests.test_commit_gate_allows_only_same_line_marked_synthetic_test_secret)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/songjincheng/LinGang-housing/rigorbreeze/rigorbreeze/scripts/tests/test_flow.py\", line 379, in test_commit_gate_allows_only_same_line_marked_synthetic_test_secret\n    allowed = self.run_flow(\"--mode\", \"enforced\", \"check\", \"commit\")\n  File \"/Users/songjincheng/LinGang-housing/rigorbreeze/rigorbreeze/scripts/tests/flow_test_support.py\", line 34, in run_flow\n    self.fail(\n    ~~~~~~~~~^\n        f\"flow command returned {result.returncode}, expected {expected}\\n\"\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n        f\"stdout:\\n{result.stdout}\\nstderr:\\n{result.stderr}\"\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\nAssertionError: flow command returned 2, expected 0\nstdout:\n\nstderr:\nERROR: secret-like content detected: tests/test_redaction.py\n\n\n----------------------------------------------------------------------\nRan 1 test in 1.853s\n\nFAILED (failures=1)",
+        "taskDigest": "f0926ef0f722a73f6fe7dd53c3f08de71f791c8e90cdf66fa57236add3426ee3",
+        "projectFingerprint": "decd359cfce284fdd3c17280ede4195970187b4f7a91062a687954c8d09a63fe",
+        "head": "d3f1adde4f76662793dd06d8ae34e26df15254a9",
+        "observedAt": "2026-08-05T14:05:38+08:00"
+      },
+      "green": null
+    },
+    {
+      "requirement": "REQ-006",
+      "red": {
+        "requirement": "REQ-006",
+        "command": [
+          "/usr/bin/env",
+          "RIGORBREEZE_TEST_FILE=rigorbreeze/scripts/tests/test_flow.py",
+          "PYTHONPATH=rigorbreeze/scripts/tests:rigorbreeze/scripts",
+          "python3",
+          "-B",
+          "-m",
+          "unittest",
+          "-v",
+          "test_flow.FlowCliTests.test_commit_gate_requires_configured_profile_verification"
+        ],
+        "exitCode": 1,
+        "expectedPattern": "returned 0, expected 2",
+        "testDigests": {
+          "rigorbreeze/scripts/tests/test_flow.py": "2d1667f5930173438d8b8118272a3bad0b05e7ed6d4d3f6f90ce0607e23e8e78"
+        },
+        "summary": "test_commit_gate_requires_configured_profile_verification (test_flow.FlowCliTests.test_commit_gate_requires_configured_profile_verification) ... FAIL\n\n======================================================================\nFAIL: test_commit_gate_requires_configured_profile_verification (test_flow.FlowCliTests.test_commit_gate_requires_configured_profile_verification)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/songjincheng/LinGang-housing/rigorbreeze/rigorbreeze/scripts/tests/test_flow.py\", line 490, in test_commit_gate_requires_configured_profile_verification\n    blocked = self.run_flow(\"--mode\", \"enforced\", \"check\", \"commit\", expected=2)\n  File \"/Users/songjincheng/LinGang-housing/rigorbreeze/rigorbreeze/scripts/tests/flow_test_support.py\", line 34, in run_flow\n    self.fail(\n    ~~~~~~~~~^\n        f\"flow command returned {result.returncode}, expected {expected}\\n\"\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n        f\"stdout:\\n{result.stdout}\\nstderr:\\n{result.stderr}\"\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\nAssertionError: flow command returned 0, expected 2\nstdout:\ncheck commit: passed\n\nstderr:\n\n\n----------------------------------------------------------------------\nRan 1 test in 2.161s\n\nFAILED (failures=1)",
+        "taskDigest": "f0926ef0f722a73f6fe7dd53c3f08de71f791c8e90cdf66fa57236add3426ee3",
+        "projectFingerprint": "decd359cfce284fdd3c17280ede4195970187b4f7a91062a687954c8d09a63fe",
+        "head": "d3f1adde4f76662793dd06d8ae34e26df15254a9",
+        "observedAt": "2026-08-05T14:05:41+08:00"
+      },
+      "green": null
+    },
+    {
+      "requirement": "REQ-001",
+      "red": {
+        "requirement": "REQ-001",
+        "command": [
+          "/usr/bin/env",
+          "RIGORBREEZE_TEST_FILE=rigorbreeze/scripts/tests/test_flow_v2.py",
+          "PYTHONPATH=rigorbreeze/scripts/tests:rigorbreeze/scripts",
+          "python3",
+          "-B",
+          "-m",
+          "unittest",
+          "-v",
+          "test_flow_v2.FlowV2Tests.test_timeout_output_normalizes_bytes_text_and_none"
+        ],
+        "exitCode": 1,
+        "expectedPattern": "subprocess_text",
+        "testDigests": {
+          "rigorbreeze/scripts/tests/test_flow_v2.py": "b08056250d8da363d350ee8d66c9c8abc09371b4aff2d046ed9fe699129167cd"
+        },
+        "summary": "test_timeout_output_normalizes_bytes_text_and_none (test_flow_v2.FlowV2Tests.test_timeout_output_normalizes_bytes_text_and_none) ... ERROR\n\n======================================================================\nERROR: test_timeout_output_normalizes_bytes_text_and_none (test_flow_v2.FlowV2Tests.test_timeout_output_normalizes_bytes_text_and_none)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/songjincheng/LinGang-housing/rigorbreeze/rigorbreeze/scripts/tests/test_flow_v2.py\", line 300, in test_timeout_output_normalizes_bytes_text_and_none\n    self.assertEqual(flow_state.subprocess_text(b\"partial\\xff\"), \"partial�\")\n                     ^^^^^^^^^^^^^^^^^^^^^^^^^^\nAttributeError: module 'flow_state' has no attribute 'subprocess_text'\n\n----------------------------------------------------------------------\nRan 1 test in 0.003s\n\nFAILED (errors=1)",
+        "taskDigest": "f790fce6cf6f5d548da40635cb04007256777fe9558396d8ebd439241fad2533",
+        "projectFingerprint": "d5601ab536cb03f90f682b0726030ccdd178e78783900bb92af5e7eef76773df",
+        "head": "d3f1adde4f76662793dd06d8ae34e26df15254a9",
+        "observedAt": "2026-08-05T14:08:46+08:00"
+      },
+      "green": null
+    },
+    {
+      "requirement": "REQ-002",
+      "red": {
+        "requirement": "REQ-002",
+        "command": [
+          "/usr/bin/env",
+          "RIGORBREEZE_TEST_FILE=rigorbreeze/scripts/tests/test_flow_v2.py",
+          "PYTHONPATH=rigorbreeze/scripts/tests:rigorbreeze/scripts",
+          "python3",
+          "-B",
+          "-m",
+          "unittest",
+          "-v",
+          "test_flow_v2.FlowV2Tests.test_identical_profile_checks_execute_once_and_keep_distinct_records"
+        ],
+        "exitCode": 1,
+        "expectedPattern": "'xx' != 'x'",
+        "testDigests": {
+          "rigorbreeze/scripts/tests/test_flow_v2.py": "b08056250d8da363d350ee8d66c9c8abc09371b4aff2d046ed9fe699129167cd"
+        },
+        "summary": "test_identical_profile_checks_execute_once_and_keep_distinct_records (test_flow_v2.FlowV2Tests.test_identical_profile_checks_execute_once_and_keep_distinct_records) ... FAIL\n\n======================================================================\nFAIL: test_identical_profile_checks_execute_once_and_keep_distinct_records (test_flow_v2.FlowV2Tests.test_identical_profile_checks_execute_once_and_keep_distinct_records)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/songjincheng/LinGang-housing/rigorbreeze/rigorbreeze/scripts/tests/test_flow_v2.py\", line 387, in test_identical_profile_checks_execute_once_and_keep_distinct_records\n    self.assertEqual(counter.read_text(), \"x\")\n    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: 'xx' != 'x'\n- xx\n? -\n+ x\n\n\n----------------------------------------------------------------------\nRan 1 test in 0.812s\n\nFAILED (failures=1)",
+        "taskDigest": "f790fce6cf6f5d548da40635cb04007256777fe9558396d8ebd439241fad2533",
+        "projectFingerprint": "d5601ab536cb03f90f682b0726030ccdd178e78783900bb92af5e7eef76773df",
+        "head": "d3f1adde4f76662793dd06d8ae34e26df15254a9",
+        "observedAt": "2026-08-05T14:08:48+08:00"
+      },
+      "green": null
+    },
+    {
+      "requirement": "REQ-004",
+      "red": {
+        "requirement": "REQ-004",
+        "command": [
+          "/usr/bin/env",
+          "RIGORBREEZE_TEST_FILE=rigorbreeze/scripts/tests/test_flow.py",
+          "PYTHONPATH=rigorbreeze/scripts/tests:rigorbreeze/scripts",
+          "python3",
+          "-B",
+          "-m",
+          "unittest",
+          "-v",
+          "test_flow.FlowCliTests.test_commit_gate_allows_only_same_line_marked_synthetic_test_secret"
+        ],
+        "exitCode": 1,
+        "expectedPattern": "secret-like content detected",
+        "testDigests": {
+          "rigorbreeze/scripts/tests/test_flow.py": "df52849b18400e2922704e310af568f1698d2c0d40a810d78bcdd43a9d60e0be"
+        },
+        "summary": "test_commit_gate_allows_only_same_line_marked_synthetic_test_secret (test_flow.FlowCliTests.test_commit_gate_allows_only_same_line_marked_synthetic_test_secret) ... FAIL\n\n======================================================================\nFAIL: test_commit_gate_allows_only_same_line_marked_synthetic_test_secret (test_flow.FlowCliTests.test_commit_gate_allows_only_same_line_marked_synthetic_test_secret)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/songjincheng/LinGang-housing/rigorbreeze/rigorbreeze/scripts/tests/test_flow.py\", line 379, in test_commit_gate_allows_only_same_line_marked_synthetic_test_secret\n    allowed = self.run_flow(\"--mode\", \"enforced\", \"check\", \"commit\")\n  File \"/Users/songjincheng/LinGang-housing/rigorbreeze/rigorbreeze/scripts/tests/flow_test_support.py\", line 34, in run_flow\n    self.fail(\n    ~~~~~~~~~^\n        f\"flow command returned {result.returncode}, expected {expected}\\n\"\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n        f\"stdout:\\n{result.stdout}\\nstderr:\\n{result.stderr}\"\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\nAssertionError: flow command returned 2, expected 0\nstdout:\n\nstderr:\nERROR: secret-like content detected: tests/test_redaction.py\n\n\n----------------------------------------------------------------------\nRan 1 test in 1.342s\n\nFAILED (failures=1)",
+        "taskDigest": "f790fce6cf6f5d548da40635cb04007256777fe9558396d8ebd439241fad2533",
+        "projectFingerprint": "d5601ab536cb03f90f682b0726030ccdd178e78783900bb92af5e7eef76773df",
+        "head": "d3f1adde4f76662793dd06d8ae34e26df15254a9",
+        "observedAt": "2026-08-05T14:08:49+08:00"
+      },
+      "green": null
+    },
+    {
+      "requirement": "REQ-006",
+      "red": {
+        "requirement": "REQ-006",
+        "command": [
+          "/usr/bin/env",
+          "RIGORBREEZE_TEST_FILE=rigorbreeze/scripts/tests/test_flow.py",
+          "PYTHONPATH=rigorbreeze/scripts/tests:rigorbreeze/scripts",
+          "python3",
+          "-B",
+          "-m",
+          "unittest",
+          "-v",
+          "test_flow.FlowCliTests.test_commit_gate_requires_configured_profile_verification"
+        ],
+        "exitCode": 1,
+        "expectedPattern": "returned 0, expected 2",
+        "testDigests": {
+          "rigorbreeze/scripts/tests/test_flow.py": "df52849b18400e2922704e310af568f1698d2c0d40a810d78bcdd43a9d60e0be"
+        },
+        "summary": "test_commit_gate_requires_configured_profile_verification (test_flow.FlowCliTests.test_commit_gate_requires_configured_profile_verification) ... FAIL\n\n======================================================================\nFAIL: test_commit_gate_requires_configured_profile_verification (test_flow.FlowCliTests.test_commit_gate_requires_configured_profile_verification)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/songjincheng/LinGang-housing/rigorbreeze/rigorbreeze/scripts/tests/test_flow.py\", line 487, in test_commit_gate_requires_configured_profile_verification\n    blocked = self.run_flow(\"--mode\", \"enforced\", \"check\", \"commit\", expected=2)\n  File \"/Users/songjincheng/LinGang-housing/rigorbreeze/rigorbreeze/scripts/tests/flow_test_support.py\", line 34, in run_flow\n    self.fail(\n    ~~~~~~~~~^\n        f\"flow command returned {result.returncode}, expected {expected}\\n\"\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n        f\"stdout:\\n{result.stdout}\\nstderr:\\n{result.stderr}\"\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\nAssertionError: flow command returned 0, expected 2\nstdout:\ncheck commit: passed\n\nstderr:\n\n\n----------------------------------------------------------------------\nRan 1 test in 1.562s\n\nFAILED (failures=1)",
+        "taskDigest": "f790fce6cf6f5d548da40635cb04007256777fe9558396d8ebd439241fad2533",
+        "projectFingerprint": "d5601ab536cb03f90f682b0726030ccdd178e78783900bb92af5e7eef76773df",
+        "head": "d3f1adde4f76662793dd06d8ae34e26df15254a9",
+        "observedAt": "2026-08-05T14:08:52+08:00"
+      },
+      "green": null
+    },
+    {
+      "requirement": "REQ-001",
+      "red": {
+        "requirement": "REQ-001",
+        "command": [
+          "/usr/bin/env",
+          "RIGORBREEZE_TEST_FILE=rigorbreeze/scripts/tests/test_flow_v2.py",
+          "PYTHONPATH=rigorbreeze/scripts/tests:rigorbreeze/scripts",
+          "python3",
+          "-B",
+          "-m",
+          "unittest",
+          "-v",
+          "test_flow_v2.FlowV2Tests.test_timeout_output_normalizes_bytes_text_and_none"
+        ],
+        "exitCode": 1,
+        "expectedPattern": "subprocess_text",
+        "testDigests": {
+          "rigorbreeze/scripts/tests/test_flow_v2.py": "b08056250d8da363d350ee8d66c9c8abc09371b4aff2d046ed9fe699129167cd"
+        },
+        "summary": "test_timeout_output_normalizes_bytes_text_and_none (test_flow_v2.FlowV2Tests.test_timeout_output_normalizes_bytes_text_and_none) ... ERROR\n\n======================================================================\nERROR: test_timeout_output_normalizes_bytes_text_and_none (test_flow_v2.FlowV2Tests.test_timeout_output_normalizes_bytes_text_and_none)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/songjincheng/LinGang-housing/rigorbreeze/rigorbreeze/scripts/tests/test_flow_v2.py\", line 300, in test_timeout_output_normalizes_bytes_text_and_none\n    self.assertEqual(flow_state.subprocess_text(b\"partial\\xff\"), \"partial�\")\n                     ^^^^^^^^^^^^^^^^^^^^^^^^^^\nAttributeError: module 'flow_state' has no attribute 'subprocess_text'\n\n----------------------------------------------------------------------\nRan 1 test in 0.002s\n\nFAILED (errors=1)",
+        "taskDigest": "5dfe1aef97b59d6d208fba08d4ee7f2f02d260df57e3d9105350a5ac07d66495",
+        "projectFingerprint": "e658341ccca7ec865fda5877c1873f620c6724a984595c158f778764a6c39671",
+        "head": "d3f1adde4f76662793dd06d8ae34e26df15254a9",
+        "observedAt": "2026-08-05T14:17:21+08:00"
+      },
+      "green": {
+        "toolVersion": "0.9.1",
+        "profile": "full",
+        "configured": true,
+        "mode": "enforced",
+        "checks": [
+          "format",
+          "lint",
+          "unit",
+          "contract",
+          "secret",
+          "build",
+          "acceptance"
+        ],
+        "passed": true,
+        "taskDigest": "5dfe1aef97b59d6d208fba08d4ee7f2f02d260df57e3d9105350a5ac07d66495",
+        "projectFingerprint": "3b285d336e1319782b8f61d3c10d14d0097b4cc07154bc5f037ea5b4300e3c89",
+        "configDigest": "29e4313a1131a04a40744798b88740046122394a3b05daff60b9a73c50db1f43",
+        "head": "d3f1adde4f76662793dd06d8ae34e26df15254a9",
+        "verifiedAt": "2026-08-05T14:54:55+08:00"
+      }
+    },
+    {
+      "requirement": "REQ-002",
+      "red": {
+        "requirement": "REQ-002",
+        "command": [
+          "/usr/bin/env",
+          "RIGORBREEZE_TEST_FILE=rigorbreeze/scripts/tests/test_flow_v2.py",
+          "PYTHONPATH=rigorbreeze/scripts/tests:rigorbreeze/scripts",
+          "python3",
+          "-B",
+          "-m",
+          "unittest",
+          "-v",
+          "test_flow_v2.FlowV2Tests.test_identical_profile_checks_execute_once_and_keep_distinct_records"
+        ],
+        "exitCode": 1,
+        "expectedPattern": "'xx' != 'x'",
+        "testDigests": {
+          "rigorbreeze/scripts/tests/test_flow_v2.py": "b08056250d8da363d350ee8d66c9c8abc09371b4aff2d046ed9fe699129167cd"
+        },
+        "summary": "test_identical_profile_checks_execute_once_and_keep_distinct_records (test_flow_v2.FlowV2Tests.test_identical_profile_checks_execute_once_and_keep_distinct_records) ... FAIL\n\n======================================================================\nFAIL: test_identical_profile_checks_execute_once_and_keep_distinct_records (test_flow_v2.FlowV2Tests.test_identical_profile_checks_execute_once_and_keep_distinct_records)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/songjincheng/LinGang-housing/rigorbreeze/rigorbreeze/scripts/tests/test_flow_v2.py\", line 387, in test_identical_profile_checks_execute_once_and_keep_distinct_records\n    self.assertEqual(counter.read_text(), \"x\")\n    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: 'xx' != 'x'\n- xx\n? -\n+ x\n\n\n----------------------------------------------------------------------\nRan 1 test in 0.645s\n\nFAILED (failures=1)",
+        "taskDigest": "5dfe1aef97b59d6d208fba08d4ee7f2f02d260df57e3d9105350a5ac07d66495",
+        "projectFingerprint": "e658341ccca7ec865fda5877c1873f620c6724a984595c158f778764a6c39671",
+        "head": "d3f1adde4f76662793dd06d8ae34e26df15254a9",
+        "observedAt": "2026-08-05T14:17:22+08:00"
+      },
+      "green": {
+        "toolVersion": "0.9.1",
+        "profile": "full",
+        "configured": true,
+        "mode": "enforced",
+        "checks": [
+          "format",
+          "lint",
+          "unit",
+          "contract",
+          "secret",
+          "build",
+          "acceptance"
+        ],
+        "passed": true,
+        "taskDigest": "5dfe1aef97b59d6d208fba08d4ee7f2f02d260df57e3d9105350a5ac07d66495",
+        "projectFingerprint": "3b285d336e1319782b8f61d3c10d14d0097b4cc07154bc5f037ea5b4300e3c89",
+        "configDigest": "29e4313a1131a04a40744798b88740046122394a3b05daff60b9a73c50db1f43",
+        "head": "d3f1adde4f76662793dd06d8ae34e26df15254a9",
+        "verifiedAt": "2026-08-05T14:54:55+08:00"
+      }
+    },
+    {
+      "requirement": "REQ-004",
+      "red": {
+        "requirement": "REQ-004",
+        "command": [
+          "/usr/bin/env",
+          "RIGORBREEZE_TEST_FILE=rigorbreeze/scripts/tests/test_flow.py",
+          "PYTHONPATH=rigorbreeze/scripts/tests:rigorbreeze/scripts",
+          "python3",
+          "-B",
+          "-m",
+          "unittest",
+          "-v",
+          "test_flow.FlowCliTests.test_commit_gate_allows_only_same_line_marked_synthetic_test_secret"
+        ],
+        "exitCode": 1,
+        "expectedPattern": "secret-like content detected",
+        "testDigests": {
+          "rigorbreeze/scripts/tests/test_flow.py": "df52849b18400e2922704e310af568f1698d2c0d40a810d78bcdd43a9d60e0be"
+        },
+        "summary": "test_commit_gate_allows_only_same_line_marked_synthetic_test_secret (test_flow.FlowCliTests.test_commit_gate_allows_only_same_line_marked_synthetic_test_secret) ... FAIL\n\n======================================================================\nFAIL: test_commit_gate_allows_only_same_line_marked_synthetic_test_secret (test_flow.FlowCliTests.test_commit_gate_allows_only_same_line_marked_synthetic_test_secret)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/songjincheng/LinGang-housing/rigorbreeze/rigorbreeze/scripts/tests/test_flow.py\", line 379, in test_commit_gate_allows_only_same_line_marked_synthetic_test_secret\n    allowed = self.run_flow(\"--mode\", \"enforced\", \"check\", \"commit\")\n  File \"/Users/songjincheng/LinGang-housing/rigorbreeze/rigorbreeze/scripts/tests/flow_test_support.py\", line 34, in run_flow\n    self.fail(\n    ~~~~~~~~~^\n        f\"flow command returned {result.returncode}, expected {expected}\\n\"\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n        f\"stdout:\\n{result.stdout}\\nstderr:\\n{result.stderr}\"\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\nAssertionError: flow command returned 2, expected 0\nstdout:\n\nstderr:\nERROR: secret-like content detected: tests/test_redaction.py\n\n\n----------------------------------------------------------------------\nRan 1 test in 1.211s\n\nFAILED (failures=1)",
+        "taskDigest": "5dfe1aef97b59d6d208fba08d4ee7f2f02d260df57e3d9105350a5ac07d66495",
+        "projectFingerprint": "e658341ccca7ec865fda5877c1873f620c6724a984595c158f778764a6c39671",
+        "head": "d3f1adde4f76662793dd06d8ae34e26df15254a9",
+        "observedAt": "2026-08-05T14:17:23+08:00"
+      },
+      "green": {
+        "toolVersion": "0.9.1",
+        "profile": "full",
+        "configured": true,
+        "mode": "enforced",
+        "checks": [
+          "format",
+          "lint",
+          "unit",
+          "contract",
+          "secret",
+          "build",
+          "acceptance"
+        ],
+        "passed": true,
+        "taskDigest": "5dfe1aef97b59d6d208fba08d4ee7f2f02d260df57e3d9105350a5ac07d66495",
+        "projectFingerprint": "3b285d336e1319782b8f61d3c10d14d0097b4cc07154bc5f037ea5b4300e3c89",
+        "configDigest": "29e4313a1131a04a40744798b88740046122394a3b05daff60b9a73c50db1f43",
+        "head": "d3f1adde4f76662793dd06d8ae34e26df15254a9",
+        "verifiedAt": "2026-08-05T14:54:55+08:00"
+      }
+    },
+    {
+      "requirement": "REQ-006",
+      "red": {
+        "requirement": "REQ-006",
+        "command": [
+          "/usr/bin/env",
+          "RIGORBREEZE_TEST_FILE=rigorbreeze/scripts/tests/test_flow.py",
+          "PYTHONPATH=rigorbreeze/scripts/tests:rigorbreeze/scripts",
+          "python3",
+          "-B",
+          "-m",
+          "unittest",
+          "-v",
+          "test_flow.FlowCliTests.test_commit_gate_requires_configured_profile_verification"
+        ],
+        "exitCode": 1,
+        "expectedPattern": "returned 0, expected 2",
+        "testDigests": {
+          "rigorbreeze/scripts/tests/test_flow.py": "df52849b18400e2922704e310af568f1698d2c0d40a810d78bcdd43a9d60e0be"
+        },
+        "summary": "test_commit_gate_requires_configured_profile_verification (test_flow.FlowCliTests.test_commit_gate_requires_configured_profile_verification) ... FAIL\n\n======================================================================\nFAIL: test_commit_gate_requires_configured_profile_verification (test_flow.FlowCliTests.test_commit_gate_requires_configured_profile_verification)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/songjincheng/LinGang-housing/rigorbreeze/rigorbreeze/scripts/tests/test_flow.py\", line 487, in test_commit_gate_requires_configured_profile_verification\n    blocked = self.run_flow(\"--mode\", \"enforced\", \"check\", \"commit\", expected=2)\n  File \"/Users/songjincheng/LinGang-housing/rigorbreeze/rigorbreeze/scripts/tests/flow_test_support.py\", line 34, in run_flow\n    self.fail(\n    ~~~~~~~~~^\n        f\"flow command returned {result.returncode}, expected {expected}\\n\"\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n        f\"stdout:\\n{result.stdout}\\nstderr:\\n{result.stderr}\"\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\nAssertionError: flow command returned 0, expected 2\nstdout:\ncheck commit: passed\n\nstderr:\n\n\n----------------------------------------------------------------------\nRan 1 test in 1.373s\n\nFAILED (failures=1)",
+        "taskDigest": "5dfe1aef97b59d6d208fba08d4ee7f2f02d260df57e3d9105350a5ac07d66495",
+        "projectFingerprint": "e658341ccca7ec865fda5877c1873f620c6724a984595c158f778764a6c39671",
+        "head": "d3f1adde4f76662793dd06d8ae34e26df15254a9",
+        "observedAt": "2026-08-05T14:17:25+08:00"
+      },
+      "green": {
+        "toolVersion": "0.9.1",
+        "profile": "full",
+        "configured": true,
+        "mode": "enforced",
+        "checks": [
+          "format",
+          "lint",
+          "unit",
+          "contract",
+          "secret",
+          "build",
+          "acceptance"
+        ],
+        "passed": true,
+        "taskDigest": "5dfe1aef97b59d6d208fba08d4ee7f2f02d260df57e3d9105350a5ac07d66495",
+        "projectFingerprint": "3b285d336e1319782b8f61d3c10d14d0097b4cc07154bc5f037ea5b4300e3c89",
+        "configDigest": "29e4313a1131a04a40744798b88740046122394a3b05daff60b9a73c50db1f43",
+        "head": "d3f1adde4f76662793dd06d8ae34e26df15254a9",
+        "verifiedAt": "2026-08-05T14:54:55+08:00"
+      }
+    }
+  ],
+  "artifacts": [
+    {
+      "kind": "build",
+      "path": "artifacts/rigorbreeze.zip",
+      "sha256": "b78d575ec3506380d5374da2487684b8e023e66fdd8be5ac3c29fc781eff2a76",
+      "size": 129305,
+      "head": "d3f1adde4f76662793dd06d8ae34e26df15254a9",
+      "taskDigest": "5dfe1aef97b59d6d208fba08d4ee7f2f02d260df57e3d9105350a5ac07d66495",
+      "projectFingerprint": "3b285d336e1319782b8f61d3c10d14d0097b4cc07154bc5f037ea5b4300e3c89",
+      "recordedAt": "2026-08-05T14:24:20+08:00"
+    },
+    {
+      "kind": "build",
+      "path": "artifacts/rigorbreeze.zip",
+      "sha256": "b78d575ec3506380d5374da2487684b8e023e66fdd8be5ac3c29fc781eff2a76",
+      "size": 129305,
+      "head": "d3f1adde4f76662793dd06d8ae34e26df15254a9",
+      "taskDigest": "5dfe1aef97b59d6d208fba08d4ee7f2f02d260df57e3d9105350a5ac07d66495",
+      "projectFingerprint": "3b285d336e1319782b8f61d3c10d14d0097b4cc07154bc5f037ea5b4300e3c89",
+      "recordedAt": "2026-08-05T14:27:51+08:00"
+    },
+    {
+      "kind": "build",
+      "path": "artifacts/rigorbreeze.zip",
+      "sha256": "b78d575ec3506380d5374da2487684b8e023e66fdd8be5ac3c29fc781eff2a76",
+      "size": 129305,
+      "head": "d3f1adde4f76662793dd06d8ae34e26df15254a9",
+      "taskDigest": "5dfe1aef97b59d6d208fba08d4ee7f2f02d260df57e3d9105350a5ac07d66495",
+      "projectFingerprint": "3b285d336e1319782b8f61d3c10d14d0097b4cc07154bc5f037ea5b4300e3c89",
+      "recordedAt": "2026-08-05T14:54:55+08:00"
+    }
+  ],
+  "acceptance": [
+    {
+      "kind": "product-review",
+      "fields": {
+        "status": "passed",
+        "reviewer": "primary-agent"
+      },
+      "taskDigest": "5dfe1aef97b59d6d208fba08d4ee7f2f02d260df57e3d9105350a5ac07d66495",
+      "projectFingerprint": "3b285d336e1319782b8f61d3c10d14d0097b4cc07154bc5f037ea5b4300e3c89",
+      "head": "d3f1adde4f76662793dd06d8ae34e26df15254a9",
+      "artifactDigests": [
+        "b78d575ec3506380d5374da2487684b8e023e66fdd8be5ac3c29fc781eff2a76",
+        "b78d575ec3506380d5374da2487684b8e023e66fdd8be5ac3c29fc781eff2a76"
+      ],
+      "recordedAt": "2026-08-05T14:52:28+08:00",
+      "path": "reports/acceptance-091.txt",
+      "sha256": "270d260bc38d1d4d4481e6b5998309bee43f86120f7fc85ba7c090dd734cf5d5",
+      "size": 197
+    },
+    {
+      "kind": "review",
+      "fields": {
+        "status": "passed",
+        "reviewer": "standards-pass"
+      },
+      "taskDigest": "5dfe1aef97b59d6d208fba08d4ee7f2f02d260df57e3d9105350a5ac07d66495",
+      "projectFingerprint": "3b285d336e1319782b8f61d3c10d14d0097b4cc07154bc5f037ea5b4300e3c89",
+      "head": "d3f1adde4f76662793dd06d8ae34e26df15254a9",
+      "artifactDigests": [
+        "b78d575ec3506380d5374da2487684b8e023e66fdd8be5ac3c29fc781eff2a76",
+        "b78d575ec3506380d5374da2487684b8e023e66fdd8be5ac3c29fc781eff2a76"
+      ],
+      "recordedAt": "2026-08-05T14:52:28+08:00",
+      "path": "reports/standards-review-091.txt",
+      "sha256": "6f6cef7167ab6fe7cb3166058baa4dacda609117a61386cb102de91f37797755",
+      "size": 297
+    },
+    {
+      "kind": "review",
+      "fields": {
+        "status": "passed",
+        "reviewer": "spec-pass"
+      },
+      "taskDigest": "5dfe1aef97b59d6d208fba08d4ee7f2f02d260df57e3d9105350a5ac07d66495",
+      "projectFingerprint": "3b285d336e1319782b8f61d3c10d14d0097b4cc07154bc5f037ea5b4300e3c89",
+      "head": "d3f1adde4f76662793dd06d8ae34e26df15254a9",
+      "artifactDigests": [
+        "b78d575ec3506380d5374da2487684b8e023e66fdd8be5ac3c29fc781eff2a76",
+        "b78d575ec3506380d5374da2487684b8e023e66fdd8be5ac3c29fc781eff2a76"
+      ],
+      "recordedAt": "2026-08-05T14:52:29+08:00",
+      "path": "reports/spec-review-091.txt",
+      "sha256": "571a62f8135d1af7107c4db193dd6b804dd0e296fc6e11e63f72b18e56e39201",
+      "size": 309
+    }
+  ],
+  "release": [],
+  "automation": [],
+  "practice": {
+    "confirmation": {
+      "reworkReason": "none",
+      "exceptions": "none",
+      "workflowImpact": "helped",
+      "evolutionCandidate": false,
+      "summaryDigest": "59ea88c9e0edc64d90926d5d889aadd54b15af533fb2f86f1cc890c7fe0a3ea8",
+      "taskDigest": "5dfe1aef97b59d6d208fba08d4ee7f2f02d260df57e3d9105350a5ac07d66495",
+      "projectFingerprint": "3b285d336e1319782b8f61d3c10d14d0097b4cc07154bc5f037ea5b4300e3c89",
+      "confirmedAt": "2026-08-05T14:55:07+08:00"
+    },
+    "events": [],
+    "summary": {
+      "taskId": "RB-LOW-FRICTION-091",
+      "risk": "L1",
+      "verificationRuns": 3,
+      "checkRuns": 21,
+      "checkDurationMs": 397796,
+      "failedChecks": [],
+      "failureCategories": [],
+      "potentialBypasses": [],
+      "firstAcceptancePassed": true,
+      "acceptanceRecords": 3,
+      "estimatedReworkSeconds": null,
+      "practiceEvents": [],
+      "generatedAt": "2026-08-05T14:55:07+08:00",
+      "summaryDigest": "59ea88c9e0edc64d90926d5d889aadd54b15af533fb2f86f1cc890c7fe0a3ea8"
+    }
+  },
+  "closure": {
+    "outcome": "completed",
+    "reason": null,
+    "closedAt": "2026-08-05T14:55:07+08:00",
+    "head": "d3f1adde4f76662793dd06d8ae34e26df15254a9",
+    "branch": "main",
+    "originalPhase": "accepted",
+    "integrationProof": null,
+    "verificationStatus": "current",
+    "practiceEvents": [
+      "closure-pending-commit"
+    ],
+    "unrelatedChanges": []
+  },
+  "verification": {
+    "toolVersion": "0.9.1",
+    "profile": "full",
+    "configured": true,
+    "mode": "enforced",
+    "checks": [
+      "format",
+      "lint",
+      "unit",
+      "contract",
+      "secret",
+      "build",
+      "acceptance"
+    ],
+    "passed": true,
+    "taskDigest": "5dfe1aef97b59d6d208fba08d4ee7f2f02d260df57e3d9105350a5ac07d66495",
+    "projectFingerprint": "3b285d336e1319782b8f61d3c10d14d0097b4cc07154bc5f037ea5b4300e3c89",
+    "configDigest": "29e4313a1131a04a40744798b88740046122394a3b05daff60b9a73c50db1f43",
+    "head": "d3f1adde4f76662793dd06d8ae34e26df15254a9",
+    "verifiedAt": "2026-08-05T14:54:55+08:00"
+  }
+}

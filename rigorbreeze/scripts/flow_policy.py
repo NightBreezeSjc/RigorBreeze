@@ -430,7 +430,12 @@ def staged_files(root: Path) -> list[str]:
     ]
 
 
-def secret_content_paths(root: Path, paths: Iterable[str]) -> list[str]:
+SYNTHETIC_SECRET_MARKER = "rigorbreeze: synthetic-secret"
+
+
+def secret_content_scan(
+    root: Path, paths: Iterable[str]
+) -> tuple[list[str], list[str]]:
     patterns = (
         re.compile(
             r"(?i)\b(api[_-]?key|access[_-]?token|token|password|passwd|secret)\s*[:=]\s*['\"]?[A-Za-z0-9_./+\-=]{12,}"
@@ -438,13 +443,24 @@ def secret_content_paths(root: Path, paths: Iterable[str]) -> list[str]:
         re.compile(r"\b(ghp|github_pat|sk)-[A-Za-z0-9_-]{12,}\b"),
     )
     found: list[str] = []
+    exemptions: list[str] = []
+    test_roots = configured_paths(load_config(root), "test_paths", ["tests"])
     for relative in paths:
         result = git(root, "show", f":{relative}")
         if result.returncode != 0 or "\0" in result.stdout:
             continue
-        if any(pattern.search(result.stdout) for pattern in patterns):
-            found.append(relative)
-    return found
+        for line_number, line in enumerate(result.stdout.splitlines(), start=1):
+            if not any(pattern.search(line) for pattern in patterns):
+                continue
+            if SYNTHETIC_SECRET_MARKER in line and path_under(relative, test_roots):
+                exemptions.append(f"{relative}:{line_number}")
+            elif relative not in found:
+                found.append(relative)
+    return found, exemptions
+
+
+def secret_content_paths(root: Path, paths: Iterable[str]) -> list[str]:
+    return secret_content_scan(root, paths)[0]
 
 
 def is_migration_path(relative: str) -> bool:

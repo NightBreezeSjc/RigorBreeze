@@ -17,6 +17,40 @@ The project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). 
 - Reframed the repository for first-time adopters with bilingual onboarding, explicit safety boundaries, and a complete first-task walkthrough.
 - Added concise contribution and security policies plus an MIT license.
 
+## [0.9.2] - Requirement interpretation reliability
+
+### Changed
+
+- Translate compound requests into observable `ADD`, `REMOVE`, `MOVE`, `RETAIN`, and `REPLACE` atoms before approval, with every atom mapped to an acceptance ID or an explicit out-of-scope reason.
+- Resolve whether negated wording describes the current defect or desired result from project evidence; ask one short outcome question only when the direction remains materially ambiguous.
+- Require UI final-state coverage for presence, absence, order/location, and retained behavior without adding a document, field, command, or user form.
+- Classify user interpretation corrections through existing retrospective evidence as missing atoms, reversed intent, wrong source, or scope change without retaining chat transcripts.
+
+### Tests
+
+- Replaced the original semantics pressure fixture with a compound UI scenario that rejects partial capture of move/remove/retain operations and ambiguous negation while preserving the six-case suite.
+
+### Compatibility
+
+- Public CLI, state/evidence schema v4, automation journal v1, Spec Tree, runtime dependencies, and Git authority are unchanged.
+
+## [0.9.1] - Low-friction verification closure
+
+### Changed
+
+- Reuse an identical `argv + cwd + env + timeout` process result only inside one profile invocation while preserving separate check, report, and artifact records.
+- Accept current configured `affected` or `full` evidence for an ordinary commit; targeted commands remain exploratory, while archive, merge, and direct integration-branch delivery retain full-quality gates.
+- Run the core runner suite once with a 240-second timeout and use the deterministic behavior contract suite as the separate acceptance check. Live Codex behavior runs remain an explicit maintainer release-candidate action and are never launched by commit, full, or CI.
+
+### Fixed
+
+- Normalize timeout stdout/stderr from bytes, text, or missing values and always record exit code 124 with the preserved redacted output and timeout reason.
+- Permit an explicitly marked synthetic secret only on the same physical line under configured test paths; secret paths, unmarked lines, and configured secret adapters remain enforced.
+
+### Compatibility
+
+- Public CLI, state/evidence schema v4, automation journal v1, Spec Tree, dependencies, and delivery authority are unchanged.
+
 ## [0.9.0] - Agent behavior reliability
 
 ### Added

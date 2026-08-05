@@ -2,7 +2,7 @@ version = 4
 
 [policy]
 local_mode = "advisory"
-test_paths = ["rigorbreeze/scripts/tests"]
+test_paths = ["rigorbreeze/scripts/tests", "tests/behavior"]
 source_paths = ["rigorbreeze/scripts"]
 migration_paths = ["migration", "migrations"]
 
@@ -30,16 +30,16 @@ commit_message = "{task_id}: {title}"
 
 [[checks]]
 id = "format"
-command = ["python3", "-m", "ruff", "format", "--check", "rigorbreeze/scripts"]
+command = ["python3", "-m", "ruff", "format", "--check", "rigorbreeze/scripts", "tests/behavior"]
 
 [[checks]]
 id = "lint"
-command = ["python3", "-m", "ruff", "check", "rigorbreeze/scripts"]
+command = ["python3", "-m", "ruff", "check", "rigorbreeze/scripts", "tests/behavior"]
 
 [[checks]]
 id = "unit"
-command = ["python3", "-m", "unittest", "discover", "-s", "rigorbreeze/scripts/tests", "-v"]
-timeout = 120
+command = ["python3", "-B", "-m", "unittest", "discover", "-s", "rigorbreeze/scripts/tests", "-v"]
+timeout = 240
 
 [[checks]]
 id = "contract"
@@ -56,5 +56,5 @@ artifacts = ["artifacts/rigorbreeze.zip"]
 
 [[checks]]
 id = "acceptance"
-command = ["python3", "-m", "unittest", "discover", "-s", "rigorbreeze/scripts/tests", "-v"]
-timeout = 120
+command = ["python3", "-B", "-m", "unittest", "discover", "-s", "tests/behavior", "-v"]
+timeout = 60

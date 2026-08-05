@@ -5,6 +5,9 @@ import subprocess
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+import flow_state
 from flow_test_support import FlowTestCase
 
 STANDARD_CHECKS = (
@@ -27,6 +30,9 @@ STANDARD_CHECKS = (
 
 
 class FlowV2Tests(FlowTestCase):
+    def write_literal_config(self, text: str) -> None:
+        (self.root / "rigorbreeze.toml").write_text(text, encoding="utf-8")
+
     def record_operation_plan(self, task_id: str = "TASK-001") -> None:
         evidence = json.loads(
             (self.root / "spec" / "evidence" / f"{task_id}.json").read_text()
@@ -289,6 +295,188 @@ Risk: {risk}
         self.assertEqual(len(evidence["artifacts"]), 1)
         self.assertEqual(len(evidence["artifacts"][0]["sha256"]), 64)
         self.assertEqual(evidence["verification"]["profile"], "full")
+
+    def test_timeout_output_normalizes_bytes_text_and_none(self) -> None:
+        self.assertEqual(flow_state.subprocess_text(b"partial\xff"), "partial�")
+        self.assertEqual(flow_state.subprocess_text("partial"), "partial")
+        self.assertEqual(flow_state.subprocess_text(None), "")
+
+        self.run_flow("init")
+        command = json.dumps(
+            [
+                sys.executable,
+                "-c",
+                (
+                    "import sys,time;"
+                    "print('partial stdout',flush=True);"
+                    "print('partial stderr',file=sys.stderr,flush=True);"
+                    "time.sleep(5)"
+                ),
+            ]
+        )
+        self.write_literal_config(
+            "version = 4\n\n"
+            "[policy]\n"
+            'local_mode = "advisory"\n'
+            'test_paths = ["tests"]\n'
+            'source_paths = ["src"]\n\n'
+            "[profiles]\n"
+            'affected = ["unit"]\n'
+            'full = ["unit"]\n\n'
+            "[[checks]]\n"
+            'id = "unit"\n'
+            f"command = {command}\n"
+            "timeout = 1\n"
+        )
+        self.create_task(risk="L0")
+        self.run_flow("approve", "task")
+
+        result = self.run_flow(
+            "--mode", "enforced", "verify", "--profile", "full", expected=1
+        )
+        self.assertNotIn("Traceback", result.stderr)
+        evidence = json.loads(
+            (self.root / "spec" / "evidence" / "TASK-001.json").read_text()
+        )
+        record = evidence["checkRuns"][-1]
+        self.assertEqual(record["exitCode"], 124)
+        self.assertIn("partial stdout", record["summary"])
+        self.assertIn("partial stderr", record["summary"])
+        self.assertIn("timed out after 1 seconds", record["summary"])
+
+    def test_identical_profile_checks_execute_once_and_keep_distinct_records(
+        self,
+    ) -> None:
+        self.run_flow("init")
+        counter = self.root / "counter.txt"
+        reports = self.root / "reports"
+        script = (
+            "import pathlib;"
+            f"counter=pathlib.Path({str(counter)!r});"
+            "counter.write_text(counter.read_text()+'x' if counter.exists() else 'x');"
+            f"reports=pathlib.Path({str(reports)!r});reports.mkdir(exist_ok=True);"
+            "(reports/'unit.json').write_text('{\"status\":\"passed\"}');"
+            "(reports/'acceptance.json').write_text('{\"status\":\"passed\"}')"
+        )
+        command = json.dumps([sys.executable, "-c", script])
+        self.write_literal_config(
+            "version = 4\n\n"
+            "[policy]\n"
+            'local_mode = "advisory"\n'
+            'test_paths = ["tests"]\n'
+            'source_paths = ["src"]\n\n'
+            "[profiles]\n"
+            'affected = ["unit"]\n'
+            'full = ["unit", "acceptance"]\n\n'
+            "[[checks]]\n"
+            'id = "unit"\n'
+            f"command = {command}\n"
+            "timeout = 30\n"
+            'report = "reports/unit.json"\n\n'
+            "[[checks]]\n"
+            'id = "acceptance"\n'
+            f"command = {command}\n"
+            "timeout = 30\n"
+            'report = "reports/acceptance.json"\n'
+        )
+        self.create_task(risk="L0")
+        self.run_flow("approve", "task")
+
+        self.run_flow("--mode", "enforced", "verify", "--profile", "full")
+
+        self.assertEqual(counter.read_text(), "x")
+        evidence = json.loads(
+            (self.root / "spec" / "evidence" / "TASK-001.json").read_text()
+        )
+        records = evidence["checkRuns"][-2:]
+        self.assertEqual(
+            [record["checkId"] for record in records], ["unit", "acceptance"]
+        )
+        self.assertNotIn("reusedFromCheckId", records[0])
+        self.assertEqual(records[1]["reusedFromCheckId"], "unit")
+        self.assertTrue(all(record["report"] for record in records))
+
+    def test_reused_execution_still_validates_each_check_report(
+        self,
+    ) -> None:
+        self.run_flow("init")
+        counter = self.root / "counter.txt"
+        script = (
+            "import pathlib;"
+            f"counter=pathlib.Path({str(counter)!r});"
+            "counter.write_text(counter.read_text()+'x' if counter.exists() else 'x')"
+        )
+        command = json.dumps([sys.executable, "-c", script])
+        self.write_literal_config(
+            "version = 4\n\n"
+            "[policy]\n"
+            'local_mode = "advisory"\n'
+            'test_paths = ["tests"]\n'
+            'source_paths = ["src"]\n\n'
+            "[profiles]\n"
+            'affected = ["unit"]\n'
+            'full = ["unit", "acceptance"]\n\n'
+            "[[checks]]\n"
+            'id = "unit"\n'
+            f"command = {command}\n"
+            "timeout = 30\n\n"
+            "[[checks]]\n"
+            'id = "acceptance"\n'
+            f"command = {command}\n"
+            "timeout = 30\n"
+            'report = "reports/missing.json"\n'
+        )
+        self.create_task(risk="L0")
+        self.run_flow("approve", "task")
+
+        self.run_flow("--mode", "enforced", "verify", "--profile", "full", expected=1)
+
+        self.assertEqual(counter.read_text(), "x")
+        evidence = json.loads(
+            (self.root / "spec" / "evidence" / "TASK-001.json").read_text()
+        )
+        records = evidence["checkRuns"][-2:]
+        self.assertEqual(records[1]["reusedFromCheckId"], "unit")
+        self.assertTrue(records[0]["passed"])
+        self.assertFalse(records[1]["passed"])
+
+    def test_different_execution_identity_runs_again(self) -> None:
+        self.run_flow("init")
+        counter = self.root / "counter.txt"
+        script = (
+            "import pathlib;"
+            f"counter=pathlib.Path({str(counter)!r});"
+            "counter.write_text(counter.read_text()+'x' if counter.exists() else 'x')"
+        )
+        command = json.dumps([sys.executable, "-c", script])
+        self.write_literal_config(
+            "version = 4\n\n"
+            "[policy]\n"
+            'local_mode = "advisory"\n'
+            'test_paths = ["tests"]\n'
+            'source_paths = ["src"]\n\n'
+            "[profiles]\n"
+            'affected = ["unit"]\n'
+            'full = ["unit", "acceptance"]\n\n'
+            "[[checks]]\n"
+            'id = "unit"\n'
+            f"command = {command}\n"
+            "timeout = 30\n\n"
+            "[[checks]]\n"
+            'id = "acceptance"\n'
+            f"command = {command}\n"
+            "timeout = 31\n"
+        )
+        self.create_task(risk="L0")
+        self.run_flow("approve", "task")
+
+        self.run_flow("--mode", "enforced", "verify", "--profile", "full")
+
+        self.assertEqual(counter.read_text(), "xx")
+        evidence = json.loads(
+            (self.root / "spec" / "evidence" / "TASK-001.json").read_text()
+        )
+        self.assertNotIn("reusedFromCheckId", evidence["checkRuns"][-1])
 
     def test_arbitrary_verify_scope_is_not_part_of_the_public_cli(self) -> None:
         self.run_flow("init")

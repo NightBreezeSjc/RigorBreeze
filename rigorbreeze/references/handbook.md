@@ -81,6 +81,10 @@ Do not require a perfect user prompt. Build a compact context intake inside Auth
 - record user outcome, current behavior evidence, architecture path, invariants/source of truth, freshness and fallback semantics, and the governing requirement/design/API version;
 - ask only for outcome-changing intent that evidence cannot determine, and state any safe default explicitly.
 
+For a compound request, preserve a short exact user phrase or a resolvable authoritative source and translate the request into observable `ADD`, `REMOVE`, `MOVE`, `RETAIN`, or `REPLACE` atoms. State each atom as a final product condition and map it to one acceptance ID or an explicit out-of-scope reason. This mapping lives in the existing Authoritative inputs and Acceptance criteria; it is not another requirements document.
+
+Negative phrases such as “not shown”, “missing”, “cannot”, or “not changed” can describe either the current defect or the desired result. Resolve that direction from requirements, prototype, current UI, tests and follow-up context. If evidence cannot decide and the two readings produce different results, ask one short binary outcome question. Do not silently choose a direction.
+
 Role prompts such as “act as a CTO” may encourage a perspective but never replace project evidence, acceptance criteria, or human authority. After compaction or a follow-up write request, re-run RigorBreeze status and ownership checks even when a debugging or review skill is also active.
 
 Before approval, agree on:
@@ -90,7 +94,7 @@ Before approval, agree on:
 - production paths that may change;
 - the requirement or design version used for acceptance.
 
-Then perform one semantic self-review. Reject unresolved placeholders and internal contradictions, split an oversized outcome, and make source-of-truth, freshness, fallback, and failure behavior unambiguous. Correct facts recoverable from the repository directly; ask the developer only when different answers produce materially different outcomes.
+Then perform one semantic self-review. Reject unresolved placeholders and internal contradictions, split an oversized outcome, and make source-of-truth, freshness, fallback, and failure behavior unambiguous. For UI changes, acceptance covers four applicable dimensions: what must exist, what must be absent, order/location, and behavior that must remain. Present a compact final-state checklist before approval and confirm that every observable atom is covered. Correct facts recoverable from the repository directly; ask the developer only when different answers produce materially different outcomes.
 
 The Skill first calls its bundled runner and inspects the `installation` projection. It must not begin product-code writes until the task exists, approval is valid, the current window owns the worktree, and the runner/configuration/baseline are usable. An active task freezes project-runner upgrades; finish or safely abandon that task with the bundled runner before `init` replaces managed files.
 
@@ -135,6 +139,8 @@ The normal delivery order is verify/full → acceptance → two-pass review → 
 
 L0 may archive after its configured verification. L1/L2 require current full verification, applicable acceptance, two separate review passes, and the prefilled retrospective confirmation.
 
+An ordinary commit requires a current configured `affected` or `full` result; a targeted exploration never satisfies the gate, and a fresh configured result is reused instead of rerun. Archive, merge, and direct integration-branch delivery remain full-quality operations. Live Codex behavior evaluation is a separate maintainer release-candidate action and is never launched by commit, configured full, or CI.
+
 Verification, merge, archive, and optional Git automation evaluate the complete task change set: committed paths from the approved baseline through `HEAD` plus current working-tree changes. A scope violation takes priority in `status` and must be corrected or split before verification continues. Every current RED chain must have an unchanged test digest and GREEN bound to the current full verification before merge or archive.
 
 Run review in two passes:
@@ -161,6 +167,8 @@ Common optional check IDs include:
 
 One-off exploration and debugging commands may run directly but do not satisfy workflow gates. The configured profile is the contract shared by local development and CI.
 
+Within one profile invocation, checks with identical argv, resolved cwd, effective environment, and timeout share one process result. Each check still validates its own report and artifacts and records `reusedFromCheckId`; no result is cached across profiles, sessions, or project changes.
+
 L2 `full` derives a non-negotiable minimum from risk and actual changes: secret scanning, build, at least one static-quality check, and at least one behavioral check. Dependency-manifest changes additionally require dependency, license, and SBOM checks with non-empty reports. Migration changes require the configured migration adapter and report. L0/L1 remain project-declared and do not inherit unrelated enterprise tooling.
 
 Always preserve these boundaries:
@@ -171,6 +179,8 @@ Always preserve these boundaries:
 - dependency and migration changes are detected and explicitly reviewed;
 - changing source, tests, dependencies, configuration, migrations, or the task invalidates stale proof;
 - tests, UAT, artifacts, and release refer to the same Git SHA and immutable artifact digest when release applies.
+
+Synthetic redaction fixtures may annotate a secret-shaped value with `rigorbreeze: synthetic-secret` on the same physical line, but only under configured test paths. The exemption applies only to the built-in content heuristic for that line: secret-like paths, other lines, and the project's configured secret adapter still block normally, and output reports only file/line metadata.
 
 Local advisory mode helps iteration. Remote required checks and protected environments are the non-bypassable merge and release authority.
 
@@ -214,7 +224,7 @@ Before L1/L2/Emergency archive, Codex displays the prefilled `retro --json` summ
 2. Was any block, bypass, or `nextAction` unreasonable?
 3. Did the workflow help, remain neutral, or hurt?
 
-The confirmation binds to the current task and project fingerprint. L0 has no mandatory retrospective. Runner drift, occupied task slots, runtime conflicts, missing operation plans, and gate failures are captured and deduplicated automatically as practice events. Correct blocks remain statistics; only human-confirmed misblocks, unreasonable next actions, bypasses, workflow-caused rework, or `hurt` impact become evolution candidates. Do not create a second practice log or retain chat transcripts.
+The confirmation binds to the current task and project fingerprint. L0 has no mandatory retrospective. Runner drift, occupied task slots, runtime conflicts, missing operation plans, and gate failures are captured and deduplicated automatically as practice events. If the user corrects the interpretation with language such as “I meant”, “you missed”, or “understood it backwards”, record the existing retrospective exception as `requirement-interpretation-correction` and classify it as `missing-atom`, `reversed-intent`, `wrong-source`, or `scope-change`. Correct blocks remain statistics; only human-confirmed misblocks, unreasonable next actions, bypasses, workflow-caused rework, or `hurt` impact become evolution candidates. Do not create a second practice log or retain chat transcripts.
 
 Ordinary candidates are observed once and reviewed after the second comparable occurrence. Review immediately when the workflow incorrectly permits a secret, privilege bypass, destructive migration, stale evidence, unauthorized external action, or wrong release.
 

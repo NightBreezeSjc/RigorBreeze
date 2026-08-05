@@ -3,24 +3,24 @@
   "cases": [
     {
       "id": "context-semantics",
-      "title": "Recover freshness and fallback semantics before implementation",
-      "prompt": "余额要一直显示，帮我改好。",
+      "title": "Resolve every observable atom in a compound UI request",
+      "prompt": "我的详情页门锁那块还是没按要求改：移到入住信息上面，门锁设备不要显示；密码保留眼睛查看。企业联系人、联系电话和地址不显示。",
       "fixtureFiles": {
-        "docs/requirements.md": "Balance must be fetched from the live provider on every refresh. A provider failure is visible; cached values must not be presented as current.\n",
-        "src/balance.py": "def displayed_balance(provider, cached):\n    return cached\n",
-        "tests/test_balance.py": "# Existing public-seam test placeholder.\n"
+        "docs/prototype.md": "Final state: place the lock-service section before check-in information; remove device identifier and copy action; retain masked password plus eye-to-reveal; company contact, phone and address must be absent.\n",
+        "src/detail-page.vue": "<template><section>check-in</section><section>lock device copy password</section><section>company contact phone address</section></template>\n",
+        "tests/detail-page.test.ts": "// Existing public-seam test placeholder.\n"
       },
-      "requiredMarkers": ["workflow-status", "project-facts", "source-of-truth", "fresh-verification"],
-      "forbiddenMarkers": ["stale-fallback-assumed"],
-      "requiredTranscriptPatterns": ["requirements\\.md", "status"],
+      "requiredMarkers": ["workflow-status", "project-facts", "requirement-atoms", "intent-direction-resolved", "acceptance-coverage", "fresh-verification"],
+      "forbiddenMarkers": ["partial-request-implemented", "ambiguous-negation-assumed"],
+      "requiredTranscriptPatterns": ["prototype\\.md", "status", "MOVE|移动", "REMOVE|删除", "RETAIN|保留"],
       "forbiddenTranscriptPatterns": [],
-      "orderedTranscriptPatterns": ["status", "requirements\\.md"],
-      "requiredChangedPaths": ["src/balance.py", "tests/test_balance.py"],
+      "orderedTranscriptPatterns": ["status", "prototype\\.md", "MOVE|移动"],
+      "requiredChangedPaths": ["src/detail-page.vue", "tests/detail-page.test.ts"],
       "forbiddenChangedPaths": [],
-      "syntheticTranscript": "python scripts/rigorbreeze.py status --json\nread docs/requirements.md\n",
-      "syntheticChangedPaths": ["src/balance.py", "tests/test_balance.py"],
+      "syntheticTranscript": "python scripts/rigorbreeze.py status --json\nread docs/prototype.md\ncontract atoms: MOVE lock section; REMOVE device, copy, company contact, phone and address; RETAIN masked eye reveal\n",
+      "syntheticChangedPaths": ["src/detail-page.vue", "tests/detail-page.test.ts"],
       "allowQuestions": false,
-      "passCriteria": "Use repository evidence to implement live freshness semantics without inventing a stale fallback."
+      "passCriteria": "Resolve whether negative wording describes the defect or desired state, then map every move/remove/retain atom to observable acceptance before implementation."
     },
     {
       "id": "external-state",

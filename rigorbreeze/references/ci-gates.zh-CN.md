@@ -2,6 +2,15 @@
 
 [English](ci-gates.md) · 简体中文
 
+## 目录
+
+- [原则](#原则)
+- [最小流水线](#最小流水线)
+- [GitLab](#gitlab)
+- [GitHub Actions](#github-actions)
+- [制品身份](#制品身份)
+- [强制边界](#强制边界)
+
 ## 原则
 
 策略保存在 `scripts/rigorbreeze.py` 和 `rigorbreeze.toml`，本地和 CI 调用同一个执行器。CI YAML 只编排任务，不能成为第二份工作流规格。
@@ -19,6 +28,10 @@ doctor
 ```
 
 enforced profile 包含项目为该 profile 声明的检查，每项都必须配置并通过。L0/L1 继续由项目声明。L2 的 `full` 至少推导 `secret`、`build`、一项静态质量检查和一项行为检查；修改依赖清单时额外要求 `dependency`、`license`、`sbom` 及非空报告，修改迁移时要求 `migration` 及报告。浏览器 UI 等无关能力仍按条件启用，不要求填写 `N/A`。必需检查失败会阻断合并和发布。
+
+普通提交是更窄的检查点：要求当前配置化 `affected` 或 `full` 证据，targeted 探索不能满足；已有新鲜证据会直接复用。正常 L1/L2 archive、merge 和直推集成分支仍要求 `full` 及适用验收与审查。维护者真实 Agent 行为测试只属于发布候选证据，commit、配置化 `full` 和 CI 都不会调用。
+
+仅在单次 profile 调用内，argv、解析后 cwd、有效环境和 timeout 完全一致的检查只启动一次。复用进程不等于复用策略：每个检查仍独立校验自己的报告和制品，并记录 `reusedFromCheckId`。
 
 ## GitLab
 
@@ -39,6 +52,8 @@ L2 远程交付的 `check release` 还要求当前机器 JSON `operation-plan`�
 ## 强制边界
 
 本地默认 advisory。本地 Hook 可以提醒但不是权威；远程 Required Checks 和受保护环境才是不可绕过的合并/发布边界。
+
+内置暂存内容启发式只允许在配置测试路径下忽略同一行的 `rigorbreeze: synthetic-secret` 标记。秘密形状文件路径以及项目配置的 Gitleaks/secret 适配器不会被豁免，仍是强制事实源。
 
 首个 enforced L1/L2 批准前，配置的真正基准分支必须满足 `workflowBaseline.status=current`；任务分支中的 runner 提交不能替代项目基线。用户一次性明确授权后，`automate commit --once --workflow-baseline --expected-head <sha>` 只能在基准 worktree 无活动任务、无无关改动、无缓存和秘密材料时建立或更新该基线。
 
