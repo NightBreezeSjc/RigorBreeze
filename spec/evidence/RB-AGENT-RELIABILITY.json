@@ -839,7 +839,20 @@
       }
     ]
   },
-  "closure": null,
+  "closure": {
+    "outcome": "reconciled",
+    "reason": "v0.9.0 changes are committed on main; live release-candidate behavior evaluation remains pending",
+    "closedAt": "2026-08-05T13:48:31+08:00",
+    "head": "1dcad09a41b376cadec9507e6e19e239e16449f3",
+    "branch": "main",
+    "originalPhase": "verified",
+    "integrationProof": "confirmed-on-base-head",
+    "verificationStatus": "missing/stale",
+    "practiceEvents": [
+      "integrated-unclosed"
+    ],
+    "unrelatedChanges": []
+  },
   "verification": {
     "toolVersion": "0.9.0",
     "profile": "full",
