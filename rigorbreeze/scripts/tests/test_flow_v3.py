@@ -579,7 +579,6 @@ command = ["python3", "-c", "print('secret ok')"]
             {
                 "spec/changes/TASK-302.md",
                 "spec/evidence/TASK-302.json",
-                "spec/state.json",
                 "src/value.txt",
             },
         )
@@ -1112,16 +1111,15 @@ artifacts = ["artifacts/app.bin"]
         )
 
         status = json.loads(self.run_flow("status", "--all", "--json").stdout)
-        self.assertEqual(
-            status["cleanup"]["removableWorktrees"],
-            [
-                {
-                    "branch": "rigorbreeze/task-404",
-                    "taskId": "TASK-404",
-                    "worktree": str(worktree.resolve()),
-                }
-            ],
-        )
+        removable = status["cleanup"]["removableWorktrees"]
+        self.assertEqual(len(removable), 1)
+        self.assertEqual(removable[0]["branch"], "rigorbreeze/task-404")
+        self.assertEqual(removable[0]["taskId"], "TASK-404")
+        self.assertEqual(removable[0]["worktree"], str(worktree.resolve()))
+        self.assertTrue(removable[0]["clean"])
+        self.assertEqual(removable[0]["integrationStatus"], "contained")
+        self.assertFalse(removable[0]["requiresConfirmation"])
+        self.assertTrue(removable[0]["expectedHead"])
 
         result = json.loads(self.run_flow("reconcile", "--cleanup").stdout)
         self.assertEqual(result["integrated"], ["TASK-404"])
@@ -1286,17 +1284,16 @@ artifacts = ["artifacts/app.bin"]
                 capture_output=True,
             )
             status = json.loads(self.run_flow("status", "--all", "--json").stdout)
-            self.assertEqual(
-                status["cleanup"]["retainedWorktrees"],
-                [
-                    {
-                        "branch": "manual/unregistered",
-                        "reason": "unregistered",
-                        "taskId": None,
-                        "worktree": str(worktree.resolve()),
-                    }
-                ],
-            )
+            retained = status["cleanup"]["retainedWorktrees"]
+            self.assertEqual(len(retained), 1)
+            self.assertEqual(retained[0]["branch"], "manual/unregistered")
+            self.assertEqual(retained[0]["reason"], "unregistered")
+            self.assertIsNone(retained[0]["taskId"])
+            self.assertEqual(retained[0]["worktree"], str(worktree.resolve()))
+            self.assertTrue(retained[0]["clean"])
+            self.assertEqual(retained[0]["integrationStatus"], "contained")
+            self.assertTrue(retained[0]["requiresConfirmation"])
+            self.assertTrue(retained[0]["expectedHead"])
             human = self.run_flow("status", "--all").stdout
             self.assertIn("1 retained worktree(s)", human)
             self.assertTrue(worktree.exists())
@@ -1477,7 +1474,7 @@ artifacts = ["artifacts/app.bin"]
     def test_v2_state_and_evidence_upgrade_to_v3_without_history_loss(self) -> None:
         self.init_git()
         self.run_flow("init")
-        state_path = self.root / "spec" / "state.json"
+        state_path = self.state_path()
         state = json.loads(state_path.read_text(encoding="utf-8"))
         state["workflowVersion"] = 2
         state["warnings"] = ["keep"]

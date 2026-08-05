@@ -65,6 +65,22 @@ class FlowTestCase(unittest.TestCase):
             == 0
         )
 
+    def state_path(self, root: Path | None = None) -> Path:
+        project = root or self.root
+        if not self.is_git_repo() and project == self.root:
+            return project / "spec" / "state.json"
+        result = subprocess.run(
+            ["git", "rev-parse", "--git-path", "rigorbreeze/state.json"],
+            cwd=project,
+            text=True,
+            encoding="utf-8",
+            capture_output=True,
+        )
+        if result.returncode != 0:
+            return project / "spec" / "state.json"
+        value = Path(result.stdout.strip())
+        return value.resolve() if value.is_absolute() else (project / value).resolve()
+
     def commit_all(self, message: str = "workflow baseline") -> None:
         subprocess.run(["git", "add", "."], cwd=self.root, check=True)
         pending = subprocess.run(

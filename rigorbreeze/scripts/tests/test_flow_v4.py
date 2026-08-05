@@ -141,7 +141,7 @@ artifacts = ["artifacts/app.bin"]
         runner = self.root / "scripts" / "flow_state.py"
         runner.write_text(
             runner.read_text(encoding="utf-8").replace(
-                'TOOL_VERSION = "0.7.0"', 'TOOL_VERSION = "0.5.1"'
+                'TOOL_VERSION = "0.8.0"', 'TOOL_VERSION = "0.5.1"'
             ),
             encoding="utf-8",
         )
@@ -151,9 +151,11 @@ artifacts = ["artifacts/app.bin"]
             status["installation"],
             {
                 "runnerVersion": "0.5.1",
-                "skillVersion": "0.7.0",
+                "skillVersion": "0.8.0",
                 "status": "outdated",
                 "upgradeSafe": False,
+                "missingComponents": [],
+                "modifiedComponents": ["scripts/flow_state.py"],
             },
         )
         blocked = self.run_flow("init", expected=2)
@@ -172,7 +174,7 @@ artifacts = ["artifacts/app.bin"]
         self.run_flow("init")
         self.assertTrue(runner.is_file())
         self.assertIn(
-            'TOOL_VERSION = "0.7.0"',
+            'TOOL_VERSION = "0.8.0"',
             (self.root / "scripts" / "flow_state.py").read_text(encoding="utf-8"),
         )
 
@@ -183,7 +185,8 @@ artifacts = ["artifacts/app.bin"]
         self.write_task("TASK-702", risk="L2")
 
         blocked = self.run_flow("approve", "task", expected=2)
-        self.assertIn("workflow baseline is not tracked", blocked.stderr)
+        self.assertIn("workflow baseline branch is not current", blocked.stderr)
+        self.assertIn("baseline=missing", blocked.stderr)
 
         self.commit_all("track workflow baseline")
         self.run_flow("approve", "task")
@@ -206,7 +209,7 @@ artifacts = ["artifacts/app.bin"]
             "requirement was withdrawn",
         )
         self.assertIn("abandoned TASK-703", result.stdout)
-        state = json.loads((self.root / "spec" / "state.json").read_text())
+        state = json.loads(self.state_path().read_text())
         evidence = json.loads(
             (self.root / "spec" / "evidence" / "TASK-703.json").read_text()
         )
@@ -329,7 +332,7 @@ artifacts = ["artifacts/app.bin"]
 
     def test_v3_state_upgrade_preserves_history_and_adds_v4_closure(self) -> None:
         self.run_flow("init")
-        state_path = self.root / "spec" / "state.json"
+        state_path = self.state_path()
         state = json.loads(state_path.read_text())
         state["workflowVersion"] = 3
         state["lastClosed"] = {
@@ -578,3 +581,321 @@ level = "manual"
         )
         retro_only = self.run_flow("archive", expected=2)
         self.assertIn("retrospective", retro_only.stderr)
+
+    def test_primary_worktree_state_migrates_to_git_private_storage(self) -> None:
+        self.run_flow("init")
+        legacy = self.root / "spec" / "state.json"
+        legacy_state = json.loads(legacy.read_text())
+        legacy_state["warnings"] = ["preserve-me"]
+        legacy.write_text(json.dumps(legacy_state), encoding="utf-8")
+        self.init_git()
+
+        projected = json.loads(self.run_flow("status", "--all", "--json").stdout)
+        self.assertIsNotNone(projected["workflowBaseline"])
+        self.assertTrue(self.state_path().is_file())
+        self.assertTrue(legacy.is_file())
+        self.run_flow("init")
+
+        private = self.state_path()
+        self.assertTrue(private.is_file())
+        self.assertEqual(json.loads(private.read_text())["warnings"], ["preserve-me"])
+        self.assertFalse(legacy.exists())
+        self.assertNotIn("spec/state.json", self.run_flow("status", "--json").stdout)
+
+    def test_workflow_baseline_is_proven_on_the_base_branch(self) -> None:
+        self.init_git()
+        base = subprocess.run(
+            ["git", "branch", "--show-current"],
+            cwd=self.root,
+            text=True,
+            capture_output=True,
+            check=True,
+        ).stdout.strip()
+        subprocess.run(
+            ["git", "checkout", "-qb", "rigorbreeze/task-branch"],
+            cwd=self.root,
+            check=True,
+        )
+        self.run_flow("init")
+        self.commit_all("workflow exists only on task branch")
+        self.run_flow("new", "TASK-712", "--title", "baseline branch", "--risk", "L2")
+        self.write_task("TASK-712", risk="L2")
+
+        status = json.loads(self.run_flow("status", "--json").stdout)
+        self.assertEqual(status["workflowBaseline"]["baseBranch"], base)
+        self.assertEqual(status["workflowBaseline"]["status"], "missing")
+        blocked = self.run_flow("--mode", "enforced", "approve", "task", expected=2)
+        self.assertIn("baseline branch", blocked.stderr)
+
+    def test_completed_archive_can_be_committed_from_last_closed_context(self) -> None:
+        self.init_git()
+        self.run_flow("init")
+        (self.root / "rigorbreeze.toml").write_text(
+            f'''version = 4
+[policy]
+local_mode = "advisory"
+test_paths = ["tests"]
+source_paths = ["src"]
+migration_paths = ["migrations"]
+[profiles]
+affected = ["unit"]
+full = ["unit"]
+[automation]
+level = "manual"
+[[checks]]
+id = "unit"
+command = {json.dumps([sys.executable, "-c", "print('passed')"])}
+''',
+            encoding="utf-8",
+        )
+        self.commit_all("install workflow")
+        self.run_flow("new", "TASK-713", "--title", "close then commit", "--risk", "L0")
+        self.write_task("TASK-713", scope="src/")
+        self.run_flow("approve", "task")
+        self.commit_all("track approved task contract")
+        self.assertEqual(
+            subprocess.run(
+                ["git", "ls-files", "--error-unmatch", "spec/changes/TASK-713.md"],
+                cwd=self.root,
+                capture_output=True,
+            ).returncode,
+            0,
+        )
+        source = self.root / "src" / "value.txt"
+        source.parent.mkdir()
+        source.write_text("done\n", encoding="utf-8")
+        self.run_flow("verify", "--profile", "affected")
+        self.run_flow("archive")
+
+        pending = json.loads(self.run_flow("status", "--json").stdout)
+        self.assertEqual(pending["lifecycle"], "closure-pending")
+        self.assertIn("automate commit --once", pending["nextAction"]["command"])
+        pending_evidence = json.loads(
+            (self.root / "spec" / "evidence" / "TASK-713.json").read_text()
+        )
+        self.assertIn(
+            "closure-pending-commit", pending_evidence["closure"]["practiceEvents"]
+        )
+        blocked_new = self.run_flow(
+            "new",
+            "TASK-713-NEXT",
+            "--title",
+            "must wait",
+            "--risk",
+            "L0",
+            expected=2,
+        )
+        self.assertIn("closure-pending", blocked_new.stderr)
+        self.run_flow("automate", "commit", "--once")
+
+        self.assertEqual(
+            subprocess.run(
+                ["git", "status", "--porcelain"],
+                cwd=self.root,
+                text=True,
+                capture_output=True,
+                check=True,
+            ).stdout,
+            "",
+        )
+        committed = subprocess.run(
+            ["git", "show", "--pretty=format:", "--name-only", "HEAD"],
+            cwd=self.root,
+            text=True,
+            capture_output=True,
+            check=True,
+        ).stdout
+        self.assertIn("src/value.txt", committed)
+        self.assertIn("spec/archive/TASK-713.md", committed)
+        self.assertIn("spec/evidence/TASK-713.json", committed)
+        self.assertNotEqual(
+            subprocess.run(
+                ["git", "cat-file", "-e", "HEAD:spec/changes/TASK-713.md"],
+                cwd=self.root,
+                capture_output=True,
+            ).returncode,
+            0,
+        )
+
+    def test_reconciled_archive_is_honest_and_releases_the_task_slot(self) -> None:
+        self.init_git()
+        self.run_flow("init")
+        self.commit_all("install workflow")
+        self.run_flow("new", "TASK-714", "--title", "historical", "--risk", "L1")
+        self.write_task("TASK-714", risk="L1")
+        self.run_flow("approve", "task")
+        self.commit_all("externally integrated task record")
+        head = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=self.root,
+            text=True,
+            capture_output=True,
+            check=True,
+        ).stdout.strip()
+
+        self.run_flow(
+            "archive",
+            "--outcome",
+            "reconciled",
+            "--reason",
+            "code was integrated before workflow closure",
+            "--expected-head",
+            head,
+        )
+
+        evidence = json.loads(
+            (self.root / "spec" / "evidence" / "TASK-714.json").read_text()
+        )
+        state = json.loads(self.state_path().read_text())
+        self.assertEqual(evidence["closure"]["outcome"], "reconciled")
+        self.assertEqual(evidence["closure"]["originalPhase"], "approved")
+        self.assertEqual(evidence["closure"]["verificationStatus"], "missing/stale")
+        self.assertIn("integrated-unclosed", evidence["closure"]["practiceEvents"])
+        self.assertEqual(evidence["tddChain"], [])
+        self.assertIsNone(state["activeTask"])
+        self.assertEqual(state["lastClosed"]["outcome"], "reconciled")
+
+    def test_one_time_workflow_baseline_commit_is_exact_and_becomes_current(self) -> None:
+        self.init_git()
+        self.run_flow("init")
+        head = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=self.root,
+            text=True,
+            capture_output=True,
+            check=True,
+        ).stdout.strip()
+
+        before = json.loads(self.run_flow("status", "--json").stdout)
+        self.assertTrue(before["workflowBaseline"]["safeToCommit"])
+        self.run_flow(
+            "automate",
+            "commit",
+            "--once",
+            "--workflow-baseline",
+            "--expected-head",
+            head,
+        )
+
+        after = json.loads(self.run_flow("status", "--json").stdout)
+        self.assertEqual(after["workflowBaseline"]["status"], "current")
+        committed = subprocess.run(
+            ["git", "show", "--pretty=format:", "--name-only", "HEAD"],
+            cwd=self.root,
+            text=True,
+            capture_output=True,
+            check=True,
+        ).stdout.splitlines()
+        self.assertIn("AGENTS.md", committed)
+        self.assertIn("scripts/rigorbreeze.py", committed)
+        self.assertIn("spec/index.md", committed)
+        self.assertNotIn("spec/state.json", committed)
+
+    def test_integrated_task_is_reported_unclosed_before_baseline_staleness(self) -> None:
+        self.init_git()
+        self.run_flow("init")
+        self.commit_all("install workflow")
+        base = subprocess.run(
+            ["git", "branch", "--show-current"],
+            cwd=self.root,
+            text=True,
+            capture_output=True,
+            check=True,
+        ).stdout.strip()
+        created = self.run_flow(
+            "new",
+            "TASK-715",
+            "--title",
+            "integrated history",
+            "--risk",
+            "L0",
+            "--worktree",
+            "auto",
+        )
+        worktree = Path(created.stdout.split("worktree: ", 1)[1].splitlines()[0])
+        self.write_task("TASK-715", root=worktree, scope="src/")
+        self.run_at(worktree, "approve", "task")
+        source = worktree / "src" / "value.txt"
+        source.parent.mkdir()
+        source.write_text("integrated\n", encoding="utf-8")
+        subprocess.run(["git", "add", "."], cwd=worktree, check=True)
+        subprocess.run(
+            ["git", "commit", "-qm", "integrate historical task"],
+            cwd=worktree,
+            check=True,
+        )
+        subprocess.run(
+            ["git", "merge", "--ff-only", "rigorbreeze/task-715"],
+            cwd=self.root,
+            check=True,
+        )
+
+        payload = json.loads(self.run_flow("status", "--all", "--json").stdout)
+        task = next(item for item in payload["tasks"] if item["taskId"] == "TASK-715")
+        task_head = subprocess.run(
+            ["git", "rev-parse", "rigorbreeze/task-715"],
+            cwd=self.root,
+            text=True,
+            capture_output=True,
+            check=True,
+        ).stdout.strip()
+        self.assertEqual(task["lifecycle"], "integrated-unclosed")
+        self.assertFalse(task["baselineStale"])
+        self.assertIn("--outcome reconciled", task["nextAction"]["command"])
+        self.assertIn(task_head, task["nextAction"]["command"])
+        self.assertEqual(task["baseBranch"], base)
+
+    def test_explicit_unmanaged_cleanup_removes_only_proven_integrated_worktree(self) -> None:
+        self.init_git()
+        self.run_flow("init")
+        self.commit_all("install workflow")
+        base = subprocess.run(
+            ["git", "branch", "--show-current"],
+            cwd=self.root,
+            text=True,
+            capture_output=True,
+            check=True,
+        ).stdout.strip()
+        target = self.root.parent / f"{self.root.name}-unmanaged"
+        subprocess.run(
+            ["git", "worktree", "add", "-qb", "historical-cleanup", str(target), base],
+            cwd=self.root,
+            check=True,
+        )
+        head = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=target,
+            text=True,
+            capture_output=True,
+            check=True,
+        ).stdout.strip()
+
+        projected = json.loads(self.run_flow("status", "--all", "--json").stdout)
+        candidate = next(
+            item
+            for item in projected["cleanup"]["retainedWorktrees"]
+            if item["worktree"] == str(target.resolve())
+        )
+        self.assertTrue(candidate["clean"])
+        self.assertEqual(candidate["integrationStatus"], "contained")
+        self.assertTrue(candidate["requiresConfirmation"])
+        self.run_flow(
+            "reconcile",
+            "--cleanup",
+            "--worktree",
+            str(target),
+            "--base",
+            base,
+            "--expected-head",
+            head,
+            "--allow-unmanaged",
+        )
+        self.assertFalse(target.exists())
+        self.assertEqual(
+            subprocess.run(
+                ["git", "show-ref", "--verify", "refs/heads/historical-cleanup"],
+                cwd=self.root,
+                capture_output=True,
+            ).returncode,
+            0,
+        )

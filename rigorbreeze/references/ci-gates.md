@@ -67,6 +67,13 @@ Local mode defaults to advisory. Local hooks can remind but are not the
 authority. Remote required checks and protected environments are the
 non-bypassable merge/release boundary.
 
+Before the first enforced L1/L2 approval, `workflowBaseline.status` must be
+`current` on the configured base branch. A task-branch runner commit is not a
+substitute. With explicit one-time user authorization,
+`automate commit --once --workflow-baseline --expected-head <sha>` may establish
+or update that baseline only when the base worktree contains no active task,
+unrelated changes, cache, or secret material.
+
 `[automation].level` is an explicit project authorization boundary:
 
 - `manual` grants no unattended Git write; an explicit current-message request may authorize one guarded commit or push without changing the level;

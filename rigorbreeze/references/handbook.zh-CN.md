@@ -117,7 +117,10 @@ L1 和 L2 的 RED 至少引用一个真实测试文件；Emergency 可以改用�
 - `full` 是配置的 L1/L2 合并质量 profile；
 - `archive` 关闭完成任务，不等于生产发布；
 - `archive --outcome abandoned --reason <原因>` 关闭被取消或替代的任务，不宣称完成成功。任务范围内存在未提交代码、自动化仍运行或外部结果未知时会阻断；无关改动只报告。分支、worktree 和提交都会保留；
+- `archive --outcome reconciled --reason <原因> --expected-head <sha>` 用于代码已经集成但流程没有关闭的历史任务。它要求精确 HEAD，并通过祖先关系、完整 patch-equivalence，或同基准分支上的明确确认与无产品改动来证明集成；记录原阶段和缺失验证，不伪造 GREEN、验收或发布成功；
 - `release` 只在明确请求发布后评估。
+
+正常交付顺序固定为 verify/full → 验收 → 两轮审查 → 复盘 → archive → 受保护 commit/push/merge → reconcile → cleanup。archive 保存只读 `lastClosed` 快照，使产品变化、移动后的合同和对应 evidence 仍可安全提交与交付。同一 worktree 的关闭结果未提交前不能创建新任务；普通归档不会继承 release 权限。
 
 L0 可以在配置验证后归档。L1/L2 必须具备当前 full 验证、适用验收、两轮独立审查和预填复盘确认。
 
@@ -164,7 +167,7 @@ L2 的 `full` 根据风险和实际变化推导不可省略的最低集合：sec
 - 小程序：正式构建、开发者工具自动化、真实 AppID/HTTPS 环境和真机证据；
 - 权限：角色、租户、归属、数据范围和禁止访问；
 - 迁移：克隆数据演练、前后断言、备份恢复或前向修复证明；
-- 外部集成：沙箱或受控真实环境合同及失败行为。
+- 外部集成：优先使用脱敏真实响应或厂商沙箱 fixture；覆盖启用、关闭、依赖不可用及失败行为；按适用性验证序列化格式、文本 JSON、URL 编码次数、数据库方言语义、订单创建等业务前置条件。Mock 或临时凭证只能证明局部合同/构建，不能替代真实验收。
 
 视觉基线必须由人批准，不能只为消除失败而更新截图。
 
@@ -211,6 +214,8 @@ L1/L2/Emergency 归档前，Codex 展示预填的 `retro --json` 摘要。只询
 
 每个 Codex 窗口保持稳定的 `RIGORBREEZE_SESSION_ID`。第二个存活 Session 不能认领同一 worktree。`status --all --json` 是所有窗口和可选外部编排器的只读接口。
 
+所有 worktree 状态都保存在 Git 私有目录。`status --json` 从真正基准分支投影工作流基线，区分 missing、partial、modified、current 和 blocked。一次性 baseline commit 只能在该分支、精确 expected HEAD、无活动任务且没有混入产品改动时执行。
+
 独立任务不创建 DAG。真实顺序通过每个任务唯一的 `Depends-On` 保存，执行器推导 ready、环、缺失依赖和拓扑顺序。没有依赖关系的活动任务不得拥有重叠 Allowed Scope；应拆分、排序或建立共享 Integration 任务。
 
 `Depends-On` 只表示同仓库任务。跨仓库交付时，每个仓库各自保存合同和证据，并在 Authoritative inputs 中关联对方任务与共享 API/数据契约；提供方接口完成集成和验证前，消费方不得完成真实验收。
@@ -225,7 +230,7 @@ L1/L2/Emergency 归档前，Codex 展示预填的 `retro --json` 摘要。只询
 | merge | 请求平台 auto-merge | 当前 Required Checks 和基线 |
 | release | 调用配置的发布适配器 | 同一 SHA/制品和完整治理 |
 
-平台结果保存在 Git 私有自动化日志中，避免外部动作污染 tracked evidence。`status --all --json` 会投影可清理、需保留和未登记 worktree，以及默认保留的任务分支。集成必须由祖先关系证明，或由已记录基线之后的每个任务提交都在基准分支拥有补丁等价结果证明；部分等价仍视为活动任务。清理只能删除来源明确、路径一致、干净、已集成且不是当前目录的 Flow worktree；来源未知、重建、移动、脏、当前或手工 worktree 都会保留并报告，本地分支按策略继续保留。
+平台结果保存在 Git 私有自动化日志中，避免外部动作污染 tracked evidence。`status --all --json` 会投影可清理、需保留和未登记 worktree，以及默认保留的任务分支，并给出干净状态、集成状态、expected HEAD 和确认要求。集成必须由祖先关系证明，或由已记录基线之后的每个任务提交都在基准分支拥有补丁等价结果证明；部分等价仍视为活动任务。受管清理要求完整创建来源；未登记清理还要求一次性明确绝对路径、base、expected HEAD、干净且无活动状态，并证明完整集成。本地分支始终保留。
 
 用户明确要求交付当前任务时，Codex 可以执行 `automate commit --once`，或执行 `automate push --once --remote <名称> --branch <当前分支> --expected-head <SHA>`，且不修改 `rigorbreeze.toml`。push 不会隐式提交，会在写入前 fetch，只允许 fast-forward，不会 rebase 或 force push，并在完成后核对远端 SHA。直推集成分支还必须具备当前 full 验证、结构化验收和审查。单次授权不适用于 merge、release、生产迁移或回滚。
 

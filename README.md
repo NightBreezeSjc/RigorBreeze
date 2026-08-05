@@ -13,7 +13,7 @@ English · [简体中文](README.zh-CN.md)
 
 RigorBreeze turns a conversation into one approved task contract, observed TDD evidence, configured quality checks, real-runtime acceptance, and a recoverable delivery record. It is deliberately smaller than a full project-management system: one task Markdown, one machine evidence file, and no document maze.
 
-> **Public Preview:** v0.7.0 is usable today and closes real-delivery gaps around runner drift, abandoned tasks, shared runtime resources, conditional operating modes, and release-operation recovery. It has not yet completed the validation required for v1.0, so interfaces may still change in response to further delivery evidence.
+> **Public Preview:** v0.8.0 is usable today and closes real-delivery gaps around workflow baselines, stale integrated tasks, post-archive delivery, and safe review of unmanaged worktrees. It has not yet completed the validation required for v1.0, so interfaces may still change in response to further delivery evidence.
 
 ## Why this exists
 
@@ -110,7 +110,7 @@ You make three kinds of judgment: approve the intended outcome, accept the real 
 
 Allowed Scope entries are repository-relative paths, directory prefixes, or globs; `*` matches one path segment and `**` crosses directories. Acceptance criteria use unique machine-readable IDs. A contract cannot be reapproved over production changes: restore the approved contract and finish, or revert those changes before amending the same outcome. A new user outcome or acceptance condition becomes a dependent slice.
 
-After initialization and project-check configuration, establish a human-controlled Git baseline before the first enforced L1/L2 approval. RigorBreeze blocks an untracked workflow baseline but never commits it automatically. The installed Skill always checks through its bundled v0.7.0 runner, reports an older project runner as `outdated`, and does not overwrite it while an implementation task is active.
+After initialization and project-check configuration, establish a human-controlled Git baseline before the first enforced L1/L2 approval. `status --json` reports the exact base-branch state under `workflowBaseline`. When the user explicitly authorizes it, Codex may run `automate commit --once --workflow-baseline --expected-head <SHA>`; it stages only managed workflow files, rejects mixed product changes and secrets, and does not persist Git authority. The installed Skill always checks through its bundled v0.8.0 runner, reports missing or modified components separately, and does not overwrite it while an implementation task is active.
 
 After initialization, the project contains:
 
@@ -123,6 +123,7 @@ spec/
 
 rigorbreeze.toml               # project checks and policy
 scripts/rigorbreeze.py         # the same runner used locally and in CI
+.git/rigorbreeze/state.json    # private state; never committed
 ```
 
 The expected next-action check is:
@@ -145,6 +146,8 @@ frame one vertical slice
 → review against standards and the spec
 → confirm the prefilled retrospective
 → archive
+→ guarded commit/push/merge when requested
+→ reconcile and clean integrated worktrees
 ```
 
 Risk controls scale with the task:
@@ -173,7 +176,7 @@ See the installable Skill's [Spec Tree contract](rigorbreeze/references/spec-tre
 - Local checks default to advisory; CI, L2, merge, and release use enforced policy.
 - Git automation defaults to `manual`: no unattended Git write is allowed, while an explicit current-task request may authorize one safe commit or push without changing the project level. Upgrades never increase standing authority.
 - No force push or local merge is used to bypass protected branches.
-- Worktree cleanup is allowed only when RigorBreeze creation provenance, path, integration, and cleanliness are all proven.
+- Managed worktree cleanup requires creation provenance, exact path, integration, and cleanliness. An unmanaged worktree remains report-only unless the user explicitly supplies its absolute path, base branch, expected HEAD, and one-time `--allow-unmanaged`; the branch is always preserved.
 - A cancelled or superseded task may be archived as `abandoned` only when its task-owned working tree is clean and no external action has an unknown outcome; this releases its task and runtime claims without deleting its branch or worktree.
 - Workflow policy files such as `AGENTS.md`, `rigorbreeze.toml`, and the runner must be explicitly included in Allowed Scope when a task changes them.
 - External-action recovery data stays in Git-private `.git/rigorbreeze/automation.json`.
@@ -188,7 +191,7 @@ The Skill coordinates external security, migration, CI, browser, device, and obs
 
 One physical worktree may have only one active writing task. When another Codex window must write concurrently, the Skill creates an isolated `rigorbreeze/<task-id>` branch and worktree. File isolation does not make ports, watchers, local services, environments, or developer tools independent: tasks declare only the exclusive resources they use through `Runtime-Claims`, and conflicting active claims are blocked. `status --all --json` is the shared read-only project view.
 
-The same status payload exposes removable, retained, and unregistered worktrees. RigorBreeze recognizes both ancestor merges and complete patch-equivalent cherry-picks, never treats a partial patch set as integrated, and removes only clean worktrees with intact creation provenance. Local task branches remain recoverable by default.
+The same status payload exposes removable, retained, and unregistered worktrees with cleanliness, integration proof, expected HEAD, and confirmation requirements. RigorBreeze recognizes both ancestor merges and complete patch-equivalent cherry-picks, never treats a partial patch set as integrated, and normally removes only clean worktrees with intact creation provenance. A precisely authorized unmanaged cleanup uses the same proof and preserves the local branch.
 
 Independent tasks do not get a DAG. When real ordering exists, Codex proposes a compact dependency graph once and stores it only through each task's `Depends-On` field. That field is repository-local; cross-repository tasks link their counterpart contract and API/data contract under Authoritative inputs, and a consumer cannot complete real acceptance before the provider is integrated and verified. Cycles, missing dependencies, overlapping allowed scopes, stale baselines, and duplicate live claims are blocked.
 
@@ -233,7 +236,7 @@ For a manual install, remove only the `rigorbreeze` directory or symlink from yo
 
 ## Public Preview and v1.0
 
-v0.7.0 keeps the minimal Spec Tree and existing command surface while making workflow activation, task termination, shared runtime ownership, configuration modes, and release recovery machine-visible. Maturity beyond preview must still come from repeated real use rather than more features.
+v0.8.0 keeps the minimal Spec Tree and existing command surface while moving all worktree state into Git-private storage, proving the workflow baseline on the real base branch, prioritizing `integrated-unclosed` and `closure-pending` lifecycles, and permitting guarded delivery after archive. Historical reconciliation records missing proof honestly; it never fabricates GREEN, acceptance, or release success. Maturity beyond preview must still come from repeated real use rather than more features.
 
 Before v1.0, the workflow must complete and learn from:
 

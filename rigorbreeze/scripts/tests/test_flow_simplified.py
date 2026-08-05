@@ -170,8 +170,11 @@ Risk: {risk}
         self.assertIn("## Conditional risks", content)
 
     def test_new_v2_state_does_not_emit_legacy_attestations(self) -> None:
+        # Initializing Git after an existing non-Git workflow is a supported
+        # legacy-state migration path. The first runner read performs the copy.
+        self.run_flow("status", "--json")
         state = json.loads(
-            (self.root / "spec" / "state.json").read_text(encoding="utf-8")
+            self.state_path().read_text(encoding="utf-8")
         )
         self.assertNotIn("attestations", state)
 
@@ -229,7 +232,7 @@ Risk: {risk}
         self.run_flow("archive")
 
         state = json.loads(
-            (self.root / "spec" / "state.json").read_text(encoding="utf-8")
+            self.state_path().read_text(encoding="utf-8")
         )
         evidence = json.loads(
             (self.root / "spec" / "evidence" / "TASK-001.json").read_text(

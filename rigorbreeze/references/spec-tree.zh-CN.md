@@ -36,11 +36,12 @@ scripts/flow_automation.py
 
 .git/rigorbreeze/registry.json                 # Git 公共私有状态，不提交
 .git/rigorbreeze/automation.json               # 外部动作日志
+.git/rigorbreeze/state.json                    # 主 worktree 私有状态
 .git/worktrees/<name>/rigorbreeze/state.json   # worktree 私有状态
 ```
 
 - `index.md`：只保存权威顺序和导航。
-- Git 私有 `state.json`：schema v4 阶段、活动任务、批准、最新 RED/验证、警告和最后关闭记录。兼容迁移期间仍可读取主 worktree 原有 `spec/state.json`。
+- Git 私有 `state.json`：主 worktree 和 linked worktree 都在各自 Git 私有目录保存 schema v4 阶段、活动任务、批准、最新 RED/验证、警告和最后关闭记录。首次读取会复制旧 `spec/state.json`；只有在它未被跟踪且与迁移结果一致时，`init` 或明确 repair 才删除。已跟踪或内容不同的旧文件会保留并报告。
 - `changes/<TASK-ID>.md`：唯一人工变更合同。
 - `evidence/<TASK-ID>.json`：基线、检查、TDD 链、验证、制品摘要、验收、发布和预填实践摘要。
 - `archive/<TASK-ID>.md`：完成适用风险门禁后移动的同一任务，不创建副本。
@@ -73,7 +74,7 @@ draft → approved → red → implementing → verified → accepted
 accepted → release-ready → protected release gate
 ```
 
-完成和废弃任务都会把同一合同移动到 `archive/`，由 `closure.outcome` 区分成功和取消，不伪造验证结果。`release-ready` 是可选生产发布分支，不是关闭所有任务的前提。
+完成、废弃和 reconciled 历史任务都会把同一合同移动到 `archive/`，由 `closure.outcome` 区分成功、取消和代码已由外部 Git 操作集成但流程未关闭，不伪造验证结果。正常关闭保存只读 `lastClosed` 快照，供 archive 后受保护的 commit/push/merge 使用。`release-ready` 是可选生产发布分支，不是关闭所有任务的前提。
 
 一个 worktree 只能有一个活动任务，一个项目可以有多个活动 worktree。每个并行写任务使用自己的 `rigorbreeze/<task-id>` 分支和 linked worktree；两个写窗口不能共享同一物理 worktree。
 
@@ -83,9 +84,9 @@ accepted → release-ready → protected release gate
 
 私有 `state.json` 和公共注册表是机器缓存和门禁输入，不是产品需求源。不要提交 linked-worktree 状态，也不要手工修改状态绕过门禁。`doctor --all --repair` 只在明确请求时重建注册表。
 
-`status --json` 包含 `installation` 和 `scope` 投影。安装状态对比 bundled Skill 与项目执行器，返回 `current`、`outdated`、`missing` 或 `unmanaged` 以及是否可安全升级。范围状态为 `current`、`violated` 或 `not-applicable`，计算从批准基线到 `HEAD` 的已提交变化和当前工作树变化。
+`status --json` 包含 `installation`、`workflowBaseline`、生命周期和 `scope` 投影。安装状态对比 bundled Skill 与项目执行器，返回 `current`、`outdated`、`missing` 或 `unmanaged`、缺失/被修改组件和是否可安全升级。`workflowBaseline` 在真正基准分支证明受管文件，返回 `current`、`missing`、`partial`、`modified` 或 `blocked`。生命周期优先报告 `integrated-unclosed` 和 `closure-pending`，不会先给出错误的过期基线建议。范围状态为 `current`、`violated` 或 `not-applicable`，计算从批准基线到 `HEAD` 的已提交变化和当前工作树变化。
 
-`status --all --json` 还包含运行资源声明/冲突与 `cleanup` 投影，列出可删除的已集成受管 worktree、带安全原因的保留项、未登记 Git worktree，以及按策略保留的本地任务分支。该投影只从 Git 和注册表推导，是提示状态，不是第二套任务或证据事实源。
+`status --all --json` 还包含运行资源声明/冲突与 `cleanup` 投影，列出可删除的已集成受管 worktree、带安全原因的保留项、未登记 Git worktree，以及按策略保留的本地任务分支；候选同时显示干净状态、集成证明、expected HEAD 和是否需要一次性确认。未登记清理永不删除分支。该投影只从 Git 和注册表推导，是提示状态，不是第二套任务或证据事实源。
 
 证据 JSON 可以保存：
 
@@ -96,7 +97,7 @@ accepted → release-ready → protected release gate
 - Git HEAD 和时间；
 - 运行、审查、安全、迁移、第二人和事故证据引用。
 
-schema v4 的稳定区段包括 `baseline`、`checkRuns`、`tddChain`、`artifacts`、`acceptance`、`release`、`automation`、`practice`、`red`、`verifications` 和表示完成/废弃结果的 `closure`。`release` 可保存经过校验的 `operation-plan` 与 `operation-result` 快照，`practice` 可保存去重机器事件。历史 evidence 中的 `automation` 记录继续可读，但新的外部动作结果只写入 Git 私有日志。实践确认只为负向流程信号设置 `evolutionCandidate`，直接从证据汇总候选，不建立额外日志。升级 schema v1/v2/v3 时不得删除 RED、验证、验收、发布、自动化或实践历史。
+schema v4 的稳定区段包括 `baseline`、`checkRuns`、`tddChain`、`artifacts`、`acceptance`、`release`、`automation`、`practice`、`red`、`verifications` 和表示 completed/abandoned/reconciled 结果的 `closure`。`release` 可保存经过校验的 `operation-plan` 与 `operation-result` 快照，`practice` 可保存去重机器事件。历史 evidence 中的 `automation` 记录继续可读，但新的外部动作结果只写入 Git 私有日志。实践确认只为负向流程信号设置 `evolutionCandidate`，直接从证据汇总候选，不建立额外日志。升级 schema v1/v2/v3 时不得删除 RED、验证、验收、发布、自动化或实践历史。
 
 不得保存凭证、生产数据、包含个人信息的完整日志或无法验证的结论。
 

@@ -13,7 +13,7 @@
 
 RigorBreeze 把聊天中的需求连接成一份经过批准的任务合同、真实观察到的 TDD 证据、项目配置的质量检查、真实环境验收和可恢复的交付记录。它刻意小于完整项目管理系统：一个任务 Markdown、一个机器证据 JSON，不创建文档迷宫。
 
-> **Public Preview：** v0.7.0 当前已经可以使用，并补齐真实交付暴露的执行器漂移、废弃任务、共享运行资源、条件化运行模式和发布恢复缺口；但尚未完成 v1.0 所要求的验证，接口仍可能根据后续真实交付证据调整。
+> **Public Preview：** v0.8.0 当前已经可以使用，并补齐真实交付暴露的工作流基线、已集成旧任务、归档后交付和未登记 worktree 安全审查缺口；但尚未完成 v1.0 所要求的验证，接口仍可能根据后续真实交付证据调整。
 
 ## 为什么需要它
 
@@ -110,7 +110,7 @@ Codex 会：
 
 Allowed Scope 只能填写仓库相对路径、目录前缀或 glob；`*` 只匹配一层路径，`**` 才跨目录。验收条件必须使用唯一且机器可读的 ID。不能在生产代码变化之上重新批准：应恢复已批准合同并完成，或先回退生产变化，再修订同一用户结果。新增用户结果或验收条件才建立依赖切片。
 
-初始化并配置项目检查后，应在首个 enforced L1/L2 批准前由人建立 Git 工作流基线。未跟踪的工作流基线会被阻断，但 RigorBreeze 永远不会自动提交。安装后的 Skill 始终使用自身 v0.7.0 bundled runner 检查项目；项目执行器过旧时显示 `outdated`，活动实施任务存在期间不会静默覆盖。
+初始化并配置项目检查后，应在首个 enforced L1/L2 批准前由人建立 Git 工作流基线。`status --json` 会在 `workflowBaseline` 中报告真正基准分支的状态。用户明确授权后，Codex 可以执行 `automate commit --once --workflow-baseline --expected-head <SHA>`；它只暂存受管工作流文件，遇到混入产品改动或秘密时阻断，且不会持久化 Git 权限。安装后的 Skill 始终使用自身 v0.8.0 bundled runner 检查项目，分别报告缺失或被修改的组件，活动实施任务存在期间不会静默覆盖。
 
 初始化后，项目会包含：
 
@@ -123,6 +123,7 @@ spec/
 
 rigorbreeze.toml               # 项目检查与策略
 scripts/rigorbreeze.py         # 本地和 CI 使用同一个执行器
+.git/rigorbreeze/state.json    # 私有状态，永不提交
 ```
 
 检查下一动作的标准命令是：
@@ -145,6 +146,8 @@ python3 scripts/rigorbreeze.py status --json
 → 分别进行规范审查和规格审查
 → 确认预填复盘
 → archive
+→ 按需执行受保护的 commit/push/merge
+→ reconcile 并清理已集成 worktree
 ```
 
 门禁成本随风险变化：
@@ -173,7 +176,7 @@ python3 scripts/rigorbreeze.py status --json
 - 本地检查默认 advisory；CI、L2、merge 和 release 使用 enforced。
 - Git 自动化默认 `manual`：不允许无人值守的 Git 写操作，但用户对当前任务的明确要求可以单次授权安全 commit 或 push，且不会修改项目长期等级。升级 Skill 不会提高长期权限。
 - 不通过 force push 或本地直合绕过受保护分支。
-- 只有能证明由 RigorBreeze 创建、路径一致、任务已集成且工作树干净时才自动清理 worktree。
+- 受管 worktree 清理必须证明创建来源、准确路径、集成状态和干净状态。未登记 worktree 默认只报告；只有用户一次性明确给出绝对路径、基准分支、expected HEAD 和 `--allow-unmanaged` 时才可按同等标准清理，且始终保留分支。
 - 被取消或替代的任务只有在任务范围内工作树干净、外部动作结果明确时，才可按 `abandoned` 归档并释放任务槽和运行资源；分支和 worktree 不会被自动删除。
 - 任务修改 `AGENTS.md`、`rigorbreeze.toml` 或执行器等工作流策略文件时，必须把它们显式写入 Allowed Scope。
 - 外部动作恢复信息保存在 Git 私有 `.git/rigorbreeze/automation.json`。
@@ -188,7 +191,7 @@ Skill 通过项目配置编排真实的安全、迁移、CI、浏览器、真机
 
 一个物理 worktree 只能有一个活动写任务。另一个 Codex 窗口需要并行写入时，Skill 会创建隔离的 `rigorbreeze/<task-id>` 分支和 worktree。文件隔离并不能隔离端口、watcher、本地服务、环境和开发者工具；任务只需通过 `Runtime-Claims` 声明实际占用的独占资源，活动声明冲突会被阻断。`status --all --json` 是统一只读项目视图。
 
-同一状态结果会展示可清理、需保留和未登记的 worktree。RigorBreeze 同时识别祖先式 merge 与全部提交都补丁等价的 cherry-pick，不会把部分补丁误判为已集成，并且只删除创建来源完整且干净的 worktree；本地任务分支默认继续保留以便恢复。
+同一状态结果会展示可清理、需保留和未登记的 worktree，并给出是否干净、集成证明、expected HEAD 和是否需要确认。RigorBreeze 同时识别祖先式 merge 与全部提交都补丁等价的 cherry-pick，不会把部分补丁误判为已集成；通常只删除创建来源完整且干净的 worktree。未登记清理也必须精确授权并通过同等证明，本地分支始终保留。
 
 独立任务不创建 DAG。只有真实先后关系存在时，Codex 才一次提出精简依赖图，并只通过每个任务的 `Depends-On` 保存。该字段只表示同仓库依赖；跨仓库任务在 Authoritative inputs 中关联对方任务和 API/数据契约，提供方尚未集成并验证前，消费方不得完成真实验收。环、缺失依赖、Allowed Scope 重叠、过期基线和重复窗口认领都会被阻断。
 
@@ -233,7 +236,7 @@ npx skills@latest remove rigorbreeze -g -a codex -y
 
 ## Public Preview 与 v1.0
 
-v0.7.0 保持最小 Spec Tree 和现有命令面，同时让工作流是否真正启用、任务终止、共享运行资源、配置模式和发布恢复都可被机器检查。更高成熟度仍必须来自反复真实使用，而不是继续增加功能。
+v0.8.0 保持最小 Spec Tree 和现有命令面，同时把所有 worktree 状态迁入 Git 私有目录、在真正基准分支证明工作流基线、优先识别 `integrated-unclosed` 与 `closure-pending` 生命周期，并允许归档后继续执行受保护交付。历史 reconciled 只记录真实缺口，绝不伪造 GREEN、验收或发布成功。更高成熟度仍必须来自反复真实使用，而不是继续增加功能。
 
 达到 v1.0 前至少需要完成：
 

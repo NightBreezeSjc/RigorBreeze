@@ -206,7 +206,7 @@ Risk: {risk}
         self.run_flow("init")
         self.assertTrue((self.root / "rigorbreeze.toml").is_file())
         state = json.loads(
-            (self.root / "spec" / "state.json").read_text(encoding="utf-8")
+            self.state_path().read_text(encoding="utf-8")
         )
         self.assertEqual(state["workflowVersion"], 4)
 
@@ -232,7 +232,7 @@ Risk: {risk}
     ) -> None:
         self.init_git()
         self.run_flow("init")
-        state_path = self.root / "spec" / "state.json"
+        state_path = self.state_path()
         state = json.loads(state_path.read_text(encoding="utf-8"))
         state["workflowVersion"] = 1
         state["phase"] = "baseline"
@@ -831,7 +831,7 @@ Risk: {risk}
         )
 
         state = json.loads(
-            (self.root / "spec" / "state.json").read_text(encoding="utf-8")
+            self.state_path().read_text(encoding="utf-8")
         )
         changed = subprocess.run(
             [

@@ -106,8 +106,6 @@ def is_linked_worktree(root: Path) -> bool:
 
 
 def worktree_state_path(root: Path, legacy: Path) -> Path:
-    if not is_linked_worktree(root):
-        return legacy
     private = git_path(root, f"{REGISTRY_DIRECTORY}/state.json")
     return private or legacy
 
@@ -264,6 +262,9 @@ def update_task(
     }
     if state.get("phase") == "archived":
         entry["archived"] = True
+        entry["runtimeClaims"] = []
+        entry.pop("owner", None)
+        entry.pop("ownerPid", None)
     registry["tasks"][task_id] = entry
     save_registry(root, registry)
 
@@ -476,6 +477,100 @@ def reconcile_integrations(root: Path, cleanup: bool = False) -> dict[str, Any]:
     }
 
 
+def integration_status(
+    root: Path, branch: str | None, base: str | None, base_sha: str | None = None
+) -> str:
+    """Return a conservative proof label for branch integration."""
+
+    if not branch or not base:
+        return "unknown"
+    branch_head = git(root, "rev-parse", branch)
+    base_head = git(root, "rev-parse", base)
+    if branch_head.returncode != 0 or base_head.returncode != 0:
+        return "unknown"
+    if branch_head.stdout.strip() == base_head.stdout.strip():
+        return "contained"
+    if git(root, "merge-base", "--is-ancestor", branch, base).returncode == 0:
+        return "contained"
+    comparison_base = base_sha
+    if not comparison_base:
+        common = git(root, "merge-base", branch, base)
+        comparison_base = common.stdout.strip() if common.returncode == 0 else None
+    if not comparison_base:
+        return "unknown"
+    if (
+        git(root, "merge-base", "--is-ancestor", comparison_base, branch).returncode
+        != 0
+    ):
+        return "not-integrated"
+    cherry = git(root, "cherry", base, branch, comparison_base)
+    if cherry.returncode != 0:
+        return "unknown"
+    patches = [line.strip() for line in cherry.stdout.splitlines() if line.strip()]
+    if patches and all(line.startswith("- ") for line in patches):
+        return "patch-equivalent"
+    return "not-integrated"
+
+
+def cleanup_unmanaged_worktree(
+    root: Path,
+    *,
+    worktree: Path,
+    base: str,
+    expected_head: str,
+) -> dict[str, Any]:
+    target = worktree.resolve()
+    current = root.resolve()
+    if target == current:
+        raise ParallelError("the current worktree cannot be removed")
+    actual = next(
+        (
+            item
+            for item in worktrees(root)
+            if item.get("worktree") and Path(item["worktree"]).resolve() == target
+        ),
+        None,
+    )
+    if actual is None:
+        raise ParallelError(f"worktree is not registered with Git: {target}")
+    head = actual.get("HEAD") or ""
+    if not expected_head or expected_head != head:
+        raise ParallelError(
+            f"unmanaged worktree expected HEAD {expected_head or '<missing>'}, found {head}"
+        )
+    status = git(target, "status", "--porcelain")
+    if status.returncode != 0 or status.stdout.strip():
+        raise ParallelError("unmanaged worktree must be clean before removal")
+    private_state = worktree_state_path(target, target / "spec" / "state.json")
+    if private_state.is_file():
+        try:
+            state = json.loads(private_state.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            raise ParallelError(
+                f"unable to prove unmanaged worktree state is inactive: {private_state}"
+            ) from exc
+        if state.get("activeTask"):
+            raise ParallelError("unmanaged worktree still has an active private task")
+    branch = actual.get("branch", "").removeprefix("refs/heads/") or None
+    proof = integration_status(root, branch, base)
+    if proof not in {"contained", "patch-equivalent"}:
+        raise ParallelError(
+            f"unmanaged worktree is not proven integrated into {base}: {proof}"
+        )
+    result = git(root, "worktree", "remove", str(target))
+    if result.returncode != 0:
+        raise ParallelError(result.stderr.strip() or "unable to remove worktree")
+    return {
+        "integrated": [],
+        "removed": [str(target)],
+        "retained": [],
+        "clean": True,
+        "integrationStatus": proof,
+        "expectedHead": expected_head,
+        "requiresConfirmation": False,
+    }
+
+
 def worktree_cleanup_reason(
     root: Path, task: dict[str, Any], current: Path
 ) -> str | None:
@@ -532,10 +627,25 @@ def cleanup_projection(
         worktree = Path(str(worktree_value)).resolve()
         if worktree == current:
             continue
+        observed_head = git(worktree, "rev-parse", "HEAD")
+        expected_head = (
+            observed_head.stdout.strip()
+            if observed_head.returncode == 0
+            else task.get("head")
+        )
+        clean_result = git(worktree, "status", "--porcelain")
+        clean = clean_result.returncode == 0 and not clean_result.stdout.strip()
+        integration = integration_status(
+            root, branch, task.get("baseBranch"), task.get("baseSha")
+        )
         item = {
             "taskId": task_id,
             "worktree": str(worktree),
             "branch": branch,
+            "clean": clean,
+            "integrationStatus": integration,
+            "expectedHead": expected_head,
+            "requiresConfirmation": False,
         }
         reason = worktree_cleanup_reason(root, task, current)
         if reason:
@@ -550,12 +660,20 @@ def cleanup_projection(
         worktree = Path(worktree_value).resolve()
         if worktree == current or str(worktree) in registered_paths:
             continue
+        branch = actual.get("branch", "").removeprefix("refs/heads/") or None
+        base = default_base_branch(root)
+        status = git(worktree, "status", "--porcelain")
+        clean = status.returncode == 0 and not status.stdout.strip()
         retained.append(
             {
                 "taskId": None,
                 "worktree": str(worktree),
-                "branch": actual.get("branch", "").removeprefix("refs/heads/") or None,
+                "branch": branch,
                 "reason": "unregistered",
+                "clean": clean,
+                "integrationStatus": integration_status(root, branch, base),
+                "expectedHead": actual.get("HEAD"),
+                "requiresConfirmation": True,
             }
         )
 
@@ -631,28 +749,11 @@ def is_integrated(root: Path, task: dict[str, Any]) -> bool:
     base = task.get("baseBranch")
     if not branch or not base:
         return False
-    branch_head = git(root, "rev-parse", branch)
-    base_head = git(root, "rev-parse", base)
-    if branch_head.returncode != 0 or base_head.returncode != 0:
-        return False
-    if branch_head.stdout.strip() == base_head.stdout.strip():
-        return bool(
-            task.get("baseSha") and branch_head.stdout.strip() != task.get("baseSha")
-        )
-    result = git(root, "merge-base", "--is-ancestor", branch, base)
-    if result.returncode == 0:
-        return True
-    base_sha = task.get("baseSha")
-    if not base_sha:
-        return False
-    task_base = git(root, "merge-base", "--is-ancestor", str(base_sha), branch)
-    if task_base.returncode != 0:
-        return False
-    cherry = git(root, "cherry", base, branch, str(base_sha))
-    if cherry.returncode != 0:
-        return False
-    patches = [line.strip() for line in cherry.stdout.splitlines() if line.strip()]
-    return bool(patches) and all(line.startswith("- ") for line in patches)
+    proof = integration_status(root, branch, base, task.get("baseSha"))
+    if proof == "contained":
+        branch_head = git(root, "rev-parse", branch).stdout.strip()
+        return bool(task.get("baseSha") and branch_head != task.get("baseSha"))
+    return proof == "patch-equivalent"
 
 
 def task_readiness(
@@ -680,6 +781,11 @@ def aggregate(root: Path) -> dict[str, Any]:
         )
         worktree = Path(str(item.get("worktree", "")))
         item["worktreeExists"] = worktree.is_dir()
+        observed_head = (
+            git(worktree, "rev-parse", "HEAD") if item["worktreeExists"] else None
+        )
+        if observed_head and observed_head.returncode == 0:
+            item["head"] = observed_head.stdout.strip()
         item["readiness"] = task_readiness(root, item, tasks)
         base = item.get("baseBranch")
         base_head = git(root, "rev-parse", base) if base else None
@@ -689,7 +795,21 @@ def aggregate(root: Path) -> dict[str, Any]:
             and item.get("baseSha")
             and base_head.stdout.strip() != item.get("baseSha")
         )
-        if item["baselineStale"]:
+        if item["readiness"] == "integrated" and not item.get("archived"):
+            item["lifecycle"] = "integrated-unclosed"
+            item["baselineStale"] = False
+            item["nextAction"] = {
+                "reason": "The task is integrated but its workflow record is still open.",
+                "command": (
+                    "python scripts/rigorbreeze.py archive --outcome reconciled "
+                    f"--reason <reason> --expected-head {item.get('head') or '<SHA>'}"
+                ),
+            }
+        elif item.get("archived"):
+            item["lifecycle"] = "closed"
+            item["baselineStale"] = False
+        elif item["baselineStale"]:
+            item["lifecycle"] = "active"
             item["verification"] = "missing/stale"
             item["fullProfile"] = "missing/stale"
             item["nextAction"] = {
@@ -697,10 +817,13 @@ def aggregate(root: Path) -> dict[str, Any]:
                 "command": "incorporate the latest baseline, then rerun affected/full",
             }
         elif item["readiness"] == "blocked":
+            item["lifecycle"] = "active"
             item["nextAction"] = {
                 "reason": "One or more Depends-On tasks are not integrated.",
                 "command": "wait for dependencies, then refresh status --all --json",
             }
+        else:
+            item["lifecycle"] = "active"
         result.append(item)
     order = [] if errors else topological_order(tasks)
     return {

@@ -117,7 +117,10 @@ Do not batch every test before every implementation. Do not include drive-by ref
 - `full` is the configured L1/L2 merge-quality profile.
 - `archive` closes a completed task; it is not a production release.
 - `archive --outcome abandoned --reason <reason>` closes a cancelled or superseded task without claiming success. Task-owned uncommitted changes, running automation, or unknown external outcomes block abandonment; unrelated changes are reported. Branches, worktrees, and commits are preserved.
+- `archive --outcome reconciled --reason <reason> --expected-head <sha>` closes a historical task whose code is already integrated. It requires exact HEAD plus ancestry or complete patch-equivalence (or explicit same-base-branch confirmation with no product changes), records the original phase and missing verification honestly, and never fabricates GREEN, acceptance, or release success.
 - `release` is evaluated only after an explicit release request.
+
+The normal delivery order is verify/full → acceptance → two-pass review → retrospective → archive → guarded commit/push/merge → reconcile → cleanup. Archive stores a read-only `lastClosed` snapshot so task-owned product changes, the moved contract, and its evidence can still be committed and delivered safely. A pending closure blocks another task in the same worktree. Release authority is never inherited from ordinary archive.
 
 L0 may archive after its configured verification. L1/L2 require current full verification, applicable acceptance, two separate review passes, and the prefilled retrospective confirmation.
 
@@ -164,7 +167,7 @@ Accept the capability that actually changed:
 - mini-app: production build, developer-tool automation, real AppID/HTTPS environment, and device evidence;
 - authorization: role, tenant, ownership, data scope, and forbidden access;
 - migration: cloned-data rehearsal, before/after assertions, backup/restore or forward-fix proof;
-- external integration: sandbox or controlled real-environment contract and failure behavior.
+- external integration: prefer sanitized real responses or provider-sandbox fixtures; cover enabled, disabled, and unavailable modes plus failure behavior. Verify wire serialization, text-form JSON, URL-encoding count, database-dialect semantics, and order-creation or other business preconditions where applicable. Mock or temporary credentials prove only a local contract/build, never real acceptance.
 
 Humans approve visual baselines. Never update screenshots only to remove a failure.
 
@@ -211,6 +214,8 @@ one project entry
 
 Keep a stable `RIGORBREEZE_SESSION_ID` per Codex window. A second live session cannot claim the same worktree. `status --all --json` is the read-only interface for every window and optional external orchestrator.
 
+All worktree state is Git-private. `status --json` projects the workflow baseline from the real base branch and distinguishes missing, partial, modified, current, and blocked states. A one-time baseline commit is allowed only on that branch, at the expected HEAD, with no active task or mixed product changes.
+
 Do not create a DAG for independent tasks. When ordering is real, store it only in each task's `Depends-On`. The runner derives readiness, cycles, missing dependencies, and topological order. Unrelated active tasks may not have overlapping allowed scopes; split them, order them, or isolate a shared integration task.
 
 `Depends-On` represents only tasks in the same repository. For cross-repository delivery, each repository keeps its own contract and evidence; Authoritative inputs link the counterpart task and shared API/data contract. A consumer cannot complete real acceptance until the provider interface is integrated and verified.
@@ -225,7 +230,7 @@ Automation levels are cumulative but explicit:
 | merge | Request provider auto-merge | Current Required Checks and baseline |
 | release | Invoke configured release adapter | One SHA/artifact and complete governance |
 
-Provider results stay in the Git-private automation journal so an external action does not dirty tracked evidence. `status --all --json` projects removable, retained, and unregistered worktrees plus retained task branches. Integration is proven by ancestry or only when every task commit since the recorded baseline is patch-equivalent on the baseline branch; partial equivalence remains active. Cleanup removes only a clean, integrated, non-current worktree whose exact Flow-created provenance is intact. Unknown, rebuilt, moved, dirty, current, or manual worktrees are retained and reported, and local branches are preserved by policy.
+Provider results stay in the Git-private automation journal so an external action does not dirty tracked evidence. `status --all --json` projects removable, retained, and unregistered worktrees plus retained task branches, with cleanliness, integration status, expected HEAD, and confirmation requirements. Integration is proven by ancestry or only when every task commit since the recorded baseline is patch-equivalent on the baseline branch; partial equivalence remains active. Managed cleanup requires exact Flow-created provenance. Unmanaged cleanup additionally requires a one-time explicit absolute path, base, expected HEAD, clean inactive state, and complete integration proof. Local branches are always preserved.
 
 For an explicit current-task request, Codex may run `automate commit --once` or `automate push --once --remote <name> --branch <current> --expected-head <sha>` without changing `rigorbreeze.toml`. Push never commits implicitly, fetches before writing, permits only a fast-forward update, never rebases or force-pushes, and verifies the remote SHA. Direct integration-branch push additionally requires current full verification, structured acceptance, and review. One-time authority never applies to merge, release, production migration, or rollback.
 

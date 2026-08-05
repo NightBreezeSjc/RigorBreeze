@@ -87,10 +87,12 @@ from flow_state import (  # noqa: E402
     config_digest,
     config_path,
     config_template,
+    clean_managed_bytecode,
     current_head,
     effective_mode,
     empty_evidence,
     ensure_agents,
+    evidence_path,
     git,
     index_template,
     initial_state,
@@ -99,6 +101,8 @@ from flow_state import (  # noqa: E402
     load_config,
     load_evidence,
     load_state,
+    legacy_state_path,
+    migrate_legacy_state,
     now_iso,
     parse_fields,
     project_lock,
@@ -125,6 +129,8 @@ def command_init(root: Path) -> None:
     existing_state = None
     if state_path(root).exists():
         existing_state = load_state(root)
+    elif legacy_state_path(root).exists():
+        existing_state = upgrade_state(read_json(legacy_state_path(root)))
     current_installation = installation_status(root, existing_state)
     if (
         current_installation["status"] != "current"
@@ -142,7 +148,7 @@ def command_init(root: Path) -> None:
     if not index.exists():
         atomic_write(index, index_template())
     current_state = state_path(root)
-    legacy_state = spec_root(root) / "state.json"
+    legacy_state = legacy_state_path(root)
     if not current_state.exists():
         if current_state != legacy_state and legacy_state.exists():
             write_json(current_state, upgrade_state(read_json(legacy_state)))
@@ -187,6 +193,12 @@ def command_init(root: Path) -> None:
         ):
             atomic_write(helper, helper_source)
     ensure_agents(root)
+    legacy_warnings = migrate_legacy_state(root, remove_untracked=True)
+    cache_warnings = clean_managed_bytecode(root)
+    for warning in legacy_warnings:
+        print(f"warning: {warning}")
+    for relative in cache_warnings:
+        print(f"warning: retained unknown cache entry: {relative}")
     print("initialized v4 workflow and minimal spec tree")
 
 
@@ -200,6 +212,8 @@ def installation_status(
             "runnerVersion": None,
             "status": "missing",
             "upgradeSafe": not bool((state or {}).get("activeTask")),
+            "missingComponents": ["scripts/rigorbreeze.py"],
+            "modifiedComponents": [],
         }
     runner_text = repository_runner.read_text(encoding="utf-8", errors="replace")
     if RUNNER_MARKER in runner_text:
@@ -217,6 +231,8 @@ def installation_status(
             "runnerVersion": None,
             "status": "unmanaged",
             "upgradeSafe": not bool((state or {}).get("activeTask")),
+            "missingComponents": [],
+            "modifiedComponents": ["scripts/rigorbreeze.py"],
         }
 
     version_file = target_directory / "flow_state.py"
@@ -242,13 +258,22 @@ def installation_status(
             flow_automation.__file__
         ).read_text(encoding="utf-8"),
     }
-    exact = all(
-        path.is_file() and path.read_text(encoding="utf-8", errors="replace") == content
-        for path, content in expected.items()
+    missing_components = sorted(
+        str(path.relative_to(root)).replace("\\", "/")
+        for path in expected
+        if not path.is_file()
     )
-    if runner_version != TOOL_VERSION:
+    modified_components = sorted(
+        str(path.relative_to(root)).replace("\\", "/")
+        for path, content in expected.items()
+        if path.is_file()
+        and path.read_text(encoding="utf-8", errors="replace") != content
+    )
+    if missing_components:
+        status = "missing"
+    elif runner_version != TOOL_VERSION:
         status = "outdated"
-    elif exact:
+    elif not modified_components:
         status = "current"
     else:
         status = "unmanaged"
@@ -257,24 +282,230 @@ def installation_status(
         "runnerVersion": runner_version,
         "status": status,
         "upgradeSafe": not bool((state or {}).get("activeTask")),
+        "missingComponents": missing_components,
+        "modifiedComponents": modified_components,
     }
 
 
-def untracked_workflow_baseline(root: Path) -> list[str]:
-    paths = (
+def managed_workflow_paths(root: Path) -> tuple[str, ...]:
+    runner = root / "scripts" / "rigorbreeze.py"
+    wrapper = (
+        runner.is_file()
+        and REPOSITORY_WRAPPER_MARKER
+        in runner.read_text(encoding="utf-8", errors="replace")
+        and (root / "rigorbreeze" / "scripts" / "flow.py").is_file()
+    )
+    runner_paths = (
+        (
+            "scripts/rigorbreeze.py",
+            "rigorbreeze/scripts/flow.py",
+            "rigorbreeze/scripts/flow_state.py",
+            "rigorbreeze/scripts/flow_policy.py",
+            "rigorbreeze/scripts/flow_parallel.py",
+            "rigorbreeze/scripts/flow_automation.py",
+        )
+        if wrapper
+        else (
+            "scripts/rigorbreeze.py",
+            "scripts/flow_state.py",
+            "scripts/flow_policy.py",
+            "scripts/flow_parallel.py",
+            "scripts/flow_automation.py",
+        )
+    )
+    return (
+        "AGENTS.md",
         CONFIG_NAME,
-        "scripts/rigorbreeze.py",
-        "scripts/flow_state.py",
-        "scripts/flow_policy.py",
-        "scripts/flow_parallel.py",
-        "scripts/flow_automation.py",
+        *runner_paths,
         "spec/index.md",
     )
+
+
+def baseline_branch(root: Path, state: dict[str, Any] | None = None) -> str | None:
+    active = (state or {}).get("activeTask") or {}
+    if active.get("baseBranch"):
+        return str(active["baseBranch"])
+    try:
+        configured = str(load_config(root).get("parallel", {}).get("base_branch", "")).strip()
+    except FlowError:
+        configured = ""
+    if configured:
+        return configured
+    try:
+        return flow_parallel.default_base_branch(root)
+    except flow_parallel.ParallelError:
+        return None
+
+
+def completed_closure_paths(root: Path, state: dict[str, Any]) -> list[str]:
+    last = state.get("lastClosed") or {}
+    if last.get("outcome") not in {"completed", "reconciled"}:
+        return []
+    task_id = last.get("id")
+    if not task_id:
+        return []
     return [
-        relative
-        for relative in paths
-        if git(root, "ls-files", "--error-unmatch", "--", relative).returncode != 0
+        f"spec/changes/{task_id}.md",
+        f"spec/archive/{task_id}.md",
+        f"spec/evidence/{task_id}.json",
     ]
+
+
+def workflow_baseline_commit_paths(root: Path, state: dict[str, Any]) -> list[str]:
+    allowed = set(managed_workflow_paths(root)) | set(completed_closure_paths(root, state))
+    changed = flow_automation.working_tree_paths(root, {f"spec/{LOCK_NAME}"})
+    return sorted(path for path in changed if path in allowed)
+
+
+def workflow_baseline_status(root: Path, state: dict[str, Any]) -> dict[str, Any]:
+    base = baseline_branch(root, state)
+    payload: dict[str, Any] = {
+        "status": "blocked",
+        "baseBranch": base,
+        "tracked": [],
+        "untracked": list(managed_workflow_paths(root)),
+        "modified": [],
+        "safeToCommit": False,
+        "nextAction": {
+            "reason": "The workflow baseline branch cannot be determined.",
+            "command": "configure parallel.base_branch, then run status --json",
+        },
+    }
+    if not is_git_repo(root) or not base:
+        return payload
+    base_head = git(root, "rev-parse", base)
+    if base_head.returncode != 0:
+        payload["nextAction"] = {
+            "reason": f"The workflow baseline branch {base} does not exist.",
+            "command": "create or configure the baseline branch",
+        }
+        return payload
+    tracked: list[str] = []
+    missing: list[str] = []
+    modified: list[str] = []
+    for relative in managed_workflow_paths(root):
+        stored = git(root, "show", f"{base}:{relative}")
+        if stored.returncode != 0:
+            missing.append(relative)
+            continue
+        tracked.append(relative)
+        if git(root, "diff", "--quiet", base, "--", relative).returncode != 0:
+            modified.append(relative)
+    payload["tracked"] = sorted(tracked)
+    payload["untracked"] = sorted(missing)
+    payload["modified"] = sorted(modified)
+    installation = installation_status(root, state)
+    if len(missing) == len(managed_workflow_paths(root)):
+        status = "missing"
+    elif missing:
+        status = "partial"
+    elif modified or installation["status"] != "current":
+        status = "modified"
+    else:
+        status = "current"
+    payload["status"] = status
+    current_branch = flow_parallel.branch_name(root)
+    head = current_head(root)
+    changed = flow_automation.working_tree_paths(root, {f"spec/{LOCK_NAME}"})
+    selectable = set(workflow_baseline_commit_paths(root, state))
+    outside = sorted(set(changed) - selectable)
+    safe = bool(
+        status != "current"
+        and current_branch == base
+        and head == base_head.stdout.strip()
+        and not state.get("activeTask")
+        and installation["status"] == "current"
+        and selectable
+        and not outside
+    )
+    payload["safeToCommit"] = safe
+    if status == "current":
+        payload["nextAction"] = {
+            "reason": "The baseline branch contains the current managed workflow.",
+            "command": "continue the active task or create the next task",
+        }
+    elif safe:
+        payload["nextAction"] = {
+            "reason": "Only managed workflow baseline files are pending on the baseline branch.",
+            "command": (
+                "python scripts/rigorbreeze.py automate commit --once "
+                f"--workflow-baseline --expected-head {head}"
+            ),
+        }
+    else:
+        payload["nextAction"] = {
+            "reason": "The baseline branch is missing, partial, modified, or mixed with other changes.",
+            "command": "finish active work and isolate workflow files on the baseline branch",
+        }
+    return payload
+
+
+def last_closed_task(state: dict[str, Any], *, completed_only: bool = False) -> dict[str, Any]:
+    last = state.get("lastClosed") or {}
+    if not last or (completed_only and last.get("outcome") != "completed"):
+        raise FlowError("no eligible closed task context is available")
+    return last
+
+
+def closure_pending_paths(root: Path, state: dict[str, Any]) -> list[str]:
+    expected = set(completed_closure_paths(root, state))
+    if not expected:
+        return []
+    return sorted(
+        path
+        for path in flow_automation.working_tree_paths(root, {f"spec/{LOCK_NAME}"})
+        if path in expected
+    )
+
+
+def closed_context_current(root: Path, state: dict[str, Any]) -> bool:
+    last = last_closed_task(state, completed_only=True)
+    archive = root / str(last.get("archivePath", ""))
+    evidence_file = root / str(last.get("evidencePath", ""))
+    if not archive.is_file() or not evidence_file.is_file():
+        return False
+    digest = sha256_bytes(archive.read_bytes() + b"\0" + evidence_file.read_bytes())
+    return bool(
+        digest == last.get("closureDigest")
+        and project_fingerprint(root) == last.get("projectFingerprint")
+    )
+
+
+def current_task_lifecycle(root: Path, state: dict[str, Any]) -> tuple[str, dict[str, str] | None]:
+    active = state.get("activeTask")
+    if active and is_git_repo(root):
+        try:
+            entry = flow_parallel.load_registry(root)["tasks"].get(active["id"], {})
+            if entry and flow_parallel.is_integrated(root, entry):
+                return (
+                    "integrated-unclosed",
+                    {
+                        "reason": "The task code is integrated but the workflow record is still open.",
+                        "command": (
+                            "python scripts/rigorbreeze.py archive --outcome reconciled "
+                            f"--reason <reason> --expected-head {current_head(root) or '<SHA>'}"
+                        ),
+                    },
+                )
+        except flow_parallel.ParallelError:
+            pass
+    if not active and state.get("lastClosed"):
+        pending = closure_pending_paths(root, state)
+        if pending:
+            last = state["lastClosed"]
+            if last.get("outcome") == "completed":
+                action = {
+                    "reason": "The completed task closure has not been committed.",
+                    "command": "python scripts/rigorbreeze.py automate commit --once",
+                }
+            else:
+                action = {
+                    "reason": "The historical closure is pending a guarded workflow baseline commit.",
+                    "command": "python scripts/rigorbreeze.py status --json",
+                }
+            return "closure-pending", action
+        return "closed", None
+    return "active" if active else "idle", None
 
 
 def command_new(
@@ -286,6 +517,13 @@ def command_new(
     depends_on: list[str] | None = None,
 ) -> None:
     dependencies = list(dict.fromkeys(depends_on or []))
+    if state_path(root).is_file():
+        existing_state = load_state(root)
+        lifecycle, _ = current_task_lifecycle(root, existing_state)
+        if lifecycle in {"integrated-unclosed", "closure-pending"}:
+            raise FlowError(
+                f"{lifecycle} task must be closed and committed before starting another task"
+            )
     if task_id in dependencies:
         raise FlowError("a task cannot depend on itself")
     if dependencies and is_git_repo(root):
@@ -390,7 +628,7 @@ def command_approve(
     root: Path, kind: str, name: str | None, reason: str | None = None
 ) -> None:
     state = load_state(root)
-    active = active_task(state)
+    active = state.get("activeTask")
     if kind == "task":
         previously_approved = bool(
             state.get("approvals", {}).get("task", {}).get("approvedAt")
@@ -424,10 +662,13 @@ def command_approve(
             and active.get("risk") in {"L1", "L2"}
             and effective_mode(root, None, state) == "enforced"
         ):
-            untracked = untracked_workflow_baseline(root)
-            if untracked:
+            baseline = workflow_baseline_status(root, state)
+            installation = installation_status(root, state)
+            if baseline["status"] != "current" or installation["status"] != "current":
                 raise FlowError(
-                    "workflow baseline is not tracked: " + ", ".join(untracked)
+                    "workflow baseline branch is not current: "
+                    f"baseline={baseline['status']}, installation={installation['status']}; "
+                    + ", ".join(baseline["untracked"] + baseline["modified"])
                 )
         if is_git_repo(root):
             try:
@@ -590,8 +831,15 @@ def command_status(
         except flow_parallel.ParallelError as exc:
             raise FlowError(str(exc)) from exc
         payload["workflowVersion"] = VERSION
-        state = load_state(root) if state_path(root).is_file() else None
+        state = (
+            load_state(root)
+            if state_path(root).is_file() or legacy_state_path(root).is_file()
+            else None
+        )
         payload["installation"] = installation_status(root, state)
+        payload["workflowBaseline"] = (
+            workflow_baseline_status(root, state) if state else None
+        )
         try:
             for item in payload["tasks"]:
                 item["automation"] = flow_automation.action_summary(
@@ -638,7 +886,10 @@ def command_status(
         if active and approval_valid_now and full_profile_current(root, state)
         else "missing/stale"
     )
-    action = next_action(root, state, approval_valid_now, verification, full_profile)
+    lifecycle, lifecycle_action = current_task_lifecycle(root, state)
+    action = lifecycle_action or next_action(
+        root, state, approval_valid_now, verification, full_profile
+    )
     scope = task_scope_status(root, state)
     payload = {
         "phase": state.get("phase"),
@@ -648,8 +899,10 @@ def command_status(
         "verification": verification,
         "fullProfile": full_profile,
         "scope": scope,
+        "lifecycle": lifecycle,
         "nextAction": action,
         "installation": installation_status(root, state),
+        "workflowBaseline": workflow_baseline_status(root, state),
     }
     if is_git_repo(root):
         try:
@@ -1205,7 +1458,10 @@ def command_check(root: Path, gate: str, requested_mode: str | None = None) -> N
     state = load_state(root)
     if refresh_approval(root, state):
         save_state(root, state)
-    active_task(state)
+    active = state.get("activeTask")
+    closed = None if active else (state.get("lastClosed") or None)
+    if not active and not (gate == "merge" and closed and closed.get("outcome") == "completed"):
+        active_task(state)
     if gate == "commit":
         if not is_git_repo(root):
             raise FlowError("commit gate requires a Git repository")
@@ -1243,13 +1499,177 @@ def command_check(root: Path, gate: str, requested_mode: str | None = None) -> N
         if not verification_current(root, state):
             raise FlowError("verification is missing or stale")
     elif gate == "merge":
-        ensure_delivery_quality(root, state)
+        if active:
+            ensure_delivery_quality(root, state)
+        elif not closed_context_current(root, state):
+            raise FlowError("closed task evidence changed after archive")
+        elif not closed.get("verification"):
+            raise FlowError("closed task has no delivery-quality verification")
     elif gate == "release":
         ensure_release(root, state)
     else:
         raise FlowError(f"unknown gate: {gate}")
     save_state(root, state)
     print(f"check {gate}: passed")
+
+
+def automation_context_task(state: dict[str, Any]) -> dict[str, Any]:
+    active = state.get("activeTask")
+    if active:
+        return active
+    last = last_closed_task(state, completed_only=True)
+    return {
+        "id": last["id"],
+        "title": last.get("title") or last["id"],
+        "risk": last.get("risk"),
+        "baseBranch": last.get("baseBranch"),
+        "baseSha": last.get("baseSha"),
+    }
+
+
+def context_task_paths(root: Path, state: dict[str, Any]) -> list[str]:
+    if state.get("activeTask"):
+        return automation_task_paths(root, state)
+    last = last_closed_task(state, completed_only=True)
+    if not closed_context_current(root, state):
+        raise FlowError("closed task contract or evidence changed after archive")
+    scopes = list(last.get("allowedScope", []))
+    closure = {
+        str(last.get("sourcePath")),
+        str(last.get("archivePath")),
+        str(last.get("evidencePath")),
+    }
+    return sorted(
+        relative
+        for relative in flow_automation.working_tree_paths(root, {f"spec/{LOCK_NAME}"})
+        if relative in closure or path_allowed(relative, scopes)
+    )
+
+
+def context_automation_values(root: Path, state: dict[str, Any]) -> dict[str, str]:
+    if state.get("activeTask"):
+        return automation_values(root, state)
+    last = last_closed_task(state, completed_only=True)
+    artifacts = last.get("artifacts", [])
+    return {
+        "task_id": str(last["id"]),
+        "title": str(last.get("title") or last["id"]),
+        "branch": flow_parallel.branch_name(root) or str(last.get("branch") or ""),
+        "base": str(last.get("baseBranch") or ""),
+        "head": current_head(root) or "",
+        "artifact_sha256": ",".join(
+            sorted(str(record["sha256"]) for record in artifacts if record.get("sha256"))
+        ),
+    }
+
+
+def context_automation_input(root: Path, state: dict[str, Any]) -> dict[str, Any]:
+    if state.get("activeTask"):
+        return automation_input(root, state)
+    last = last_closed_task(state, completed_only=True)
+    values = context_automation_values(root, state)
+    verification = json.dumps(
+        last.get("verification"), ensure_ascii=False, sort_keys=True
+    ).encode()
+    evidence_file = root / str(last["evidencePath"])
+    return {
+        "head": values["head"],
+        "taskDigest": last.get("taskDigest"),
+        "evidenceDigest": sha256_bytes(evidence_file.read_bytes()),
+        "verificationDigest": sha256_bytes(verification),
+        "projectFingerprint": last.get("projectFingerprint"),
+        "artifactSha256": values["artifact_sha256"] or None,
+        "closureDigest": last.get("closureDigest"),
+    }
+
+
+def check_closed_commit(root: Path, state: dict[str, Any], selected: list[str]) -> None:
+    if not closed_context_current(root, state):
+        raise FlowError("closed task contract or evidence changed after archive")
+    staged = staged_files(root)
+    outside = sorted(set(staged) - set(selected))
+    if outside:
+        raise FlowError("staged files are outside the closed task: " + ", ".join(outside))
+    secrets = [path for path in staged if is_secret_path(path)]
+    secrets.extend(secret_content_paths(root, staged))
+    if secrets:
+        raise FlowError("secret material is forbidden: " + ", ".join(sorted(set(secrets))))
+
+
+def automate_workflow_baseline_commit(
+    root: Path,
+    state: dict[str, Any],
+    config: dict[str, Any],
+    expected_head: str | None,
+) -> None:
+    if state.get("activeTask"):
+        raise FlowError("workflow baseline commit requires no active business task")
+    head = current_head(root) or ""
+    if not expected_head or expected_head != head:
+        raise FlowError(
+            f"workflow baseline expected HEAD {expected_head or '<missing>'}, found {head}"
+        )
+    base = baseline_branch(root, state)
+    if not base or flow_parallel.branch_name(root) != base:
+        raise FlowError("workflow baseline commit must run on the baseline branch")
+    installation = installation_status(root, state)
+    if installation["status"] != "current":
+        raise FlowError(
+            f"workflow installation must be current: {installation['status']}"
+        )
+    load_config(root)
+    agents = (root / "AGENTS.md").read_text(encoding="utf-8", errors="replace")
+    if flow_state.AGENTS_START not in agents or flow_state.AGENTS_END not in agents:
+        raise FlowError("managed RigorBreeze AGENTS marker is missing")
+    selected = workflow_baseline_commit_paths(root, state)
+    changed = flow_automation.working_tree_paths(root, {f"spec/{LOCK_NAME}"})
+    outside = sorted(set(changed) - set(selected))
+    if not selected:
+        raise FlowError("workflow baseline commit found no managed changes")
+    if outside:
+        raise FlowError(
+            "workflow baseline commit found non-workflow changes: " + ", ".join(outside)
+        )
+    secrets = [path for path in selected if is_secret_path(path)]
+    secrets.extend(secret_content_paths(root, selected))
+    if secrets:
+        raise FlowError(
+            "workflow baseline commit blocked secret material: "
+            + ", ".join(sorted(set(secrets)))
+        )
+    staged_before = staged_files(root)
+    unrelated_staged = sorted(set(staged_before) - set(selected))
+    if unrelated_staged:
+        raise FlowError(
+            "workflow baseline commit will not alter unrelated staged files: "
+            + ", ".join(unrelated_staged)
+        )
+
+    def check() -> None:
+        staged = staged_files(root)
+        if sorted(staged) != sorted(selected):
+            raise FlowError("workflow baseline staged set changed during validation")
+        load_config(root)
+        if installation_status(root, state)["status"] != "current":
+            raise FlowError("workflow installation changed during baseline validation")
+
+    flow_automation.commit_action(
+        root,
+        task_id="WORKFLOW-BASELINE",
+        files=selected,
+        staged_before=staged_before,
+        message=f"Establish RigorBreeze v{TOOL_VERSION} workflow baseline",
+        inputs={
+            "head": head,
+            "workflowBaseline": True,
+            "managedFiles": selected,
+            "configDigest": config_digest(root),
+        },
+        target={"branch": base},
+        check=check,
+        redact=redact,
+        authorization_mode="user-once",
+    )
 
 
 def automate_commit(
@@ -1265,19 +1685,22 @@ def automate_commit(
     )
     if not is_git_repo(root):
         raise FlowError("automatic commit requires a Git repository")
-    active = active_task(state)
+    active = automation_context_task(state)
     if flow_automation.recover_interrupted_commit(root, active["id"]):
         print("automate commit: recovered completed commit")
         return
     changed = flow_automation.working_tree_paths(root, {f"spec/{LOCK_NAME}"})
-    selected = automation_task_paths(root, state)
+    selected = context_task_paths(root, state)
     secrets = [path for path in changed if is_secret_path(path)]
     secrets.extend(secret_content_paths(root, changed))
     if secrets:
         raise FlowError(
             "automatic commit blocked secret material: " + ", ".join(secrets)
         )
-    ensure_scope_current(root, state)
+    if state.get("activeTask"):
+        ensure_scope_current(root, state)
+    elif not closed_context_current(root, state):
+        raise FlowError("closed task contract or evidence changed after archive")
     outside = sorted(set(changed) - set(selected))
     if outside:
         raise FlowError(
@@ -1293,13 +1716,18 @@ def automate_commit(
             "automatic commit will not alter unrelated staged files: "
             + ", ".join(unrelated_staged)
         )
+    approvals = (
+        state["approvals"]
+        if state.get("activeTask")
+        else (state.get("lastClosed") or {}).get("approvals", {})
+    )
     dependencies = [path for path in selected if is_dependency_path(path)]
-    if dependencies and not state["approvals"]["dependencies"]:
+    if dependencies and not approvals.get("dependencies"):
         raise FlowError("automatic commit requires dependency approval")
     migrations = [path for path in selected if is_configured_migration_path(root, path)]
-    if migrations and not state["approvals"]["migrations"]:
+    if migrations and not approvals.get("migrations"):
         raise FlowError("automatic commit requires migration approval")
-    values = automation_values(root, state)
+    values = context_automation_values(root, state)
     message = str(automation.get("commit_message", "{task_id}: {title}")).format_map(
         values
     )
@@ -1309,9 +1737,13 @@ def automate_commit(
         files=selected,
         staged_before=staged_before,
         message=message,
-        inputs=automation_input(root, state),
+        inputs=context_automation_input(root, state),
         target={"branch": flow_parallel.branch_name(root)},
-        check=lambda: command_check(root, "commit", "enforced"),
+        check=(
+            (lambda: command_check(root, "commit", "enforced"))
+            if state.get("activeTask")
+            else (lambda: check_closed_commit(root, state, selected))
+        ),
         redact=redact,
         authorization_mode=authorization_mode,
     )
@@ -1353,23 +1785,33 @@ def automate_push(
             raise FlowError(
                 f"one-time push expected HEAD {expected_head or '<missing>'}, found {head}"
             )
-        if automation_task_paths(root, state):
+        if context_task_paths(root, state):
             raise FlowError(
                 "one-time push does not commit pending changes; authorize and run "
                 "automate commit --once first"
             )
     elif branch in protected or not branch.startswith("rigorbreeze/"):
         raise FlowError("automatic push is limited to rigorbreeze/<task-id> branches")
-    if not one_time and automation_task_paths(root, state):
+    if not one_time and context_task_paths(root, state):
         automate_commit(root, state, config, authorization_mode)
-    ensure_scope_current(root, state)
+    if state.get("activeTask"):
+        ensure_scope_current(root, state)
+    elif not closed_context_current(root, state):
+        raise FlowError("closed task contract or evidence changed after archive")
     if one_time and branch in protected:
-        ensure_delivery_quality(root, state)
-        if not full_profile_current(root, state):
+        if state.get("activeTask"):
+            ensure_delivery_quality(root, state)
+            has_full = full_profile_current(root, state)
+            acceptance = current_structured_records(root, state, "acceptance")
+        else:
+            last = last_closed_task(state, completed_only=True)
+            verification = last.get("verification") or {}
+            has_full = verification.get("profile") == "full"
+            acceptance = list(last.get("acceptance", []))
+        if not has_full:
             raise FlowError(
                 "one-time push to an integration branch requires full verification"
             )
-        acceptance = current_structured_records(root, state, "acceptance")
         if not acceptance:
             raise FlowError(
                 "one-time push to an integration branch requires current "
@@ -1381,14 +1823,17 @@ def automate_push(
                 "independent review evidence"
             )
     else:
-        if not approval_valid(root, state) or not configured_verification_current(
-            root, state
-        ):
-            raise FlowError("push requires current configured verification")
+        if state.get("activeTask"):
+            if not approval_valid(root, state) or not configured_verification_current(
+                root, state
+            ):
+                raise FlowError("push requires current configured verification")
+        elif not (state.get("lastClosed") or {}).get("verification"):
+            raise FlowError("closed task push requires recorded verification")
     remote = str(remote_override if one_time else automation.get("remote", "origin"))
     if not remote:
         raise FlowError("automation.remote must be explicit")
-    active = active_task(state)
+    active = automation_context_task(state)
     head = current_head(root) or ""
     if one_time:
         remote_ref = git(root, "ls-remote", remote, f"refs/heads/{branch}")
@@ -1416,7 +1861,7 @@ def automate_push(
         remote=remote,
         branch=branch,
         head=head,
-        inputs=automation_input(root, state),
+        inputs=context_automation_input(root, state),
         redact=redact,
         authorization_mode=authorization_mode,
     )
@@ -1429,12 +1874,20 @@ def automate_provider_action(
 ) -> None:
     automation = flow_automation.require_level(config, action)
     if action == "merge":
-        ensure_delivery_quality(root, state)
-        if not baseline_current(root, state):
-            raise FlowError("task baseline changed; rebase and reverify before merge")
+        if state.get("activeTask"):
+            ensure_delivery_quality(root, state)
+            if not baseline_current(root, state):
+                raise FlowError("task baseline changed; rebase and reverify before merge")
+        else:
+            last = last_closed_task(state, completed_only=True)
+            if not closed_context_current(root, state):
+                raise FlowError("closed task contract or evidence changed after archive")
+            if not last.get("verification") or not last.get("reviews"):
+                raise FlowError("closed task merge requires verification and review evidence")
     else:
+        active_task(state)
         ensure_release(root, state)
-    values = automation_values(root, state)
+    values = context_automation_values(root, state)
     if not values["branch"].startswith("rigorbreeze/"):
         raise FlowError(f"automatic {action} requires a rigorbreeze/<task-id> branch")
     key = flow_automation.idempotency_key(
@@ -1450,7 +1903,7 @@ def automate_provider_action(
         action=action,
         key=key,
         values=values,
-        inputs=automation_input(root, state),
+        inputs=context_automation_input(root, state),
         target=target,
         check_command=automation.get(f"{action}_check_command"),
         action_command=automation.get(f"{action}_command"),
@@ -1468,17 +1921,26 @@ def command_automate(
     remote: str | None = None,
     branch: str | None = None,
     expected_head: str | None = None,
+    workflow_baseline: bool = False,
 ) -> None:
     state = load_state(root)
     config = load_config(root)
     if once and action not in {"commit", "push"}:
         raise FlowError("one-time authorization is only available for commit and push")
+    if workflow_baseline and (not once or action != "commit"):
+        raise FlowError("--workflow-baseline requires automate commit --once")
     if (
         once
         and action == "commit"
-        and any(value is not None for value in (remote, branch, expected_head))
+        and (
+            remote is not None
+            or branch is not None
+            or (expected_head is not None and not workflow_baseline)
+        )
     ):
-        raise FlowError("remote, branch, and expected HEAD apply only to one-time push")
+        raise FlowError(
+            "remote and branch apply only to one-time push; expected HEAD on commit requires --workflow-baseline"
+        )
     if not once and any(value is not None for value in (remote, branch, expected_head)):
         raise FlowError("remote, branch, and expected HEAD overrides require --once")
     authorization_mode = "user-once" if once else "standing"
@@ -1492,7 +1954,10 @@ def command_automate(
                     f"branch={flow_parallel.branch_name(root) or '<detached>'} "
                     f"head={current_head(root) or '<none>'}"
                 )
-            automate_commit(root, state, config, authorization_mode)
+            if workflow_baseline:
+                automate_workflow_baseline_commit(root, state, config, expected_head)
+            else:
+                automate_commit(root, state, config, authorization_mode)
         elif action == "push":
             automate_push(
                 root,
@@ -1513,15 +1978,24 @@ def command_automate(
 
 
 def command_archive(
-    root: Path, outcome: str = "completed", reason: str | None = None
+    root: Path,
+    outcome: str = "completed",
+    reason: str | None = None,
+    expected_head: str | None = None,
 ) -> None:
     state = load_state(root)
     active = active_task(state)
+    original_phase = str(state.get("phase"))
+    integration_proof: str | None = None
     if outcome == "completed":
-        if reason:
-            raise FlowError("archive --reason is only valid for abandoned tasks")
+        if reason or expected_head:
+            raise FlowError(
+                "archive --reason and --expected-head are only valid for abandoned or reconciled tasks"
+            )
         ensure_close(root, state)
     elif outcome == "abandoned":
+        if expected_head:
+            raise FlowError("abandoned archive does not use --expected-head")
         if not reason or not reason.strip():
             raise FlowError("abandoned archive requires --reason")
         try:
@@ -1540,6 +2014,64 @@ def command_archive(
                 "task-owned uncommitted changes prevent abandonment: "
                 + ", ".join(task_code_changes)
             )
+    elif outcome == "reconciled":
+        if not reason or not reason.strip():
+            raise FlowError("reconciled archive requires --reason")
+        head = current_head(root) or ""
+        if not expected_head or expected_head != head:
+            raise FlowError(
+                f"reconciled archive expected HEAD {expected_head or '<missing>'}, found {head}"
+            )
+        try:
+            action = flow_automation.latest_action(root, active["id"])
+        except flow_automation.AutomationError as exc:
+            raise FlowError(str(exc)) from exc
+        if action and action.get("status") == "running":
+            raise FlowError("running automation must finish before reconciliation")
+        release_records_for_reconcile = current_structured_records(
+            root, state, "release"
+        )
+        operation_plans = [
+            record
+            for record in release_records_for_reconcile
+            if record.get("kind") == "operation-plan"
+        ]
+        operation_results = [
+            record
+            for record in release_records_for_reconcile
+            if record.get("kind") == "operation-result"
+        ]
+        if operation_plans and (
+            not operation_results
+            or operation_results[-1].get("operation", {}).get("status") != "succeeded"
+        ):
+            raise FlowError(
+                "release or migration operation result is not confirmed succeeded; "
+                "reach a known safe result before reconciliation"
+            )
+        branch = flow_parallel.branch_name(root)
+        base = active.get("baseBranch")
+        if branch == base:
+            non_workflow_changes = [
+                path
+                for path in working_tree_paths(root)
+                if not path.startswith("spec/")
+                and path not in set(managed_workflow_paths(root))
+            ]
+            if non_workflow_changes:
+                raise FlowError(
+                    "reconciled archive requires no uncommitted product changes: "
+                    + ", ".join(non_workflow_changes)
+                )
+            integration_proof = "confirmed-on-base-head"
+        else:
+            integration_proof = flow_parallel.integration_status(
+                root, branch, base, active.get("baseSha")
+            )
+            if integration_proof not in {"contained", "patch-equivalent"}:
+                raise FlowError(
+                    f"task integration into {base or '<unknown>'} is not proven: {integration_proof}"
+                )
     else:
         raise FlowError(f"unknown archive outcome: {outcome}")
     source = task_path(root, active["id"])
@@ -1547,6 +2079,8 @@ def command_archive(
     if destination.exists():
         raise FlowError(f"archive already exists: {destination}")
     release_records = current_structured_records(root, state, "release")
+    artifact_records = current_structured_records(root, state, "artifacts")
+    acceptance_records = current_structured_records(root, state, "acceptance")
     evidence = load_evidence(root, active["id"])
     changes = working_tree_paths(root)
     scopes = allowed_scope(root, state)
@@ -1561,6 +2095,18 @@ def command_archive(
         "closedAt": now_iso(),
         "head": current_head(root) if is_git_repo(root) else None,
         "branch": flow_parallel.branch_name(root) if is_git_repo(root) else None,
+        "originalPhase": original_phase,
+        "integrationProof": integration_proof,
+        "verificationStatus": (
+            "current" if verification_current(root, state) else "missing/stale"
+        ),
+        "practiceEvents": (
+            ["closure-pending-commit"]
+            if outcome == "completed"
+            else ["integrated-unclosed"]
+            if outcome == "reconciled"
+            else []
+        ),
         "unrelatedChanges": sorted(
             relative
             for relative in changes
@@ -1570,15 +2116,45 @@ def command_archive(
     evidence["closure"] = closure
     save_evidence(root, active["id"], evidence)
     source.replace(destination)
+    archive_relative = f"spec/archive/{active['id']}.md"
+    evidence_relative = f"spec/evidence/{active['id']}.json"
+    closure_digest = sha256_bytes(
+        destination.read_bytes()
+        + b"\0"
+        + evidence_path(root, active["id"]).read_bytes()
+    )
     state["lastClosed"] = {
         "id": active["id"],
+        "title": active.get("title"),
+        "risk": active.get("risk"),
+        "branch": closure["branch"],
+        "baseBranch": active.get("baseBranch"),
+        "baseSha": active.get("baseSha"),
+        "allowedScope": scopes,
         "closedAt": closure["closedAt"],
         "outcome": outcome,
         "reason": closure["reason"],
+        "archivePath": archive_relative,
+        "sourcePath": f"spec/changes/{active['id']}.md",
+        "evidencePath": evidence_relative,
+        "closureDigest": closure_digest,
         "taskDigest": state["approvals"]["task"]["digest"],
         "verification": state.get("verification"),
+        "artifacts": artifact_records,
+        "acceptance": acceptance_records,
+        "reviews": [
+            record
+            for record in acceptance_records
+            if record.get("kind") == "review"
+        ],
         "release": release_records,
         "practice": evidence.get("practice", {}),
+        "approvals": {
+            "dependencies": list(state["approvals"].get("dependencies", [])),
+            "migrations": list(state["approvals"].get("migrations", [])),
+        },
+        "integrationProof": integration_proof,
+        "projectFingerprint": project_fingerprint(root),
     }
     state["activeTask"] = None
     state["phase"] = "archived"
@@ -1591,7 +2167,7 @@ def command_archive(
     print(
         f"archived {active['id']}"
         if outcome == "completed"
-        else f"abandoned {active['id']}"
+        else f"{outcome} {active['id']}"
     )
 
 
@@ -1603,6 +2179,12 @@ def command_doctor(
 ) -> None:
     issues: list[str] = []
     warnings: list[str] = []
+    if is_git_repo(root):
+        warnings.extend(migrate_legacy_state(root, remove_untracked=repair))
+        cache_retained = clean_managed_bytecode(root) if repair else []
+        warnings.extend(
+            f"retained unknown cache entry: {relative}" for relative in cache_retained
+        )
     if repair:
         if not all_worktrees or not is_git_repo(root):
             raise FlowError("doctor --repair requires --all in a Git repository")
@@ -1634,25 +2216,11 @@ def command_doctor(
         if active and not task_path(root, active["id"]).is_file():
             issues.append("active task file is missing")
         if active and active.get("risk") in {"L1", "L2"} and is_git_repo(root):
-            baseline_paths = (
-                CONFIG_NAME,
-                "scripts/rigorbreeze.py",
-                "scripts/flow_state.py",
-                "scripts/flow_policy.py",
-                "scripts/flow_parallel.py",
-                "scripts/flow_automation.py",
-                "spec/index.md",
-            )
-            untracked = [
-                relative
-                for relative in baseline_paths
-                if git(root, "ls-files", "--error-unmatch", "--", relative).returncode
-                != 0
-            ]
-            if untracked:
+            baseline = workflow_baseline_status(root, state)
+            if baseline["status"] != "current":
                 warnings.append(
-                    "workflow baseline is not tracked before a high-risk task: "
-                    + ", ".join(untracked)
+                    "workflow baseline is not current before a high-risk task: "
+                    f"{baseline['status']} on {baseline['baseBranch']}"
                 )
     except FlowError as exc:
         issues.append(str(exc))
@@ -1790,15 +2358,21 @@ def build_parser() -> argparse.ArgumentParser:
     automate.add_argument("--remote")
     automate.add_argument("--branch")
     automate.add_argument("--expected-head")
+    automate.add_argument("--workflow-baseline", action="store_true")
     claim = sub.add_parser("claim")
     claim.add_argument("--release", action="store_true")
     reconcile = sub.add_parser("reconcile")
     reconcile.add_argument("--cleanup", action="store_true")
+    reconcile.add_argument("--worktree", type=Path)
+    reconcile.add_argument("--base")
+    reconcile.add_argument("--expected-head")
+    reconcile.add_argument("--allow-unmanaged", action="store_true")
     archive = sub.add_parser("archive")
     archive.add_argument(
-        "--outcome", choices=("completed", "abandoned"), default="completed"
+        "--outcome", choices=("completed", "abandoned", "reconciled"), default="completed"
     )
     archive.add_argument("--reason")
+    archive.add_argument("--expected-head")
     doctor = sub.add_parser("doctor")
     doctor.add_argument("--json", action="store_true")
     doctor.add_argument("--all", action="store_true")
@@ -1825,7 +2399,8 @@ def main() -> int:
                         args.session,
                         check_resources=not (
                             args.command == "archive"
-                            and getattr(args, "outcome", None) == "abandoned"
+                            and getattr(args, "outcome", None)
+                            in {"abandoned", "reconciled"}
                         ),
                     )
                 except flow_parallel.ParallelError as exc:
@@ -1876,6 +2451,7 @@ def main() -> int:
                     remote=args.remote,
                     branch=args.branch,
                     expected_head=args.expected_head,
+                    workflow_baseline=args.workflow_baseline,
                 )
             elif args.command == "claim":
                 try:
@@ -1889,12 +2465,28 @@ def main() -> int:
                     raise FlowError(str(exc)) from exc
             elif args.command == "reconcile":
                 try:
-                    result = flow_parallel.reconcile_integrations(root, args.cleanup)
+                    if args.allow_unmanaged:
+                        if not args.cleanup or not args.worktree or not args.base or not args.expected_head:
+                            raise FlowError(
+                                "unmanaged cleanup requires --cleanup, --worktree, --base, and --expected-head"
+                            )
+                        result = flow_parallel.cleanup_unmanaged_worktree(
+                            root,
+                            worktree=args.worktree,
+                            base=args.base,
+                            expected_head=args.expected_head,
+                        )
+                    else:
+                        if any((args.worktree, args.base, args.expected_head)):
+                            raise FlowError(
+                                "targeted worktree cleanup requires --allow-unmanaged"
+                            )
+                        result = flow_parallel.reconcile_integrations(root, args.cleanup)
                 except flow_parallel.ParallelError as exc:
                     raise FlowError(str(exc)) from exc
                 print(json.dumps(result, ensure_ascii=False, sort_keys=True))
             elif args.command == "archive":
-                command_archive(root, args.outcome, args.reason)
+                command_archive(root, args.outcome, args.reason, args.expected_head)
         return 0
     except FlowError as exc:
         try:
@@ -1908,14 +2500,27 @@ def main() -> int:
                     details["gate"] = getattr(args, "gate", None)
                 elif "runtime claim" in message.lower():
                     event_type = "runtime-resource-conflict"
+                elif "workflow baseline branch is not current" in message.lower():
+                    event_type = "workflow-baseline-pending"
+                elif "integrated-unclosed" in message.lower():
+                    event_type = "integrated-unclosed"
+                elif "closure-pending" in message.lower():
+                    event_type = "closure-pending-commit"
+                elif "unmanaged worktree" in message.lower():
+                    event_type = "unmanaged-worktree-review"
                 elif "active task" in message.lower() and getattr(
                     args, "command", None
                 ) in {"new", "init"}:
-                    event_type = (
-                        "runner-drift"
-                        if getattr(args, "command", None) == "init"
-                        else "old-task-slot"
-                    )
+                    if getattr(args, "command", None) == "init":
+                        install = installation_status(root, event_state)
+                        event_type = (
+                            "runner-partial-installation"
+                            if install.get("missingComponents")
+                            else "runner-drift"
+                        )
+                        details["installationStatus"] = install.get("status")
+                    else:
+                        event_type = "old-task-slot"
                 if event_type:
                     record_practice_event(root, event_state, event_type, details)
         except (FlowError, OSError, json.JSONDecodeError):

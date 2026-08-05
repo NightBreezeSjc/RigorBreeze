@@ -36,13 +36,16 @@ scripts/flow_automation.py
 
 .git/rigorbreeze/registry.json                 # primary/common, not committed
 .git/rigorbreeze/automation.json               # external-action journal
+.git/rigorbreeze/state.json                    # primary-worktree private state
 .git/worktrees/<name>/rigorbreeze/state.json   # linked-worktree private
 ```
 
 - `index.md`: authority order and navigation only.
 - Git-private `state.json`: schema-v4 phase, active task, approvals, latest
-  RED/verification, warnings, and last close. Existing primary-worktree
-  `spec/state.json` remains readable during compatibility migration.
+  RED/verification, warnings, and last close for both primary and linked
+  worktrees. Existing `spec/state.json` is copied on first read; `init` or
+  explicit repair removes it only when it is untracked and identical. A tracked
+  or divergent legacy file is retained and reported.
 - `changes/<TASK-ID>.md`: the only human-authored change contract.
 - `evidence/<TASK-ID>.json`: baseline, check runs, TDD chain, verification,
   artifact digests, acceptance, release, and the prefilled practice summary.
@@ -81,7 +84,7 @@ draft → approved → red → implementing → verified → accepted
 accepted → release-ready → protected release gate
 ```
 
-Completed and abandoned tasks both move the same contract to `archive/`; `closure.outcome` distinguishes success from cancellation without inventing verification. `release-ready` is an optional production-release branch, not a prerequisite
+Completed, abandoned, and reconciled tasks move the same contract to `archive/`; `closure.outcome` distinguishes success, cancellation, and an externally integrated historical close without inventing verification. A normal close preserves a read-only `lastClosed` snapshot for guarded commit/push/merge after archive. `release-ready` is an optional production-release branch, not a prerequisite
 for closing every task.
 
 Only one task may be active in one worktree. One project may have many active
@@ -99,15 +102,16 @@ Private `state.json` and the common registry are machine caches and gate inputs,
 not product requirement sources. Do not commit linked-worktree state or edit it
 to bypass a gate. `doctor --all --repair` may rebuild the registry explicitly.
 
-`status --json` includes `installation` and `scope` projections. Installation
+`status --json` includes `installation`, `workflowBaseline`, lifecycle, and `scope` projections. Installation
 compares the bundled Skill with the project runner and reports `current`,
-`outdated`, `missing`, or `unmanaged` plus upgrade safety. Scope is `current`,
+`outdated`, `missing`, or `unmanaged`, missing/modified components, and upgrade safety. `workflowBaseline` proves managed files on the real base branch and reports `current`, `missing`, `partial`, `modified`, or `blocked`. Lifecycle prioritizes `integrated-unclosed` and `closure-pending` over stale-baseline advice. Scope is `current`,
 `violated`, or `not-applicable`, and evaluates committed changes from the
 approval baseline through `HEAD` together with current working-tree changes.
 
 `status --all --json` also includes runtime claims/conflicts and a `cleanup` projection. It lists
 managed integrated worktrees that are removable, entries retained with a safety
 reason, unregistered Git worktrees, and local task branches preserved by policy.
+Candidates include cleanliness, integration proof, expected HEAD, and whether one-time confirmation is required. Unmanaged removal never deletes its branch.
 This is advisory state derived from Git and the registry, not another task or
 evidence source.
 
@@ -122,7 +126,7 @@ Evidence JSON may store:
 
 Stable schema-v4 sections are `baseline`, `checkRuns`, `tddChain`,
 `artifacts`, `acceptance`, `release`, `automation`, `practice`, `red`, and
-`verifications`, plus `closure` for completed or abandoned outcomes. Release
+`verifications`, plus `closure` for completed, abandoned, or reconciled outcomes. Release
 may contain validated `operation-plan` and `operation-result` snapshots;
 practice may contain deduplicated machine events. Existing evidence `automation` entries remain readable, but
 new external-action outcomes are written only to the Git-private journal.

@@ -12,7 +12,7 @@ Deliver one observable user outcome per task. Keep one human-authored Markdown c
 1. Resolve the project root.
 2. Always run the bundled `python <skill-dir>/scripts/flow.py --root <project> status --all --json` in Git projects; fall back to `status --json` before initialization. Do not claim compliance from prose alone.
 3. If uninitialized, run `init`, configure `rigorbreeze.toml`, and run `doctor --json`. Report `installation.status`; never overwrite an outdated project runner while a task is active.
-4. Read `rigorbreeze.toml`, `spec/index.md`, the current task, and only its linked authoritative sources. Do not assume state is tracked at `spec/state.json`; linked worktrees use Git-private state.
+4. Read `rigorbreeze.toml`, `spec/index.md`, the current task, and only its linked authoritative sources. State for every Git worktree is private under its Git directory; migrate legacy `spec/state.json` through `init` or `doctor --all --repair`, never by editing it.
 5. Follow `nextAction`; use the bundled runner's `--help` as the canonical command reference. Before product-code writes, require an approved contract and successfully claim the current worktree/window.
 
 Read [handbook.md](references/handbook.md) before initialization, policy changes, or L2/Emergency work. Read [spec-tree.md](references/spec-tree.md) before changing state, evidence, digest, or archive behavior. Read [ci-gates.md](references/ci-gates.md) when configuring remote enforcement or releases.
@@ -44,6 +44,8 @@ Before approval, agree:
 - which requirement/design version defines acceptance.
 
 Approve the task only after scope, design, acceptance, plan, and test shape are stable. Its digest becomes the contract; changes invalidate downstream evidence. Do not reapprove over production implementation changes. Restore the approved contract and finish, or revert production changes before amending and reapproving the same outcome. Create a dependent task for a new user outcome or acceptance condition.
+
+Before the first enforced L1/L2 approval, require `workflowBaseline.status=current` on the task's real base branch. If the user explicitly authorizes the isolated baseline commit shown by `nextAction`, use `automate commit --once --workflow-baseline --expected-head <sha>`; never mix product changes into it or treat a task-branch runner commit as the project baseline.
 
 ## Implement with evidence
 
@@ -107,7 +109,7 @@ Never raise the configured level during initialization or upgrade. Before an aut
 
 Use `automate commit --once` or `automate push --once --remote <name> --branch <current> --expected-head <sha>` only when the user explicitly requested that action in the current message. One-time authority never persists or covers merge/release. Push fetches first, requires a fast-forward target, never rebases or force-pushes, and verifies the remote SHA; an integration branch additionally requires current full verification, structured acceptance, and review.
 
-After refreshing the baseline, inspect the `cleanup` projection from `status --all --json`. Run `reconcile --cleanup` from a different worktree when managed entries are removable; report retained or unregistered entries instead of asking the user to remember periodic cleanup. Integration may be proven by ancestry or by every task commit having a patch-equivalent baseline commit; partial equivalence never qualifies. Cleanup still requires exact RigorBreeze creation provenance and a clean non-current worktree. Local task branches remain recoverable.
+After refreshing the baseline, inspect the `cleanup` projection from `status --all --json`. Run `reconcile --cleanup` from a different worktree when managed entries are removable. Unregistered entries remain report-only unless the current user message explicitly authorizes the exact absolute path, base branch, expected HEAD, and `--allow-unmanaged`; require a clean non-current worktree with ancestry or complete patch-equivalence proof. Partial equivalence never qualifies, and local branches are always preserved.
 
 Automation outcomes live in Git-private `.git/rigorbreeze/automation.json`, keyed
 by immutable inputs. They are projected by JSON status, validated by `doctor`,
@@ -136,4 +138,4 @@ Keep the human interaction small:
 2. ask for real acceptance when implementation is ready;
 3. before L1/L2/Emergency archive, show the prefilled `retro --json` summary and ask only for rework reason, whether any block/next action was unreasonable, and whether the workflow helped.
 
-Codex runs the CLI and records evidence; do not make the user operate each internal command. L0 archives after configured verification. L1/L2 archive after full verification, applicable acceptance, independent review, and one retrospective confirmation. If a task is cancelled or superseded, use `archive --outcome abandoned --reason <reason>` only after task-owned changes are clean and external outcomes are known; this releases claims but preserves Git references. Production release gates run only when requested; artifact identity and release governance are not ordinary task-close requirements.
+Codex runs the CLI and records evidence; do not make the user operate each internal command. Close in this order: verify, accept, review, confirm retrospective, archive, then guarded commit/push/merge and worktree reconciliation. L0 needs only configured affected verification; L1/L2 need full verification, applicable acceptance, review, and retrospective. Use `abandoned` for a clean cancellation. If code was already externally integrated but the task remained open, use `archive --outcome reconciled --reason <reason> --expected-head <sha>` only after integration and external outcomes are proven; never invent GREEN, acceptance, or release success. Production release still requires an active `release-ready` task.

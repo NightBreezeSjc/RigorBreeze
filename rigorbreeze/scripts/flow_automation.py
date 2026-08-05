@@ -268,6 +268,32 @@ def working_tree_paths(root: Path, excluded: set[str] | None = None) -> list[str
     ]
 
 
+def stage_exact_paths(root: Path, files: list[str]) -> None:
+    existing = [relative for relative in files if (root / relative).exists()]
+    removed = [relative for relative in files if not (root / relative).exists()]
+    if existing:
+        added = flow_parallel.git(root, "add", "--", *existing)
+        if added.returncode != 0:
+            raise AutomationError(added.stderr.strip() or "unable to stage task files")
+    if removed:
+        tracked = [
+            relative
+            for relative in removed
+            if flow_parallel.git(root, "cat-file", "-e", f"HEAD:{relative}").returncode
+            == 0
+        ]
+        if len(tracked) != len(removed):
+            unknown = sorted(set(removed) - set(tracked))
+            raise AutomationError(
+                "unable to stage unknown removed paths: " + ", ".join(unknown)
+            )
+        deleted = flow_parallel.git(root, "update-index", "--remove", "--", *tracked)
+        if deleted.returncode != 0:
+            raise AutomationError(
+                deleted.stderr.strip() or "unable to stage removed task files"
+            )
+
+
 def commit_action(
     root: Path,
     *,
@@ -283,9 +309,7 @@ def commit_action(
 ) -> str:
     if recover_interrupted_commit(root, task_id):
         return "recovered"
-    added = flow_parallel.git(root, "add", "--", *files)
-    if added.returncode != 0:
-        raise AutomationError(added.stderr.strip() or "unable to stage task files")
+    stage_exact_paths(root, files)
     try:
         check()
     except Exception:
@@ -293,11 +317,7 @@ def commit_action(
         if staged_before:
             flow_parallel.git(root, "add", "--", *staged_before)
         raise
-    refreshed = flow_parallel.git(root, "add", "--", *files)
-    if refreshed.returncode != 0:
-        raise AutomationError(
-            refreshed.stderr.strip() or "unable to refresh staged task files"
-        )
+    stage_exact_paths(root, files)
     parent = flow_parallel.git(root, "rev-parse", "HEAD").stdout.strip()
     tree_result = flow_parallel.git(root, "write-tree")
     if tree_result.returncode != 0:

@@ -17,6 +17,22 @@ The project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). 
 - Reframed the repository for first-time adopters with bilingual onboarding, explicit safety boundaries, and a complete first-task walkthrough.
 - Added concise contribution and security policies plus an MIT license.
 
+## [0.8.0] - State closure and low-friction adoption
+
+### Added
+
+- `workflowBaseline` proves the managed installation on the real base branch and provides one exact, user-authorized baseline commit path.
+- `archive --outcome reconciled` honestly closes externally integrated historical tasks without fabricating verification or acceptance.
+- Normal archive retains an immutable `lastClosed` delivery context so guarded commit, push, and protected merge can finish after task closure.
+- Explicit unmanaged-worktree cleanup requires an absolute path, base branch, exact HEAD, a clean inactive worktree, and complete integration proof while preserving the branch.
+
+### Changed
+
+- Primary and linked worktree state now lives only in Git-private directories; compatible legacy state is migrated conservatively.
+- Installation status identifies missing and modified runner components, while lifecycle status prioritizes integrated or pending closure over stale-baseline advice.
+- Enforced L1/L2 approval no longer accepts a workflow baseline committed only on a task branch.
+- L2 guidance now favors sanitized real/provider-sandbox fixtures and explicit serialization, encoding, database-dialect, and business-precondition checks.
+
 ## [0.7.0] - Real-delivery closure
 
 ### Added

@@ -127,11 +127,13 @@ Risk: L1
         return task
 
     def test_init_creates_minimal_spec_tree_and_is_idempotent(self) -> None:
+        self.init_git()
         self.run_flow("init")
         self.run_flow("init")
 
         self.assertTrue((self.root / "spec" / "index.md").is_file())
-        self.assertTrue((self.root / "spec" / "state.json").is_file())
+        self.assertTrue(self.state_path().is_file())
+        self.assertFalse((self.root / "spec" / "state.json").exists())
         self.assertTrue((self.root / "spec" / "changes").is_dir())
         self.assertTrue((self.root / "spec" / "evidence").is_dir())
         self.assertTrue((self.root / "spec" / "archive").is_dir())
@@ -153,7 +155,7 @@ Risk: L1
         self.assertIn("## Conditional risks", task_text)
 
         state = json.loads(
-            (self.root / "spec" / "state.json").read_text(encoding="utf-8")
+            self.state_path().read_text(encoding="utf-8")
         )
         self.assertEqual(state["phase"], "draft")
         self.assertEqual(state["activeTask"]["id"], "TASK-001")
@@ -215,7 +217,7 @@ Risk: L1
         status = self.run_flow("status")
         self.assertIn("approval: invalid", status.stdout.lower())
         state = json.loads(
-            (self.root / "spec" / "state.json").read_text(encoding="utf-8")
+            self.state_path().read_text(encoding="utf-8")
         )
         self.assertTrue(
             state["approvals"]["task"]["valid"],
@@ -225,7 +227,7 @@ Risk: L1
     def test_status_json_reports_next_action_without_mutating_state(self) -> None:
         self.init_git()
         self.run_flow("init")
-        state_path = self.root / "spec" / "state.json"
+        state_path = self.state_path()
         before = state_path.read_bytes()
         lock_path = self.root / "spec" / ".rigorbreeze.lock"
         lock_path.mkdir()
@@ -365,7 +367,7 @@ Risk: L1
         self.assertFalse((self.root / "spec" / "changes" / "TASK-001.md").exists())
         self.assertTrue((self.root / "spec" / "archive" / "TASK-001.md").is_file())
         state = json.loads(
-            (self.root / "spec" / "state.json").read_text(encoding="utf-8")
+            self.state_path().read_text(encoding="utf-8")
         )
         self.assertEqual(state["phase"], "archived")
         self.assertIsNone(state["activeTask"])
