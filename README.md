@@ -13,7 +13,7 @@ English · [简体中文](README.zh-CN.md)
 
 RigorBreeze turns a conversation into one approved task contract, observed TDD evidence, configured quality checks, real-runtime acceptance, and a recoverable delivery record. It is deliberately smaller than a full project-management system: one task Markdown, one machine evidence file, and no document maze.
 
-> **Public Preview:** v0.8.0 is usable today and closes real-delivery gaps around workflow baselines, stale integrated tasks, post-archive delivery, and safe review of unmanaged worktrees. It has not yet completed the validation required for v1.0, so interfaces may still change in response to further delivery evidence.
+> **Public Preview:** v0.8.1 is usable today and closes real-delivery gaps around workflow baselines, stale integrated tasks, post-archive delivery, incomplete prompts, and repeated external operations. It has not yet completed the validation required for v1.0, so interfaces may still change in response to further delivery evidence.
 
 ## Why this exists
 
@@ -99,7 +99,7 @@ $rigorbreeze initialize this project and develop a profile page where users can 
 
 Codex will:
 
-1. inspect the current project and its authoritative requirements;
+1. inspect the current project and complete missing context from authoritative requirements, code, tests, Git and runtime evidence;
 2. propose one observable task with scope, acceptance IDs, risk, and test seams;
 3. ask you to approve that compact contract;
 4. observe RED for L1/L2 behavior, implement in small GREEN steps, and run configured checks;
@@ -108,9 +108,11 @@ Codex will:
 
 You make three kinds of judgment: approve the intended outcome, accept the real result, and confirm whether the workflow helped. Codex runs and records the internal workflow commands.
 
+You do not need to write a perfect prompt or prepend a persona such as “act as a unicorn CTO.” RigorBreeze recovers project facts, current behavior, architecture paths, invariants and data-freshness/fallback semantics itself. It asks only when evidence cannot determine an intent that would materially change the result. For external Git, deployment, developer-tool or platform writes, it first reports what is already completed, the current immutable identifiers, the one remaining action and stop conditions so an old checklist is not replayed.
+
 Allowed Scope entries are repository-relative paths, directory prefixes, or globs; `*` matches one path segment and `**` crosses directories. Acceptance criteria use unique machine-readable IDs. A contract cannot be reapproved over production changes: restore the approved contract and finish, or revert those changes before amending the same outcome. A new user outcome or acceptance condition becomes a dependent slice.
 
-After initialization and project-check configuration, establish a human-controlled Git baseline before the first enforced L1/L2 approval. `status --json` reports the exact base-branch state under `workflowBaseline`. When the user explicitly authorizes it, Codex may run `automate commit --once --workflow-baseline --expected-head <SHA>`; it stages only managed workflow files, rejects mixed product changes and secrets, and does not persist Git authority. The installed Skill always checks through its bundled v0.8.0 runner, reports missing or modified components separately, and does not overwrite it while an implementation task is active.
+After initialization and project-check configuration, establish a human-controlled Git baseline before the first enforced L1/L2 approval. `status --json` reports the exact base-branch state under `workflowBaseline`. When the user explicitly authorizes it, Codex may run `automate commit --once --workflow-baseline --expected-head <SHA>`; it stages only managed workflow files, rejects mixed product changes and secrets, and does not persist Git authority. The installed Skill always checks through its bundled v0.8.1 runner, reports missing or modified components separately, and does not overwrite it while an implementation task is active.
 
 After initialization, the project contains:
 
@@ -236,7 +238,7 @@ For a manual install, remove only the `rigorbreeze` directory or symlink from yo
 
 ## Public Preview and v1.0
 
-v0.8.0 keeps the minimal Spec Tree and existing command surface while moving all worktree state into Git-private storage, proving the workflow baseline on the real base branch, prioritizing `integrated-unclosed` and `closure-pending` lifecycles, and permitting guarded delivery after archive. Historical reconciliation records missing proof honestly; it never fabricates GREEN, acceptance, or release success. Maturity beyond preview must still come from repeated real use rather than more features.
+v0.8.1 keeps the minimal Spec Tree and existing command surface while adding evidence-backed prompt completion, follow-up task re-entry, observed external-state reconstruction, and correct nested test/source classification. Historical reconciliation records missing proof honestly; it never fabricates GREEN, acceptance, or release success. Maturity beyond preview must still come from repeated real use rather than more features.
 
 Before v1.0, the workflow must complete and learn from:
 

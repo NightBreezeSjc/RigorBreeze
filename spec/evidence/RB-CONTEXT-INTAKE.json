@@ -1,0 +1,1133 @@
+{
+  "workflowVersion": 4,
+  "taskId": "RB-CONTEXT-INTAKE",
+  "baseline": {
+    "taskDigest": "1c25e860284cf551de57393769932c3669a2e3dd9539cc8bb786846a3e718df5",
+    "head": "942867a19e92ee825e8e7b804b0ff94205a91cae",
+    "projectFingerprint": "296ee4ac71f91265efcd9f3915b4c2adb13d6e5eaefa55fff6bfa06f066e3d7d",
+    "configDigest": "e309b7a492f02e8a45e3c07000bd1a83ea30532fed05a783bbc286965e0be829",
+    "workingTreePaths": [
+      "AGENTS.md",
+      "CHANGELOG.md",
+      "CHANGELOG.zh-CN.md",
+      "README.md",
+      "README.zh-CN.md",
+      "Skill演进与实践记录.md",
+      "rigorbreeze/SKILL.md",
+      "rigorbreeze/agents/openai.yaml",
+      "rigorbreeze/references/handbook.md",
+      "rigorbreeze/references/handbook.zh-CN.md",
+      "rigorbreeze/scripts/tests/test_flow.py",
+      "rigorbreeze/scripts/tests/test_flow_simplified.py",
+      "rigorbreeze/scripts/tests/test_flow_v2.py",
+      "rigorbreeze/scripts/tests/test_flow_v4.py",
+      "rigorbreeze/scripts/tests/test_skill_contract.py",
+      "spec/changes/RB-CONTEXT-INTAKE.md"
+    ],
+    "workingTreeDigests": {
+      "AGENTS.md": "0d7bb3b380b96651e5dbf894f70691ce024118660494f051797f2c4d782ad274",
+      "CHANGELOG.md": "1ef32dc1e623907b558b28db87f3b4515e63ce4aa6b99f34f84fa0b3ad5de23d",
+      "CHANGELOG.zh-CN.md": "88f7f2b0343630f8773c0b9de8ba9571b73e1b6878875c8b6c11a976a81e9ffb",
+      "README.md": "ae103d1000021479d771a741d475a70acc90e95afd78525cb357e056a789cb2c",
+      "README.zh-CN.md": "173b874555da16bfad8a442e9cff0c5517c524d831bf1c918e460cfae319e48d",
+      "Skill演进与实践记录.md": "8df95d47b78551855dcfee8fb13a05a991b8c7b05f956d270e3b61b4cfdecd95",
+      "rigorbreeze/SKILL.md": "dae2fa27044c9d36c81f6edc1c18074bcbd8a20a6febf2717ab26aeacbca34e6",
+      "rigorbreeze/agents/openai.yaml": "c12ebbb7cd5ad18925a67999a1ec3bec4be78570f3935100651d0edb466090e3",
+      "rigorbreeze/references/handbook.md": "e67bafa781a715163a1345e95d63ac3b8912a599a13cb506e7303f841f18d7e7",
+      "rigorbreeze/references/handbook.zh-CN.md": "03ba9eb29d320e2c501b9024c3a686c4a644ce2a9b1175a3c8a40ace579fa450",
+      "rigorbreeze/scripts/tests/test_flow.py": "ef856debb076aa2bba15cf3fbadf0fce2d6cbfbaeec26c62fe4ee008ad9bd54c",
+      "rigorbreeze/scripts/tests/test_flow_simplified.py": "4b0c7b378869d4df121e0a2906b109035de3596a9ea3ba0f9f3e0c7c9a851262",
+      "rigorbreeze/scripts/tests/test_flow_v2.py": "2e825c5930d8567e0362983fb1329ab558792d93827c1fc316a1b8ef7ac21a3e",
+      "rigorbreeze/scripts/tests/test_flow_v4.py": "17fcaa6d393543f4ca3695b43a0566ca952f31784a2e74fdfd758fc2db8faa93",
+      "rigorbreeze/scripts/tests/test_skill_contract.py": "0e79f55a864637760d00787d7a20eb8ab31d4868aa61f6f9d2d34ff1a0ba0beb",
+      "spec/changes/RB-CONTEXT-INTAKE.md": "1c25e860284cf551de57393769932c3669a2e3dd9539cc8bb786846a3e718df5"
+    },
+    "approvedAt": "2026-08-05T11:07:44+08:00"
+  },
+  "red": [
+    {
+      "requirement": "REQ-001",
+      "command": [
+        "env",
+        "PYTHONPATH=rigorbreeze/scripts",
+        "python3",
+        "-B",
+        "-c",
+        "from flow_state import task_template; assert '- User outcome: TODO' in task_template('T','t','L1'), 'context-intake-missing'",
+        "rigorbreeze/scripts/tests/test_flow.py"
+      ],
+      "exitCode": 1,
+      "expectedPattern": "context-intake-missing",
+      "testDigests": {
+        "rigorbreeze/scripts/tests/test_flow.py": "7008e62e33ceeb68a60bc2129c529945084be8c2148055f4672af27c24caafa8"
+      },
+      "summary": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n    from flow_state import task_template; assert '- User outcome: TODO' in task_template('T','t','L1'), 'context-intake-missing'\n                                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: context-intake-missing",
+      "taskDigest": "0d3604ac547e7ce604696072ec6f58f0e34dfb002363a9d8f4ee639b1dac3c3d",
+      "projectFingerprint": "f0b409ea91938c096276a5b14d9276df3f0b6cc4296f4eebac1b9e20054b53e9",
+      "head": "942867a19e92ee825e8e7b804b0ff94205a91cae",
+      "observedAt": "2026-08-05T10:35:25+08:00"
+    },
+    {
+      "requirement": "REQ-001",
+      "command": [
+        "env",
+        "PYTHONPATH=rigorbreeze/scripts",
+        "python3",
+        "-B",
+        "-c",
+        "from flow_state import task_template; assert '- User outcome: TODO' in task_template('T','t','L1'), 'context-intake-missing'",
+        "rigorbreeze/scripts/tests/test_flow.py"
+      ],
+      "exitCode": 1,
+      "expectedPattern": "context-intake-missing",
+      "testDigests": {
+        "rigorbreeze/scripts/tests/test_flow.py": "7008e62e33ceeb68a60bc2129c529945084be8c2148055f4672af27c24caafa8"
+      },
+      "summary": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n    from flow_state import task_template; assert '- User outcome: TODO' in task_template('T','t','L1'), 'context-intake-missing'\n                                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: context-intake-missing",
+      "taskDigest": "e427b29c481d2bac00574ccf20dc57938e8bedffe7d29ca671f2b773d30c2bec",
+      "projectFingerprint": "fbb7672f2727253ac4eb9e33a1488141079f7c286647930c29a1f4531efde7ad",
+      "head": "942867a19e92ee825e8e7b804b0ff94205a91cae",
+      "observedAt": "2026-08-05T10:44:13+08:00"
+    },
+    {
+      "requirement": "REQ-001",
+      "command": [
+        "env",
+        "PYTHONPATH=rigorbreeze/scripts",
+        "python3",
+        "-B",
+        "-c",
+        "from flow_state import task_template; assert '- User outcome: TODO' in task_template('T','t','L1'), 'context-intake-missing'",
+        "rigorbreeze/scripts/tests/test_flow_v2.py"
+      ],
+      "exitCode": 1,
+      "expectedPattern": "context-intake-missing",
+      "testDigests": {
+        "rigorbreeze/scripts/tests/test_flow_v2.py": "e319128f8effe2cf6b25312f0e3d878c2b08015f4a3a27d29e2b3eb3a9a98d37"
+      },
+      "summary": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n    from flow_state import task_template; assert '- User outcome: TODO' in task_template('T','t','L1'), 'context-intake-missing'\n                                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: context-intake-missing",
+      "taskDigest": "e427b29c481d2bac00574ccf20dc57938e8bedffe7d29ca671f2b773d30c2bec",
+      "projectFingerprint": "fbb7672f2727253ac4eb9e33a1488141079f7c286647930c29a1f4531efde7ad",
+      "head": "942867a19e92ee825e8e7b804b0ff94205a91cae",
+      "observedAt": "2026-08-05T10:47:42+08:00"
+    },
+    {
+      "requirement": "REQ-001",
+      "command": [
+        "env",
+        "PYTHONPATH=rigorbreeze/scripts",
+        "python3",
+        "-B",
+        "-c",
+        "from flow_state import task_template; assert '- User outcome: TODO' in task_template('T','t','L1'), 'context-intake-missing'",
+        "rigorbreeze/scripts/tests/test_flow_v2.py"
+      ],
+      "exitCode": 1,
+      "expectedPattern": "context-intake-missing",
+      "testDigests": {
+        "rigorbreeze/scripts/tests/test_flow_v2.py": "2e825c5930d8567e0362983fb1329ab558792d93827c1fc316a1b8ef7ac21a3e"
+      },
+      "summary": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n    from flow_state import task_template; assert '- User outcome: TODO' in task_template('T','t','L1'), 'context-intake-missing'\n                                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: context-intake-missing",
+      "taskDigest": "e427b29c481d2bac00574ccf20dc57938e8bedffe7d29ca671f2b773d30c2bec",
+      "projectFingerprint": "36aa926023f9429b3423b71d14ab83d3faccfbe1cd195dde3fe875e3d8881c5b",
+      "head": "942867a19e92ee825e8e7b804b0ff94205a91cae",
+      "observedAt": "2026-08-05T10:53:37+08:00"
+    },
+    {
+      "requirement": "REQ-001",
+      "command": [
+        "env",
+        "PYTHONPATH=rigorbreeze/scripts",
+        "python3",
+        "-B",
+        "-c",
+        "from flow_state import task_template; assert '- User outcome: TODO' in task_template('T','t','L1'), 'context-intake-missing'",
+        "rigorbreeze/scripts/tests/test_flow_v2.py"
+      ],
+      "exitCode": 1,
+      "expectedPattern": "context-intake-missing",
+      "testDigests": {
+        "rigorbreeze/scripts/tests/test_flow_v2.py": "2e825c5930d8567e0362983fb1329ab558792d93827c1fc316a1b8ef7ac21a3e"
+      },
+      "summary": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n    from flow_state import task_template; assert '- User outcome: TODO' in task_template('T','t','L1'), 'context-intake-missing'\n                                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: context-intake-missing",
+      "taskDigest": "1c25e860284cf551de57393769932c3669a2e3dd9539cc8bb786846a3e718df5",
+      "projectFingerprint": "296ee4ac71f91265efcd9f3915b4c2adb13d6e5eaefa55fff6bfa06f066e3d7d",
+      "head": "942867a19e92ee825e8e7b804b0ff94205a91cae",
+      "observedAt": "2026-08-05T11:07:53+08:00"
+    }
+  ],
+  "verifications": [
+    {
+      "toolVersion": "0.8.1",
+      "profile": "affected",
+      "configured": true,
+      "mode": "enforced",
+      "checks": [
+        "format",
+        "lint",
+        "unit",
+        "secret"
+      ],
+      "passed": false,
+      "taskDigest": "e427b29c481d2bac00574ccf20dc57938e8bedffe7d29ca671f2b773d30c2bec",
+      "projectFingerprint": "9d42346c63c30c0721c2e737323e79ac4460a1ffd36e303a3952ba61d4583162",
+      "configDigest": "e309b7a492f02e8a45e3c07000bd1a83ea30532fed05a783bbc286965e0be829",
+      "head": "942867a19e92ee825e8e7b804b0ff94205a91cae",
+      "verifiedAt": "2026-08-05T10:50:35+08:00"
+    },
+    {
+      "toolVersion": "0.8.1",
+      "profile": "affected",
+      "configured": true,
+      "mode": "enforced",
+      "checks": [
+        "format",
+        "lint",
+        "unit",
+        "secret"
+      ],
+      "passed": true,
+      "taskDigest": "e427b29c481d2bac00574ccf20dc57938e8bedffe7d29ca671f2b773d30c2bec",
+      "projectFingerprint": "e3313abd85b57cedcf29d0278b80f88f1090f2c2a88d52d4575584ac12a5246d",
+      "configDigest": "e309b7a492f02e8a45e3c07000bd1a83ea30532fed05a783bbc286965e0be829",
+      "head": "942867a19e92ee825e8e7b804b0ff94205a91cae",
+      "verifiedAt": "2026-08-05T10:56:16+08:00"
+    },
+    {
+      "toolVersion": "0.8.1",
+      "profile": "full",
+      "configured": true,
+      "mode": "enforced",
+      "checks": [
+        "format",
+        "lint",
+        "unit",
+        "contract",
+        "secret",
+        "build",
+        "acceptance"
+      ],
+      "passed": true,
+      "taskDigest": "e427b29c481d2bac00574ccf20dc57938e8bedffe7d29ca671f2b773d30c2bec",
+      "projectFingerprint": "e3313abd85b57cedcf29d0278b80f88f1090f2c2a88d52d4575584ac12a5246d",
+      "configDigest": "e309b7a492f02e8a45e3c07000bd1a83ea30532fed05a783bbc286965e0be829",
+      "head": "942867a19e92ee825e8e7b804b0ff94205a91cae",
+      "verifiedAt": "2026-08-05T11:00:20+08:00"
+    },
+    {
+      "toolVersion": "0.8.1",
+      "profile": "full",
+      "configured": true,
+      "mode": "enforced",
+      "checks": [
+        "format",
+        "lint",
+        "unit",
+        "contract",
+        "secret",
+        "build",
+        "acceptance"
+      ],
+      "passed": true,
+      "taskDigest": "1c25e860284cf551de57393769932c3669a2e3dd9539cc8bb786846a3e718df5",
+      "projectFingerprint": "9237ef516bfea009237f3912f0ff421dd1e059503b43e36a7032cb35296be57f",
+      "configDigest": "e309b7a492f02e8a45e3c07000bd1a83ea30532fed05a783bbc286965e0be829",
+      "head": "942867a19e92ee825e8e7b804b0ff94205a91cae",
+      "verifiedAt": "2026-08-05T11:12:31+08:00"
+    }
+  ],
+  "checkRuns": [
+    {
+      "checkId": "format",
+      "category": "static-quality",
+      "profile": "affected",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-m",
+        "ruff",
+        "format",
+        "--check",
+        "rigorbreeze/scripts"
+      ],
+      "exitCode": 1,
+      "passed": false,
+      "durationMs": 231,
+      "summary": "Would reformat: rigorbreeze/scripts/flow.py\nWould reformat: rigorbreeze/scripts/flow_state.py\nWould reformat: rigorbreeze/scripts/tests/test_flow.py\nWould reformat: rigorbreeze/scripts/tests/test_flow_simplified.py\nWould reformat: rigorbreeze/scripts/tests/test_flow_v2.py\nWould reformat: rigorbreeze/scripts/tests/test_flow_v4.py\n6 files would be reformatted, 7 files already formatted",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "e427b29c481d2bac00574ccf20dc57938e8bedffe7d29ca671f2b773d30c2bec",
+      "projectFingerprint": "9d42346c63c30c0721c2e737323e79ac4460a1ffd36e303a3952ba61d4583162",
+      "head": "942867a19e92ee825e8e7b804b0ff94205a91cae",
+      "recordedAt": "2026-08-05T10:48:39+08:00"
+    },
+    {
+      "checkId": "lint",
+      "category": "static-quality",
+      "profile": "affected",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-m",
+        "ruff",
+        "check",
+        "rigorbreeze/scripts"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 31,
+      "summary": "All checks passed!",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "e427b29c481d2bac00574ccf20dc57938e8bedffe7d29ca671f2b773d30c2bec",
+      "projectFingerprint": "9d42346c63c30c0721c2e737323e79ac4460a1ffd36e303a3952ba61d4583162",
+      "head": "942867a19e92ee825e8e7b804b0ff94205a91cae",
+      "recordedAt": "2026-08-05T10:48:39+08:00"
+    },
+    {
+      "checkId": "unit",
+      "category": "behavior",
+      "profile": "affected",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "rigorbreeze/scripts/tests",
+        "-v"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 115495,
+      "summary": "workflow_baseline_is_proven_on_the_base_branch (test_flow_v4.FlowV4Tests.test_workflow_baseline_is_proven_on_the_base_branch) ... ok\ntest_documented_first_run_cli_commands_exist (test_skill_contract.SkillContractTests.test_documented_first_run_cli_commands_exist) ... ok\ntest_every_user_facing_english_document_has_chinese (test_skill_contract.SkillContractTests.test_every_user_facing_english_document_has_chinese) ... ok\ntest_installable_skill_excludes_repository_documents (test_skill_contract.SkillContractTests.test_installable_skill_excludes_repository_documents) ... ok\ntest_installable_skill_has_no_project_specific_policy (test_skill_contract.SkillContractTests.test_installable_skill_has_no_project_specific_policy) ... ok\ntest_long_references_have_a_table_of_contents (test_skill_contract.SkillContractTests.test_long_references_have_a_table_of_contents) ... ok\ntest_public_markdown_relative_links_resolve (test_skill_contract.SkillContractTests.test_public_markdown_relative_links_resolve) ... ok\ntest_public_readmes_cover_the_same_first_run_contract (test_skill_contract.SkillContractTests.test_public_readmes_cover_the_same_first_run_contract) ... ok\ntest_repository_has_minimal_open_source_governance (test_skill_contract.SkillContractTests.test_repository_has_minimal_open_source_governance) ... ok\ntest_repository_has_skill_owned_ci (test_skill_contract.SkillContractTests.test_repository_has_skill_owned_ci) ... ok\ntest_skill_completes_context_and_rechecks_follow_up_writes (test_skill_contract.SkillContractTests.test_skill_completes_context_and_rechecks_follow_up_writes) ... ok\ntest_skill_entrypoint_stays_compact_and_links_every_reference (test_skill_contract.SkillContractTests.test_skill_entrypoint_stays_compact_and_links_every_reference) ... ok\ntest_skill_metadata_matches_public_name (test_skill_contract.SkillContractTests.test_skill_metadata_matches_public_name) ... ok\n\n----------------------------------------------------------------------\nRan 112 tests in 115.425s\n\nOK",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "e427b29c481d2bac00574ccf20dc57938e8bedffe7d29ca671f2b773d30c2bec",
+      "projectFingerprint": "9d42346c63c30c0721c2e737323e79ac4460a1ffd36e303a3952ba61d4583162",
+      "head": "942867a19e92ee825e8e7b804b0ff94205a91cae",
+      "recordedAt": "2026-08-05T10:50:35+08:00"
+    },
+    {
+      "checkId": "secret",
+      "category": "secrets",
+      "profile": "affected",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-c",
+        "import pathlib,re,sys; files=[p for p in pathlib.Path('.').rglob('*') if p.is_file() and '.git' not in p.parts and 'tests' not in p.parts and p.name != 'rigorbreeze.toml']; pattern=re.compile(r'(?i)(api[_-]?key|token|password|secret)\\s*[:=]\\s*\\S{20,}'); hits=[str(p) for p in files if pattern.search(p.read_text(errors='ignore'))]; print('\\n'.join(hits)); sys.exit(bool(hits))"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 45,
+      "summary": "",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "e427b29c481d2bac00574ccf20dc57938e8bedffe7d29ca671f2b773d30c2bec",
+      "projectFingerprint": "9d42346c63c30c0721c2e737323e79ac4460a1ffd36e303a3952ba61d4583162",
+      "head": "942867a19e92ee825e8e7b804b0ff94205a91cae",
+      "recordedAt": "2026-08-05T10:50:35+08:00"
+    },
+    {
+      "checkId": "format",
+      "category": "static-quality",
+      "profile": "affected",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-m",
+        "ruff",
+        "format",
+        "--check",
+        "rigorbreeze/scripts"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 51,
+      "summary": "13 files already formatted",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "e427b29c481d2bac00574ccf20dc57938e8bedffe7d29ca671f2b773d30c2bec",
+      "projectFingerprint": "e3313abd85b57cedcf29d0278b80f88f1090f2c2a88d52d4575584ac12a5246d",
+      "head": "942867a19e92ee825e8e7b804b0ff94205a91cae",
+      "recordedAt": "2026-08-05T10:54:23+08:00"
+    },
+    {
+      "checkId": "lint",
+      "category": "static-quality",
+      "profile": "affected",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-m",
+        "ruff",
+        "check",
+        "rigorbreeze/scripts"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 34,
+      "summary": "All checks passed!",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "e427b29c481d2bac00574ccf20dc57938e8bedffe7d29ca671f2b773d30c2bec",
+      "projectFingerprint": "e3313abd85b57cedcf29d0278b80f88f1090f2c2a88d52d4575584ac12a5246d",
+      "head": "942867a19e92ee825e8e7b804b0ff94205a91cae",
+      "recordedAt": "2026-08-05T10:54:23+08:00"
+    },
+    {
+      "checkId": "unit",
+      "category": "behavior",
+      "profile": "affected",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "rigorbreeze/scripts/tests",
+        "-v"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 113125,
+      "summary": "workflow_baseline_is_proven_on_the_base_branch (test_flow_v4.FlowV4Tests.test_workflow_baseline_is_proven_on_the_base_branch) ... ok\ntest_documented_first_run_cli_commands_exist (test_skill_contract.SkillContractTests.test_documented_first_run_cli_commands_exist) ... ok\ntest_every_user_facing_english_document_has_chinese (test_skill_contract.SkillContractTests.test_every_user_facing_english_document_has_chinese) ... ok\ntest_installable_skill_excludes_repository_documents (test_skill_contract.SkillContractTests.test_installable_skill_excludes_repository_documents) ... ok\ntest_installable_skill_has_no_project_specific_policy (test_skill_contract.SkillContractTests.test_installable_skill_has_no_project_specific_policy) ... ok\ntest_long_references_have_a_table_of_contents (test_skill_contract.SkillContractTests.test_long_references_have_a_table_of_contents) ... ok\ntest_public_markdown_relative_links_resolve (test_skill_contract.SkillContractTests.test_public_markdown_relative_links_resolve) ... ok\ntest_public_readmes_cover_the_same_first_run_contract (test_skill_contract.SkillContractTests.test_public_readmes_cover_the_same_first_run_contract) ... ok\ntest_repository_has_minimal_open_source_governance (test_skill_contract.SkillContractTests.test_repository_has_minimal_open_source_governance) ... ok\ntest_repository_has_skill_owned_ci (test_skill_contract.SkillContractTests.test_repository_has_skill_owned_ci) ... ok\ntest_skill_completes_context_and_rechecks_follow_up_writes (test_skill_contract.SkillContractTests.test_skill_completes_context_and_rechecks_follow_up_writes) ... ok\ntest_skill_entrypoint_stays_compact_and_links_every_reference (test_skill_contract.SkillContractTests.test_skill_entrypoint_stays_compact_and_links_every_reference) ... ok\ntest_skill_metadata_matches_public_name (test_skill_contract.SkillContractTests.test_skill_metadata_matches_public_name) ... ok\n\n----------------------------------------------------------------------\nRan 112 tests in 113.061s\n\nOK",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "e427b29c481d2bac00574ccf20dc57938e8bedffe7d29ca671f2b773d30c2bec",
+      "projectFingerprint": "e3313abd85b57cedcf29d0278b80f88f1090f2c2a88d52d4575584ac12a5246d",
+      "head": "942867a19e92ee825e8e7b804b0ff94205a91cae",
+      "recordedAt": "2026-08-05T10:56:16+08:00"
+    },
+    {
+      "checkId": "secret",
+      "category": "secrets",
+      "profile": "affected",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-c",
+        "import pathlib,re,sys; files=[p for p in pathlib.Path('.').rglob('*') if p.is_file() and '.git' not in p.parts and 'tests' not in p.parts and p.name != 'rigorbreeze.toml']; pattern=re.compile(r'(?i)(api[_-]?key|token|password|secret)\\s*[:=]\\s*\\S{20,}'); hits=[str(p) for p in files if pattern.search(p.read_text(errors='ignore'))]; print('\\n'.join(hits)); sys.exit(bool(hits))"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 44,
+      "summary": "",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "e427b29c481d2bac00574ccf20dc57938e8bedffe7d29ca671f2b773d30c2bec",
+      "projectFingerprint": "e3313abd85b57cedcf29d0278b80f88f1090f2c2a88d52d4575584ac12a5246d",
+      "head": "942867a19e92ee825e8e7b804b0ff94205a91cae",
+      "recordedAt": "2026-08-05T10:56:16+08:00"
+    },
+    {
+      "checkId": "format",
+      "category": "static-quality",
+      "profile": "full",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-m",
+        "ruff",
+        "format",
+        "--check",
+        "rigorbreeze/scripts"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 61,
+      "summary": "13 files already formatted",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "e427b29c481d2bac00574ccf20dc57938e8bedffe7d29ca671f2b773d30c2bec",
+      "projectFingerprint": "e3313abd85b57cedcf29d0278b80f88f1090f2c2a88d52d4575584ac12a5246d",
+      "head": "942867a19e92ee825e8e7b804b0ff94205a91cae",
+      "recordedAt": "2026-08-05T10:56:36+08:00"
+    },
+    {
+      "checkId": "lint",
+      "category": "static-quality",
+      "profile": "full",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-m",
+        "ruff",
+        "check",
+        "rigorbreeze/scripts"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 28,
+      "summary": "All checks passed!",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "e427b29c481d2bac00574ccf20dc57938e8bedffe7d29ca671f2b773d30c2bec",
+      "projectFingerprint": "e3313abd85b57cedcf29d0278b80f88f1090f2c2a88d52d4575584ac12a5246d",
+      "head": "942867a19e92ee825e8e7b804b0ff94205a91cae",
+      "recordedAt": "2026-08-05T10:56:36+08:00"
+    },
+    {
+      "checkId": "unit",
+      "category": "behavior",
+      "profile": "full",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "rigorbreeze/scripts/tests",
+        "-v"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 111674,
+      "summary": "workflow_baseline_is_proven_on_the_base_branch (test_flow_v4.FlowV4Tests.test_workflow_baseline_is_proven_on_the_base_branch) ... ok\ntest_documented_first_run_cli_commands_exist (test_skill_contract.SkillContractTests.test_documented_first_run_cli_commands_exist) ... ok\ntest_every_user_facing_english_document_has_chinese (test_skill_contract.SkillContractTests.test_every_user_facing_english_document_has_chinese) ... ok\ntest_installable_skill_excludes_repository_documents (test_skill_contract.SkillContractTests.test_installable_skill_excludes_repository_documents) ... ok\ntest_installable_skill_has_no_project_specific_policy (test_skill_contract.SkillContractTests.test_installable_skill_has_no_project_specific_policy) ... ok\ntest_long_references_have_a_table_of_contents (test_skill_contract.SkillContractTests.test_long_references_have_a_table_of_contents) ... ok\ntest_public_markdown_relative_links_resolve (test_skill_contract.SkillContractTests.test_public_markdown_relative_links_resolve) ... ok\ntest_public_readmes_cover_the_same_first_run_contract (test_skill_contract.SkillContractTests.test_public_readmes_cover_the_same_first_run_contract) ... ok\ntest_repository_has_minimal_open_source_governance (test_skill_contract.SkillContractTests.test_repository_has_minimal_open_source_governance) ... ok\ntest_repository_has_skill_owned_ci (test_skill_contract.SkillContractTests.test_repository_has_skill_owned_ci) ... ok\ntest_skill_completes_context_and_rechecks_follow_up_writes (test_skill_contract.SkillContractTests.test_skill_completes_context_and_rechecks_follow_up_writes) ... ok\ntest_skill_entrypoint_stays_compact_and_links_every_reference (test_skill_contract.SkillContractTests.test_skill_entrypoint_stays_compact_and_links_every_reference) ... ok\ntest_skill_metadata_matches_public_name (test_skill_contract.SkillContractTests.test_skill_metadata_matches_public_name) ... ok\n\n----------------------------------------------------------------------\nRan 112 tests in 111.617s\n\nOK",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "e427b29c481d2bac00574ccf20dc57938e8bedffe7d29ca671f2b773d30c2bec",
+      "projectFingerprint": "e3313abd85b57cedcf29d0278b80f88f1090f2c2a88d52d4575584ac12a5246d",
+      "head": "942867a19e92ee825e8e7b804b0ff94205a91cae",
+      "recordedAt": "2026-08-05T10:58:28+08:00"
+    },
+    {
+      "checkId": "contract",
+      "category": "behavior",
+      "profile": "full",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-m",
+        "py_compile",
+        "rigorbreeze/scripts/flow.py"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 42,
+      "summary": "",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "e427b29c481d2bac00574ccf20dc57938e8bedffe7d29ca671f2b773d30c2bec",
+      "projectFingerprint": "e3313abd85b57cedcf29d0278b80f88f1090f2c2a88d52d4575584ac12a5246d",
+      "head": "942867a19e92ee825e8e7b804b0ff94205a91cae",
+      "recordedAt": "2026-08-05T10:58:28+08:00"
+    },
+    {
+      "checkId": "secret",
+      "category": "secrets",
+      "profile": "full",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-c",
+        "import pathlib,re,sys; files=[p for p in pathlib.Path('.').rglob('*') if p.is_file() and '.git' not in p.parts and 'tests' not in p.parts and p.name != 'rigorbreeze.toml']; pattern=re.compile(r'(?i)(api[_-]?key|token|password|secret)\\s*[:=]\\s*\\S{20,}'); hits=[str(p) for p in files if pattern.search(p.read_text(errors='ignore'))]; print('\\n'.join(hits)); sys.exit(bool(hits))"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 47,
+      "summary": "",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "e427b29c481d2bac00574ccf20dc57938e8bedffe7d29ca671f2b773d30c2bec",
+      "projectFingerprint": "e3313abd85b57cedcf29d0278b80f88f1090f2c2a88d52d4575584ac12a5246d",
+      "head": "942867a19e92ee825e8e7b804b0ff94205a91cae",
+      "recordedAt": "2026-08-05T10:58:28+08:00"
+    },
+    {
+      "checkId": "build",
+      "category": "build",
+      "profile": "full",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-c",
+        "import pathlib,zipfile; out=pathlib.Path('artifacts/rigorbreeze.zip'); out.parent.mkdir(exist_ok=True); files=[p for p in pathlib.Path('rigorbreeze').rglob('*') if p.is_file() and '__pycache__' not in p.parts]; z=zipfile.ZipFile(out,'w',zipfile.ZIP_DEFLATED); [z.write(p,p.as_posix()) for p in files]; z.close()"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 49,
+      "summary": "",
+      "report": null,
+      "artifacts": [
+        "9958a8a0a5768670b60a1497533f3dfe51842c1466367e1c7547e5bec09cff8e"
+      ],
+      "taskDigest": "e427b29c481d2bac00574ccf20dc57938e8bedffe7d29ca671f2b773d30c2bec",
+      "projectFingerprint": "e3313abd85b57cedcf29d0278b80f88f1090f2c2a88d52d4575584ac12a5246d",
+      "head": "942867a19e92ee825e8e7b804b0ff94205a91cae",
+      "recordedAt": "2026-08-05T10:58:28+08:00"
+    },
+    {
+      "checkId": "acceptance",
+      "category": "acceptance",
+      "profile": "full",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "rigorbreeze/scripts/tests",
+        "-v"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 112179,
+      "summary": "workflow_baseline_is_proven_on_the_base_branch (test_flow_v4.FlowV4Tests.test_workflow_baseline_is_proven_on_the_base_branch) ... ok\ntest_documented_first_run_cli_commands_exist (test_skill_contract.SkillContractTests.test_documented_first_run_cli_commands_exist) ... ok\ntest_every_user_facing_english_document_has_chinese (test_skill_contract.SkillContractTests.test_every_user_facing_english_document_has_chinese) ... ok\ntest_installable_skill_excludes_repository_documents (test_skill_contract.SkillContractTests.test_installable_skill_excludes_repository_documents) ... ok\ntest_installable_skill_has_no_project_specific_policy (test_skill_contract.SkillContractTests.test_installable_skill_has_no_project_specific_policy) ... ok\ntest_long_references_have_a_table_of_contents (test_skill_contract.SkillContractTests.test_long_references_have_a_table_of_contents) ... ok\ntest_public_markdown_relative_links_resolve (test_skill_contract.SkillContractTests.test_public_markdown_relative_links_resolve) ... ok\ntest_public_readmes_cover_the_same_first_run_contract (test_skill_contract.SkillContractTests.test_public_readmes_cover_the_same_first_run_contract) ... ok\ntest_repository_has_minimal_open_source_governance (test_skill_contract.SkillContractTests.test_repository_has_minimal_open_source_governance) ... ok\ntest_repository_has_skill_owned_ci (test_skill_contract.SkillContractTests.test_repository_has_skill_owned_ci) ... ok\ntest_skill_completes_context_and_rechecks_follow_up_writes (test_skill_contract.SkillContractTests.test_skill_completes_context_and_rechecks_follow_up_writes) ... ok\ntest_skill_entrypoint_stays_compact_and_links_every_reference (test_skill_contract.SkillContractTests.test_skill_entrypoint_stays_compact_and_links_every_reference) ... ok\ntest_skill_metadata_matches_public_name (test_skill_contract.SkillContractTests.test_skill_metadata_matches_public_name) ... ok\n\n----------------------------------------------------------------------\nRan 112 tests in 112.120s\n\nOK",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "e427b29c481d2bac00574ccf20dc57938e8bedffe7d29ca671f2b773d30c2bec",
+      "projectFingerprint": "e3313abd85b57cedcf29d0278b80f88f1090f2c2a88d52d4575584ac12a5246d",
+      "head": "942867a19e92ee825e8e7b804b0ff94205a91cae",
+      "recordedAt": "2026-08-05T11:00:20+08:00"
+    },
+    {
+      "checkId": "format",
+      "category": "static-quality",
+      "profile": "full",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-m",
+        "ruff",
+        "format",
+        "--check",
+        "rigorbreeze/scripts"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 54,
+      "summary": "13 files already formatted",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "1c25e860284cf551de57393769932c3669a2e3dd9539cc8bb786846a3e718df5",
+      "projectFingerprint": "9237ef516bfea009237f3912f0ff421dd1e059503b43e36a7032cb35296be57f",
+      "head": "942867a19e92ee825e8e7b804b0ff94205a91cae",
+      "recordedAt": "2026-08-05T11:08:42+08:00"
+    },
+    {
+      "checkId": "lint",
+      "category": "static-quality",
+      "profile": "full",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-m",
+        "ruff",
+        "check",
+        "rigorbreeze/scripts"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 37,
+      "summary": "All checks passed!",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "1c25e860284cf551de57393769932c3669a2e3dd9539cc8bb786846a3e718df5",
+      "projectFingerprint": "9237ef516bfea009237f3912f0ff421dd1e059503b43e36a7032cb35296be57f",
+      "head": "942867a19e92ee825e8e7b804b0ff94205a91cae",
+      "recordedAt": "2026-08-05T11:08:42+08:00"
+    },
+    {
+      "checkId": "unit",
+      "category": "behavior",
+      "profile": "full",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "rigorbreeze/scripts/tests",
+        "-v"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 110755,
+      "summary": "workflow_baseline_is_proven_on_the_base_branch (test_flow_v4.FlowV4Tests.test_workflow_baseline_is_proven_on_the_base_branch) ... ok\ntest_documented_first_run_cli_commands_exist (test_skill_contract.SkillContractTests.test_documented_first_run_cli_commands_exist) ... ok\ntest_every_user_facing_english_document_has_chinese (test_skill_contract.SkillContractTests.test_every_user_facing_english_document_has_chinese) ... ok\ntest_installable_skill_excludes_repository_documents (test_skill_contract.SkillContractTests.test_installable_skill_excludes_repository_documents) ... ok\ntest_installable_skill_has_no_project_specific_policy (test_skill_contract.SkillContractTests.test_installable_skill_has_no_project_specific_policy) ... ok\ntest_long_references_have_a_table_of_contents (test_skill_contract.SkillContractTests.test_long_references_have_a_table_of_contents) ... ok\ntest_public_markdown_relative_links_resolve (test_skill_contract.SkillContractTests.test_public_markdown_relative_links_resolve) ... ok\ntest_public_readmes_cover_the_same_first_run_contract (test_skill_contract.SkillContractTests.test_public_readmes_cover_the_same_first_run_contract) ... ok\ntest_repository_has_minimal_open_source_governance (test_skill_contract.SkillContractTests.test_repository_has_minimal_open_source_governance) ... ok\ntest_repository_has_skill_owned_ci (test_skill_contract.SkillContractTests.test_repository_has_skill_owned_ci) ... ok\ntest_skill_completes_context_and_rechecks_follow_up_writes (test_skill_contract.SkillContractTests.test_skill_completes_context_and_rechecks_follow_up_writes) ... ok\ntest_skill_entrypoint_stays_compact_and_links_every_reference (test_skill_contract.SkillContractTests.test_skill_entrypoint_stays_compact_and_links_every_reference) ... ok\ntest_skill_metadata_matches_public_name (test_skill_contract.SkillContractTests.test_skill_metadata_matches_public_name) ... ok\n\n----------------------------------------------------------------------\nRan 112 tests in 110.704s\n\nOK",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "1c25e860284cf551de57393769932c3669a2e3dd9539cc8bb786846a3e718df5",
+      "projectFingerprint": "9237ef516bfea009237f3912f0ff421dd1e059503b43e36a7032cb35296be57f",
+      "head": "942867a19e92ee825e8e7b804b0ff94205a91cae",
+      "recordedAt": "2026-08-05T11:10:32+08:00"
+    },
+    {
+      "checkId": "contract",
+      "category": "behavior",
+      "profile": "full",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-m",
+        "py_compile",
+        "rigorbreeze/scripts/flow.py"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 43,
+      "summary": "",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "1c25e860284cf551de57393769932c3669a2e3dd9539cc8bb786846a3e718df5",
+      "projectFingerprint": "9237ef516bfea009237f3912f0ff421dd1e059503b43e36a7032cb35296be57f",
+      "head": "942867a19e92ee825e8e7b804b0ff94205a91cae",
+      "recordedAt": "2026-08-05T11:10:33+08:00"
+    },
+    {
+      "checkId": "secret",
+      "category": "secrets",
+      "profile": "full",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-c",
+        "import pathlib,re,sys; files=[p for p in pathlib.Path('.').rglob('*') if p.is_file() and '.git' not in p.parts and 'tests' not in p.parts and p.name != 'rigorbreeze.toml']; pattern=re.compile(r'(?i)(api[_-]?key|token|password|secret)\\s*[:=]\\s*\\S{20,}'); hits=[str(p) for p in files if pattern.search(p.read_text(errors='ignore'))]; print('\\n'.join(hits)); sys.exit(bool(hits))"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 50,
+      "summary": "",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "1c25e860284cf551de57393769932c3669a2e3dd9539cc8bb786846a3e718df5",
+      "projectFingerprint": "9237ef516bfea009237f3912f0ff421dd1e059503b43e36a7032cb35296be57f",
+      "head": "942867a19e92ee825e8e7b804b0ff94205a91cae",
+      "recordedAt": "2026-08-05T11:10:33+08:00"
+    },
+    {
+      "checkId": "build",
+      "category": "build",
+      "profile": "full",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-c",
+        "import pathlib,zipfile; out=pathlib.Path('artifacts/rigorbreeze.zip'); out.parent.mkdir(exist_ok=True); files=[p for p in pathlib.Path('rigorbreeze').rglob('*') if p.is_file() and '__pycache__' not in p.parts]; z=zipfile.ZipFile(out,'w',zipfile.ZIP_DEFLATED); [z.write(p,p.as_posix()) for p in files]; z.close()"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 48,
+      "summary": "",
+      "report": null,
+      "artifacts": [
+        "fdb97da34623dba6d04e519a95ea39c62c7abf73ffd7a0a4fefc1fa74b509f41"
+      ],
+      "taskDigest": "1c25e860284cf551de57393769932c3669a2e3dd9539cc8bb786846a3e718df5",
+      "projectFingerprint": "9237ef516bfea009237f3912f0ff421dd1e059503b43e36a7032cb35296be57f",
+      "head": "942867a19e92ee825e8e7b804b0ff94205a91cae",
+      "recordedAt": "2026-08-05T11:10:33+08:00"
+    },
+    {
+      "checkId": "acceptance",
+      "category": "acceptance",
+      "profile": "full",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "rigorbreeze/scripts/tests",
+        "-v"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 118274,
+      "summary": "workflow_baseline_is_proven_on_the_base_branch (test_flow_v4.FlowV4Tests.test_workflow_baseline_is_proven_on_the_base_branch) ... ok\ntest_documented_first_run_cli_commands_exist (test_skill_contract.SkillContractTests.test_documented_first_run_cli_commands_exist) ... ok\ntest_every_user_facing_english_document_has_chinese (test_skill_contract.SkillContractTests.test_every_user_facing_english_document_has_chinese) ... ok\ntest_installable_skill_excludes_repository_documents (test_skill_contract.SkillContractTests.test_installable_skill_excludes_repository_documents) ... ok\ntest_installable_skill_has_no_project_specific_policy (test_skill_contract.SkillContractTests.test_installable_skill_has_no_project_specific_policy) ... ok\ntest_long_references_have_a_table_of_contents (test_skill_contract.SkillContractTests.test_long_references_have_a_table_of_contents) ... ok\ntest_public_markdown_relative_links_resolve (test_skill_contract.SkillContractTests.test_public_markdown_relative_links_resolve) ... ok\ntest_public_readmes_cover_the_same_first_run_contract (test_skill_contract.SkillContractTests.test_public_readmes_cover_the_same_first_run_contract) ... ok\ntest_repository_has_minimal_open_source_governance (test_skill_contract.SkillContractTests.test_repository_has_minimal_open_source_governance) ... ok\ntest_repository_has_skill_owned_ci (test_skill_contract.SkillContractTests.test_repository_has_skill_owned_ci) ... ok\ntest_skill_completes_context_and_rechecks_follow_up_writes (test_skill_contract.SkillContractTests.test_skill_completes_context_and_rechecks_follow_up_writes) ... ok\ntest_skill_entrypoint_stays_compact_and_links_every_reference (test_skill_contract.SkillContractTests.test_skill_entrypoint_stays_compact_and_links_every_reference) ... ok\ntest_skill_metadata_matches_public_name (test_skill_contract.SkillContractTests.test_skill_metadata_matches_public_name) ... ok\n\n----------------------------------------------------------------------\nRan 112 tests in 118.220s\n\nOK",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "1c25e860284cf551de57393769932c3669a2e3dd9539cc8bb786846a3e718df5",
+      "projectFingerprint": "9237ef516bfea009237f3912f0ff421dd1e059503b43e36a7032cb35296be57f",
+      "head": "942867a19e92ee825e8e7b804b0ff94205a91cae",
+      "recordedAt": "2026-08-05T11:12:31+08:00"
+    }
+  ],
+  "tddChain": [
+    {
+      "requirement": "REQ-001",
+      "red": {
+        "requirement": "REQ-001",
+        "command": [
+          "env",
+          "PYTHONPATH=rigorbreeze/scripts",
+          "python3",
+          "-B",
+          "-c",
+          "from flow_state import task_template; assert '- User outcome: TODO' in task_template('T','t','L1'), 'context-intake-missing'",
+          "rigorbreeze/scripts/tests/test_flow.py"
+        ],
+        "exitCode": 1,
+        "expectedPattern": "context-intake-missing",
+        "testDigests": {
+          "rigorbreeze/scripts/tests/test_flow.py": "7008e62e33ceeb68a60bc2129c529945084be8c2148055f4672af27c24caafa8"
+        },
+        "summary": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n    from flow_state import task_template; assert '- User outcome: TODO' in task_template('T','t','L1'), 'context-intake-missing'\n                                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: context-intake-missing",
+        "taskDigest": "0d3604ac547e7ce604696072ec6f58f0e34dfb002363a9d8f4ee639b1dac3c3d",
+        "projectFingerprint": "f0b409ea91938c096276a5b14d9276df3f0b6cc4296f4eebac1b9e20054b53e9",
+        "head": "942867a19e92ee825e8e7b804b0ff94205a91cae",
+        "observedAt": "2026-08-05T10:35:25+08:00"
+      },
+      "green": null
+    },
+    {
+      "requirement": "REQ-001",
+      "red": {
+        "requirement": "REQ-001",
+        "command": [
+          "env",
+          "PYTHONPATH=rigorbreeze/scripts",
+          "python3",
+          "-B",
+          "-c",
+          "from flow_state import task_template; assert '- User outcome: TODO' in task_template('T','t','L1'), 'context-intake-missing'",
+          "rigorbreeze/scripts/tests/test_flow.py"
+        ],
+        "exitCode": 1,
+        "expectedPattern": "context-intake-missing",
+        "testDigests": {
+          "rigorbreeze/scripts/tests/test_flow.py": "7008e62e33ceeb68a60bc2129c529945084be8c2148055f4672af27c24caafa8"
+        },
+        "summary": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n    from flow_state import task_template; assert '- User outcome: TODO' in task_template('T','t','L1'), 'context-intake-missing'\n                                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: context-intake-missing",
+        "taskDigest": "e427b29c481d2bac00574ccf20dc57938e8bedffe7d29ca671f2b773d30c2bec",
+        "projectFingerprint": "fbb7672f2727253ac4eb9e33a1488141079f7c286647930c29a1f4531efde7ad",
+        "head": "942867a19e92ee825e8e7b804b0ff94205a91cae",
+        "observedAt": "2026-08-05T10:44:13+08:00"
+      },
+      "green": null
+    },
+    {
+      "requirement": "REQ-001",
+      "red": {
+        "requirement": "REQ-001",
+        "command": [
+          "env",
+          "PYTHONPATH=rigorbreeze/scripts",
+          "python3",
+          "-B",
+          "-c",
+          "from flow_state import task_template; assert '- User outcome: TODO' in task_template('T','t','L1'), 'context-intake-missing'",
+          "rigorbreeze/scripts/tests/test_flow_v2.py"
+        ],
+        "exitCode": 1,
+        "expectedPattern": "context-intake-missing",
+        "testDigests": {
+          "rigorbreeze/scripts/tests/test_flow_v2.py": "e319128f8effe2cf6b25312f0e3d878c2b08015f4a3a27d29e2b3eb3a9a98d37"
+        },
+        "summary": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n    from flow_state import task_template; assert '- User outcome: TODO' in task_template('T','t','L1'), 'context-intake-missing'\n                                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: context-intake-missing",
+        "taskDigest": "e427b29c481d2bac00574ccf20dc57938e8bedffe7d29ca671f2b773d30c2bec",
+        "projectFingerprint": "fbb7672f2727253ac4eb9e33a1488141079f7c286647930c29a1f4531efde7ad",
+        "head": "942867a19e92ee825e8e7b804b0ff94205a91cae",
+        "observedAt": "2026-08-05T10:47:42+08:00"
+      },
+      "green": null
+    },
+    {
+      "requirement": "REQ-001",
+      "red": {
+        "requirement": "REQ-001",
+        "command": [
+          "env",
+          "PYTHONPATH=rigorbreeze/scripts",
+          "python3",
+          "-B",
+          "-c",
+          "from flow_state import task_template; assert '- User outcome: TODO' in task_template('T','t','L1'), 'context-intake-missing'",
+          "rigorbreeze/scripts/tests/test_flow_v2.py"
+        ],
+        "exitCode": 1,
+        "expectedPattern": "context-intake-missing",
+        "testDigests": {
+          "rigorbreeze/scripts/tests/test_flow_v2.py": "2e825c5930d8567e0362983fb1329ab558792d93827c1fc316a1b8ef7ac21a3e"
+        },
+        "summary": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n    from flow_state import task_template; assert '- User outcome: TODO' in task_template('T','t','L1'), 'context-intake-missing'\n                                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: context-intake-missing",
+        "taskDigest": "e427b29c481d2bac00574ccf20dc57938e8bedffe7d29ca671f2b773d30c2bec",
+        "projectFingerprint": "36aa926023f9429b3423b71d14ab83d3faccfbe1cd195dde3fe875e3d8881c5b",
+        "head": "942867a19e92ee825e8e7b804b0ff94205a91cae",
+        "observedAt": "2026-08-05T10:53:37+08:00"
+      },
+      "green": {
+        "toolVersion": "0.8.1",
+        "profile": "full",
+        "configured": true,
+        "mode": "enforced",
+        "checks": [
+          "format",
+          "lint",
+          "unit",
+          "contract",
+          "secret",
+          "build",
+          "acceptance"
+        ],
+        "passed": true,
+        "taskDigest": "e427b29c481d2bac00574ccf20dc57938e8bedffe7d29ca671f2b773d30c2bec",
+        "projectFingerprint": "e3313abd85b57cedcf29d0278b80f88f1090f2c2a88d52d4575584ac12a5246d",
+        "configDigest": "e309b7a492f02e8a45e3c07000bd1a83ea30532fed05a783bbc286965e0be829",
+        "head": "942867a19e92ee825e8e7b804b0ff94205a91cae",
+        "verifiedAt": "2026-08-05T11:00:20+08:00"
+      }
+    },
+    {
+      "requirement": "REQ-001",
+      "red": {
+        "requirement": "REQ-001",
+        "command": [
+          "env",
+          "PYTHONPATH=rigorbreeze/scripts",
+          "python3",
+          "-B",
+          "-c",
+          "from flow_state import task_template; assert '- User outcome: TODO' in task_template('T','t','L1'), 'context-intake-missing'",
+          "rigorbreeze/scripts/tests/test_flow_v2.py"
+        ],
+        "exitCode": 1,
+        "expectedPattern": "context-intake-missing",
+        "testDigests": {
+          "rigorbreeze/scripts/tests/test_flow_v2.py": "2e825c5930d8567e0362983fb1329ab558792d93827c1fc316a1b8ef7ac21a3e"
+        },
+        "summary": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n    from flow_state import task_template; assert '- User outcome: TODO' in task_template('T','t','L1'), 'context-intake-missing'\n                                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: context-intake-missing",
+        "taskDigest": "1c25e860284cf551de57393769932c3669a2e3dd9539cc8bb786846a3e718df5",
+        "projectFingerprint": "296ee4ac71f91265efcd9f3915b4c2adb13d6e5eaefa55fff6bfa06f066e3d7d",
+        "head": "942867a19e92ee825e8e7b804b0ff94205a91cae",
+        "observedAt": "2026-08-05T11:07:53+08:00"
+      },
+      "green": {
+        "toolVersion": "0.8.1",
+        "profile": "full",
+        "configured": true,
+        "mode": "enforced",
+        "checks": [
+          "format",
+          "lint",
+          "unit",
+          "contract",
+          "secret",
+          "build",
+          "acceptance"
+        ],
+        "passed": true,
+        "taskDigest": "1c25e860284cf551de57393769932c3669a2e3dd9539cc8bb786846a3e718df5",
+        "projectFingerprint": "9237ef516bfea009237f3912f0ff421dd1e059503b43e36a7032cb35296be57f",
+        "configDigest": "e309b7a492f02e8a45e3c07000bd1a83ea30532fed05a783bbc286965e0be829",
+        "head": "942867a19e92ee825e8e7b804b0ff94205a91cae",
+        "verifiedAt": "2026-08-05T11:12:31+08:00"
+      }
+    }
+  ],
+  "artifacts": [
+    {
+      "kind": "build",
+      "path": "artifacts/rigorbreeze.zip",
+      "sha256": "9958a8a0a5768670b60a1497533f3dfe51842c1466367e1c7547e5bec09cff8e",
+      "size": 123095,
+      "head": "942867a19e92ee825e8e7b804b0ff94205a91cae",
+      "taskDigest": "e427b29c481d2bac00574ccf20dc57938e8bedffe7d29ca671f2b773d30c2bec",
+      "projectFingerprint": "e3313abd85b57cedcf29d0278b80f88f1090f2c2a88d52d4575584ac12a5246d",
+      "recordedAt": "2026-08-05T10:58:28+08:00"
+    },
+    {
+      "kind": "build",
+      "path": "artifacts/rigorbreeze.zip",
+      "sha256": "fdb97da34623dba6d04e519a95ea39c62c7abf73ffd7a0a4fefc1fa74b509f41",
+      "size": 123095,
+      "head": "942867a19e92ee825e8e7b804b0ff94205a91cae",
+      "taskDigest": "1c25e860284cf551de57393769932c3669a2e3dd9539cc8bb786846a3e718df5",
+      "projectFingerprint": "9237ef516bfea009237f3912f0ff421dd1e059503b43e36a7032cb35296be57f",
+      "recordedAt": "2026-08-05T11:10:33+08:00"
+    }
+  ],
+  "acceptance": [
+    {
+      "kind": "runtime",
+      "fields": {
+        "status": "passed",
+        "environment": "local-skill-package",
+        "validator": "quick_validate",
+        "requirements": "REQ-001,REQ-002,REQ-003,REQ-004,REQ-005"
+      },
+      "taskDigest": "e427b29c481d2bac00574ccf20dc57938e8bedffe7d29ca671f2b773d30c2bec",
+      "projectFingerprint": "e3313abd85b57cedcf29d0278b80f88f1090f2c2a88d52d4575584ac12a5246d",
+      "head": "942867a19e92ee825e8e7b804b0ff94205a91cae",
+      "artifactDigests": [
+        "9958a8a0a5768670b60a1497533f3dfe51842c1466367e1c7547e5bec09cff8e"
+      ],
+      "recordedAt": "2026-08-05T11:02:19+08:00",
+      "path": "rigorbreeze/agents/openai.yaml",
+      "sha256": "c12ebbb7cd5ad18925a67999a1ec3bec4be78570f3935100651d0edb466090e3",
+      "size": 302
+    },
+    {
+      "kind": "review",
+      "fields": {
+        "status": "passed",
+        "reviewer": "codex-standards-pass",
+        "pass": "standards",
+        "conclusion": "concise-no-new-schema-or-command"
+      },
+      "taskDigest": "e427b29c481d2bac00574ccf20dc57938e8bedffe7d29ca671f2b773d30c2bec",
+      "projectFingerprint": "e3313abd85b57cedcf29d0278b80f88f1090f2c2a88d52d4575584ac12a5246d",
+      "head": "942867a19e92ee825e8e7b804b0ff94205a91cae",
+      "artifactDigests": [
+        "9958a8a0a5768670b60a1497533f3dfe51842c1466367e1c7547e5bec09cff8e"
+      ],
+      "recordedAt": "2026-08-05T11:02:27+08:00",
+      "path": "rigorbreeze/SKILL.md",
+      "sha256": "dae2fa27044c9d36c81f6edc1c18074bcbd8a20a6febf2717ab26aeacbca34e6",
+      "size": 15062
+    },
+    {
+      "kind": "review",
+      "fields": {
+        "status": "passed",
+        "reviewer": "codex-spec-pass",
+        "pass": "spec",
+        "conclusion": "all-acceptance-ids-traced"
+      },
+      "taskDigest": "e427b29c481d2bac00574ccf20dc57938e8bedffe7d29ca671f2b773d30c2bec",
+      "projectFingerprint": "e3313abd85b57cedcf29d0278b80f88f1090f2c2a88d52d4575584ac12a5246d",
+      "head": "942867a19e92ee825e8e7b804b0ff94205a91cae",
+      "artifactDigests": [
+        "9958a8a0a5768670b60a1497533f3dfe51842c1466367e1c7547e5bec09cff8e"
+      ],
+      "recordedAt": "2026-08-05T11:02:38+08:00",
+      "path": "spec/changes/RB-CONTEXT-INTAKE.md",
+      "sha256": "e427b29c481d2bac00574ccf20dc57938e8bedffe7d29ca671f2b773d30c2bec",
+      "size": 4682
+    },
+    {
+      "kind": "runtime",
+      "fields": {
+        "status": "passed",
+        "environment": "local-skill-package",
+        "validator": "quick_validate",
+        "requirements": "REQ-001,REQ-002,REQ-003,REQ-004,REQ-005"
+      },
+      "taskDigest": "1c25e860284cf551de57393769932c3669a2e3dd9539cc8bb786846a3e718df5",
+      "projectFingerprint": "9237ef516bfea009237f3912f0ff421dd1e059503b43e36a7032cb35296be57f",
+      "head": "942867a19e92ee825e8e7b804b0ff94205a91cae",
+      "artifactDigests": [
+        "fdb97da34623dba6d04e519a95ea39c62c7abf73ffd7a0a4fefc1fa74b509f41"
+      ],
+      "recordedAt": "2026-08-05T11:12:48+08:00",
+      "path": "rigorbreeze/agents/openai.yaml",
+      "sha256": "c12ebbb7cd5ad18925a67999a1ec3bec4be78570f3935100651d0edb466090e3",
+      "size": 302
+    },
+    {
+      "kind": "review",
+      "fields": {
+        "status": "passed",
+        "reviewer": "codex-standards-pass",
+        "pass": "standards",
+        "conclusion": "concise-no-new-schema-or-command"
+      },
+      "taskDigest": "1c25e860284cf551de57393769932c3669a2e3dd9539cc8bb786846a3e718df5",
+      "projectFingerprint": "9237ef516bfea009237f3912f0ff421dd1e059503b43e36a7032cb35296be57f",
+      "head": "942867a19e92ee825e8e7b804b0ff94205a91cae",
+      "artifactDigests": [
+        "fdb97da34623dba6d04e519a95ea39c62c7abf73ffd7a0a4fefc1fa74b509f41"
+      ],
+      "recordedAt": "2026-08-05T11:12:49+08:00",
+      "path": "rigorbreeze/SKILL.md",
+      "sha256": "dae2fa27044c9d36c81f6edc1c18074bcbd8a20a6febf2717ab26aeacbca34e6",
+      "size": 15062
+    },
+    {
+      "kind": "review",
+      "fields": {
+        "status": "passed",
+        "reviewer": "codex-spec-pass",
+        "pass": "spec",
+        "conclusion": "all-acceptance-ids-traced"
+      },
+      "taskDigest": "1c25e860284cf551de57393769932c3669a2e3dd9539cc8bb786846a3e718df5",
+      "projectFingerprint": "9237ef516bfea009237f3912f0ff421dd1e059503b43e36a7032cb35296be57f",
+      "head": "942867a19e92ee825e8e7b804b0ff94205a91cae",
+      "artifactDigests": [
+        "fdb97da34623dba6d04e519a95ea39c62c7abf73ffd7a0a4fefc1fa74b509f41"
+      ],
+      "recordedAt": "2026-08-05T11:12:49+08:00",
+      "path": "spec/changes/RB-CONTEXT-INTAKE.md",
+      "sha256": "1c25e860284cf551de57393769932c3669a2e3dd9539cc8bb786846a3e718df5",
+      "size": 4792
+    }
+  ],
+  "release": [],
+  "automation": [],
+  "practice": {
+    "confirmation": {
+      "reworkReason": "workflow",
+      "exceptions": "nested test paths were incorrectly classified as production before the fix; self-hosted RED required a temporary runner bootstrap",
+      "workflowImpact": "helped",
+      "evolutionCandidate": true,
+      "summaryDigest": "5c0e438575b9a812ed74a34983bfc679ade8d3755c22270a2a368d50b099ec26",
+      "taskDigest": "1c25e860284cf551de57393769932c3669a2e3dd9539cc8bb786846a3e718df5",
+      "projectFingerprint": "9237ef516bfea009237f3912f0ff421dd1e059503b43e36a7032cb35296be57f",
+      "confirmedAt": "2026-08-05T11:12:55+08:00"
+    },
+    "events": [],
+    "summary": {
+      "taskId": "RB-CONTEXT-INTAKE",
+      "risk": "L1",
+      "verificationRuns": 4,
+      "checkRuns": 22,
+      "checkDurationMs": 682397,
+      "failedChecks": [
+        "format"
+      ],
+      "failureCategories": [
+        "static-quality"
+      ],
+      "potentialBypasses": [],
+      "firstAcceptancePassed": true,
+      "acceptanceRecords": 6,
+      "estimatedReworkSeconds": 1432,
+      "practiceEvents": [],
+      "generatedAt": "2026-08-05T11:12:55+08:00",
+      "summaryDigest": "5c0e438575b9a812ed74a34983bfc679ade8d3755c22270a2a368d50b099ec26"
+    }
+  },
+  "closure": {
+    "outcome": "completed",
+    "reason": null,
+    "closedAt": "2026-08-05T11:13:00+08:00",
+    "head": "942867a19e92ee825e8e7b804b0ff94205a91cae",
+    "branch": "main",
+    "originalPhase": "accepted",
+    "integrationProof": null,
+    "verificationStatus": "current",
+    "practiceEvents": [
+      "closure-pending-commit"
+    ],
+    "unrelatedChanges": []
+  },
+  "verification": {
+    "toolVersion": "0.8.1",
+    "profile": "full",
+    "configured": true,
+    "mode": "enforced",
+    "checks": [
+      "format",
+      "lint",
+      "unit",
+      "contract",
+      "secret",
+      "build",
+      "acceptance"
+    ],
+    "passed": true,
+    "taskDigest": "1c25e860284cf551de57393769932c3669a2e3dd9539cc8bb786846a3e718df5",
+    "projectFingerprint": "9237ef516bfea009237f3912f0ff421dd1e059503b43e36a7032cb35296be57f",
+    "configDigest": "e309b7a492f02e8a45e3c07000bd1a83ea30532fed05a783bbc286965e0be829",
+    "head": "942867a19e92ee825e8e7b804b0ff94205a91cae",
+    "verifiedAt": "2026-08-05T11:12:31+08:00"
+  }
+}

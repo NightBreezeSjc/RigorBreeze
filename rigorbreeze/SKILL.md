@@ -1,6 +1,6 @@
 ---
 name: rigorbreeze
-description: Operate and evolve RigorBreeze, an evidence-backed and risk-adaptive spec-to-delivery workflow for a solo developer using Codex. Use when initializing or resuming a project, implementing features or fixes, coordinating isolated parallel worktrees or an optional dependency DAG, collecting SDD/TDD and real-runtime acceptance evidence, running configured quality gates, proving merge or release readiness, or reviewing workflow friction from real delivery.
+description: Operate and evolve RigorBreeze, an evidence-backed and risk-adaptive spec-to-delivery workflow for a solo developer using Codex. Use when initializing or resuming a project, completing an incomplete request from project evidence, implementing any non-trivial feature or follow-up fix in an initialized project, coordinating isolated parallel worktrees or an optional dependency DAG, collecting SDD/TDD and real-runtime acceptance evidence, running configured quality gates, proving merge or release readiness, or reviewing workflow friction from real delivery.
 ---
 
 # RigorBreeze
@@ -10,12 +10,16 @@ Deliver one observable user outcome per task. Keep one human-authored Markdown c
 ## Start or resume
 
 1. Resolve the project root.
-2. Always run the bundled `python <skill-dir>/scripts/flow.py --root <project> status --all --json` in Git projects; fall back to `status --json` before initialization. Do not claim compliance from prose alone.
+2. Before every non-trivial writing request, including a follow-up after compaction or while debugging/review skills are active, run the bundled `python <skill-dir>/scripts/flow.py --root <project> status --all --json` in Git projects; fall back to `status --json` before initialization. Other skills supplement RigorBreeze but never replace its task state and ownership check.
 3. If uninitialized, run `init`, configure `rigorbreeze.toml`, and run `doctor --json`. Report `installation.status`; never overwrite an outdated project runner while a task is active.
 4. Read `rigorbreeze.toml`, `spec/index.md`, the current task, and only its linked authoritative sources. State for every Git worktree is private under its Git directory; migrate legacy `spec/state.json` through `init` or `doctor --all --repair`, never by editing it.
 5. Follow `nextAction`; use the bundled runner's `--help` as the canonical command reference. Before product-code writes, require an approved contract and successfully claim the current worktree/window.
 
 Read [handbook.md](references/handbook.md) before initialization, policy changes, or L2/Emergency work. Read [spec-tree.md](references/spec-tree.md) before changing state, evidence, digest, or archive behavior. Read [ci-gates.md](references/ci-gates.md) when configuring remote enforcement or releases.
+
+Complete an imperfect prompt before creating the contract. Recover **recoverable project facts** from authoritative requirements, current code, tests, Git, interfaces, data, permissions and runtime evidence. Ask only for **outcome-changing intent** those sources cannot establish. State safe defaults and uncertainty explicitly; a persona such as “CTO” is a perspective, never evidence or approval. Trace only the affected vertical slice and its dependencies rather than rereading the whole repository.
+
+Write the compact result into the existing Authoritative inputs: user outcome, current behavior and evidence, business and architecture path, invariants and source of truth (including freshness/fallback semantics), requirement/design/API version, and unresolved outcome-changing ambiguity. Do not create another context report or make the developer fill these fields.
 
 ## Frame one vertical slice
 
@@ -80,6 +84,8 @@ Validate the real product, not only the build:
 - Mini-app: formal build, developer-tool automation, real AppID/HTTPS environment, and device evidence.
 - Migration: cloned-data rehearsal, assertions, backup/restore or forward-fix proof.
 - Release, only when requested: one SHA/artifact across tests and UAT plus applicable governance. Before L2 remote writes, show the complete operation-plan stages and the one stage being executed; after pause/failure record the safe state and single resume action.
+
+Before any external Git, deployment, developer-tool, or platform write, reconstruct the **observed current state** from the system itself. Summarize already completed steps, current immutable identifiers, the one remaining action, and stop conditions; never repeat a completed step from an old plan or chat summary.
 
 Temporary or synthetic credentials prove buildability only; they cannot satisfy real-environment acceptance, deployment, or release evidence.
 

@@ -17,7 +17,7 @@ from typing import Any, Iterable
 import flow_parallel
 
 VERSION = 4
-TOOL_VERSION = "0.8.0"
+TOOL_VERSION = "0.8.1"
 SPEC_DIR = "spec"
 CONFIG_NAME = "rigorbreeze.toml"
 MODES = ("advisory", "enforced")
@@ -282,8 +282,12 @@ Runtime-Claims: none
 Operational-Modes: N/A - no conditional runtime behavior
 
 ## Authoritative inputs
-- Requirement: TODO
-- Design/API/data/permission: N/A unless the task depends on one
+- User outcome: TODO
+- Current behavior and evidence: TODO
+- Business and architecture path: TODO
+- Invariants and source of truth: TODO
+- Requirement/design/API version: TODO
+- Unresolved outcome-changing ambiguity: TODO
 
 ## Allowed scope
 - TODO
@@ -331,11 +335,13 @@ def agents_block() -> str:
     return f"""{AGENTS_START}
 ## RigorBreeze
 
-Before product-code writes, invoke `$rigorbreeze`, inspect bundled-runner status and the real base-branch `workflowBaseline`, and require an approved task plus a successful window claim. Read `rigorbreeze.toml`, `spec/index.md`, and the active contract.
+Before every non-trivial product-code write, including a follow-up after context compaction or while another workflow skill is active, invoke `$rigorbreeze`, inspect bundled-runner status and the real base-branch `workflowBaseline`, and require an approved task plus a successful window claim. Read `rigorbreeze.toml`, `spec/index.md`, and the active contract.
+Complete incomplete prompts from evidence before approval: recover project facts from requirements, code, tests, Git and runtime state; ask only for outcome-changing intent that cannot be recovered; state safe defaults instead of hiding assumptions. Record the compact result in Authoritative inputs rather than creating another context document.
 One worktree may own only one active writing task. Use `new --worktree auto` for parallel tasks and `status --all --json` for the project view. Declare exclusive ports, services, processes, apps, or environments in `Runtime-Claims`; worktrees do not isolate them. Complex DAGs are proposed once, then represented only by `Depends-On`.
 Local mode is advisory; CI, L2, merge, and release use enforced profiles. L0 closes after configured verification; L1/L2 require current full verification, applicable acceptance, review, and retrospective confirmation. Immutable artifacts and release governance are required only when release is actually requested.
 Use `archive --outcome abandoned --reason <reason>` for a clean cancelled task; use `reconciled` only for proven externally integrated history. Archive before guarded delivery and preserve branches. Conditional L2 integrations map enabled/disabled/unavailable behavior in `Operational-Modes`, and L2 remote release requires an operation plan with one safe recovery entry.
 Git automation defaults to manual and never increases during an upgrade. A current-message request may authorize one guarded commit/push; provider merge and release require standing project configuration.
+Before any external write, report the observed current state, already completed steps, immutable identifiers, remaining action and stop conditions. Never repeat a completed operation from a stale plan or chat summary.
 {AGENTS_END}"""
 
 
@@ -467,8 +473,10 @@ def clean_managed_bytecode(root: Path) -> list[str]:
         if not cache.is_dir():
             continue
         for path in sorted(cache.iterdir()):
-            if path.is_file() and path.suffix == ".pyc" and path.name.startswith(
-                managed_prefixes
+            if (
+                path.is_file()
+                and path.suffix == ".pyc"
+                and path.name.startswith(managed_prefixes)
             ):
                 path.unlink()
             else:

@@ -74,6 +74,15 @@ Do not lower risk to bypass a gate. Raise it when scope or consequences expand. 
 
 Read the current requirements, design, code, interfaces, permissions, data, and tests before changing behavior. Propose the smallest observable task. Stop for unresolved business ambiguity, unapproved dependencies, unexpected migration risk, or scope expansion.
 
+Do not require a perfect user prompt. Build a compact context intake inside Authoritative inputs:
+
+- recover project facts from authoritative documents, current behavior, code, tests, Git and runtime evidence;
+- trace the affected user flow through its business rule, interface, data, permission and failure boundaries rather than rereading the whole repository;
+- record user outcome, current behavior evidence, architecture path, invariants/source of truth, freshness and fallback semantics, and the governing requirement/design/API version;
+- ask only for outcome-changing intent that evidence cannot determine, and state any safe default explicitly.
+
+Role prompts such as “act as a CTO” may encourage a perspective but never replace project evidence, acceptance criteria, or human authority. After compaction or a follow-up write request, re-run RigorBreeze status and ownership checks even when a debugging or review skill is also active.
+
 Before approval, agree on:
 
 - the public interface or business boundary the test observes;
@@ -180,6 +189,8 @@ Only an explicit production release requires:
 - applicable business metric and user-feedback evidence.
 
 An L2 release also requires a machine JSON `operation-plan` bound to the current Git SHA and artifact digest. It lists ordered backup, configuration-freeze, migration, deployment, acceptance, traffic-switch, and observation stages; every step has a success condition, plus stop conditions, safe recovery points, and rollback limitations. Show the full plan and identify the single step about to run before any remote write.
+
+Before any external Git, deployment, developer-tool, or platform write, inspect the external system rather than trusting an old plan or chat summary. Present the observed current state, what is already completed, current immutable identifiers, the one remaining action, and stop conditions. Do not rebuild, upload, migrate, deploy, or promote a version again merely because that step still appears in an earlier checklist.
 
 Record `operation-result` after execution. `paused` and `failed` results state completed steps, the current safe state, and exactly one resume action. For example, when migration succeeded but the candidate failed and the old instance remains healthy, resume from candidate deployment instead of repeating migration or the whole release. These snapshots do not create a resident deployment scheduler.
 

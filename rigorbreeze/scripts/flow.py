@@ -326,7 +326,9 @@ def baseline_branch(root: Path, state: dict[str, Any] | None = None) -> str | No
     if active.get("baseBranch"):
         return str(active["baseBranch"])
     try:
-        configured = str(load_config(root).get("parallel", {}).get("base_branch", "")).strip()
+        configured = str(
+            load_config(root).get("parallel", {}).get("base_branch", "")
+        ).strip()
     except FlowError:
         configured = ""
     if configured:
@@ -352,7 +354,9 @@ def completed_closure_paths(root: Path, state: dict[str, Any]) -> list[str]:
 
 
 def workflow_baseline_commit_paths(root: Path, state: dict[str, Any]) -> list[str]:
-    allowed = set(managed_workflow_paths(root)) | set(completed_closure_paths(root, state))
+    allowed = set(managed_workflow_paths(root)) | set(
+        completed_closure_paths(root, state)
+    )
     changed = flow_automation.working_tree_paths(root, {f"spec/{LOCK_NAME}"})
     return sorted(path for path in changed if path in allowed)
 
@@ -440,7 +444,9 @@ def workflow_baseline_status(root: Path, state: dict[str, Any]) -> dict[str, Any
     return payload
 
 
-def last_closed_task(state: dict[str, Any], *, completed_only: bool = False) -> dict[str, Any]:
+def last_closed_task(
+    state: dict[str, Any], *, completed_only: bool = False
+) -> dict[str, Any]:
     last = state.get("lastClosed") or {}
     if not last or (completed_only and last.get("outcome") != "completed"):
         raise FlowError("no eligible closed task context is available")
@@ -471,7 +477,9 @@ def closed_context_current(root: Path, state: dict[str, Any]) -> bool:
     )
 
 
-def current_task_lifecycle(root: Path, state: dict[str, Any]) -> tuple[str, dict[str, str] | None]:
+def current_task_lifecycle(
+    root: Path, state: dict[str, Any]
+) -> tuple[str, dict[str, str] | None]:
     active = state.get("activeTask")
     if active and is_git_repo(root):
         try:
@@ -743,10 +751,15 @@ def command_approve(
             )
         config = load_config(root)
         source_roots = configured_paths(config, "source_paths", ["src", "app", "lib"])
+        test_roots = configured_paths(
+            config, "test_paths", ["tests", "test", "src/test"]
+        )
         production_changes = [
             relative
             for relative in task_change_paths(root, state)
-            if path_allowed(relative, scopes) and path_under(relative, source_roots)
+            if path_allowed(relative, scopes)
+            and path_under(relative, source_roots)
+            and not path_under(relative, test_roots)
         ]
         if production_changes:
             if previously_approved:
@@ -970,7 +983,7 @@ def command_red(
     production_changes = [
         relative
         for relative in changed_after_approval
-        if path_under(relative, source_roots)
+        if path_under(relative, source_roots) and not path_under(relative, test_roots)
     ]
     if production_changes:
         raise FlowError(
@@ -1460,7 +1473,9 @@ def command_check(root: Path, gate: str, requested_mode: str | None = None) -> N
         save_state(root, state)
     active = state.get("activeTask")
     closed = None if active else (state.get("lastClosed") or None)
-    if not active and not (gate == "merge" and closed and closed.get("outcome") == "completed"):
+    if not active and not (
+        gate == "merge" and closed and closed.get("outcome") == "completed"
+    ):
         active_task(state)
     if gate == "commit":
         if not is_git_repo(root):
@@ -1558,7 +1573,9 @@ def context_automation_values(root: Path, state: dict[str, Any]) -> dict[str, st
         "base": str(last.get("baseBranch") or ""),
         "head": current_head(root) or "",
         "artifact_sha256": ",".join(
-            sorted(str(record["sha256"]) for record in artifacts if record.get("sha256"))
+            sorted(
+                str(record["sha256"]) for record in artifacts if record.get("sha256")
+            )
         ),
     }
 
@@ -1589,11 +1606,15 @@ def check_closed_commit(root: Path, state: dict[str, Any], selected: list[str]) 
     staged = staged_files(root)
     outside = sorted(set(staged) - set(selected))
     if outside:
-        raise FlowError("staged files are outside the closed task: " + ", ".join(outside))
+        raise FlowError(
+            "staged files are outside the closed task: " + ", ".join(outside)
+        )
     secrets = [path for path in staged if is_secret_path(path)]
     secrets.extend(secret_content_paths(root, staged))
     if secrets:
-        raise FlowError("secret material is forbidden: " + ", ".join(sorted(set(secrets))))
+        raise FlowError(
+            "secret material is forbidden: " + ", ".join(sorted(set(secrets)))
+        )
 
 
 def automate_workflow_baseline_commit(
@@ -1877,13 +1898,19 @@ def automate_provider_action(
         if state.get("activeTask"):
             ensure_delivery_quality(root, state)
             if not baseline_current(root, state):
-                raise FlowError("task baseline changed; rebase and reverify before merge")
+                raise FlowError(
+                    "task baseline changed; rebase and reverify before merge"
+                )
         else:
             last = last_closed_task(state, completed_only=True)
             if not closed_context_current(root, state):
-                raise FlowError("closed task contract or evidence changed after archive")
+                raise FlowError(
+                    "closed task contract or evidence changed after archive"
+                )
             if not last.get("verification") or not last.get("reviews"):
-                raise FlowError("closed task merge requires verification and review evidence")
+                raise FlowError(
+                    "closed task merge requires verification and review evidence"
+                )
     else:
         active_task(state)
         ensure_release(root, state)
@@ -2143,9 +2170,7 @@ def command_archive(
         "artifacts": artifact_records,
         "acceptance": acceptance_records,
         "reviews": [
-            record
-            for record in acceptance_records
-            if record.get("kind") == "review"
+            record for record in acceptance_records if record.get("kind") == "review"
         ],
         "release": release_records,
         "practice": evidence.get("practice", {}),
@@ -2369,7 +2394,9 @@ def build_parser() -> argparse.ArgumentParser:
     reconcile.add_argument("--allow-unmanaged", action="store_true")
     archive = sub.add_parser("archive")
     archive.add_argument(
-        "--outcome", choices=("completed", "abandoned", "reconciled"), default="completed"
+        "--outcome",
+        choices=("completed", "abandoned", "reconciled"),
+        default="completed",
     )
     archive.add_argument("--reason")
     archive.add_argument("--expected-head")
@@ -2466,7 +2493,12 @@ def main() -> int:
             elif args.command == "reconcile":
                 try:
                     if args.allow_unmanaged:
-                        if not args.cleanup or not args.worktree or not args.base or not args.expected_head:
+                        if (
+                            not args.cleanup
+                            or not args.worktree
+                            or not args.base
+                            or not args.expected_head
+                        ):
                             raise FlowError(
                                 "unmanaged cleanup requires --cleanup, --worktree, --base, and --expected-head"
                             )
@@ -2481,7 +2513,9 @@ def main() -> int:
                             raise FlowError(
                                 "targeted worktree cleanup requires --allow-unmanaged"
                             )
-                        result = flow_parallel.reconcile_integrations(root, args.cleanup)
+                        result = flow_parallel.reconcile_integrations(
+                            root, args.cleanup
+                        )
                 except flow_parallel.ParallelError as exc:
                     raise FlowError(str(exc)) from exc
                 print(json.dumps(result, ensure_ascii=False, sort_keys=True))

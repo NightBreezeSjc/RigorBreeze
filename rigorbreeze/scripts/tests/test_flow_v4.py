@@ -141,7 +141,7 @@ artifacts = ["artifacts/app.bin"]
         runner = self.root / "scripts" / "flow_state.py"
         runner.write_text(
             runner.read_text(encoding="utf-8").replace(
-                'TOOL_VERSION = "0.8.0"', 'TOOL_VERSION = "0.5.1"'
+                'TOOL_VERSION = "0.8.1"', 'TOOL_VERSION = "0.5.1"'
             ),
             encoding="utf-8",
         )
@@ -151,7 +151,7 @@ artifacts = ["artifacts/app.bin"]
             status["installation"],
             {
                 "runnerVersion": "0.5.1",
-                "skillVersion": "0.8.0",
+                "skillVersion": "0.8.1",
                 "status": "outdated",
                 "upgradeSafe": False,
                 "missingComponents": [],
@@ -174,7 +174,7 @@ artifacts = ["artifacts/app.bin"]
         self.run_flow("init")
         self.assertTrue(runner.is_file())
         self.assertIn(
-            'TOOL_VERSION = "0.8.0"',
+            'TOOL_VERSION = "0.8.1"',
             (self.root / "scripts" / "flow_state.py").read_text(encoding="utf-8"),
         )
 
@@ -190,6 +190,43 @@ artifacts = ["artifacts/app.bin"]
 
         self.commit_all("track workflow baseline")
         self.run_flow("approve", "task")
+
+    def test_nested_test_path_is_not_treated_as_production_before_red(self) -> None:
+        self.init_git()
+        self.run_flow("init")
+        config = self.root / "rigorbreeze.toml"
+        config.write_text(
+            config.read_text(encoding="utf-8")
+            .replace(
+                'test_paths = ["tests", "test", "__tests__", "src/test"]',
+                'test_paths = ["src/tests"]',
+            )
+            .replace('source_paths = ["src", "app", "lib"]', 'source_paths = ["src"]'),
+            encoding="utf-8",
+        )
+        self.commit_all("install nested-test workflow")
+        self.run_flow("new", "TASK-716", "--title", "nested tests", "--risk", "L1")
+        self.write_task("TASK-716", risk="L1", scope="src/")
+        self.run_flow("approve", "task")
+
+        test_file = self.root / "src" / "tests" / "test_feature.py"
+        test_file.parent.mkdir(parents=True)
+        test_file.write_text(
+            "raise AssertionError('expected behavior missing')\n", encoding="utf-8"
+        )
+        observed = self.run_flow(
+            "red",
+            "--requirement",
+            "REQ-001",
+            "--test",
+            "src/tests/test_feature.py",
+            "--expect-pattern",
+            "expected behavior missing",
+            "--",
+            sys.executable,
+            "src/tests/test_feature.py",
+        )
+        self.assertIn("RED observed", observed.stdout)
 
     def test_abandoned_archive_records_outcome_and_releases_the_task_slot(
         self,
@@ -631,7 +668,7 @@ level = "manual"
         self.init_git()
         self.run_flow("init")
         (self.root / "rigorbreeze.toml").write_text(
-            f'''version = 4
+            f"""version = 4
 [policy]
 local_mode = "advisory"
 test_paths = ["tests"]
@@ -645,7 +682,7 @@ level = "manual"
 [[checks]]
 id = "unit"
 command = {json.dumps([sys.executable, "-c", "print('passed')"])}
-''',
+""",
             encoding="utf-8",
         )
         self.commit_all("install workflow")
@@ -755,7 +792,9 @@ command = {json.dumps([sys.executable, "-c", "print('passed')"])}
         self.assertIsNone(state["activeTask"])
         self.assertEqual(state["lastClosed"]["outcome"], "reconciled")
 
-    def test_one_time_workflow_baseline_commit_is_exact_and_becomes_current(self) -> None:
+    def test_one_time_workflow_baseline_commit_is_exact_and_becomes_current(
+        self,
+    ) -> None:
         self.init_git()
         self.run_flow("init")
         head = subprocess.run(
@@ -791,7 +830,9 @@ command = {json.dumps([sys.executable, "-c", "print('passed')"])}
         self.assertIn("spec/index.md", committed)
         self.assertNotIn("spec/state.json", committed)
 
-    def test_integrated_task_is_reported_unclosed_before_baseline_staleness(self) -> None:
+    def test_integrated_task_is_reported_unclosed_before_baseline_staleness(
+        self,
+    ) -> None:
         self.init_git()
         self.run_flow("init")
         self.commit_all("install workflow")
@@ -845,7 +886,9 @@ command = {json.dumps([sys.executable, "-c", "print('passed')"])}
         self.assertIn(task_head, task["nextAction"]["command"])
         self.assertEqual(task["baseBranch"], base)
 
-    def test_explicit_unmanaged_cleanup_removes_only_proven_integrated_worktree(self) -> None:
+    def test_explicit_unmanaged_cleanup_removes_only_proven_integrated_worktree(
+        self,
+    ) -> None:
         self.init_git()
         self.run_flow("init")
         self.commit_all("install workflow")

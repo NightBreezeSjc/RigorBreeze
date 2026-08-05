@@ -173,9 +173,7 @@ Risk: {risk}
         # Initializing Git after an existing non-Git workflow is a supported
         # legacy-state migration path. The first runner read performs the copy.
         self.run_flow("status", "--json")
-        state = json.loads(
-            self.state_path().read_text(encoding="utf-8")
-        )
+        state = json.loads(self.state_path().read_text(encoding="utf-8"))
         self.assertNotIn("attestations", state)
 
         self.run_flow(
@@ -231,9 +229,7 @@ Risk: {risk}
         self.assertNotIn("evolution candidate", confirmation.stdout.lower())
         self.run_flow("archive")
 
-        state = json.loads(
-            self.state_path().read_text(encoding="utf-8")
-        )
+        state = json.loads(self.state_path().read_text(encoding="utf-8"))
         evidence = json.loads(
             (self.root / "spec" / "evidence" / "TASK-001.json").read_text(
                 encoding="utf-8"

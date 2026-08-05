@@ -205,9 +205,7 @@ Risk: {risk}
     def test_init_creates_v2_config_and_structured_evidence(self) -> None:
         self.run_flow("init")
         self.assertTrue((self.root / "rigorbreeze.toml").is_file())
-        state = json.loads(
-            self.state_path().read_text(encoding="utf-8")
-        )
+        state = json.loads(self.state_path().read_text(encoding="utf-8"))
         self.assertEqual(state["workflowVersion"], 4)
 
         self.create_task(risk="L0")
@@ -830,9 +828,7 @@ Risk: {risk}
             check=True,
         )
 
-        state = json.loads(
-            self.state_path().read_text(encoding="utf-8")
-        )
+        state = json.loads(self.state_path().read_text(encoding="utf-8"))
         changed = subprocess.run(
             [
                 "git",

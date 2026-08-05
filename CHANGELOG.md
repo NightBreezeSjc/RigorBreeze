@@ -17,6 +17,19 @@ The project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). 
 - Reframed the repository for first-time adopters with bilingual onboarding, explicit safety boundaries, and a complete first-task walkthrough.
 - Added concise contribution and security policies plus an MIT license.
 
+## [0.8.1] - Evidence-backed context intake
+
+### Changed
+
+- Incomplete prompts are completed from authoritative requirements, code, tests, Git and runtime evidence inside the existing task contract; Codex asks only for outcome-changing intent that cannot be recovered.
+- Follow-up writes after compaction or while debugging/review skills are active must re-enter RigorBreeze state and ownership checks.
+- External Git, deployment, developer-tool and platform writes first report observed current state, already completed work, immutable identifiers, the remaining action and stop conditions.
+- Configured test paths nested below a source path are no longer misclassified as production changes before RED.
+
+### Compatibility
+
+- CLI, state/evidence schema v4, automation journal v1, Spec file types and runtime dependencies are unchanged.
+
 ## [0.8.0] - State closure and low-friction adoption
 
 ### Added

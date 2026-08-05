@@ -35,7 +35,7 @@ class SkillContractTests(unittest.TestCase):
 
         shared_contract = (
             "$rigorbreeze",
-            "v0.8.0",
+            "v0.8.1",
             "nightbreezesjc/rigorbreeze",
             "npx skills@latest add nightbreezesjc/rigorbreeze --skill rigorbreeze -g -a codex -y",
             "python3 scripts/rigorbreeze.py status --json",
@@ -120,6 +120,21 @@ class SkillContractTests(unittest.TestCase):
         self.assertRegex(skill, r"(?m)^name: rigorbreeze$")
         self.assertIn('display_name: "RigorBreeze"', metadata)
         self.assertIn("$rigorbreeze", metadata)
+
+    def test_skill_completes_context_and_rechecks_follow_up_writes(self) -> None:
+        skill = (SKILL_DIR / "SKILL.md").read_text(encoding="utf-8")
+        metadata = (SKILL_DIR / "agents" / "openai.yaml").read_text(encoding="utf-8")
+        handbook = (SKILL_DIR / "references" / "handbook.md").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn("recoverable project facts", skill)
+        self.assertIn("outcome-changing intent", skill)
+        self.assertIn("after compaction", skill)
+        self.assertIn("observed current state", skill)
+        self.assertIn("incomplete request", metadata)
+        self.assertIn("already completed", handbook)
+        self.assertIn("remaining action", handbook)
 
     def test_documented_first_run_cli_commands_exist(self) -> None:
         result = subprocess.run(

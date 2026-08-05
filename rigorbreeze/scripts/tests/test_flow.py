@@ -153,10 +153,17 @@ Risk: L1
         )
         self.assertIn("## Test seams", task_text)
         self.assertIn("## Conditional risks", task_text)
+        for context_field in (
+            "- User outcome: TODO",
+            "- Current behavior and evidence: TODO",
+            "- Business and architecture path: TODO",
+            "- Invariants and source of truth: TODO",
+            "- Requirement/design/API version: TODO",
+            "- Unresolved outcome-changing ambiguity: TODO",
+        ):
+            self.assertIn(context_field, task_text)
 
-        state = json.loads(
-            self.state_path().read_text(encoding="utf-8")
-        )
+        state = json.loads(self.state_path().read_text(encoding="utf-8"))
         self.assertEqual(state["phase"], "draft")
         self.assertEqual(state["activeTask"]["id"], "TASK-001")
 
@@ -216,9 +223,7 @@ Risk: L1
 
         status = self.run_flow("status")
         self.assertIn("approval: invalid", status.stdout.lower())
-        state = json.loads(
-            self.state_path().read_text(encoding="utf-8")
-        )
+        state = json.loads(self.state_path().read_text(encoding="utf-8"))
         self.assertTrue(
             state["approvals"]["task"]["valid"],
             "status must report derived invalidity without mutating persisted state",
@@ -366,9 +371,7 @@ Risk: L1
 
         self.assertFalse((self.root / "spec" / "changes" / "TASK-001.md").exists())
         self.assertTrue((self.root / "spec" / "archive" / "TASK-001.md").is_file())
-        state = json.loads(
-            self.state_path().read_text(encoding="utf-8")
-        )
+        state = json.loads(self.state_path().read_text(encoding="utf-8"))
         self.assertEqual(state["phase"], "archived")
         self.assertIsNone(state["activeTask"])
         status = self.run_flow("status")
