@@ -17,6 +17,21 @@ The project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). 
 - Reframed the repository for first-time adopters with bilingual onboarding, explicit safety boundaries, and a complete first-task walkthrough.
 - Added concise contribution and security policies plus an MIT license.
 
+## [0.9.0] - Agent behavior reliability
+
+### Added
+
+- Added six repository-only synthetic pressure scenarios plus a standard-library scorer and an opt-in `codex exec --ephemeral --json` maintainer runner. Live redacted results stay under Git-private storage; CI uses deterministic fake transcripts and never calls a model.
+- Added compact execution rules for semantic self-review before approval, fresh command/exit/scope evidence before completion claims, evidence-based review feedback handling, and an architecture stop after three failed hypotheses.
+
+### Fixed
+
+- Closed task projections discard stale retrospective `nextAction` values instead of suggesting work after archive.
+
+### Compatibility
+
+- Public CLI, state/evidence schema v4, automation journal v1, Spec Tree, risk lanes, runtime dependencies, and normal project operation are unchanged.
+
 ## [0.8.1] - Evidence-backed context intake
 
 ### Changed

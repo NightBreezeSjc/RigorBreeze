@@ -47,7 +47,7 @@ Before approval, agree:
 - which production paths may change;
 - which requirement/design version defines acceptance.
 
-Approve the task only after scope, design, acceptance, plan, and test shape are stable. Its digest becomes the contract; changes invalidate downstream evidence. Do not reapprove over production implementation changes. Restore the approved contract and finish, or revert production changes before amending and reapproving the same outcome. Create a dependent task for a new user outcome or acceptance condition.
+Before approval, perform one **semantic self-review** for placeholders, contradictions, oversized scope, and ambiguous outcome, source-of-truth, freshness, or fallback meaning. Repair recoverable project facts directly; ask only when the ambiguity changes the result. Approve only after scope, design, acceptance, plan, and test shape are stable. Its digest becomes the contract; changes invalidate downstream evidence. Do not reapprove over production implementation changes. Restore the approved contract and finish, or revert production changes before amending and reapproving the same outcome. Create a dependent task for a new user outcome or acceptance condition.
 
 Before the first enforced L1/L2 approval, require `workflowBaseline.status=current` on the task's real base branch. If the user explicitly authorizes the isolated baseline commit shown by `nextAction`, use `automate commit --once --workflow-baseline --expected-head <sha>`; never mix product changes into it or treat a task-branch runner commit as the project baseline.
 
@@ -65,7 +65,7 @@ Implement as tracer bullets:
 
 Do not batch all tests, then all implementation. Do not derive the expected result by calling or duplicating the implementation under test.
 
-For bugs, first build a tight feedback loop that is deterministic, fast, agent-runnable, and capable of turning red. Minimize the reproduction, rank falsifiable hypotheses, instrument only to distinguish them, remove temporary probes, then retain a regression test.
+For bugs, first build a tight feedback loop that is deterministic, fast, agent-runnable, and capable of turning red. Minimize the reproduction, rank falsifiable hypotheses, instrument only to distinguish them, remove temporary probes, then retain a regression test. After **three failed hypotheses** for the same defect, make an **architecture stop**: preserve evidence and re-examine boundaries, shared state, and assumptions before another patch.
 
 Run one-off debugging or exploratory commands directly. Workflow validity comes only from configured profiles. A profile is the project's declared contract: every listed check must run, while unrelated capabilities stay outside the profile.
 
@@ -76,7 +76,7 @@ Run two separate review passes so one does not mask the other:
 1. **Standards pass:** correctness, simplicity, project conventions, security, maintainability, tests, and scope.
 2. **Spec pass:** each acceptance ID, prototype state, API/data/permission contract, and forbidden scope.
 
-A solo developer may perform both passes at different times with fresh context. Require a second human only when project policy or the real production risk calls for one.
+A solo developer may perform both passes at different times with fresh context. Require a second human only when project policy or the real production risk calls for one. Treat **review feedback** as a hypothesis: verify it against the requirement, actual code use, compatibility constraints, tests, and YAGNI. Explain and reject advice that is wrong, excessive, or unused rather than implementing it because a reviewer proposed it.
 
 Validate the real product, not only the build:
 
@@ -144,4 +144,4 @@ Keep the human interaction small:
 2. ask for real acceptance when implementation is ready;
 3. before L1/L2/Emergency archive, show the prefilled `retro --json` summary and ask only for rework reason, whether any block/next action was unreasonable, and whether the workflow helped.
 
-Codex runs the CLI and records evidence; do not make the user operate each internal command. Close in this order: verify, accept, review, confirm retrospective, archive, then guarded commit/push/merge and worktree reconciliation. L0 needs only configured affected verification; L1/L2 need full verification, applicable acceptance, review, and retrospective. Use `abandoned` for a clean cancellation. If code was already externally integrated but the task remained open, use `archive --outcome reconciled --reason <reason> --expected-head <sha>` only after integration and external outcomes are proven; never invent GREEN, acceptance, or release success. Production release still requires an active `release-ready` task.
+Codex runs the CLI and records evidence; do not make the user operate each internal command. Close in this order: verify, accept, review, confirm retrospective, archive, then guarded commit/push/merge and worktree reconciliation. L0 needs only configured affected verification; L1/L2 need full verification, applicable acceptance, review, and retrospective. Use `abandoned` for a clean cancellation. If code was already externally integrated but the task remained open, use `archive --outcome reconciled --reason <reason> --expected-head <sha>` only after integration and external outcomes are proven; never invent GREEN, acceptance, or release success. Production release still requires an active `release-ready` task. Before commit, archive, or any “fixed/passed/complete” claim, cite **fresh verification** run in this turn: the exact command, **exit status**, and covered scope. Historical reports, partial checks, or another Agent's success claim cannot substitute.

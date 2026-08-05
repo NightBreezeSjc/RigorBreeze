@@ -35,7 +35,7 @@ class SkillContractTests(unittest.TestCase):
 
         shared_contract = (
             "$rigorbreeze",
-            "v0.8.1",
+            "v0.9.0",
             "nightbreezesjc/rigorbreeze",
             "npx skills@latest add nightbreezesjc/rigorbreeze --skill rigorbreeze -g -a codex -y",
             "python3 scripts/rigorbreeze.py status --json",
@@ -136,6 +136,36 @@ class SkillContractTests(unittest.TestCase):
         self.assertIn("already completed", handbook)
         self.assertIn("remaining action", handbook)
 
+    def test_skill_encodes_behavior_reliability_rules_once(self) -> None:
+        skill = (SKILL_DIR / "SKILL.md").read_text(encoding="utf-8")
+        generated_policy = (SKILL_DIR / "scripts" / "flow_state.py").read_text(
+            encoding="utf-8"
+        )
+
+        required_skill_phrases = (
+            "semantic self-review",
+            "fresh verification",
+            "exit status",
+            "review feedback",
+            "three failed hypotheses",
+            "architecture stop",
+        )
+        for phrase in required_skill_phrases:
+            with self.subTest(phrase=phrase):
+                self.assertEqual(
+                    skill.lower().count(phrase),
+                    1,
+                    f"keep {phrase!r} explicit without duplicating the protocol",
+                )
+
+        for phrase in (
+            "semantic self-review",
+            "fresh verification",
+            "review feedback",
+            "three failed hypotheses",
+        ):
+            self.assertIn(phrase, generated_policy.lower())
+
     def test_documented_first_run_cli_commands_exist(self) -> None:
         result = subprocess.run(
             [sys.executable, str(SKILL_DIR / "scripts" / "flow.py"), "--help"],
@@ -211,6 +241,8 @@ class SkillContractTests(unittest.TestCase):
         content = workflow.read_text(encoding="utf-8")
         self.assertIn("unittest discover", content)
         self.assertIn("test_skill_contract.py", content)
+        self.assertIn("tests/behavior/run.py validate", content)
+        self.assertIn("unittest discover -s tests/behavior", content)
 
 
 if __name__ == "__main__":

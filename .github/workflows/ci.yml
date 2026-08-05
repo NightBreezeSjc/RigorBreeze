@@ -34,5 +34,9 @@ jobs:
           python-version: "3.13"
       - name: Verify public Skill contract
         run: python -m unittest discover -s rigorbreeze/scripts/tests -p test_skill_contract.py -v
+      - name: Validate Agent behavior contracts
+        run: python tests/behavior/run.py validate
+      - name: Test deterministic Agent behavior scorer
+        run: python -m unittest discover -s tests/behavior -v
       - name: Validate POSIX hooks
         run: sh -n rigorbreeze/assets/hooks/pre-commit

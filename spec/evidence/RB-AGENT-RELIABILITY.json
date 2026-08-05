@@ -1,0 +1,864 @@
+{
+  "workflowVersion": 4,
+  "taskId": "RB-AGENT-RELIABILITY",
+  "baseline": {
+    "taskDigest": "d38edd5159d98a89582564601696e8a08ac1e939997cd1b3d7b35bca2fe2f897",
+    "head": "38f79796aea204b9530e04c5e80ae3bfe1c52de3",
+    "projectFingerprint": "088b7015f0c67e26b255cb8800a1551714a084eb639a63dda6704f3c25520564",
+    "configDigest": "e309b7a492f02e8a45e3c07000bd1a83ea30532fed05a783bbc286965e0be829",
+    "workingTreePaths": [
+      "spec/changes/RB-AGENT-RELIABILITY.md"
+    ],
+    "workingTreeDigests": {
+      "spec/changes/RB-AGENT-RELIABILITY.md": "d38edd5159d98a89582564601696e8a08ac1e939997cd1b3d7b35bca2fe2f897"
+    },
+    "approvedAt": "2026-08-05T12:03:53+08:00"
+  },
+  "red": [
+    {
+      "requirement": "REQ-007",
+      "command": [
+        "env",
+        "PYTHONPATH=rigorbreeze/scripts/tests",
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "rigorbreeze/scripts/tests/test_flow_v4.py",
+        "-v"
+      ],
+      "exitCode": 1,
+      "expectedPattern": "nextAction",
+      "testDigests": {
+        "rigorbreeze/scripts/tests/test_flow_v4.py": "419a952b3a14ee208b55087dadb0e397b731ceb60bad121625cf7bd458192054"
+      },
+      "summary": "_init_does_not_upgrade_active_task) ... ok\ntest_v3_state_upgrade_preserves_history_and_adds_v4_closure (rigorbreeze.scripts.tests.test_flow_v4.FlowV4Tests.test_v3_state_upgrade_preserves_history_and_adds_v4_closure) ... ok\ntest_workflow_baseline_is_proven_on_the_base_branch (rigorbreeze.scripts.tests.test_flow_v4.FlowV4Tests.test_workflow_baseline_is_proven_on_the_base_branch) ... ok\n\n======================================================================\nFAIL: test_completed_archive_can_be_committed_from_last_closed_context (rigorbreeze.scripts.tests.test_flow_v4.FlowV4Tests.test_completed_archive_can_be_committed_from_last_closed_context)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/songjincheng/LinGang-housing/rigorbreeze/rigorbreeze/scripts/tests/test_flow_v4.py\", line 727, in test_completed_archive_can_be_committed_from_last_closed_context\n    self.assertNotIn(\"nextAction\", archived)\n    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: 'nextAction' unexpectedly found in {'taskId': 'TASK-713', 'title': 'close then commit', 'risk': 'L0', 'phase': 'archived', 'dependsOn': [], 'worktree': '/private/var/folders/3t/nfwgp77s1dgffqg752fg4b2m0000gn/T/tmp53xp206e', 'branch': 'main', 'baseBranch': 'main', 'baseSha': 'ba362ba73284540a2dc642ae2b729586308d65b0', 'head': 'accd986e4bbf7468d24f48e452cc0b45d3ca8bcc', 'allowedScope': ['src/'], 'runtimeClaims': [], 'managedByFlow': False, 'createdPath': None, 'createdAt': None, 'updatedAt': '2026-08-05T12:12:29+08:00', 'approval': 'valid', 'verification': 'current', 'fullProfile': 'missing/stale', 'nextAction': {'reason': 'stale retrospective advice', 'command': 'repeat an already closed action'}, 'archived': True, 'runtimeConflicts': [], 'worktreeExists': True, 'readiness': 'integrated', 'baselineStale': False, 'lifecycle': 'closed'}\n\n----------------------------------------------------------------------\nRan 19 tests in 18.671s\n\nFAILED (failures=1)",
+      "taskDigest": "d38edd5159d98a89582564601696e8a08ac1e939997cd1b3d7b35bca2fe2f897",
+      "projectFingerprint": "93d048a50da53f5c6eddc9840d5832dcee17a1af037114d54b302ac49dd9e18e",
+      "head": "38f79796aea204b9530e04c5e80ae3bfe1c52de3",
+      "observedAt": "2026-08-05T12:12:45+08:00"
+    },
+    {
+      "requirement": "REQ-004",
+      "command": [
+        "env",
+        "PYTHONPATH=rigorbreeze/scripts/tests",
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "rigorbreeze/scripts/tests/test_skill_contract.py",
+        "-v"
+      ],
+      "exitCode": 1,
+      "expectedPattern": "semantic self-review",
+      "testDigests": {
+        "rigorbreeze/scripts/tests/test_skill_contract.py": "0144f7f3b692d3555420734ada8530eb17a7f967cb6e8189d90a2596f8f2af27"
+      },
+      "summary": "d[0] == \"--\":\\n        command = command[1:]\\n    if not command:\\n        raise flowerror(\"missing command after --\")\\n    try:\\n        return subprocess.run(\\n            command,\\n            cwd=root,\\n            shell=false,\\n            text=true,\\n            encoding=\"utf-8\",\\n            errors=\"replace\",\\n            capture_output=true,\\n        )\\n    except filenotfounderror as exc:\\n        raise flowerror(f\"command not found: {command[0]}\") from exc\\n\\n\\ndef git(root: path, *args: str) -> subprocess.completedprocess[str]:\\n    return subprocess.run(\\n        [\"git\", *args],\\n        cwd=root,\\n        text=true,\\n        encoding=\"utf-8\",\\n        errors=\"replace\",\\n        capture_output=true,\\n    )\\n\\n\\ndef is_git_repo(root: path) -> bool:\\n    return git(root, \"rev-parse\", \"--is-inside-work-tree\").returncode == 0\\n\\n\\ndef current_head(root: path) -> str | none:\\n    result = git(root, \"rev-parse\", \"head\")\\n    return result.stdout.strip() if result.returncode == 0 else none\\n\\n\\ndef working_tree_paths(root: path) -> list[str]:\\n    if not is_git_repo(root):\\n        return []\\n    result = git(root, \"status\", \"--porcelain=1\", \"-z\", \"--untracked-files=all\")\\n    if result.returncode != 0:\\n        raise flowerror(\"unable to inspect working tree\")\\n    generated = configured_generated_paths(root)\\n    paths: list[str] = []\\n    for relative in flow_parallel.parse_porcelain_paths(result.stdout):\\n        parts = path(relative).parts\\n        if (\\n            relative == \"spec/state.json\"\\n            or relative == f\"spec/{lock_name}\"\\n            or relative.startswith(\"spec/evidence/\")\\n            or relative in generated\\n            or any(part in excluded_dirs for part in parts)\\n            or relative.endswith((\".pyc\", \".pyo\"))\\n        ):\\n            continue\\n        paths.append(relative)\\n    return sorted(set(paths))\\n'\n\n----------------------------------------------------------------------\nRan 13 tests in 0.073s\n\nFAILED (failures=9)",
+      "taskDigest": "d38edd5159d98a89582564601696e8a08ac1e939997cd1b3d7b35bca2fe2f897",
+      "projectFingerprint": "93d048a50da53f5c6eddc9840d5832dcee17a1af037114d54b302ac49dd9e18e",
+      "head": "38f79796aea204b9530e04c5e80ae3bfe1c52de3",
+      "observedAt": "2026-08-05T12:13:11+08:00"
+    },
+    {
+      "requirement": "REQ-007",
+      "command": [
+        "env",
+        "TEST_FILE=rigorbreeze/scripts/tests/test_flow_v4.py",
+        "PYTHONPATH=rigorbreeze/scripts/tests",
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "test_flow_v4.FlowV4Tests.test_completed_archive_can_be_committed_from_last_closed_context",
+        "-v"
+      ],
+      "exitCode": 1,
+      "expectedPattern": "nextAction",
+      "testDigests": {
+        "rigorbreeze/scripts/tests/test_flow_v4.py": "8bc7b7ec3e6f8da5d59e2182dec566b9361b7de0a9bf6b69cc8e9ca6266ef5d4"
+      },
+      "summary": "test_completed_archive_can_be_committed_from_last_closed_context (test_flow_v4.FlowV4Tests.test_completed_archive_can_be_committed_from_last_closed_context) ... FAIL\n\n======================================================================\nFAIL: test_completed_archive_can_be_committed_from_last_closed_context (test_flow_v4.FlowV4Tests.test_completed_archive_can_be_committed_from_last_closed_context)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/songjincheng/LinGang-housing/rigorbreeze/rigorbreeze/scripts/tests/test_flow_v4.py\", line 727, in test_completed_archive_can_be_committed_from_last_closed_context\n    self.assertNotIn(\"nextAction\", archived)\n    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: 'nextAction' unexpectedly found in {'taskId': 'TASK-713', 'title': 'close then commit', 'risk': 'L0', 'phase': 'archived', 'dependsOn': [], 'worktree': '/private/var/folders/3t/nfwgp77s1dgffqg752fg4b2m0000gn/T/tmp2qudihne', 'branch': 'main', 'baseBranch': 'main', 'baseSha': 'c38bf576139a67b2ccb591a5954e115cb7040aec', 'head': '29d79a9c3c5db89a5948985e83e8f984fdb8b4f5', 'allowedScope': ['src/'], 'runtimeClaims': [], 'managedByFlow': False, 'createdPath': None, 'createdAt': None, 'updatedAt': '2026-08-05T12:28:14+08:00', 'approval': 'valid', 'verification': 'current', 'fullProfile': 'missing/stale', 'nextAction': {'reason': 'stale retrospective advice', 'command': 'repeat an already closed action'}, 'archived': True, 'runtimeConflicts': [], 'worktreeExists': True, 'readiness': 'integrated', 'baselineStale': False, 'lifecycle': 'closed'}\n\n----------------------------------------------------------------------\nRan 1 test in 1.527s\n\nFAILED (failures=1)",
+      "taskDigest": "d38edd5159d98a89582564601696e8a08ac1e939997cd1b3d7b35bca2fe2f897",
+      "projectFingerprint": "20cd9161f5dcfff57f31629c627616662a7055a4b682a72b8c01b8f749bf6668",
+      "head": "38f79796aea204b9530e04c5e80ae3bfe1c52de3",
+      "observedAt": "2026-08-05T12:28:15+08:00"
+    }
+  ],
+  "verifications": [
+    {
+      "toolVersion": "0.9.0",
+      "profile": "full",
+      "configured": true,
+      "mode": "enforced",
+      "checks": [
+        "format",
+        "lint",
+        "unit",
+        "contract",
+        "secret",
+        "build",
+        "acceptance"
+      ],
+      "passed": false,
+      "taskDigest": "d38edd5159d98a89582564601696e8a08ac1e939997cd1b3d7b35bca2fe2f897",
+      "projectFingerprint": "465016e765605cfbac19311afd7b13ce95a672e218011f277e5ea9aec7fa8861",
+      "configDigest": "e309b7a492f02e8a45e3c07000bd1a83ea30532fed05a783bbc286965e0be829",
+      "head": "38f79796aea204b9530e04c5e80ae3bfe1c52de3",
+      "verifiedAt": "2026-08-05T12:27:03+08:00"
+    },
+    {
+      "toolVersion": "0.9.0",
+      "profile": "full",
+      "configured": true,
+      "mode": "enforced",
+      "checks": [
+        "format",
+        "lint",
+        "unit",
+        "contract",
+        "secret",
+        "build",
+        "acceptance"
+      ],
+      "passed": true,
+      "taskDigest": "d38edd5159d98a89582564601696e8a08ac1e939997cd1b3d7b35bca2fe2f897",
+      "projectFingerprint": "e54469f03b5f566a35f507b25e8bfc5a6c4dfc882d49f26fa1703510d3302e31",
+      "configDigest": "e309b7a492f02e8a45e3c07000bd1a83ea30532fed05a783bbc286965e0be829",
+      "head": "38f79796aea204b9530e04c5e80ae3bfe1c52de3",
+      "verifiedAt": "2026-08-05T12:32:49+08:00"
+    },
+    {
+      "toolVersion": "0.9.0",
+      "profile": "full",
+      "configured": true,
+      "mode": "enforced",
+      "checks": [
+        "format",
+        "lint",
+        "unit",
+        "contract",
+        "secret",
+        "build",
+        "acceptance"
+      ],
+      "passed": true,
+      "taskDigest": "d38edd5159d98a89582564601696e8a08ac1e939997cd1b3d7b35bca2fe2f897",
+      "projectFingerprint": "24c521f459d4feb7e5cd0710f34191a18b53c9996af09af283b60c6051312bfc",
+      "configDigest": "e309b7a492f02e8a45e3c07000bd1a83ea30532fed05a783bbc286965e0be829",
+      "head": "38f79796aea204b9530e04c5e80ae3bfe1c52de3",
+      "verifiedAt": "2026-08-05T12:56:58+08:00"
+    }
+  ],
+  "checkRuns": [
+    {
+      "checkId": "format",
+      "category": "static-quality",
+      "profile": "full",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-m",
+        "ruff",
+        "format",
+        "--check",
+        "rigorbreeze/scripts"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 60,
+      "summary": "13 files already formatted",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "d38edd5159d98a89582564601696e8a08ac1e939997cd1b3d7b35bca2fe2f897",
+      "projectFingerprint": "465016e765605cfbac19311afd7b13ce95a672e218011f277e5ea9aec7fa8861",
+      "head": "38f79796aea204b9530e04c5e80ae3bfe1c52de3",
+      "recordedAt": "2026-08-05T12:23:17+08:00"
+    },
+    {
+      "checkId": "lint",
+      "category": "static-quality",
+      "profile": "full",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-m",
+        "ruff",
+        "check",
+        "rigorbreeze/scripts"
+      ],
+      "exitCode": 1,
+      "passed": false,
+      "durationMs": 37,
+      "summary": "E402 Module level import not at top of file\n  --> rigorbreeze/scripts/tests/test_flow_v4.py:14:1\n   |\n12 |     sys.path.insert(0, str(SCRIPTS_DIR))\n13 |\n14 | import flow_parallel\n   | ^^^^^^^^^^^^^^^^^^^^\n   |\n\nFound 1 error.",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "d38edd5159d98a89582564601696e8a08ac1e939997cd1b3d7b35bca2fe2f897",
+      "projectFingerprint": "465016e765605cfbac19311afd7b13ce95a672e218011f277e5ea9aec7fa8861",
+      "head": "38f79796aea204b9530e04c5e80ae3bfe1c52de3",
+      "recordedAt": "2026-08-05T12:23:17+08:00"
+    },
+    {
+      "checkId": "unit",
+      "category": "behavior",
+      "profile": "full",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "rigorbreeze/scripts/tests",
+        "-v"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 111540,
+      "summary": "irst_run_cli_commands_exist (test_skill_contract.SkillContractTests.test_documented_first_run_cli_commands_exist) ... ok\ntest_every_user_facing_english_document_has_chinese (test_skill_contract.SkillContractTests.test_every_user_facing_english_document_has_chinese) ... ok\ntest_installable_skill_excludes_repository_documents (test_skill_contract.SkillContractTests.test_installable_skill_excludes_repository_documents) ... ok\ntest_installable_skill_has_no_project_specific_policy (test_skill_contract.SkillContractTests.test_installable_skill_has_no_project_specific_policy) ... ok\ntest_long_references_have_a_table_of_contents (test_skill_contract.SkillContractTests.test_long_references_have_a_table_of_contents) ... ok\ntest_public_markdown_relative_links_resolve (test_skill_contract.SkillContractTests.test_public_markdown_relative_links_resolve) ... ok\ntest_public_readmes_cover_the_same_first_run_contract (test_skill_contract.SkillContractTests.test_public_readmes_cover_the_same_first_run_contract) ... ok\ntest_repository_has_minimal_open_source_governance (test_skill_contract.SkillContractTests.test_repository_has_minimal_open_source_governance) ... ok\ntest_repository_has_skill_owned_ci (test_skill_contract.SkillContractTests.test_repository_has_skill_owned_ci) ... ok\ntest_skill_completes_context_and_rechecks_follow_up_writes (test_skill_contract.SkillContractTests.test_skill_completes_context_and_rechecks_follow_up_writes) ... ok\ntest_skill_encodes_behavior_reliability_rules_once (test_skill_contract.SkillContractTests.test_skill_encodes_behavior_reliability_rules_once) ... ok\ntest_skill_entrypoint_stays_compact_and_links_every_reference (test_skill_contract.SkillContractTests.test_skill_entrypoint_stays_compact_and_links_every_reference) ... ok\ntest_skill_metadata_matches_public_name (test_skill_contract.SkillContractTests.test_skill_metadata_matches_public_name) ... ok\n\n----------------------------------------------------------------------\nRan 113 tests in 111.479s\n\nOK",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "d38edd5159d98a89582564601696e8a08ac1e939997cd1b3d7b35bca2fe2f897",
+      "projectFingerprint": "465016e765605cfbac19311afd7b13ce95a672e218011f277e5ea9aec7fa8861",
+      "head": "38f79796aea204b9530e04c5e80ae3bfe1c52de3",
+      "recordedAt": "2026-08-05T12:25:08+08:00"
+    },
+    {
+      "checkId": "contract",
+      "category": "behavior",
+      "profile": "full",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-m",
+        "py_compile",
+        "rigorbreeze/scripts/flow.py"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 42,
+      "summary": "",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "d38edd5159d98a89582564601696e8a08ac1e939997cd1b3d7b35bca2fe2f897",
+      "projectFingerprint": "465016e765605cfbac19311afd7b13ce95a672e218011f277e5ea9aec7fa8861",
+      "head": "38f79796aea204b9530e04c5e80ae3bfe1c52de3",
+      "recordedAt": "2026-08-05T12:25:08+08:00"
+    },
+    {
+      "checkId": "secret",
+      "category": "secrets",
+      "profile": "full",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-c",
+        "import pathlib,re,sys; files=[p for p in pathlib.Path('.').rglob('*') if p.is_file() and '.git' not in p.parts and 'tests' not in p.parts and p.name != 'rigorbreeze.toml']; pattern=re.compile(r'(?i)(api[_-]?key|token|password|secret)\\s*[:=]\\s*\\S{20,}'); hits=[str(p) for p in files if pattern.search(p.read_text(errors='ignore'))]; print('\\n'.join(hits)); sys.exit(bool(hits))"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 51,
+      "summary": "",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "d38edd5159d98a89582564601696e8a08ac1e939997cd1b3d7b35bca2fe2f897",
+      "projectFingerprint": "465016e765605cfbac19311afd7b13ce95a672e218011f277e5ea9aec7fa8861",
+      "head": "38f79796aea204b9530e04c5e80ae3bfe1c52de3",
+      "recordedAt": "2026-08-05T12:25:08+08:00"
+    },
+    {
+      "checkId": "build",
+      "category": "build",
+      "profile": "full",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-c",
+        "import pathlib,zipfile; out=pathlib.Path('artifacts/rigorbreeze.zip'); out.parent.mkdir(exist_ok=True); files=[p for p in pathlib.Path('rigorbreeze').rglob('*') if p.is_file() and '__pycache__' not in p.parts]; z=zipfile.ZipFile(out,'w',zipfile.ZIP_DEFLATED); [z.write(p,p.as_posix()) for p in files]; z.close()"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 50,
+      "summary": "",
+      "report": null,
+      "artifacts": [
+        "9bcb6d4e2f89057a887991ca97aaa50f7aaf908300ec8302018cd083bf120b31"
+      ],
+      "taskDigest": "d38edd5159d98a89582564601696e8a08ac1e939997cd1b3d7b35bca2fe2f897",
+      "projectFingerprint": "465016e765605cfbac19311afd7b13ce95a672e218011f277e5ea9aec7fa8861",
+      "head": "38f79796aea204b9530e04c5e80ae3bfe1c52de3",
+      "recordedAt": "2026-08-05T12:25:09+08:00"
+    },
+    {
+      "checkId": "acceptance",
+      "category": "acceptance",
+      "profile": "full",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "rigorbreeze/scripts/tests",
+        "-v"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 114929,
+      "summary": "irst_run_cli_commands_exist (test_skill_contract.SkillContractTests.test_documented_first_run_cli_commands_exist) ... ok\ntest_every_user_facing_english_document_has_chinese (test_skill_contract.SkillContractTests.test_every_user_facing_english_document_has_chinese) ... ok\ntest_installable_skill_excludes_repository_documents (test_skill_contract.SkillContractTests.test_installable_skill_excludes_repository_documents) ... ok\ntest_installable_skill_has_no_project_specific_policy (test_skill_contract.SkillContractTests.test_installable_skill_has_no_project_specific_policy) ... ok\ntest_long_references_have_a_table_of_contents (test_skill_contract.SkillContractTests.test_long_references_have_a_table_of_contents) ... ok\ntest_public_markdown_relative_links_resolve (test_skill_contract.SkillContractTests.test_public_markdown_relative_links_resolve) ... ok\ntest_public_readmes_cover_the_same_first_run_contract (test_skill_contract.SkillContractTests.test_public_readmes_cover_the_same_first_run_contract) ... ok\ntest_repository_has_minimal_open_source_governance (test_skill_contract.SkillContractTests.test_repository_has_minimal_open_source_governance) ... ok\ntest_repository_has_skill_owned_ci (test_skill_contract.SkillContractTests.test_repository_has_skill_owned_ci) ... ok\ntest_skill_completes_context_and_rechecks_follow_up_writes (test_skill_contract.SkillContractTests.test_skill_completes_context_and_rechecks_follow_up_writes) ... ok\ntest_skill_encodes_behavior_reliability_rules_once (test_skill_contract.SkillContractTests.test_skill_encodes_behavior_reliability_rules_once) ... ok\ntest_skill_entrypoint_stays_compact_and_links_every_reference (test_skill_contract.SkillContractTests.test_skill_entrypoint_stays_compact_and_links_every_reference) ... ok\ntest_skill_metadata_matches_public_name (test_skill_contract.SkillContractTests.test_skill_metadata_matches_public_name) ... ok\n\n----------------------------------------------------------------------\nRan 113 tests in 114.871s\n\nOK",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "d38edd5159d98a89582564601696e8a08ac1e939997cd1b3d7b35bca2fe2f897",
+      "projectFingerprint": "465016e765605cfbac19311afd7b13ce95a672e218011f277e5ea9aec7fa8861",
+      "head": "38f79796aea204b9530e04c5e80ae3bfe1c52de3",
+      "recordedAt": "2026-08-05T12:27:03+08:00"
+    },
+    {
+      "checkId": "format",
+      "category": "static-quality",
+      "profile": "full",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-m",
+        "ruff",
+        "format",
+        "--check",
+        "rigorbreeze/scripts"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 73,
+      "summary": "13 files already formatted",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "d38edd5159d98a89582564601696e8a08ac1e939997cd1b3d7b35bca2fe2f897",
+      "projectFingerprint": "e54469f03b5f566a35f507b25e8bfc5a6c4dfc882d49f26fa1703510d3302e31",
+      "head": "38f79796aea204b9530e04c5e80ae3bfe1c52de3",
+      "recordedAt": "2026-08-05T12:29:08+08:00"
+    },
+    {
+      "checkId": "lint",
+      "category": "static-quality",
+      "profile": "full",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-m",
+        "ruff",
+        "check",
+        "rigorbreeze/scripts"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 26,
+      "summary": "All checks passed!",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "d38edd5159d98a89582564601696e8a08ac1e939997cd1b3d7b35bca2fe2f897",
+      "projectFingerprint": "e54469f03b5f566a35f507b25e8bfc5a6c4dfc882d49f26fa1703510d3302e31",
+      "head": "38f79796aea204b9530e04c5e80ae3bfe1c52de3",
+      "recordedAt": "2026-08-05T12:29:08+08:00"
+    },
+    {
+      "checkId": "unit",
+      "category": "behavior",
+      "profile": "full",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "rigorbreeze/scripts/tests",
+        "-v"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 109899,
+      "summary": "irst_run_cli_commands_exist (test_skill_contract.SkillContractTests.test_documented_first_run_cli_commands_exist) ... ok\ntest_every_user_facing_english_document_has_chinese (test_skill_contract.SkillContractTests.test_every_user_facing_english_document_has_chinese) ... ok\ntest_installable_skill_excludes_repository_documents (test_skill_contract.SkillContractTests.test_installable_skill_excludes_repository_documents) ... ok\ntest_installable_skill_has_no_project_specific_policy (test_skill_contract.SkillContractTests.test_installable_skill_has_no_project_specific_policy) ... ok\ntest_long_references_have_a_table_of_contents (test_skill_contract.SkillContractTests.test_long_references_have_a_table_of_contents) ... ok\ntest_public_markdown_relative_links_resolve (test_skill_contract.SkillContractTests.test_public_markdown_relative_links_resolve) ... ok\ntest_public_readmes_cover_the_same_first_run_contract (test_skill_contract.SkillContractTests.test_public_readmes_cover_the_same_first_run_contract) ... ok\ntest_repository_has_minimal_open_source_governance (test_skill_contract.SkillContractTests.test_repository_has_minimal_open_source_governance) ... ok\ntest_repository_has_skill_owned_ci (test_skill_contract.SkillContractTests.test_repository_has_skill_owned_ci) ... ok\ntest_skill_completes_context_and_rechecks_follow_up_writes (test_skill_contract.SkillContractTests.test_skill_completes_context_and_rechecks_follow_up_writes) ... ok\ntest_skill_encodes_behavior_reliability_rules_once (test_skill_contract.SkillContractTests.test_skill_encodes_behavior_reliability_rules_once) ... ok\ntest_skill_entrypoint_stays_compact_and_links_every_reference (test_skill_contract.SkillContractTests.test_skill_entrypoint_stays_compact_and_links_every_reference) ... ok\ntest_skill_metadata_matches_public_name (test_skill_contract.SkillContractTests.test_skill_metadata_matches_public_name) ... ok\n\n----------------------------------------------------------------------\nRan 113 tests in 109.826s\n\nOK",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "d38edd5159d98a89582564601696e8a08ac1e939997cd1b3d7b35bca2fe2f897",
+      "projectFingerprint": "e54469f03b5f566a35f507b25e8bfc5a6c4dfc882d49f26fa1703510d3302e31",
+      "head": "38f79796aea204b9530e04c5e80ae3bfe1c52de3",
+      "recordedAt": "2026-08-05T12:30:58+08:00"
+    },
+    {
+      "checkId": "contract",
+      "category": "behavior",
+      "profile": "full",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-m",
+        "py_compile",
+        "rigorbreeze/scripts/flow.py"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 45,
+      "summary": "",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "d38edd5159d98a89582564601696e8a08ac1e939997cd1b3d7b35bca2fe2f897",
+      "projectFingerprint": "e54469f03b5f566a35f507b25e8bfc5a6c4dfc882d49f26fa1703510d3302e31",
+      "head": "38f79796aea204b9530e04c5e80ae3bfe1c52de3",
+      "recordedAt": "2026-08-05T12:30:58+08:00"
+    },
+    {
+      "checkId": "secret",
+      "category": "secrets",
+      "profile": "full",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-c",
+        "import pathlib,re,sys; files=[p for p in pathlib.Path('.').rglob('*') if p.is_file() and '.git' not in p.parts and 'tests' not in p.parts and p.name != 'rigorbreeze.toml']; pattern=re.compile(r'(?i)(api[_-]?key|token|password|secret)\\s*[:=]\\s*\\S{20,}'); hits=[str(p) for p in files if pattern.search(p.read_text(errors='ignore'))]; print('\\n'.join(hits)); sys.exit(bool(hits))"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 55,
+      "summary": "",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "d38edd5159d98a89582564601696e8a08ac1e939997cd1b3d7b35bca2fe2f897",
+      "projectFingerprint": "e54469f03b5f566a35f507b25e8bfc5a6c4dfc882d49f26fa1703510d3302e31",
+      "head": "38f79796aea204b9530e04c5e80ae3bfe1c52de3",
+      "recordedAt": "2026-08-05T12:30:58+08:00"
+    },
+    {
+      "checkId": "build",
+      "category": "build",
+      "profile": "full",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-c",
+        "import pathlib,zipfile; out=pathlib.Path('artifacts/rigorbreeze.zip'); out.parent.mkdir(exist_ok=True); files=[p for p in pathlib.Path('rigorbreeze').rglob('*') if p.is_file() and '__pycache__' not in p.parts]; z=zipfile.ZipFile(out,'w',zipfile.ZIP_DEFLATED); [z.write(p,p.as_posix()) for p in files]; z.close()"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 54,
+      "summary": "",
+      "report": null,
+      "artifacts": [
+        "50630c79efb2be8d0b5ba818b61ade2be40e1e62e43d26778508e13c1e6a3032"
+      ],
+      "taskDigest": "d38edd5159d98a89582564601696e8a08ac1e939997cd1b3d7b35bca2fe2f897",
+      "projectFingerprint": "e54469f03b5f566a35f507b25e8bfc5a6c4dfc882d49f26fa1703510d3302e31",
+      "head": "38f79796aea204b9530e04c5e80ae3bfe1c52de3",
+      "recordedAt": "2026-08-05T12:30:58+08:00"
+    },
+    {
+      "checkId": "acceptance",
+      "category": "acceptance",
+      "profile": "full",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "rigorbreeze/scripts/tests",
+        "-v"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 110568,
+      "summary": "irst_run_cli_commands_exist (test_skill_contract.SkillContractTests.test_documented_first_run_cli_commands_exist) ... ok\ntest_every_user_facing_english_document_has_chinese (test_skill_contract.SkillContractTests.test_every_user_facing_english_document_has_chinese) ... ok\ntest_installable_skill_excludes_repository_documents (test_skill_contract.SkillContractTests.test_installable_skill_excludes_repository_documents) ... ok\ntest_installable_skill_has_no_project_specific_policy (test_skill_contract.SkillContractTests.test_installable_skill_has_no_project_specific_policy) ... ok\ntest_long_references_have_a_table_of_contents (test_skill_contract.SkillContractTests.test_long_references_have_a_table_of_contents) ... ok\ntest_public_markdown_relative_links_resolve (test_skill_contract.SkillContractTests.test_public_markdown_relative_links_resolve) ... ok\ntest_public_readmes_cover_the_same_first_run_contract (test_skill_contract.SkillContractTests.test_public_readmes_cover_the_same_first_run_contract) ... ok\ntest_repository_has_minimal_open_source_governance (test_skill_contract.SkillContractTests.test_repository_has_minimal_open_source_governance) ... ok\ntest_repository_has_skill_owned_ci (test_skill_contract.SkillContractTests.test_repository_has_skill_owned_ci) ... ok\ntest_skill_completes_context_and_rechecks_follow_up_writes (test_skill_contract.SkillContractTests.test_skill_completes_context_and_rechecks_follow_up_writes) ... ok\ntest_skill_encodes_behavior_reliability_rules_once (test_skill_contract.SkillContractTests.test_skill_encodes_behavior_reliability_rules_once) ... ok\ntest_skill_entrypoint_stays_compact_and_links_every_reference (test_skill_contract.SkillContractTests.test_skill_entrypoint_stays_compact_and_links_every_reference) ... ok\ntest_skill_metadata_matches_public_name (test_skill_contract.SkillContractTests.test_skill_metadata_matches_public_name) ... ok\n\n----------------------------------------------------------------------\nRan 113 tests in 110.510s\n\nOK",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "d38edd5159d98a89582564601696e8a08ac1e939997cd1b3d7b35bca2fe2f897",
+      "projectFingerprint": "e54469f03b5f566a35f507b25e8bfc5a6c4dfc882d49f26fa1703510d3302e31",
+      "head": "38f79796aea204b9530e04c5e80ae3bfe1c52de3",
+      "recordedAt": "2026-08-05T12:32:49+08:00"
+    },
+    {
+      "checkId": "format",
+      "category": "static-quality",
+      "profile": "full",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-m",
+        "ruff",
+        "format",
+        "--check",
+        "rigorbreeze/scripts"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 81,
+      "summary": "13 files already formatted",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "d38edd5159d98a89582564601696e8a08ac1e939997cd1b3d7b35bca2fe2f897",
+      "projectFingerprint": "24c521f459d4feb7e5cd0710f34191a18b53c9996af09af283b60c6051312bfc",
+      "head": "38f79796aea204b9530e04c5e80ae3bfe1c52de3",
+      "recordedAt": "2026-08-05T12:53:13+08:00"
+    },
+    {
+      "checkId": "lint",
+      "category": "static-quality",
+      "profile": "full",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-m",
+        "ruff",
+        "check",
+        "rigorbreeze/scripts"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 27,
+      "summary": "All checks passed!",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "d38edd5159d98a89582564601696e8a08ac1e939997cd1b3d7b35bca2fe2f897",
+      "projectFingerprint": "24c521f459d4feb7e5cd0710f34191a18b53c9996af09af283b60c6051312bfc",
+      "head": "38f79796aea204b9530e04c5e80ae3bfe1c52de3",
+      "recordedAt": "2026-08-05T12:53:13+08:00"
+    },
+    {
+      "checkId": "unit",
+      "category": "behavior",
+      "profile": "full",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "rigorbreeze/scripts/tests",
+        "-v"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 109822,
+      "summary": "irst_run_cli_commands_exist (test_skill_contract.SkillContractTests.test_documented_first_run_cli_commands_exist) ... ok\ntest_every_user_facing_english_document_has_chinese (test_skill_contract.SkillContractTests.test_every_user_facing_english_document_has_chinese) ... ok\ntest_installable_skill_excludes_repository_documents (test_skill_contract.SkillContractTests.test_installable_skill_excludes_repository_documents) ... ok\ntest_installable_skill_has_no_project_specific_policy (test_skill_contract.SkillContractTests.test_installable_skill_has_no_project_specific_policy) ... ok\ntest_long_references_have_a_table_of_contents (test_skill_contract.SkillContractTests.test_long_references_have_a_table_of_contents) ... ok\ntest_public_markdown_relative_links_resolve (test_skill_contract.SkillContractTests.test_public_markdown_relative_links_resolve) ... ok\ntest_public_readmes_cover_the_same_first_run_contract (test_skill_contract.SkillContractTests.test_public_readmes_cover_the_same_first_run_contract) ... ok\ntest_repository_has_minimal_open_source_governance (test_skill_contract.SkillContractTests.test_repository_has_minimal_open_source_governance) ... ok\ntest_repository_has_skill_owned_ci (test_skill_contract.SkillContractTests.test_repository_has_skill_owned_ci) ... ok\ntest_skill_completes_context_and_rechecks_follow_up_writes (test_skill_contract.SkillContractTests.test_skill_completes_context_and_rechecks_follow_up_writes) ... ok\ntest_skill_encodes_behavior_reliability_rules_once (test_skill_contract.SkillContractTests.test_skill_encodes_behavior_reliability_rules_once) ... ok\ntest_skill_entrypoint_stays_compact_and_links_every_reference (test_skill_contract.SkillContractTests.test_skill_entrypoint_stays_compact_and_links_every_reference) ... ok\ntest_skill_metadata_matches_public_name (test_skill_contract.SkillContractTests.test_skill_metadata_matches_public_name) ... ok\n\n----------------------------------------------------------------------\nRan 113 tests in 109.759s\n\nOK",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "d38edd5159d98a89582564601696e8a08ac1e939997cd1b3d7b35bca2fe2f897",
+      "projectFingerprint": "24c521f459d4feb7e5cd0710f34191a18b53c9996af09af283b60c6051312bfc",
+      "head": "38f79796aea204b9530e04c5e80ae3bfe1c52de3",
+      "recordedAt": "2026-08-05T12:55:03+08:00"
+    },
+    {
+      "checkId": "contract",
+      "category": "behavior",
+      "profile": "full",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-m",
+        "py_compile",
+        "rigorbreeze/scripts/flow.py"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 41,
+      "summary": "",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "d38edd5159d98a89582564601696e8a08ac1e939997cd1b3d7b35bca2fe2f897",
+      "projectFingerprint": "24c521f459d4feb7e5cd0710f34191a18b53c9996af09af283b60c6051312bfc",
+      "head": "38f79796aea204b9530e04c5e80ae3bfe1c52de3",
+      "recordedAt": "2026-08-05T12:55:03+08:00"
+    },
+    {
+      "checkId": "secret",
+      "category": "secrets",
+      "profile": "full",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-c",
+        "import pathlib,re,sys; files=[p for p in pathlib.Path('.').rglob('*') if p.is_file() and '.git' not in p.parts and 'tests' not in p.parts and p.name != 'rigorbreeze.toml']; pattern=re.compile(r'(?i)(api[_-]?key|token|password|secret)\\s*[:=]\\s*\\S{20,}'); hits=[str(p) for p in files if pattern.search(p.read_text(errors='ignore'))]; print('\\n'.join(hits)); sys.exit(bool(hits))"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 51,
+      "summary": "",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "d38edd5159d98a89582564601696e8a08ac1e939997cd1b3d7b35bca2fe2f897",
+      "projectFingerprint": "24c521f459d4feb7e5cd0710f34191a18b53c9996af09af283b60c6051312bfc",
+      "head": "38f79796aea204b9530e04c5e80ae3bfe1c52de3",
+      "recordedAt": "2026-08-05T12:55:03+08:00"
+    },
+    {
+      "checkId": "build",
+      "category": "build",
+      "profile": "full",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-c",
+        "import pathlib,zipfile; out=pathlib.Path('artifacts/rigorbreeze.zip'); out.parent.mkdir(exist_ok=True); files=[p for p in pathlib.Path('rigorbreeze').rglob('*') if p.is_file() and '__pycache__' not in p.parts]; z=zipfile.ZipFile(out,'w',zipfile.ZIP_DEFLATED); [z.write(p,p.as_posix()) for p in files]; z.close()"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 49,
+      "summary": "",
+      "report": null,
+      "artifacts": [
+        "50630c79efb2be8d0b5ba818b61ade2be40e1e62e43d26778508e13c1e6a3032"
+      ],
+      "taskDigest": "d38edd5159d98a89582564601696e8a08ac1e939997cd1b3d7b35bca2fe2f897",
+      "projectFingerprint": "24c521f459d4feb7e5cd0710f34191a18b53c9996af09af283b60c6051312bfc",
+      "head": "38f79796aea204b9530e04c5e80ae3bfe1c52de3",
+      "recordedAt": "2026-08-05T12:55:03+08:00"
+    },
+    {
+      "checkId": "acceptance",
+      "category": "acceptance",
+      "profile": "full",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "rigorbreeze/scripts/tests",
+        "-v"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 115061,
+      "summary": "irst_run_cli_commands_exist (test_skill_contract.SkillContractTests.test_documented_first_run_cli_commands_exist) ... ok\ntest_every_user_facing_english_document_has_chinese (test_skill_contract.SkillContractTests.test_every_user_facing_english_document_has_chinese) ... ok\ntest_installable_skill_excludes_repository_documents (test_skill_contract.SkillContractTests.test_installable_skill_excludes_repository_documents) ... ok\ntest_installable_skill_has_no_project_specific_policy (test_skill_contract.SkillContractTests.test_installable_skill_has_no_project_specific_policy) ... ok\ntest_long_references_have_a_table_of_contents (test_skill_contract.SkillContractTests.test_long_references_have_a_table_of_contents) ... ok\ntest_public_markdown_relative_links_resolve (test_skill_contract.SkillContractTests.test_public_markdown_relative_links_resolve) ... ok\ntest_public_readmes_cover_the_same_first_run_contract (test_skill_contract.SkillContractTests.test_public_readmes_cover_the_same_first_run_contract) ... ok\ntest_repository_has_minimal_open_source_governance (test_skill_contract.SkillContractTests.test_repository_has_minimal_open_source_governance) ... ok\ntest_repository_has_skill_owned_ci (test_skill_contract.SkillContractTests.test_repository_has_skill_owned_ci) ... ok\ntest_skill_completes_context_and_rechecks_follow_up_writes (test_skill_contract.SkillContractTests.test_skill_completes_context_and_rechecks_follow_up_writes) ... ok\ntest_skill_encodes_behavior_reliability_rules_once (test_skill_contract.SkillContractTests.test_skill_encodes_behavior_reliability_rules_once) ... ok\ntest_skill_entrypoint_stays_compact_and_links_every_reference (test_skill_contract.SkillContractTests.test_skill_entrypoint_stays_compact_and_links_every_reference) ... ok\ntest_skill_metadata_matches_public_name (test_skill_contract.SkillContractTests.test_skill_metadata_matches_public_name) ... ok\n\n----------------------------------------------------------------------\nRan 113 tests in 115.005s\n\nOK",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "d38edd5159d98a89582564601696e8a08ac1e939997cd1b3d7b35bca2fe2f897",
+      "projectFingerprint": "24c521f459d4feb7e5cd0710f34191a18b53c9996af09af283b60c6051312bfc",
+      "head": "38f79796aea204b9530e04c5e80ae3bfe1c52de3",
+      "recordedAt": "2026-08-05T12:56:58+08:00"
+    }
+  ],
+  "tddChain": [
+    {
+      "requirement": "REQ-007",
+      "red": {
+        "requirement": "REQ-007",
+        "command": [
+          "env",
+          "PYTHONPATH=rigorbreeze/scripts/tests",
+          "python3",
+          "-B",
+          "-m",
+          "unittest",
+          "rigorbreeze/scripts/tests/test_flow_v4.py",
+          "-v"
+        ],
+        "exitCode": 1,
+        "expectedPattern": "nextAction",
+        "testDigests": {
+          "rigorbreeze/scripts/tests/test_flow_v4.py": "419a952b3a14ee208b55087dadb0e397b731ceb60bad121625cf7bd458192054"
+        },
+        "summary": "_init_does_not_upgrade_active_task) ... ok\ntest_v3_state_upgrade_preserves_history_and_adds_v4_closure (rigorbreeze.scripts.tests.test_flow_v4.FlowV4Tests.test_v3_state_upgrade_preserves_history_and_adds_v4_closure) ... ok\ntest_workflow_baseline_is_proven_on_the_base_branch (rigorbreeze.scripts.tests.test_flow_v4.FlowV4Tests.test_workflow_baseline_is_proven_on_the_base_branch) ... ok\n\n======================================================================\nFAIL: test_completed_archive_can_be_committed_from_last_closed_context (rigorbreeze.scripts.tests.test_flow_v4.FlowV4Tests.test_completed_archive_can_be_committed_from_last_closed_context)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/songjincheng/LinGang-housing/rigorbreeze/rigorbreeze/scripts/tests/test_flow_v4.py\", line 727, in test_completed_archive_can_be_committed_from_last_closed_context\n    self.assertNotIn(\"nextAction\", archived)\n    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: 'nextAction' unexpectedly found in {'taskId': 'TASK-713', 'title': 'close then commit', 'risk': 'L0', 'phase': 'archived', 'dependsOn': [], 'worktree': '/private/var/folders/3t/nfwgp77s1dgffqg752fg4b2m0000gn/T/tmp53xp206e', 'branch': 'main', 'baseBranch': 'main', 'baseSha': 'ba362ba73284540a2dc642ae2b729586308d65b0', 'head': 'accd986e4bbf7468d24f48e452cc0b45d3ca8bcc', 'allowedScope': ['src/'], 'runtimeClaims': [], 'managedByFlow': False, 'createdPath': None, 'createdAt': None, 'updatedAt': '2026-08-05T12:12:29+08:00', 'approval': 'valid', 'verification': 'current', 'fullProfile': 'missing/stale', 'nextAction': {'reason': 'stale retrospective advice', 'command': 'repeat an already closed action'}, 'archived': True, 'runtimeConflicts': [], 'worktreeExists': True, 'readiness': 'integrated', 'baselineStale': False, 'lifecycle': 'closed'}\n\n----------------------------------------------------------------------\nRan 19 tests in 18.671s\n\nFAILED (failures=1)",
+        "taskDigest": "d38edd5159d98a89582564601696e8a08ac1e939997cd1b3d7b35bca2fe2f897",
+        "projectFingerprint": "93d048a50da53f5c6eddc9840d5832dcee17a1af037114d54b302ac49dd9e18e",
+        "head": "38f79796aea204b9530e04c5e80ae3bfe1c52de3",
+        "observedAt": "2026-08-05T12:12:45+08:00"
+      },
+      "green": null
+    },
+    {
+      "requirement": "REQ-004",
+      "red": {
+        "requirement": "REQ-004",
+        "command": [
+          "env",
+          "PYTHONPATH=rigorbreeze/scripts/tests",
+          "python3",
+          "-B",
+          "-m",
+          "unittest",
+          "rigorbreeze/scripts/tests/test_skill_contract.py",
+          "-v"
+        ],
+        "exitCode": 1,
+        "expectedPattern": "semantic self-review",
+        "testDigests": {
+          "rigorbreeze/scripts/tests/test_skill_contract.py": "0144f7f3b692d3555420734ada8530eb17a7f967cb6e8189d90a2596f8f2af27"
+        },
+        "summary": "d[0] == \"--\":\\n        command = command[1:]\\n    if not command:\\n        raise flowerror(\"missing command after --\")\\n    try:\\n        return subprocess.run(\\n            command,\\n            cwd=root,\\n            shell=false,\\n            text=true,\\n            encoding=\"utf-8\",\\n            errors=\"replace\",\\n            capture_output=true,\\n        )\\n    except filenotfounderror as exc:\\n        raise flowerror(f\"command not found: {command[0]}\") from exc\\n\\n\\ndef git(root: path, *args: str) -> subprocess.completedprocess[str]:\\n    return subprocess.run(\\n        [\"git\", *args],\\n        cwd=root,\\n        text=true,\\n        encoding=\"utf-8\",\\n        errors=\"replace\",\\n        capture_output=true,\\n    )\\n\\n\\ndef is_git_repo(root: path) -> bool:\\n    return git(root, \"rev-parse\", \"--is-inside-work-tree\").returncode == 0\\n\\n\\ndef current_head(root: path) -> str | none:\\n    result = git(root, \"rev-parse\", \"head\")\\n    return result.stdout.strip() if result.returncode == 0 else none\\n\\n\\ndef working_tree_paths(root: path) -> list[str]:\\n    if not is_git_repo(root):\\n        return []\\n    result = git(root, \"status\", \"--porcelain=1\", \"-z\", \"--untracked-files=all\")\\n    if result.returncode != 0:\\n        raise flowerror(\"unable to inspect working tree\")\\n    generated = configured_generated_paths(root)\\n    paths: list[str] = []\\n    for relative in flow_parallel.parse_porcelain_paths(result.stdout):\\n        parts = path(relative).parts\\n        if (\\n            relative == \"spec/state.json\"\\n            or relative == f\"spec/{lock_name}\"\\n            or relative.startswith(\"spec/evidence/\")\\n            or relative in generated\\n            or any(part in excluded_dirs for part in parts)\\n            or relative.endswith((\".pyc\", \".pyo\"))\\n        ):\\n            continue\\n        paths.append(relative)\\n    return sorted(set(paths))\\n'\n\n----------------------------------------------------------------------\nRan 13 tests in 0.073s\n\nFAILED (failures=9)",
+        "taskDigest": "d38edd5159d98a89582564601696e8a08ac1e939997cd1b3d7b35bca2fe2f897",
+        "projectFingerprint": "93d048a50da53f5c6eddc9840d5832dcee17a1af037114d54b302ac49dd9e18e",
+        "head": "38f79796aea204b9530e04c5e80ae3bfe1c52de3",
+        "observedAt": "2026-08-05T12:13:11+08:00"
+      },
+      "green": {
+        "toolVersion": "0.9.0",
+        "profile": "full",
+        "configured": true,
+        "mode": "enforced",
+        "checks": [
+          "format",
+          "lint",
+          "unit",
+          "contract",
+          "secret",
+          "build",
+          "acceptance"
+        ],
+        "passed": true,
+        "taskDigest": "d38edd5159d98a89582564601696e8a08ac1e939997cd1b3d7b35bca2fe2f897",
+        "projectFingerprint": "24c521f459d4feb7e5cd0710f34191a18b53c9996af09af283b60c6051312bfc",
+        "configDigest": "e309b7a492f02e8a45e3c07000bd1a83ea30532fed05a783bbc286965e0be829",
+        "head": "38f79796aea204b9530e04c5e80ae3bfe1c52de3",
+        "verifiedAt": "2026-08-05T12:56:58+08:00"
+      }
+    },
+    {
+      "requirement": "REQ-007",
+      "red": {
+        "requirement": "REQ-007",
+        "command": [
+          "env",
+          "TEST_FILE=rigorbreeze/scripts/tests/test_flow_v4.py",
+          "PYTHONPATH=rigorbreeze/scripts/tests",
+          "python3",
+          "-B",
+          "-m",
+          "unittest",
+          "test_flow_v4.FlowV4Tests.test_completed_archive_can_be_committed_from_last_closed_context",
+          "-v"
+        ],
+        "exitCode": 1,
+        "expectedPattern": "nextAction",
+        "testDigests": {
+          "rigorbreeze/scripts/tests/test_flow_v4.py": "8bc7b7ec3e6f8da5d59e2182dec566b9361b7de0a9bf6b69cc8e9ca6266ef5d4"
+        },
+        "summary": "test_completed_archive_can_be_committed_from_last_closed_context (test_flow_v4.FlowV4Tests.test_completed_archive_can_be_committed_from_last_closed_context) ... FAIL\n\n======================================================================\nFAIL: test_completed_archive_can_be_committed_from_last_closed_context (test_flow_v4.FlowV4Tests.test_completed_archive_can_be_committed_from_last_closed_context)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/songjincheng/LinGang-housing/rigorbreeze/rigorbreeze/scripts/tests/test_flow_v4.py\", line 727, in test_completed_archive_can_be_committed_from_last_closed_context\n    self.assertNotIn(\"nextAction\", archived)\n    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: 'nextAction' unexpectedly found in {'taskId': 'TASK-713', 'title': 'close then commit', 'risk': 'L0', 'phase': 'archived', 'dependsOn': [], 'worktree': '/private/var/folders/3t/nfwgp77s1dgffqg752fg4b2m0000gn/T/tmp2qudihne', 'branch': 'main', 'baseBranch': 'main', 'baseSha': 'c38bf576139a67b2ccb591a5954e115cb7040aec', 'head': '29d79a9c3c5db89a5948985e83e8f984fdb8b4f5', 'allowedScope': ['src/'], 'runtimeClaims': [], 'managedByFlow': False, 'createdPath': None, 'createdAt': None, 'updatedAt': '2026-08-05T12:28:14+08:00', 'approval': 'valid', 'verification': 'current', 'fullProfile': 'missing/stale', 'nextAction': {'reason': 'stale retrospective advice', 'command': 'repeat an already closed action'}, 'archived': True, 'runtimeConflicts': [], 'worktreeExists': True, 'readiness': 'integrated', 'baselineStale': False, 'lifecycle': 'closed'}\n\n----------------------------------------------------------------------\nRan 1 test in 1.527s\n\nFAILED (failures=1)",
+        "taskDigest": "d38edd5159d98a89582564601696e8a08ac1e939997cd1b3d7b35bca2fe2f897",
+        "projectFingerprint": "20cd9161f5dcfff57f31629c627616662a7055a4b682a72b8c01b8f749bf6668",
+        "head": "38f79796aea204b9530e04c5e80ae3bfe1c52de3",
+        "observedAt": "2026-08-05T12:28:15+08:00"
+      },
+      "green": {
+        "toolVersion": "0.9.0",
+        "profile": "full",
+        "configured": true,
+        "mode": "enforced",
+        "checks": [
+          "format",
+          "lint",
+          "unit",
+          "contract",
+          "secret",
+          "build",
+          "acceptance"
+        ],
+        "passed": true,
+        "taskDigest": "d38edd5159d98a89582564601696e8a08ac1e939997cd1b3d7b35bca2fe2f897",
+        "projectFingerprint": "24c521f459d4feb7e5cd0710f34191a18b53c9996af09af283b60c6051312bfc",
+        "configDigest": "e309b7a492f02e8a45e3c07000bd1a83ea30532fed05a783bbc286965e0be829",
+        "head": "38f79796aea204b9530e04c5e80ae3bfe1c52de3",
+        "verifiedAt": "2026-08-05T12:56:58+08:00"
+      }
+    }
+  ],
+  "artifacts": [
+    {
+      "kind": "build",
+      "path": "artifacts/rigorbreeze.zip",
+      "sha256": "9bcb6d4e2f89057a887991ca97aaa50f7aaf908300ec8302018cd083bf120b31",
+      "size": 125083,
+      "head": "38f79796aea204b9530e04c5e80ae3bfe1c52de3",
+      "taskDigest": "d38edd5159d98a89582564601696e8a08ac1e939997cd1b3d7b35bca2fe2f897",
+      "projectFingerprint": "465016e765605cfbac19311afd7b13ce95a672e218011f277e5ea9aec7fa8861",
+      "recordedAt": "2026-08-05T12:25:09+08:00"
+    },
+    {
+      "kind": "build",
+      "path": "artifacts/rigorbreeze.zip",
+      "sha256": "50630c79efb2be8d0b5ba818b61ade2be40e1e62e43d26778508e13c1e6a3032",
+      "size": 125092,
+      "head": "38f79796aea204b9530e04c5e80ae3bfe1c52de3",
+      "taskDigest": "d38edd5159d98a89582564601696e8a08ac1e939997cd1b3d7b35bca2fe2f897",
+      "projectFingerprint": "e54469f03b5f566a35f507b25e8bfc5a6c4dfc882d49f26fa1703510d3302e31",
+      "recordedAt": "2026-08-05T12:30:58+08:00"
+    },
+    {
+      "kind": "build",
+      "path": "artifacts/rigorbreeze.zip",
+      "sha256": "50630c79efb2be8d0b5ba818b61ade2be40e1e62e43d26778508e13c1e6a3032",
+      "size": 125092,
+      "head": "38f79796aea204b9530e04c5e80ae3bfe1c52de3",
+      "taskDigest": "d38edd5159d98a89582564601696e8a08ac1e939997cd1b3d7b35bca2fe2f897",
+      "projectFingerprint": "24c521f459d4feb7e5cd0710f34191a18b53c9996af09af283b60c6051312bfc",
+      "recordedAt": "2026-08-05T12:55:03+08:00"
+    }
+  ],
+  "acceptance": [],
+  "release": [],
+  "automation": [],
+  "practice": {
+    "confirmation": null,
+    "events": [
+      {
+        "key": "a21e7881bedbe1a631a473b43bd94aa2edf775a94400473904963e05c288d738",
+        "type": "gate-failure",
+        "details": {
+          "gate": "commit",
+          "message": "secret-like content detected: tests/behavior/test_behavior.py"
+        },
+        "count": 1,
+        "firstSeenAt": "2026-08-05T13:00:26+08:00",
+        "lastSeenAt": "2026-08-05T13:00:26+08:00"
+      },
+      {
+        "key": "e1f36e3b1eb329d3f127e0b44cb65aca43d3e7ac8e081fcd142f8088a8e62cc5",
+        "type": "gate-failure",
+        "details": {
+          "gate": "commit",
+          "message": "staged files are outside approved scope: \"Skill/346/274/224/350/277/233/344/270/216/345/256/236/350/267/265/350/256/260/345/275/225.md\""
+        },
+        "count": 1,
+        "firstSeenAt": "2026-08-05T13:25:12+08:00",
+        "lastSeenAt": "2026-08-05T13:25:12+08:00"
+      },
+      {
+        "key": "61754be9415bae39ae6032383c72d08b24d08eaa99ab94315e8287d5d5fae943",
+        "type": "gate-failure",
+        "details": {
+          "gate": "commit",
+          "message": "verification is missing or stale"
+        },
+        "count": 1,
+        "firstSeenAt": "2026-08-05T13:25:36+08:00",
+        "lastSeenAt": "2026-08-05T13:25:36+08:00"
+      }
+    ]
+  },
+  "closure": null,
+  "verification": {
+    "toolVersion": "0.9.0",
+    "profile": "full",
+    "configured": true,
+    "mode": "enforced",
+    "checks": [
+      "format",
+      "lint",
+      "unit",
+      "contract",
+      "secret",
+      "build",
+      "acceptance"
+    ],
+    "passed": true,
+    "taskDigest": "d38edd5159d98a89582564601696e8a08ac1e939997cd1b3d7b35bca2fe2f897",
+    "projectFingerprint": "24c521f459d4feb7e5cd0710f34191a18b53c9996af09af283b60c6051312bfc",
+    "configDigest": "e309b7a492f02e8a45e3c07000bd1a83ea30532fed05a783bbc286965e0be829",
+    "head": "38f79796aea204b9530e04c5e80ae3bfe1c52de3",
+    "verifiedAt": "2026-08-05T12:56:58+08:00"
+  }
+}

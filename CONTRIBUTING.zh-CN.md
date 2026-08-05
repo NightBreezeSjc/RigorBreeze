@@ -37,6 +37,21 @@ python3 -m py_compile rigorbreeze/scripts/flow.py
 python3 /path/to/skill-creator/scripts/quick_validate.py rigorbreeze
 ```
 
+验证离线 Agent 行为合同和评分器：
+
+```bash
+python3 -B tests/behavior/run.py validate
+python3 -B -m unittest discover -s tests/behavior -v
+```
+
+发布候选版本前，由维护者使用本机 Codex 将六个合成场景各运行两次；这一步需要明确手动触发，绝不进入 CI：
+
+```bash
+python3 -B tests/behavior/run.py run --version 0.9.0 --repetitions 2
+```
+
+任一次违反硬规则都阻断候选版本。只检查 `.git/rigorbreeze/behavior-evals/0.9.0/` 下的脱敏 Git 私有结果；不得提交这些结果，也不得在 fixture 中使用真实凭证或服务。
+
 ## 修改规则
 
 1. 增加或定位一个能够代表真实问题的失败回归。

@@ -808,6 +808,7 @@ def aggregate(root: Path) -> dict[str, Any]:
         elif item.get("archived"):
             item["lifecycle"] = "closed"
             item["baselineStale"] = False
+            item.pop("nextAction", None)
         elif item["baselineStale"]:
             item["lifecycle"] = "active"
             item["verification"] = "missing/stale"

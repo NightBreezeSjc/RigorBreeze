@@ -90,6 +90,8 @@ Before approval, agree on:
 - production paths that may change;
 - the requirement or design version used for acceptance.
 
+Then perform one semantic self-review. Reject unresolved placeholders and internal contradictions, split an oversized outcome, and make source-of-truth, freshness, fallback, and failure behavior unambiguous. Correct facts recoverable from the repository directly; ask the developer only when different answers produce materially different outcomes.
+
 The Skill first calls its bundled runner and inspects the `installation` projection. It must not begin product-code writes until the task exists, approval is valid, the current window owns the worktree, and the runner/configuration/baseline are usable. An active task freezes project-runner upgrades; finish or safely abandon that task with the bundled runner before `init` replaces managed files.
 
 ### Observe RED
@@ -104,7 +106,7 @@ L1, L2, and Emergency tasks require a real failure before production implementat
 
 L1 and L2 RED must name at least one real test file. Emergency may instead use a deterministic incident reproduction. A source-string search may prove a static contract such as an export or configuration key, but it cannot by itself prove user behavior or business logic.
 
-For bugs, first build a deterministic, fast, agent-runnable reproduction. Rank falsifiable hypotheses, instrument only to distinguish them, remove temporary probes, and retain the regression.
+For bugs, first build a deterministic, fast, agent-runnable reproduction. Rank falsifiable hypotheses, instrument only to distinguish them, remove temporary probes, and retain the regression. If three hypotheses for the same defect fail, stop patching. Preserve the attempts and reopen the architecture question around boundaries, shared state, ownership, and invalid assumptions before a fourth change.
 
 ### Implement as tracer bullets
 
@@ -141,6 +143,10 @@ Run review in two passes:
 2. spec: every acceptance ID, design state, interface, data, permission, and forbidden boundary.
 
 A solo developer may perform both with fresh context at different times.
+
+Review feedback is evidence to investigate, not authority to obey. Compare it with the accepted outcome, real code use, compatibility constraints, tests, and YAGNI. Reject an irrelevant redesign or unused capability with evidence instead of expanding scope.
+
+Before commit, archive, or a claim that work is fixed, passed, or complete, cite verification actually run in the current turn: exact command, exit status, and covered scope. A historical report, a partial check, or another Agent's statement cannot substitute for fresh evidence.
 
 ## 4. Quality policy
 

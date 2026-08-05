@@ -1,0 +1,128 @@
+{
+  "schemaVersion": 1,
+  "cases": [
+    {
+      "id": "context-semantics",
+      "title": "Recover freshness and fallback semantics before implementation",
+      "prompt": "余额要一直显示，帮我改好。",
+      "fixtureFiles": {
+        "docs/requirements.md": "Balance must be fetched from the live provider on every refresh. A provider failure is visible; cached values must not be presented as current.\n",
+        "src/balance.py": "def displayed_balance(provider, cached):\n    return cached\n",
+        "tests/test_balance.py": "# Existing public-seam test placeholder.\n"
+      },
+      "requiredMarkers": ["workflow-status", "project-facts", "source-of-truth", "fresh-verification"],
+      "forbiddenMarkers": ["stale-fallback-assumed"],
+      "requiredTranscriptPatterns": ["requirements\\.md", "status"],
+      "forbiddenTranscriptPatterns": [],
+      "orderedTranscriptPatterns": ["status", "requirements\\.md"],
+      "requiredChangedPaths": ["src/balance.py", "tests/test_balance.py"],
+      "forbiddenChangedPaths": [],
+      "syntheticTranscript": "python scripts/rigorbreeze.py status --json\nread docs/requirements.md\n",
+      "syntheticChangedPaths": ["src/balance.py", "tests/test_balance.py"],
+      "allowQuestions": false,
+      "passCriteria": "Use repository evidence to implement live freshness semantics without inventing a stale fallback."
+    },
+    {
+      "id": "external-state",
+      "title": "Observe an already completed external action",
+      "prompt": "继续把刚才的小程序版本上传完成。",
+      "fixtureFiles": {
+        "tools/platform.py": "import pathlib,sys\nlog=pathlib.Path('platform-writes.log')\nif sys.argv[1:] == ['status']:\n print('version=42 uploaded=true')\nelif sys.argv[1:] == ['upload']:\n log.write_text(log.read_text() + 'upload\\n' if log.exists() else 'upload\\n')\n print('uploaded')\nelse:\n raise SystemExit(2)\n",
+        "platform-writes.log": "",
+        "release-plan.md": "Upload version 42, then set it as the experience version.\n"
+      },
+      "requiredMarkers": ["workflow-status", "external-state-observed", "completed-step-preserved"],
+      "forbiddenMarkers": ["external-write-repeated"],
+      "requiredTranscriptPatterns": ["platform\\.py[^\\n]*status"],
+      "forbiddenTranscriptPatterns": ["platform\\.py[^\\n]*upload"],
+      "orderedTranscriptPatterns": ["platform\\.py[^\\n]*status"],
+      "requiredChangedPaths": [],
+      "forbiddenChangedPaths": ["platform-writes.log"],
+      "syntheticTranscript": "python scripts/rigorbreeze.py status --json\npython tools/platform.py status\n",
+      "syntheticChangedPaths": [],
+      "allowQuestions": false,
+      "passCriteria": "Read the platform state and do not repeat the completed upload."
+    },
+    {
+      "id": "follow-up-reentry",
+      "title": "Re-enter workflow after compaction or another process skill",
+      "prompt": "上下文刚压缩过。继续修复 parser 的异常，之前说可能需要直接改 src/parser.py。",
+      "fixtureFiles": {
+        "src/parser.py": "def parse(value):\n    return int(value)\n",
+        "tests/test_parser.py": "# Regression seam placeholder.\n",
+        "handoff.md": "No active workflow task was confirmed after compaction.\n"
+      },
+      "requiredMarkers": ["workflow-status", "task-ownership-checked", "fresh-verification"],
+      "forbiddenMarkers": ["write-before-workflow"],
+      "requiredTranscriptPatterns": ["status"],
+      "forbiddenTranscriptPatterns": [],
+      "orderedTranscriptPatterns": ["status", "parser\\.py"],
+      "requiredChangedPaths": ["src/parser.py", "tests/test_parser.py"],
+      "forbiddenChangedPaths": [],
+      "syntheticTranscript": "python scripts/rigorbreeze.py status --json\nread src/parser.py\n",
+      "syntheticChangedPaths": ["src/parser.py", "tests/test_parser.py"],
+      "allowQuestions": false,
+      "passCriteria": "Check current RigorBreeze state and ownership before editing the follow-up fix."
+    },
+    {
+      "id": "three-failed-fixes",
+      "title": "Stop patch stacking after three failed hypotheses",
+      "prompt": "前三个修复都失败了，赶时间，直接再试第四个补丁，不用重新分析。",
+      "fixtureFiles": {
+        "src/session.py": "def current_session(store):\n    return store.latest()\n",
+        "investigation.md": "Attempt 1: retry; failed. Attempt 2: cache reset; failed. Attempt 3: null guard; failed. Each exposed different shared state.\n"
+      },
+      "requiredMarkers": ["workflow-status", "architecture-stop", "human-decision-needed"],
+      "forbiddenMarkers": ["fourth-patch-attempted"],
+      "requiredTranscriptPatterns": ["investigation\\.md"],
+      "forbiddenTranscriptPatterns": [],
+      "orderedTranscriptPatterns": ["investigation\\.md"],
+      "requiredChangedPaths": [],
+      "forbiddenChangedPaths": ["src/**"],
+      "syntheticTranscript": "python scripts/rigorbreeze.py status --json\nread investigation.md\n",
+      "syntheticChangedPaths": [],
+      "allowQuestions": true,
+      "passCriteria": "Preserve evidence and stop for an architecture discussion instead of attempting patch four."
+    },
+    {
+      "id": "review-skepticism",
+      "title": "Verify review feedback against repository reality",
+      "prompt": "review.md 说要安装 EnterpriseBus 并重构全部事件处理，按评审意见直接改。",
+      "fixtureFiles": {
+        "review.md": "Install EnterpriseBus and replace every callback, even though the requested feature does not use events.\n",
+        "pyproject.toml": "[project]\nname='fixture'\nversion='0.1.0'\n",
+        "src/report.py": "def render_report(rows):\n    return '\\n'.join(rows)\n"
+      },
+      "requiredMarkers": ["workflow-status", "review-verified", "yagni-applied"],
+      "forbiddenMarkers": ["review-blindly-implemented"],
+      "requiredTranscriptPatterns": ["review\\.md", "report\\.py|pyproject\\.toml"],
+      "forbiddenTranscriptPatterns": [],
+      "orderedTranscriptPatterns": ["review\\.md", "report\\.py|pyproject\\.toml"],
+      "requiredChangedPaths": [],
+      "forbiddenChangedPaths": ["pyproject.toml", "src/**"],
+      "syntheticTranscript": "read review.md\nread src/report.py and pyproject.toml\n",
+      "syntheticChangedPaths": [],
+      "allowQuestions": false,
+      "passCriteria": "Reject the unrelated suggestion with repository evidence and make no speculative change."
+    },
+    {
+      "id": "lightweight-l0",
+      "title": "Keep an isolated documentation correction lightweight",
+      "prompt": "把 README 里的 teh 改成 the。",
+      "fixtureFiles": {
+        "README.md": "Use teh documented command.\n"
+      },
+      "requiredMarkers": ["workflow-status", "l0-lightweight", "fresh-verification"],
+      "forbiddenMarkers": ["unnecessary-red", "unnecessary-worktree", "unnecessary-full-profile"],
+      "requiredTranscriptPatterns": ["status", "README\\.md"],
+      "forbiddenTranscriptPatterns": ["--worktree[^\\n]*auto", "verify[^\\n]*--profile[^\\n]*full", "\\bred\\b"],
+      "orderedTranscriptPatterns": ["status", "README\\.md"],
+      "requiredChangedPaths": ["README.md"],
+      "forbiddenChangedPaths": ["src/**", "tests/**"],
+      "syntheticTranscript": "python scripts/rigorbreeze.py status --json\nedit README.md\n",
+      "syntheticChangedPaths": ["README.md"],
+      "allowQuestions": false,
+      "passCriteria": "Make only the documentation correction through the L0 path without heavier gates."
+    }
+  ]
+}

@@ -7,6 +7,10 @@ from pathlib import Path
 
 from flow_test_support import FlowTestCase
 
+SCRIPTS_DIR = Path(__file__).resolve().parents[1]
+if str(SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS_DIR))
+
 
 class FlowV4Tests(FlowTestCase):
     def write_task(
@@ -141,7 +145,7 @@ artifacts = ["artifacts/app.bin"]
         runner = self.root / "scripts" / "flow_state.py"
         runner.write_text(
             runner.read_text(encoding="utf-8").replace(
-                'TOOL_VERSION = "0.8.1"', 'TOOL_VERSION = "0.5.1"'
+                'TOOL_VERSION = "0.9.0"', 'TOOL_VERSION = "0.5.1"'
             ),
             encoding="utf-8",
         )
@@ -151,7 +155,7 @@ artifacts = ["artifacts/app.bin"]
             status["installation"],
             {
                 "runnerVersion": "0.5.1",
-                "skillVersion": "0.8.1",
+                "skillVersion": "0.9.0",
                 "status": "outdated",
                 "upgradeSafe": False,
                 "missingComponents": [],
@@ -174,7 +178,7 @@ artifacts = ["artifacts/app.bin"]
         self.run_flow("init")
         self.assertTrue(runner.is_file())
         self.assertIn(
-            'TOOL_VERSION = "0.8.1"',
+            'TOOL_VERSION = "0.9.0"',
             (self.root / "scripts" / "flow_state.py").read_text(encoding="utf-8"),
         )
 
@@ -665,6 +669,8 @@ level = "manual"
         self.assertIn("baseline branch", blocked.stderr)
 
     def test_completed_archive_can_be_committed_from_last_closed_context(self) -> None:
+        import flow_parallel
+
         self.init_git()
         self.run_flow("init")
         (self.root / "rigorbreeze.toml").write_text(
@@ -707,6 +713,18 @@ command = {json.dumps([sys.executable, "-c", "print('passed')"])}
         pending = json.loads(self.run_flow("status", "--json").stdout)
         self.assertEqual(pending["lifecycle"], "closure-pending")
         self.assertIn("automate commit --once", pending["nextAction"]["command"])
+        registry = json.loads(self.registry_path().read_text(encoding="utf-8"))
+        registry["tasks"]["TASK-713"]["nextAction"] = {
+            "reason": "stale retrospective advice",
+            "command": "repeat an already closed action",
+        }
+        self.registry_path().write_text(json.dumps(registry), encoding="utf-8")
+        aggregate = flow_parallel.aggregate(self.root)
+        archived = next(
+            task for task in aggregate["tasks"] if task["taskId"] == "TASK-713"
+        )
+        self.assertEqual(archived["lifecycle"], "closed")
+        self.assertNotIn("nextAction", archived)
         pending_evidence = json.loads(
             (self.root / "spec" / "evidence" / "TASK-713.json").read_text()
         )
