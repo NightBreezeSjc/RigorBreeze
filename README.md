@@ -253,6 +253,24 @@ Before v1.0, the workflow must complete and learn from:
 
 The evidence must show that `nextAction`, affected/full selection, invalidation, gates, and retrospective capture reduce rework and escaped risk without turning development into form filling. See [the Chinese maintainer evolution guide](Skill演进与实践记录.md) for the current evidence protocol.
 
+## Repository workflow
+
+RigorBreeze uses [GitHub Flow](https://docs.github.com/en/get-started/using-github/github-flow), not a permanent Git Flow hierarchy:
+
+```text
+up-to-date main
+→ one short-lived branch for one outcome
+→ focused commits
+→ pull request to main
+→ required CI and maintainer decision
+→ squash or rebase merge
+→ delete the merged branch
+```
+
+Use a descriptive prefix such as `feat/`, `fix/`, `docs/`, `refactor/`, or `test/`; for example, `docs/clarify-installation`. A `release/vX.Y.Z` branch is created only while a real release candidate needs stabilization. The project does not keep empty `develop`, `hotfix`, or release branches: `main` is the only long-lived source of truth, while topic branches are cheap, isolated, and disposable.
+
+External contributors fork the repository and open a pull request against `main`. The maintainer decides whether and when it is merged; passing CI is necessary but does not merge or publish a change by itself. See [CONTRIBUTING.md](CONTRIBUTING.md) for the copyable workflow and verification contract.
+
 ## Contributing and security
 
 Read [CONTRIBUTING.md](CONTRIBUTING.md) before proposing workflow behavior. Ordinary friction must repeat in real slices before entering the core; a gate that incorrectly permits a secret, privilege bypass, destructive migration, stale proof, or wrong release is reviewed immediately.

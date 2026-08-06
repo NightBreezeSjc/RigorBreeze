@@ -65,6 +65,25 @@ Documentation changes should keep the English and Chinese onboarding contracts a
 
 ## Pull requests
 
-Explain the problem, evidence, chosen boundary, rejected alternative, compatibility impact, and exact verification run. AI-generated contributions are welcome when the submitter has reviewed and tested them; name the agent and model in the pull request description.
+RigorBreeze has one long-lived branch: `main`. Start each unrelated outcome from an up-to-date `main` and use a short-lived branch:
+
+```bash
+git switch main
+git pull --ff-only
+git switch -c docs/clarify-installation
+```
+
+Use `feat/`, `fix/`, `docs/`, `refactor/`, or `test/` followed by a short kebab-case description. Maintainers may open `release/vX.Y.Z` while stabilizing a real release candidate. Do not create permanent `develop`, `hotfix`, or empty release branches.
+
+Keep one branch and pull request focused on one observable outcome. Push the branch, then open a pull request against `main`:
+
+```bash
+git push -u origin docs/clarify-installation
+gh pr create --base main --head docs/clarify-installation
+```
+
+Explain the problem, evidence, chosen boundary, rejected alternative, compatibility impact, and exact verification run. Resolve review conversations and keep required CI green. Passing checks does not grant merge or release authority; the maintainer makes the final decision. After merge, delete the topic branch rather than reusing it for unrelated work.
+
+AI-generated contributions are welcome when the submitter has reviewed and tested them; name the agent and model in the pull request description.
 
 By contributing, you agree that your contribution is licensed under the repository's [MIT License](LICENSE).
