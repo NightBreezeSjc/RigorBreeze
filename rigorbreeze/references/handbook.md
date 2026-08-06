@@ -126,6 +126,14 @@ one failing behavior
 
 Do not batch every test before every implementation. Do not include drive-by refactors or speculative abstractions.
 
+### Keep implementation lean without breaking production
+
+Before creating a helper, subsystem, configuration layer, or dependency, inspect the standard library, framework, and dependency set already present in the repository. Prefer the smallest maintained existing capability that satisfies the approved contract. Add something new only when current acceptance or a durable invariant justifies its ownership, supply-chain cost, and maintenance surface.
+
+Preserve the smallest working vertical path, then extract a cohesive boundary only when separate change pressure, a public contract, or safety requires it. Modularity means explicit ownership and narrow responsibilities; it does not mean manufacturing layers, adapters, or extension points for hypothetical reuse. A time-boxed experiment may be disposable, but it stays outside the durable production path and cannot become an undocumented “replace later” architecture.
+
+Compatibility is a product property, not a universal yes/no rule. Code with no declared compatibility promise may remove a proven-dead path when callers, data, and Git history support that conclusion. Public APIs, persisted data, upgrade paths, and production migrations require an explicit transition, verification, and rollback or forward-fix strategy. A pre-1.0 version by itself does not authorize destructive changes when real users or data exist.
+
 ### Verify and close
 
 - `affected` is the fast development feedback profile.

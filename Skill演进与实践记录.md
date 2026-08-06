@@ -321,6 +321,12 @@ v0.9.2 不增加字段、文档、命令或语义解析器。Codex 在现有 Aut
 
 现有六场景行为套件不扩容，只把语义场景替换为复合 UI fixture，要求同时捕获移动、删除、保留和否定方向。用户再次出现“我的意思是”“你漏了”“理解反了”时，现有复盘异常记录 `requirement-interpretation-correction`，并归类为 `missing-atom`、`reversed-intent`、`wrong-source` 或 `scope-change`；不读取或保存聊天全文。下一步验证不是继续增加规则，而是在至少两个真实复合 UI 切片中观察首次验收是否提升、是否仍出现漏项或反向理解。
 
+### 来自 Vercel eve AGENTS.md 的精简规则校准
+
+2026-08 的网络转述将一组精简编码原则称为“Next.js 团队消耗 60B tokens 得出的 8 条 AGENTS.md”。能核验的一手资料是 [vercel/eve 的 AGENTS.md](https://github.com/vercel/eve/blob/main/AGENTS.md)：它确实有 8 条仓库编码原则，但内容与转述并不一致，其破坏性变更规则也明确限定为 eve 的 pre-1.0 阶段。暂无一手证据证明“Next.js 团队”和“60B tokens”的完整归因，因此 RigorBreeze 不传播该数字或身份声称。
+
+真正吸收的是可验证的工程行为：写自定义机制前先查标准库、框架和当前依赖；新依赖、抽象、helper 或配置层必须由当前验收或长期不变量证明；先保留最小可运行的端到端路径，再按独立变更压力或安全需求提取边界。“不保留兼容”不进入生产默认；它被改写为风险自适应合同，保留 RigorBreeze 对公开 API、历史数据、升级和生产迁移的过渡、演练、回滚与证据要求。
+
 ## 六、v1.0 的真实验证条件
 
 至少完成：

@@ -1,0 +1,391 @@
+{
+  "workflowVersion": 4,
+  "taskId": "RB-LEAN-IMPLEMENTATION-GUARDRAILS",
+  "baseline": {
+    "taskDigest": "c1960cac4a670428948d58aad43ee906aa41ab4e9315700c40bc610c9b08f467",
+    "head": "1364a1ffb5b97c57daddc76b39843ce88c73b0c2",
+    "projectFingerprint": "7b345b5fb315821880fd6e63cccf73ee6f99781b151acf1d13a301f232ccffb9",
+    "configDigest": "29e4313a1131a04a40744798b88740046122394a3b05daff60b9a73c50db1f43",
+    "workingTreePaths": [
+      "spec/changes/RB-LEAN-IMPLEMENTATION-GUARDRAILS.md"
+    ],
+    "workingTreeDigests": {
+      "spec/changes/RB-LEAN-IMPLEMENTATION-GUARDRAILS.md": "c1960cac4a670428948d58aad43ee906aa41ab4e9315700c40bc610c9b08f467"
+    },
+    "approvedAt": "2026-08-06T11:43:37+08:00"
+  },
+  "red": [
+    {
+      "requirement": "REQ-001",
+      "command": [
+        "python3",
+        "-B",
+        "rigorbreeze/scripts/tests/test_skill_contract.py",
+        "SkillContractTests.test_skill_keeps_lean_implementation_compatible_with_production",
+        "-v"
+      ],
+      "exitCode": 1,
+      "expectedPattern": "AssertionError",
+      "testDigests": {
+        "rigorbreeze/scripts/tests/test_skill_contract.py": "36e7faf5d728a1ac6eace08aba6f0e8363f98a4f0510ce9ae01b753c5420d65f"
+      },
+      "summary": "s, expected HEAD, and confirmation requirements. Integration is proven by ancestry or only when every task commit since the recorded baseline is patch-equivalent on the baseline branch; partial equivalence remains active. Managed cleanup requires exact Flow-created provenance. Unmanaged cleanup additionally requires a one-time explicit absolute path, base, expected HEAD, clean inactive state, and complete integration proof. Local branches are always preserved.\\n\\nFor an explicit current-task request, Codex may run `automate commit --once` or `automate push --once --remote <name> --branch <current> --expected-head <sha>` without changing `rigorbreeze.toml`. Push never commits implicitly, fetches before writing, permits only a fast-forward update, never rebases or force-pushes, and verifies the remote SHA. Direct integration-branch push additionally requires current full verification, structured acceptance, and review. One-time authority never applies to merge, release, production migration, or rollback.\\n\\n## 8. Complexity limits\\n\\n- Do not create one human document for every evidence category.\\n- Do not make every project declare every standard check.\\n- Do not duplicate evidence, attestations, or practice logs.\\n- Do not bind ordinary archive to production artifact and rollout fields.\\n- Do not create a worktree, DAG, code graph, vector index, or agent console for a simple task.\\n- Do not perform unsolicited Git or production actions while automation is `manual`; an explicit one-time commit/push is the only exception.\\n- Do not make workflow metrics a delivery goal of their own.\\n- Do not add a permanent abstraction for a one-off problem.\\n\\nChange the shared Skill only after real use establishes the need. Prefer project configuration, an optional adapter, or a better prompt when those solve the problem without raising the fixed cost for every user.\\n\"\n\n----------------------------------------------------------------------\nRan 1 test in 0.001s\n\nFAILED (failures=4)",
+      "taskDigest": "c1960cac4a670428948d58aad43ee906aa41ab4e9315700c40bc610c9b08f467",
+      "projectFingerprint": "019bab447639da7bc1380289c72eb1e93f961d0720a8532937f2bbca2d54c418",
+      "head": "1364a1ffb5b97c57daddc76b39843ce88c73b0c2",
+      "observedAt": "2026-08-06T11:44:50+08:00"
+    }
+  ],
+  "verifications": [
+    {
+      "toolVersion": "0.9.2",
+      "profile": "full",
+      "configured": true,
+      "mode": "advisory",
+      "checks": [
+        "format",
+        "lint",
+        "unit",
+        "contract",
+        "secret",
+        "build",
+        "acceptance"
+      ],
+      "passed": true,
+      "taskDigest": "c1960cac4a670428948d58aad43ee906aa41ab4e9315700c40bc610c9b08f467",
+      "projectFingerprint": "0d4e757b525dbc5625cba75617adc4c7e15e7f96fd61a888437f3377f36275fd",
+      "configDigest": "29e4313a1131a04a40744798b88740046122394a3b05daff60b9a73c50db1f43",
+      "head": "1364a1ffb5b97c57daddc76b39843ce88c73b0c2",
+      "verifiedAt": "2026-08-06T11:49:56+08:00"
+    }
+  ],
+  "checkRuns": [
+    {
+      "checkId": "format",
+      "category": "static-quality",
+      "profile": "full",
+      "mode": "advisory",
+      "command": [
+        "python3",
+        "-m",
+        "ruff",
+        "format",
+        "--check",
+        "rigorbreeze/scripts",
+        "tests/behavior"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 59,
+      "summary": "15 files already formatted",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "c1960cac4a670428948d58aad43ee906aa41ab4e9315700c40bc610c9b08f467",
+      "projectFingerprint": "0d4e757b525dbc5625cba75617adc4c7e15e7f96fd61a888437f3377f36275fd",
+      "head": "1364a1ffb5b97c57daddc76b39843ce88c73b0c2",
+      "recordedAt": "2026-08-06T11:47:53+08:00"
+    },
+    {
+      "checkId": "lint",
+      "category": "static-quality",
+      "profile": "full",
+      "mode": "advisory",
+      "command": [
+        "python3",
+        "-m",
+        "ruff",
+        "check",
+        "rigorbreeze/scripts",
+        "tests/behavior"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 34,
+      "summary": "All checks passed!",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "c1960cac4a670428948d58aad43ee906aa41ab4e9315700c40bc610c9b08f467",
+      "projectFingerprint": "0d4e757b525dbc5625cba75617adc4c7e15e7f96fd61a888437f3377f36275fd",
+      "head": "1364a1ffb5b97c57daddc76b39843ce88c73b0c2",
+      "recordedAt": "2026-08-06T11:47:53+08:00"
+    },
+    {
+      "checkId": "unit",
+      "category": "behavior",
+      "profile": "full",
+      "mode": "advisory",
+      "command": [
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "rigorbreeze/scripts/tests",
+        "-v"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 122737,
+      "summary": "st_skill_contract.SkillContractTests.test_every_user_facing_english_document_has_chinese) ... ok\ntest_installable_skill_excludes_repository_documents (test_skill_contract.SkillContractTests.test_installable_skill_excludes_repository_documents) ... ok\ntest_installable_skill_has_no_project_specific_policy (test_skill_contract.SkillContractTests.test_installable_skill_has_no_project_specific_policy) ... ok\ntest_long_references_have_a_table_of_contents (test_skill_contract.SkillContractTests.test_long_references_have_a_table_of_contents) ... ok\ntest_public_markdown_relative_links_resolve (test_skill_contract.SkillContractTests.test_public_markdown_relative_links_resolve) ... ok\ntest_public_readmes_cover_the_same_first_run_contract (test_skill_contract.SkillContractTests.test_public_readmes_cover_the_same_first_run_contract) ... ok\ntest_repository_has_minimal_open_source_governance (test_skill_contract.SkillContractTests.test_repository_has_minimal_open_source_governance) ... ok\ntest_repository_has_skill_owned_ci (test_skill_contract.SkillContractTests.test_repository_has_skill_owned_ci) ... ok\ntest_skill_completes_context_and_rechecks_follow_up_writes (test_skill_contract.SkillContractTests.test_skill_completes_context_and_rechecks_follow_up_writes) ... ok\ntest_skill_encodes_behavior_reliability_rules_once (test_skill_contract.SkillContractTests.test_skill_encodes_behavior_reliability_rules_once) ... ok\ntest_skill_entrypoint_stays_compact_and_links_every_reference (test_skill_contract.SkillContractTests.test_skill_entrypoint_stays_compact_and_links_every_reference) ... ok\ntest_skill_keeps_lean_implementation_compatible_with_production (test_skill_contract.SkillContractTests.test_skill_keeps_lean_implementation_compatible_with_production) ... ok\ntest_skill_metadata_matches_public_name (test_skill_contract.SkillContractTests.test_skill_metadata_matches_public_name) ... ok\n\n----------------------------------------------------------------------\nRan 122 tests in 122.677s\n\nOK",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "c1960cac4a670428948d58aad43ee906aa41ab4e9315700c40bc610c9b08f467",
+      "projectFingerprint": "0d4e757b525dbc5625cba75617adc4c7e15e7f96fd61a888437f3377f36275fd",
+      "head": "1364a1ffb5b97c57daddc76b39843ce88c73b0c2",
+      "recordedAt": "2026-08-06T11:49:56+08:00"
+    },
+    {
+      "checkId": "contract",
+      "category": "behavior",
+      "profile": "full",
+      "mode": "advisory",
+      "command": [
+        "python3",
+        "-m",
+        "py_compile",
+        "rigorbreeze/scripts/flow.py"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 41,
+      "summary": "",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "c1960cac4a670428948d58aad43ee906aa41ab4e9315700c40bc610c9b08f467",
+      "projectFingerprint": "0d4e757b525dbc5625cba75617adc4c7e15e7f96fd61a888437f3377f36275fd",
+      "head": "1364a1ffb5b97c57daddc76b39843ce88c73b0c2",
+      "recordedAt": "2026-08-06T11:49:56+08:00"
+    },
+    {
+      "checkId": "secret",
+      "category": "secrets",
+      "profile": "full",
+      "mode": "advisory",
+      "command": [
+        "python3",
+        "-c",
+        "import pathlib,re,sys; files=[p for p in pathlib.Path('.').rglob('*') if p.is_file() and '.git' not in p.parts and 'tests' not in p.parts and p.name != 'rigorbreeze.toml']; pattern=re.compile(r'(?i)(api[_-]?key|token|password|secret)\\s*[:=]\\s*\\S{20,}'); hits=[str(p) for p in files if pattern.search(p.read_text(errors='ignore'))]; print('\\n'.join(hits)); sys.exit(bool(hits))"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 60,
+      "summary": "",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "c1960cac4a670428948d58aad43ee906aa41ab4e9315700c40bc610c9b08f467",
+      "projectFingerprint": "0d4e757b525dbc5625cba75617adc4c7e15e7f96fd61a888437f3377f36275fd",
+      "head": "1364a1ffb5b97c57daddc76b39843ce88c73b0c2",
+      "recordedAt": "2026-08-06T11:49:56+08:00"
+    },
+    {
+      "checkId": "build",
+      "category": "build",
+      "profile": "full",
+      "mode": "advisory",
+      "command": [
+        "python3",
+        "-c",
+        "import pathlib,zipfile; out=pathlib.Path('artifacts/rigorbreeze.zip'); out.parent.mkdir(exist_ok=True); files=[p for p in pathlib.Path('rigorbreeze').rglob('*') if p.is_file() and '__pycache__' not in p.parts]; z=zipfile.ZipFile(out,'w',zipfile.ZIP_DEFLATED); [z.write(p,p.as_posix()) for p in files]; z.close()"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 88,
+      "summary": "",
+      "report": null,
+      "artifacts": [
+        "9cb03ed5d2ea669691f570e0c54c9b978f76f03211813c01d4e5d2fe251b5bb4"
+      ],
+      "taskDigest": "c1960cac4a670428948d58aad43ee906aa41ab4e9315700c40bc610c9b08f467",
+      "projectFingerprint": "0d4e757b525dbc5625cba75617adc4c7e15e7f96fd61a888437f3377f36275fd",
+      "head": "1364a1ffb5b97c57daddc76b39843ce88c73b0c2",
+      "recordedAt": "2026-08-06T11:49:56+08:00"
+    },
+    {
+      "checkId": "acceptance",
+      "category": "acceptance",
+      "profile": "full",
+      "mode": "advisory",
+      "command": [
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/behavior",
+        "-v"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 129,
+      "summary": "test_all_synthetic_transcripts_meet_their_contracts (test_behavior.BehaviorSuiteTests.test_all_synthetic_transcripts_meet_their_contracts) ... ok\ntest_compound_ui_case_rejects_partial_requirement_capture (test_behavior.BehaviorSuiteTests.test_compound_ui_case_rejects_partial_requirement_capture) ... ok\ntest_contract_has_exactly_six_safe_cases (test_behavior.BehaviorSuiteTests.test_contract_has_exactly_six_safe_cases) ... ok\ntest_contract_rejects_path_escape_and_invalid_regex (test_behavior.BehaviorSuiteTests.test_contract_rejects_path_escape_and_invalid_regex) ... ok\ntest_globs_and_result_versions_cannot_escape_their_boundaries (test_behavior.BehaviorSuiteTests.test_globs_and_result_versions_cannot_escape_their_boundaries) ... ok\ntest_prepare_fixture_stays_inside_requested_root (test_behavior.BehaviorSuiteTests.test_prepare_fixture_stays_inside_requested_root) ... ok\ntest_redaction_removes_common_secret_shapes (test_behavior.BehaviorSuiteTests.test_redaction_removes_common_secret_shapes) ... ok\ntest_score_accepts_fresh_compliant_result (test_behavior.BehaviorSuiteTests.test_score_accepts_fresh_compliant_result) ... ok\ntest_score_rejects_forbidden_action_and_stale_evidence (test_behavior.BehaviorSuiteTests.test_score_rejects_forbidden_action_and_stale_evidence) ... ok\n\n----------------------------------------------------------------------\nRan 9 tests in 0.073s\n\nOK",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "c1960cac4a670428948d58aad43ee906aa41ab4e9315700c40bc610c9b08f467",
+      "projectFingerprint": "0d4e757b525dbc5625cba75617adc4c7e15e7f96fd61a888437f3377f36275fd",
+      "head": "1364a1ffb5b97c57daddc76b39843ce88c73b0c2",
+      "recordedAt": "2026-08-06T11:49:56+08:00"
+    }
+  ],
+  "tddChain": [
+    {
+      "requirement": "REQ-001",
+      "red": {
+        "requirement": "REQ-001",
+        "command": [
+          "python3",
+          "-B",
+          "rigorbreeze/scripts/tests/test_skill_contract.py",
+          "SkillContractTests.test_skill_keeps_lean_implementation_compatible_with_production",
+          "-v"
+        ],
+        "exitCode": 1,
+        "expectedPattern": "AssertionError",
+        "testDigests": {
+          "rigorbreeze/scripts/tests/test_skill_contract.py": "36e7faf5d728a1ac6eace08aba6f0e8363f98a4f0510ce9ae01b753c5420d65f"
+        },
+        "summary": "s, expected HEAD, and confirmation requirements. Integration is proven by ancestry or only when every task commit since the recorded baseline is patch-equivalent on the baseline branch; partial equivalence remains active. Managed cleanup requires exact Flow-created provenance. Unmanaged cleanup additionally requires a one-time explicit absolute path, base, expected HEAD, clean inactive state, and complete integration proof. Local branches are always preserved.\\n\\nFor an explicit current-task request, Codex may run `automate commit --once` or `automate push --once --remote <name> --branch <current> --expected-head <sha>` without changing `rigorbreeze.toml`. Push never commits implicitly, fetches before writing, permits only a fast-forward update, never rebases or force-pushes, and verifies the remote SHA. Direct integration-branch push additionally requires current full verification, structured acceptance, and review. One-time authority never applies to merge, release, production migration, or rollback.\\n\\n## 8. Complexity limits\\n\\n- Do not create one human document for every evidence category.\\n- Do not make every project declare every standard check.\\n- Do not duplicate evidence, attestations, or practice logs.\\n- Do not bind ordinary archive to production artifact and rollout fields.\\n- Do not create a worktree, DAG, code graph, vector index, or agent console for a simple task.\\n- Do not perform unsolicited Git or production actions while automation is `manual`; an explicit one-time commit/push is the only exception.\\n- Do not make workflow metrics a delivery goal of their own.\\n- Do not add a permanent abstraction for a one-off problem.\\n\\nChange the shared Skill only after real use establishes the need. Prefer project configuration, an optional adapter, or a better prompt when those solve the problem without raising the fixed cost for every user.\\n\"\n\n----------------------------------------------------------------------\nRan 1 test in 0.001s\n\nFAILED (failures=4)",
+        "taskDigest": "c1960cac4a670428948d58aad43ee906aa41ab4e9315700c40bc610c9b08f467",
+        "projectFingerprint": "019bab447639da7bc1380289c72eb1e93f961d0720a8532937f2bbca2d54c418",
+        "head": "1364a1ffb5b97c57daddc76b39843ce88c73b0c2",
+        "observedAt": "2026-08-06T11:44:50+08:00"
+      },
+      "green": {
+        "toolVersion": "0.9.2",
+        "profile": "full",
+        "configured": true,
+        "mode": "advisory",
+        "checks": [
+          "format",
+          "lint",
+          "unit",
+          "contract",
+          "secret",
+          "build",
+          "acceptance"
+        ],
+        "passed": true,
+        "taskDigest": "c1960cac4a670428948d58aad43ee906aa41ab4e9315700c40bc610c9b08f467",
+        "projectFingerprint": "0d4e757b525dbc5625cba75617adc4c7e15e7f96fd61a888437f3377f36275fd",
+        "configDigest": "29e4313a1131a04a40744798b88740046122394a3b05daff60b9a73c50db1f43",
+        "head": "1364a1ffb5b97c57daddc76b39843ce88c73b0c2",
+        "verifiedAt": "2026-08-06T11:49:56+08:00"
+      }
+    }
+  ],
+  "artifacts": [
+    {
+      "kind": "build",
+      "path": "artifacts/rigorbreeze.zip",
+      "sha256": "9cb03ed5d2ea669691f570e0c54c9b978f76f03211813c01d4e5d2fe251b5bb4",
+      "size": 132677,
+      "head": "1364a1ffb5b97c57daddc76b39843ce88c73b0c2",
+      "taskDigest": "c1960cac4a670428948d58aad43ee906aa41ab4e9315700c40bc610c9b08f467",
+      "projectFingerprint": "0d4e757b525dbc5625cba75617adc4c7e15e7f96fd61a888437f3377f36275fd",
+      "recordedAt": "2026-08-06T11:49:56+08:00"
+    }
+  ],
+  "acceptance": [
+    {
+      "kind": "review",
+      "fields": {
+        "status": "passed",
+        "reviewer": "Codex-standards"
+      },
+      "taskDigest": "c1960cac4a670428948d58aad43ee906aa41ab4e9315700c40bc610c9b08f467",
+      "projectFingerprint": "0d4e757b525dbc5625cba75617adc4c7e15e7f96fd61a888437f3377f36275fd",
+      "head": "1364a1ffb5b97c57daddc76b39843ce88c73b0c2",
+      "artifactDigests": [
+        "9cb03ed5d2ea669691f570e0c54c9b978f76f03211813c01d4e5d2fe251b5bb4"
+      ],
+      "recordedAt": "2026-08-06T11:52:10+08:00",
+      "path": "rigorbreeze/SKILL.md",
+      "sha256": "d698ccb2a81a6c4b71ca7592e9ed41b6dae34a89a0651d13565b01ac861b5946",
+      "size": 17958
+    },
+    {
+      "kind": "product-review",
+      "fields": {
+        "status": "passed",
+        "reviewer": "Codex-spec"
+      },
+      "taskDigest": "c1960cac4a670428948d58aad43ee906aa41ab4e9315700c40bc610c9b08f467",
+      "projectFingerprint": "0d4e757b525dbc5625cba75617adc4c7e15e7f96fd61a888437f3377f36275fd",
+      "head": "1364a1ffb5b97c57daddc76b39843ce88c73b0c2",
+      "artifactDigests": [
+        "9cb03ed5d2ea669691f570e0c54c9b978f76f03211813c01d4e5d2fe251b5bb4"
+      ],
+      "recordedAt": "2026-08-06T11:52:10+08:00",
+      "path": "spec/changes/RB-LEAN-IMPLEMENTATION-GUARDRAILS.md",
+      "sha256": "c1960cac4a670428948d58aad43ee906aa41ab4e9315700c40bc610c9b08f467",
+      "size": 4505
+    }
+  ],
+  "release": [],
+  "automation": [],
+  "practice": {
+    "confirmation": {
+      "reworkReason": "none",
+      "exceptions": "none",
+      "workflowImpact": "unknown",
+      "evolutionCandidate": false,
+      "summaryDigest": "1cbdefd3995a840c376b80a874885565fe1a3838056f5d4fa1a9a65976acc996",
+      "taskDigest": "c1960cac4a670428948d58aad43ee906aa41ab4e9315700c40bc610c9b08f467",
+      "projectFingerprint": "0d4e757b525dbc5625cba75617adc4c7e15e7f96fd61a888437f3377f36275fd",
+      "confirmedAt": "2026-08-06T11:53:00+08:00"
+    },
+    "events": [],
+    "summary": {
+      "taskId": "RB-LEAN-IMPLEMENTATION-GUARDRAILS",
+      "risk": "L1",
+      "verificationRuns": 1,
+      "checkRuns": 7,
+      "checkDurationMs": 123148,
+      "failedChecks": [],
+      "failureCategories": [],
+      "potentialBypasses": [],
+      "firstAcceptancePassed": true,
+      "acceptanceRecords": 2,
+      "estimatedReworkSeconds": null,
+      "practiceEvents": [],
+      "generatedAt": "2026-08-06T11:53:00+08:00",
+      "summaryDigest": "1cbdefd3995a840c376b80a874885565fe1a3838056f5d4fa1a9a65976acc996"
+    }
+  },
+  "closure": {
+    "outcome": "completed",
+    "reason": null,
+    "closedAt": "2026-08-06T11:53:00+08:00",
+    "head": "1364a1ffb5b97c57daddc76b39843ce88c73b0c2",
+    "branch": "main",
+    "originalPhase": "accepted",
+    "integrationProof": null,
+    "verificationStatus": "current",
+    "practiceEvents": [
+      "closure-pending-commit"
+    ],
+    "unrelatedChanges": []
+  },
+  "verification": {
+    "toolVersion": "0.9.2",
+    "profile": "full",
+    "configured": true,
+    "mode": "advisory",
+    "checks": [
+      "format",
+      "lint",
+      "unit",
+      "contract",
+      "secret",
+      "build",
+      "acceptance"
+    ],
+    "passed": true,
+    "taskDigest": "c1960cac4a670428948d58aad43ee906aa41ab4e9315700c40bc610c9b08f467",
+    "projectFingerprint": "0d4e757b525dbc5625cba75617adc4c7e15e7f96fd61a888437f3377f36275fd",
+    "configDigest": "29e4313a1131a04a40744798b88740046122394a3b05daff60b9a73c50db1f43",
+    "head": "1364a1ffb5b97c57daddc76b39843ce88c73b0c2",
+    "verifiedAt": "2026-08-06T11:49:56+08:00"
+  }
+}

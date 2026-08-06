@@ -173,6 +173,28 @@ class SkillContractTests(unittest.TestCase):
         ):
             self.assertIn(phrase, generated_policy.lower())
 
+    def test_skill_keeps_lean_implementation_compatible_with_production(self) -> None:
+        skill = (SKILL_DIR / "SKILL.md").read_text(encoding="utf-8")
+        handbook = (SKILL_DIR / "references" / "handbook.md").read_text(
+            encoding="utf-8"
+        )
+        chinese = (SKILL_DIR / "references" / "handbook.zh-CN.md").read_text(
+            encoding="utf-8"
+        )
+
+        for phrase in (
+            "standard library, framework, and current dependencies",
+            "current acceptance or a durable invariant",
+            "public APIs, persisted data, upgrade paths, and production migrations",
+        ):
+            with self.subTest(phrase=phrase):
+                self.assertIn(phrase, skill)
+
+        self.assertIn("smallest working vertical path", handbook)
+        self.assertIn("no declared compatibility promise", handbook)
+        self.assertIn("标准库、框架和当前依赖", chinese)
+        self.assertIn("公开 API、持久化数据、升级路径和生产迁移", chinese)
+
     def test_documented_first_run_cli_commands_exist(self) -> None:
         result = subprocess.run(
             [sys.executable, str(SKILL_DIR / "scripts" / "flow.py"), "--help"],

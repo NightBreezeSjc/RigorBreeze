@@ -11,6 +11,8 @@ The project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). 
 ### Changed
 
 - Renamed the project, Skill ID, invocation, runner, configuration, Git-private state, and task-branch prefix from Codex Production Flow to RigorBreeze before the first public release. No legacy alias is retained.
+- Require inspection of the standard library, framework, and current dependency set before adding custom code or packages; new dependencies and abstractions need current acceptance or a durable invariant.
+- Keep compatibility risk-adaptive: proven-dead private preview paths may be removed, while public APIs, persisted data, upgrade paths, and production migrations retain explicit transition, verification, and rollback requirements.
 
 ### Documentation
 

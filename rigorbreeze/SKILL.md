@@ -65,6 +65,8 @@ Implement as tracer bullets:
 
 Do not batch all tests, then all implementation. Do not derive the expected result by calling or duplicating the implementation under test.
 
+Before writing a custom mechanism or adding a dependency, inspect the **standard library, framework, and current dependencies**. Prefer the smallest maintained capability that satisfies the contract. A new dependency, abstraction, helper, or configuration layer needs **current acceptance or a durable invariant**; preserve the smallest working vertical path first, then extract a boundary only for independent change or safety. Treat compatibility as an explicit product contract, not a universal fallback. Code with no declared compatibility promise may remove a proven-dead path; **public APIs, persisted data, upgrade paths, and production migrations** require an approved transition, verification, and rollback plan. Never infer “no compatibility” from a pre-1.0 version alone when real users or data exist.
+
 For bugs, first build a tight feedback loop that is deterministic, fast, agent-runnable, and capable of turning red. Minimize the reproduction, rank falsifiable hypotheses, instrument only to distinguish them, remove temporary probes, then retain a regression test. After **three failed hypotheses** for the same defect, make an **architecture stop**: preserve evidence and re-examine boundaries, shared state, and assumptions before another patch.
 
 Run one-off debugging or exploratory commands directly. Workflow validity comes only from configured profiles. A profile is the project's declared contract: every listed check must run, while unrelated capabilities stay outside the profile.
