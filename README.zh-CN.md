@@ -253,6 +253,24 @@ v0.9.2 保持最小 Spec Tree 和现有命令面，并让复合需求理解可�
 
 证据还必须证明 `nextAction`、affected/full 选择、证据失效、门禁和复盘减少了返工与逃逸风险，而不是把开发变成填表。完整方法见 [Skill 演进与实践记录](Skill演进与实践记录.md)。
 
+## 仓库协作方式
+
+RigorBreeze 采用 [GitHub Flow](https://docs.github.com/zh/get-started/using-github/github-flow)，不维护永久性的 Git Flow 分支层级：
+
+```text
+从最新 main 开始
+→ 一个结果对应一个短期分支
+→ 提交范围明确的 commit
+→ 向 main 发起 Pull Request
+→ Required CI 与维护者决策
+→ squash 或 rebase 合并
+→ 删除已合并分支
+```
+
+分支使用 `feat/`、`fix/`、`docs/`、`refactor/` 或 `test/` 等清晰前缀，例如 `docs/clarify-installation`。只有真实发布候选需要稳定时才临时创建 `release/vX.Y.Z`。项目不保留空的 `develop`、`hotfix` 或 release 分支：`main` 是唯一长期事实源，任务分支只负责隔离一项工作，合并后即可删除。
+
+外部贡献者应 fork 仓库，并向 `main` 提交 Pull Request。是否以及何时合并由维护者决定；CI 通过只是必要条件，不会自行合并或发布。可复制的操作步骤和验证要求见[中文贡献指南](CONTRIBUTING.zh-CN.md)。
+
 ## 贡献与安全
 
 提交工作流行为修改前阅读[中文贡献指南](CONTRIBUTING.zh-CN.md)。普通摩擦需要在真实切片中重复发生后才进入核心；错误放过秘密、越权、破坏性迁移、过期证据或错误发布的门禁问题需要立即审查。

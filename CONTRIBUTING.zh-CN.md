@@ -65,6 +65,25 @@ python3 -B tests/behavior/run.py run --version 0.9.2 --repetitions 2
 
 ## Pull Request
 
-说明问题、证据、选择的边界、拒绝的方案、兼容性影响和实际运行的验证。可以提交 AI 生成的修改，但提交者必须亲自审查并测试，并在 PR 描述中注明使用的 Agent 和模型。
+RigorBreeze 只有一个长期分支：`main`。每个无关结果都从最新 `main` 创建一个短期分支：
+
+```bash
+git switch main
+git pull --ff-only
+git switch -c docs/clarify-installation
+```
+
+分支使用 `feat/`、`fix/`、`docs/`、`refactor/` 或 `test/` 前缀，后接简短 kebab-case 描述。只有真实发布候选需要稳定时，维护者才创建 `release/vX.Y.Z`。不要创建永久 `develop`、`hotfix` 或空 release 分支。
+
+一个分支和一个 Pull Request 只解决一个可观察结果。推送分支后，向 `main` 发起 Pull Request：
+
+```bash
+git push -u origin docs/clarify-installation
+gh pr create --base main --head docs/clarify-installation
+```
+
+说明问题、证据、选择的边界、拒绝的方案、兼容性影响和实际运行的验证。解决评审讨论并保持 Required CI 通过。检查通过不等于获得合并或发布权限；最终决定由维护者作出。合并后删除任务分支，不要用它继续承载无关修改。
+
+可以提交 AI 生成的修改，但提交者必须亲自审查并测试，并在 PR 描述中注明使用的 Agent 和模型。
 
 提交贡献即表示你同意该贡献按照仓库的 [MIT License](LICENSE) 授权。
