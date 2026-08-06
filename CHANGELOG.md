@@ -18,6 +18,7 @@ The project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). 
 
 - Use a side-effect-free native Windows process query for worktree ownership checks instead of the POSIX-only `os.kill(pid, 0)` probe.
 - Preserve repeated RED observations for audit while evaluating only the latest current chain per acceptance ID at closure gates.
+- Configure CLI stdout and stderr as UTF-8 when supported so bilingual guidance remains printable on Windows legacy code pages.
 
 ### Documentation
 

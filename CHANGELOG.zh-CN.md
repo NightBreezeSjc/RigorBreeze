@@ -18,6 +18,7 @@ RigorBreeze 的重要变更都会记录在本文档中。
 
 - worktree 所有权检查在 Windows 上改用无副作用的原生进程查询，不再使用仅适合 POSIX 的 `os.kill(pid, 0)` 探测。
 - 重复观察同一验收 ID 的 RED 时继续保留历史审计记录，但关闭门禁只评估最新的当前证据链。
+- 在流支持重新配置时将 CLI 的 stdout 和 stderr 统一为 UTF-8，确保双语提示能在 Windows 旧代码页环境下正常输出。
 
 ### 文档
 

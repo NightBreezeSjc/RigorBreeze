@@ -17,6 +17,20 @@ from typing import Any
 # behind in a project merely because a workflow command was inspected.
 sys.dont_write_bytecode = True
 
+
+def configure_text_streams() -> None:
+    """Keep CLI output portable when Windows inherits a legacy code page."""
+    for stream in (sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if not callable(reconfigure):
+            continue
+        try:
+            reconfigure(encoding="utf-8", errors="replace")
+        except (OSError, ValueError):
+            # Embedded callers may provide an already detached or fixed stream.
+            pass
+
+
 import flow_automation  # noqa: E402
 import flow_parallel  # noqa: E402
 import flow_policy  # noqa: E402
@@ -2444,6 +2458,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main() -> int:
+    configure_text_streams()
     parser = build_parser()
     args = parser.parse_args()
     root = args.root.resolve()

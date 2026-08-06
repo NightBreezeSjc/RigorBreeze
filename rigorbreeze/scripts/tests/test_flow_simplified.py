@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import json
+import os
 import sys
+from unittest.mock import patch
 
 from flow_test_support import FlowTestCase
 
@@ -246,16 +248,17 @@ Risk: {risk}
         self.run_flow("--mode", "enforced", "verify", "--profile", "full")
         self.add_runtime_acceptance()
 
-        result = self.run_flow(
-            "retro",
-            "--confirm",
-            "--rework-reason",
-            "workflow",
-            "--exceptions",
-            "nextAction suggested full too early",
-            "--workflow-impact",
-            "hurt",
-        )
+        with patch.dict(os.environ, {"PYTHONIOENCODING": "cp1252"}):
+            result = self.run_flow(
+                "retro",
+                "--confirm",
+                "--rework-reason",
+                "workflow",
+                "--exceptions",
+                "nextAction suggested full too early",
+                "--workflow-impact",
+                "hurt",
+            )
 
         self.assertIn("evolution candidate", result.stdout.lower())
         self.assertIn(
