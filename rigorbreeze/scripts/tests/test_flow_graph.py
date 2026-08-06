@@ -3,12 +3,35 @@ from __future__ import annotations
 import unittest
 import sys
 from pathlib import Path
+from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import flow_parallel
 
 
 class FlowGraphTests(unittest.TestCase):
+    def test_windows_process_liveness_never_uses_os_kill(self) -> None:
+        with (
+            patch.object(flow_parallel.os, "name", "nt"),
+            patch.object(
+                flow_parallel, "windows_process_alive", return_value=True
+            ) as windows_probe,
+            patch.object(flow_parallel.os, "kill") as os_kill,
+        ):
+            self.assertTrue(flow_parallel.process_alive(4242))
+
+        windows_probe.assert_called_once_with(4242)
+        os_kill.assert_not_called()
+
+    def test_posix_process_liveness_retains_signal_zero_probe(self) -> None:
+        with (
+            patch.object(flow_parallel.os, "name", "posix"),
+            patch.object(flow_parallel.os, "kill") as os_kill,
+        ):
+            self.assertTrue(flow_parallel.process_alive(4242))
+
+        os_kill.assert_called_once_with(4242, 0)
+
     def test_linear_fork_join_and_diamond_have_stable_topological_order(self) -> None:
         tasks = {
             "TASK-A": {"dependsOn": []},

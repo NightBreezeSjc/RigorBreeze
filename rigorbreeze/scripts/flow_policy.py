@@ -913,11 +913,12 @@ def ensure_tdd_chains_complete(root: Path, state: dict[str, Any]) -> None:
     evidence = load_evidence(root, active["id"])
     digest = task_digest(root, state)
     declared = set(acceptance_ids(root, state))
-    chains = [
-        chain
-        for chain in evidence.get("tddChain", [])
-        if (chain.get("red") or {}).get("taskDigest") == digest
-    ]
+    latest_by_requirement: dict[str, dict[str, Any]] = {}
+    for chain in evidence.get("tddChain", []):
+        if (chain.get("red") or {}).get("taskDigest") != digest:
+            continue
+        latest_by_requirement[str(chain.get("requirement") or "unknown")] = chain
+    chains = list(latest_by_requirement.values())
     if not chains:
         raise FlowError("current task has no TDD chain")
     current_verification = state.get("verification")

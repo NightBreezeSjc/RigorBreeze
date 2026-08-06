@@ -14,6 +14,11 @@ The project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). 
 - Require inspection of the standard library, framework, and current dependency set before adding custom code or packages; new dependencies and abstractions need current acceptance or a durable invariant.
 - Keep compatibility risk-adaptive: proven-dead private preview paths may be removed, while public APIs, persisted data, upgrade paths, and production migrations retain explicit transition, verification, and rollback requirements.
 
+### Fixed
+
+- Use a side-effect-free native Windows process query for worktree ownership checks instead of the POSIX-only `os.kill(pid, 0)` probe.
+- Preserve repeated RED observations for audit while evaluating only the latest current chain per acceptance ID at closure gates.
+
 ### Documentation
 
 - Reframed the repository for first-time adopters with bilingual onboarding, explicit safety boundaries, and a complete first-task walkthrough.

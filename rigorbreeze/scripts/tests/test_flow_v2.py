@@ -7,6 +7,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+import flow_policy
 import flow_state
 from flow_test_support import FlowTestCase
 
@@ -1163,6 +1164,56 @@ Risk: {risk}
             )
         )
         self.assertTrue(all(chain.get("green") for chain in evidence["tddChain"]))
+
+    def test_reobserved_red_supersedes_older_chain_for_closure(self) -> None:
+        self.init_git()
+        self.run_flow("init")
+        self.write_config(full=("unit", "secret"), affected=("unit",))
+        self.create_task(risk="L1")
+        tests = self.root / "tests"
+        tests.mkdir()
+        test_file = tests / "test_feature.py"
+        test_file.write_text("raise AssertionError('first failure')\n")
+        self.run_flow("approve", "task")
+        self.run_flow(
+            "red",
+            "--requirement",
+            "REQ-001",
+            "--test",
+            "tests/test_feature.py",
+            "--expect-pattern",
+            "first failure",
+            "--",
+            sys.executable,
+            "tests/test_feature.py",
+        )
+
+        test_file.write_text("raise AssertionError('second failure')\n")
+        self.run_flow(
+            "red",
+            "--requirement",
+            "REQ-001",
+            "--test",
+            "tests/test_feature.py",
+            "--expect-pattern",
+            "second failure",
+            "--",
+            sys.executable,
+            "tests/test_feature.py",
+        )
+        self.run_flow("--mode", "enforced", "verify", "--profile", "full")
+
+        evidence = json.loads(
+            (self.root / "spec" / "evidence" / "TASK-001.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        self.assertEqual(len(evidence["tddChain"]), 2)
+        self.assertIsNone(evidence["tddChain"][0]["green"])
+        self.assertTrue(evidence["tddChain"][1]["green"])
+        flow_policy.ensure_tdd_chains_complete(
+            self.root, flow_state.load_state(self.root)
+        )
 
     def test_l2_full_derives_supply_chain_and_migration_checks_from_changes(
         self,
