@@ -1,0 +1,460 @@
+{
+  "workflowVersion": 4,
+  "taskId": "RB-LIVE-EVAL-GIT-WRITE",
+  "baseline": {
+    "taskDigest": "435ec9f310a513ea50c7c40b44de76243636ca8592e21982022909b3abdd3f7a",
+    "head": "efc9a548d73db21208bed896085616eadfdaf0d5",
+    "projectFingerprint": "30d5d24a7a01ec63de7321e70387638b04ea33b2b7af21b51fc74eb26f28d2c7",
+    "configDigest": "29e4313a1131a04a40744798b88740046122394a3b05daff60b9a73c50db1f43",
+    "workingTreePaths": [
+      "spec/changes/RB-LIVE-EVAL-GIT-WRITE.md"
+    ],
+    "workingTreeDigests": {
+      "spec/changes/RB-LIVE-EVAL-GIT-WRITE.md": "435ec9f310a513ea50c7c40b44de76243636ca8592e21982022909b3abdd3f7a"
+    },
+    "approvedAt": "2026-08-06T21:54:32+08:00"
+  },
+  "red": [
+    {
+      "requirement": "REQ-001",
+      "command": [
+        "python3",
+        "-B",
+        "tests/behavior/test_behavior.py",
+        "BehaviorSuiteTests.test_live_codex_argv_grants_only_fixture_git_write",
+        "-v"
+      ],
+      "exitCode": 1,
+      "expectedPattern": "AttributeError.*_codex_argv",
+      "testDigests": {
+        "tests/behavior/test_behavior.py": "b2fb006cad4e51a1a9b379cda3dfd0e9898b8931284f4de0d698787bcd9cbde5"
+      },
+      "summary": "test_live_codex_argv_grants_only_fixture_git_write (__main__.BehaviorSuiteTests.test_live_codex_argv_grants_only_fixture_git_write) ... ERROR\n\n======================================================================\nERROR: test_live_codex_argv_grants_only_fixture_git_write (__main__.BehaviorSuiteTests.test_live_codex_argv_grants_only_fixture_git_write)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/songjincheng/LinGang-housing/rigorbreeze/tests/behavior/test_behavior.py\", line 220, in test_live_codex_argv_grants_only_fixture_git_write\n    argv = runner._codex_argv(\"codex\", workspace, schema, final)\n           ^^^^^^^^^^^^^^^^^^\nAttributeError: module 'rigorbreeze_behavior' has no attribute '_codex_argv'\n\n----------------------------------------------------------------------\nRan 1 test in 0.006s\n\nFAILED (errors=1)",
+      "taskDigest": "435ec9f310a513ea50c7c40b44de76243636ca8592e21982022909b3abdd3f7a",
+      "projectFingerprint": "84e1b096cc74219d2983c2f21b00d9e996ff5ef07cb36c76ce66a0463f7a8515",
+      "head": "efc9a548d73db21208bed896085616eadfdaf0d5",
+      "observedAt": "2026-08-06T21:56:01+08:00"
+    },
+    {
+      "requirement": "REQ-001",
+      "command": [
+        "python3",
+        "-B",
+        "tests/behavior/test_behavior.py",
+        "BehaviorSuiteTests.test_live_codex_argv_grants_only_fixture_git_write",
+        "BehaviorSuiteTests.test_live_prompt_names_the_exact_result_case_id",
+        "-v"
+      ],
+      "exitCode": 1,
+      "expectedPattern": "AttributeError.*(_codex_argv|_live_prompt)",
+      "testDigests": {
+        "tests/behavior/test_behavior.py": "e0332109f3a1cd449561cd93d452209325fcbb19f41abafa6aef69af9efa0cc1"
+      },
+      "summary": "test_live_codex_argv_grants_only_fixture_git_write (__main__.BehaviorSuiteTests.test_live_codex_argv_grants_only_fixture_git_write) ... ERROR\ntest_live_prompt_names_the_exact_result_case_id (__main__.BehaviorSuiteTests.test_live_prompt_names_the_exact_result_case_id) ... ERROR\n\n======================================================================\nERROR: test_live_codex_argv_grants_only_fixture_git_write (__main__.BehaviorSuiteTests.test_live_codex_argv_grants_only_fixture_git_write)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/songjincheng/LinGang-housing/rigorbreeze/tests/behavior/test_behavior.py\", line 220, in test_live_codex_argv_grants_only_fixture_git_write\n    argv = runner._codex_argv(\"codex\", workspace, schema, final)\n           ^^^^^^^^^^^^^^^^^^\nAttributeError: module 'rigorbreeze_behavior' has no attribute '_codex_argv'\n\n======================================================================\nERROR: test_live_prompt_names_the_exact_result_case_id (__main__.BehaviorSuiteTests.test_live_prompt_names_the_exact_result_case_id)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/songjincheng/LinGang-housing/rigorbreeze/tests/behavior/test_behavior.py\", line 229, in test_live_prompt_names_the_exact_result_case_id\n    prompt = runner._live_prompt(\n             ^^^^^^^^^^^^^^^^^^^\nAttributeError: module 'rigorbreeze_behavior' has no attribute '_live_prompt'\n\n----------------------------------------------------------------------\nRan 2 tests in 0.008s\n\nFAILED (errors=2)",
+      "taskDigest": "435ec9f310a513ea50c7c40b44de76243636ca8592e21982022909b3abdd3f7a",
+      "projectFingerprint": "711a5a1e7cd5b686a100c57316b873a8d2a6b8a91920e81aef0c62908fb764f7",
+      "head": "efc9a548d73db21208bed896085616eadfdaf0d5",
+      "observedAt": "2026-08-06T22:28:01+08:00"
+    }
+  ],
+  "verifications": [
+    {
+      "toolVersion": "0.9.2",
+      "profile": "full",
+      "configured": true,
+      "mode": "advisory",
+      "checks": [
+        "format",
+        "lint",
+        "unit",
+        "contract",
+        "secret",
+        "build",
+        "acceptance"
+      ],
+      "passed": true,
+      "taskDigest": "435ec9f310a513ea50c7c40b44de76243636ca8592e21982022909b3abdd3f7a",
+      "projectFingerprint": "797b2430ccc419b10192e8a43711424e93fce7ef4203c294be0cd3a766eea7de",
+      "configDigest": "29e4313a1131a04a40744798b88740046122394a3b05daff60b9a73c50db1f43",
+      "head": "efc9a548d73db21208bed896085616eadfdaf0d5",
+      "verifiedAt": "2026-08-06T22:31:06+08:00"
+    }
+  ],
+  "checkRuns": [
+    {
+      "checkId": "format",
+      "category": "static-quality",
+      "profile": "full",
+      "mode": "advisory",
+      "command": [
+        "python3",
+        "-m",
+        "ruff",
+        "format",
+        "--check",
+        "rigorbreeze/scripts",
+        "tests/behavior"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 87,
+      "summary": "15 files already formatted",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "435ec9f310a513ea50c7c40b44de76243636ca8592e21982022909b3abdd3f7a",
+      "projectFingerprint": "797b2430ccc419b10192e8a43711424e93fce7ef4203c294be0cd3a766eea7de",
+      "head": "efc9a548d73db21208bed896085616eadfdaf0d5",
+      "recordedAt": "2026-08-06T22:28:46+08:00"
+    },
+    {
+      "checkId": "lint",
+      "category": "static-quality",
+      "profile": "full",
+      "mode": "advisory",
+      "command": [
+        "python3",
+        "-m",
+        "ruff",
+        "check",
+        "rigorbreeze/scripts",
+        "tests/behavior"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 40,
+      "summary": "All checks passed!",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "435ec9f310a513ea50c7c40b44de76243636ca8592e21982022909b3abdd3f7a",
+      "projectFingerprint": "797b2430ccc419b10192e8a43711424e93fce7ef4203c294be0cd3a766eea7de",
+      "head": "efc9a548d73db21208bed896085616eadfdaf0d5",
+      "recordedAt": "2026-08-06T22:28:46+08:00"
+    },
+    {
+      "checkId": "unit",
+      "category": "behavior",
+      "profile": "full",
+      "mode": "advisory",
+      "command": [
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "rigorbreeze/scripts/tests",
+        "-v"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 139575,
+      "summary": "st_skill_contract.SkillContractTests.test_every_user_facing_english_document_has_chinese) ... ok\ntest_installable_skill_excludes_repository_documents (test_skill_contract.SkillContractTests.test_installable_skill_excludes_repository_documents) ... ok\ntest_installable_skill_has_no_project_specific_policy (test_skill_contract.SkillContractTests.test_installable_skill_has_no_project_specific_policy) ... ok\ntest_long_references_have_a_table_of_contents (test_skill_contract.SkillContractTests.test_long_references_have_a_table_of_contents) ... ok\ntest_public_markdown_relative_links_resolve (test_skill_contract.SkillContractTests.test_public_markdown_relative_links_resolve) ... ok\ntest_public_readmes_cover_the_same_first_run_contract (test_skill_contract.SkillContractTests.test_public_readmes_cover_the_same_first_run_contract) ... ok\ntest_repository_has_minimal_open_source_governance (test_skill_contract.SkillContractTests.test_repository_has_minimal_open_source_governance) ... ok\ntest_repository_has_skill_owned_ci (test_skill_contract.SkillContractTests.test_repository_has_skill_owned_ci) ... ok\ntest_skill_completes_context_and_rechecks_follow_up_writes (test_skill_contract.SkillContractTests.test_skill_completes_context_and_rechecks_follow_up_writes) ... ok\ntest_skill_encodes_behavior_reliability_rules_once (test_skill_contract.SkillContractTests.test_skill_encodes_behavior_reliability_rules_once) ... ok\ntest_skill_entrypoint_stays_compact_and_links_every_reference (test_skill_contract.SkillContractTests.test_skill_entrypoint_stays_compact_and_links_every_reference) ... ok\ntest_skill_keeps_lean_implementation_compatible_with_production (test_skill_contract.SkillContractTests.test_skill_keeps_lean_implementation_compatible_with_production) ... ok\ntest_skill_metadata_matches_public_name (test_skill_contract.SkillContractTests.test_skill_metadata_matches_public_name) ... ok\n\n----------------------------------------------------------------------\nRan 125 tests in 139.341s\n\nOK",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "435ec9f310a513ea50c7c40b44de76243636ca8592e21982022909b3abdd3f7a",
+      "projectFingerprint": "797b2430ccc419b10192e8a43711424e93fce7ef4203c294be0cd3a766eea7de",
+      "head": "efc9a548d73db21208bed896085616eadfdaf0d5",
+      "recordedAt": "2026-08-06T22:31:06+08:00"
+    },
+    {
+      "checkId": "contract",
+      "category": "behavior",
+      "profile": "full",
+      "mode": "advisory",
+      "command": [
+        "python3",
+        "-m",
+        "py_compile",
+        "rigorbreeze/scripts/flow.py"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 51,
+      "summary": "",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "435ec9f310a513ea50c7c40b44de76243636ca8592e21982022909b3abdd3f7a",
+      "projectFingerprint": "797b2430ccc419b10192e8a43711424e93fce7ef4203c294be0cd3a766eea7de",
+      "head": "efc9a548d73db21208bed896085616eadfdaf0d5",
+      "recordedAt": "2026-08-06T22:31:06+08:00"
+    },
+    {
+      "checkId": "secret",
+      "category": "secrets",
+      "profile": "full",
+      "mode": "advisory",
+      "command": [
+        "python3",
+        "-c",
+        "import pathlib,re,sys; files=[p for p in pathlib.Path('.').rglob('*') if p.is_file() and '.git' not in p.parts and 'tests' not in p.parts and p.name != 'rigorbreeze.toml']; pattern=re.compile(r'(?i)(api[_-]?key|token|password|secret)\\s*[:=]\\s*\\S{20,}'); hits=[str(p) for p in files if pattern.search(p.read_text(errors='ignore'))]; print('\\n'.join(hits)); sys.exit(bool(hits))"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 88,
+      "summary": "",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "435ec9f310a513ea50c7c40b44de76243636ca8592e21982022909b3abdd3f7a",
+      "projectFingerprint": "797b2430ccc419b10192e8a43711424e93fce7ef4203c294be0cd3a766eea7de",
+      "head": "efc9a548d73db21208bed896085616eadfdaf0d5",
+      "recordedAt": "2026-08-06T22:31:06+08:00"
+    },
+    {
+      "checkId": "build",
+      "category": "build",
+      "profile": "full",
+      "mode": "advisory",
+      "command": [
+        "python3",
+        "-c",
+        "import pathlib,zipfile; out=pathlib.Path('artifacts/rigorbreeze.zip'); out.parent.mkdir(exist_ok=True); files=[p for p in pathlib.Path('rigorbreeze').rglob('*') if p.is_file() and '__pycache__' not in p.parts]; z=zipfile.ZipFile(out,'w',zipfile.ZIP_DEFLATED); [z.write(p,p.as_posix()) for p in files]; z.close()"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 45,
+      "summary": "",
+      "report": null,
+      "artifacts": [
+        "5e735fb9a7ca92c736d097df7e1ce73da1574ddd56ac864186f90292091661b5"
+      ],
+      "taskDigest": "435ec9f310a513ea50c7c40b44de76243636ca8592e21982022909b3abdd3f7a",
+      "projectFingerprint": "797b2430ccc419b10192e8a43711424e93fce7ef4203c294be0cd3a766eea7de",
+      "head": "efc9a548d73db21208bed896085616eadfdaf0d5",
+      "recordedAt": "2026-08-06T22:31:06+08:00"
+    },
+    {
+      "checkId": "acceptance",
+      "category": "acceptance",
+      "profile": "full",
+      "mode": "advisory",
+      "command": [
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/behavior",
+        "-v"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 153,
+      "summary": "test_all_synthetic_transcripts_meet_their_contracts (test_behavior.BehaviorSuiteTests.test_all_synthetic_transcripts_meet_their_contracts) ... ok\ntest_compound_ui_case_rejects_partial_requirement_capture (test_behavior.BehaviorSuiteTests.test_compound_ui_case_rejects_partial_requirement_capture) ... ok\ntest_contract_has_exactly_six_safe_cases (test_behavior.BehaviorSuiteTests.test_contract_has_exactly_six_safe_cases) ... ok\ntest_contract_rejects_path_escape_and_invalid_regex (test_behavior.BehaviorSuiteTests.test_contract_rejects_path_escape_and_invalid_regex) ... ok\ntest_globs_and_result_versions_cannot_escape_their_boundaries (test_behavior.BehaviorSuiteTests.test_globs_and_result_versions_cannot_escape_their_boundaries) ... ok\ntest_live_codex_argv_grants_only_fixture_git_write (test_behavior.BehaviorSuiteTests.test_live_codex_argv_grants_only_fixture_git_write) ... ok\ntest_live_prompt_names_the_exact_result_case_id (test_behavior.BehaviorSuiteTests.test_live_prompt_names_the_exact_result_case_id) ... ok\ntest_prepare_fixture_stays_inside_requested_root (test_behavior.BehaviorSuiteTests.test_prepare_fixture_stays_inside_requested_root) ... ok\ntest_redaction_removes_common_secret_shapes (test_behavior.BehaviorSuiteTests.test_redaction_removes_common_secret_shapes) ... ok\ntest_score_accepts_fresh_compliant_result (test_behavior.BehaviorSuiteTests.test_score_accepts_fresh_compliant_result) ... ok\ntest_score_rejects_forbidden_action_and_stale_evidence (test_behavior.BehaviorSuiteTests.test_score_rejects_forbidden_action_and_stale_evidence) ... ok\n\n----------------------------------------------------------------------\nRan 11 tests in 0.100s\n\nOK",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "435ec9f310a513ea50c7c40b44de76243636ca8592e21982022909b3abdd3f7a",
+      "projectFingerprint": "797b2430ccc419b10192e8a43711424e93fce7ef4203c294be0cd3a766eea7de",
+      "head": "efc9a548d73db21208bed896085616eadfdaf0d5",
+      "recordedAt": "2026-08-06T22:31:06+08:00"
+    }
+  ],
+  "tddChain": [
+    {
+      "requirement": "REQ-001",
+      "red": {
+        "requirement": "REQ-001",
+        "command": [
+          "python3",
+          "-B",
+          "tests/behavior/test_behavior.py",
+          "BehaviorSuiteTests.test_live_codex_argv_grants_only_fixture_git_write",
+          "-v"
+        ],
+        "exitCode": 1,
+        "expectedPattern": "AttributeError.*_codex_argv",
+        "testDigests": {
+          "tests/behavior/test_behavior.py": "b2fb006cad4e51a1a9b379cda3dfd0e9898b8931284f4de0d698787bcd9cbde5"
+        },
+        "summary": "test_live_codex_argv_grants_only_fixture_git_write (__main__.BehaviorSuiteTests.test_live_codex_argv_grants_only_fixture_git_write) ... ERROR\n\n======================================================================\nERROR: test_live_codex_argv_grants_only_fixture_git_write (__main__.BehaviorSuiteTests.test_live_codex_argv_grants_only_fixture_git_write)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/songjincheng/LinGang-housing/rigorbreeze/tests/behavior/test_behavior.py\", line 220, in test_live_codex_argv_grants_only_fixture_git_write\n    argv = runner._codex_argv(\"codex\", workspace, schema, final)\n           ^^^^^^^^^^^^^^^^^^\nAttributeError: module 'rigorbreeze_behavior' has no attribute '_codex_argv'\n\n----------------------------------------------------------------------\nRan 1 test in 0.006s\n\nFAILED (errors=1)",
+        "taskDigest": "435ec9f310a513ea50c7c40b44de76243636ca8592e21982022909b3abdd3f7a",
+        "projectFingerprint": "84e1b096cc74219d2983c2f21b00d9e996ff5ef07cb36c76ce66a0463f7a8515",
+        "head": "efc9a548d73db21208bed896085616eadfdaf0d5",
+        "observedAt": "2026-08-06T21:56:01+08:00"
+      },
+      "green": null
+    },
+    {
+      "requirement": "REQ-001",
+      "red": {
+        "requirement": "REQ-001",
+        "command": [
+          "python3",
+          "-B",
+          "tests/behavior/test_behavior.py",
+          "BehaviorSuiteTests.test_live_codex_argv_grants_only_fixture_git_write",
+          "BehaviorSuiteTests.test_live_prompt_names_the_exact_result_case_id",
+          "-v"
+        ],
+        "exitCode": 1,
+        "expectedPattern": "AttributeError.*(_codex_argv|_live_prompt)",
+        "testDigests": {
+          "tests/behavior/test_behavior.py": "e0332109f3a1cd449561cd93d452209325fcbb19f41abafa6aef69af9efa0cc1"
+        },
+        "summary": "test_live_codex_argv_grants_only_fixture_git_write (__main__.BehaviorSuiteTests.test_live_codex_argv_grants_only_fixture_git_write) ... ERROR\ntest_live_prompt_names_the_exact_result_case_id (__main__.BehaviorSuiteTests.test_live_prompt_names_the_exact_result_case_id) ... ERROR\n\n======================================================================\nERROR: test_live_codex_argv_grants_only_fixture_git_write (__main__.BehaviorSuiteTests.test_live_codex_argv_grants_only_fixture_git_write)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/songjincheng/LinGang-housing/rigorbreeze/tests/behavior/test_behavior.py\", line 220, in test_live_codex_argv_grants_only_fixture_git_write\n    argv = runner._codex_argv(\"codex\", workspace, schema, final)\n           ^^^^^^^^^^^^^^^^^^\nAttributeError: module 'rigorbreeze_behavior' has no attribute '_codex_argv'\n\n======================================================================\nERROR: test_live_prompt_names_the_exact_result_case_id (__main__.BehaviorSuiteTests.test_live_prompt_names_the_exact_result_case_id)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/songjincheng/LinGang-housing/rigorbreeze/tests/behavior/test_behavior.py\", line 229, in test_live_prompt_names_the_exact_result_case_id\n    prompt = runner._live_prompt(\n             ^^^^^^^^^^^^^^^^^^^\nAttributeError: module 'rigorbreeze_behavior' has no attribute '_live_prompt'\n\n----------------------------------------------------------------------\nRan 2 tests in 0.008s\n\nFAILED (errors=2)",
+        "taskDigest": "435ec9f310a513ea50c7c40b44de76243636ca8592e21982022909b3abdd3f7a",
+        "projectFingerprint": "711a5a1e7cd5b686a100c57316b873a8d2a6b8a91920e81aef0c62908fb764f7",
+        "head": "efc9a548d73db21208bed896085616eadfdaf0d5",
+        "observedAt": "2026-08-06T22:28:01+08:00"
+      },
+      "green": {
+        "toolVersion": "0.9.2",
+        "profile": "full",
+        "configured": true,
+        "mode": "advisory",
+        "checks": [
+          "format",
+          "lint",
+          "unit",
+          "contract",
+          "secret",
+          "build",
+          "acceptance"
+        ],
+        "passed": true,
+        "taskDigest": "435ec9f310a513ea50c7c40b44de76243636ca8592e21982022909b3abdd3f7a",
+        "projectFingerprint": "797b2430ccc419b10192e8a43711424e93fce7ef4203c294be0cd3a766eea7de",
+        "configDigest": "29e4313a1131a04a40744798b88740046122394a3b05daff60b9a73c50db1f43",
+        "head": "efc9a548d73db21208bed896085616eadfdaf0d5",
+        "verifiedAt": "2026-08-06T22:31:06+08:00"
+      }
+    }
+  ],
+  "artifacts": [
+    {
+      "kind": "build",
+      "path": "artifacts/rigorbreeze.zip",
+      "sha256": "5e735fb9a7ca92c736d097df7e1ce73da1574ddd56ac864186f90292091661b5",
+      "size": 133860,
+      "head": "efc9a548d73db21208bed896085616eadfdaf0d5",
+      "taskDigest": "435ec9f310a513ea50c7c40b44de76243636ca8592e21982022909b3abdd3f7a",
+      "projectFingerprint": "797b2430ccc419b10192e8a43711424e93fce7ef4203c294be0cd3a766eea7de",
+      "recordedAt": "2026-08-06T22:31:06+08:00"
+    }
+  ],
+  "acceptance": [
+    {
+      "kind": "runtime",
+      "fields": {
+        "status": "passed",
+        "environment": "local-live-codex",
+        "case": "context-semantics",
+        "command": "python3 -B tests/behavior/run.py run --version 0.9.2 --repetitions 1 --case context-semantics"
+      },
+      "taskDigest": "435ec9f310a513ea50c7c40b44de76243636ca8592e21982022909b3abdd3f7a",
+      "projectFingerprint": "797b2430ccc419b10192e8a43711424e93fce7ef4203c294be0cd3a766eea7de",
+      "head": "efc9a548d73db21208bed896085616eadfdaf0d5",
+      "artifactDigests": [
+        "5e735fb9a7ca92c736d097df7e1ce73da1574ddd56ac864186f90292091661b5"
+      ],
+      "recordedAt": "2026-08-06T22:35:44+08:00",
+      "path": ".git/rigorbreeze/behavior-evals/0.9.2/context-semantics-1.json",
+      "sha256": "3f8b0d1f7f838bcc8c8b3dcedfbb15f9d8e9b72739aa1f4020376de99b09ca3f",
+      "size": 932
+    },
+    {
+      "kind": "review",
+      "fields": {
+        "status": "passed",
+        "reviewer": "codex-standards-pass",
+        "pass": "standards",
+        "conclusion": "minimal-sandbox-scoped-no-runtime-dependency"
+      },
+      "taskDigest": "435ec9f310a513ea50c7c40b44de76243636ca8592e21982022909b3abdd3f7a",
+      "projectFingerprint": "797b2430ccc419b10192e8a43711424e93fce7ef4203c294be0cd3a766eea7de",
+      "head": "efc9a548d73db21208bed896085616eadfdaf0d5",
+      "artifactDigests": [
+        "5e735fb9a7ca92c736d097df7e1ce73da1574ddd56ac864186f90292091661b5"
+      ],
+      "recordedAt": "2026-08-06T22:35:57+08:00",
+      "path": "tests/behavior/run.py",
+      "sha256": "7a508f977a24ee4e573f801af15774812242947e2322d14e0e01f5cd3d83c3f9",
+      "size": 20580
+    },
+    {
+      "kind": "review",
+      "fields": {
+        "status": "passed",
+        "reviewer": "codex-spec-pass",
+        "pass": "spec",
+        "conclusion": "REQ-001-REQ-002-REQ-003-covered"
+      },
+      "taskDigest": "435ec9f310a513ea50c7c40b44de76243636ca8592e21982022909b3abdd3f7a",
+      "projectFingerprint": "797b2430ccc419b10192e8a43711424e93fce7ef4203c294be0cd3a766eea7de",
+      "head": "efc9a548d73db21208bed896085616eadfdaf0d5",
+      "artifactDigests": [
+        "5e735fb9a7ca92c736d097df7e1ce73da1574ddd56ac864186f90292091661b5"
+      ],
+      "recordedAt": "2026-08-06T22:35:57+08:00",
+      "path": "spec/changes/RB-LIVE-EVAL-GIT-WRITE.md",
+      "sha256": "435ec9f310a513ea50c7c40b44de76243636ca8592e21982022909b3abdd3f7a",
+      "size": 2426
+    }
+  ],
+  "release": [],
+  "automation": [],
+  "practice": {
+    "confirmation": {
+      "reworkReason": "workflow",
+      "exceptions": "live evaluation harness initially lacked fixture Git-private state permission; corrected without widening its workspace-write sandbox",
+      "workflowImpact": "helped",
+      "evolutionCandidate": true,
+      "summaryDigest": "ce220617056a7e6a915a4803c30abf2249cc48dc5e3bb4fafc80c9c389a7da04",
+      "taskDigest": "435ec9f310a513ea50c7c40b44de76243636ca8592e21982022909b3abdd3f7a",
+      "projectFingerprint": "797b2430ccc419b10192e8a43711424e93fce7ef4203c294be0cd3a766eea7de",
+      "confirmedAt": "2026-08-06T22:36:55+08:00"
+    },
+    "events": [],
+    "summary": {
+      "taskId": "RB-LIVE-EVAL-GIT-WRITE",
+      "risk": "L1",
+      "verificationRuns": 1,
+      "checkRuns": 7,
+      "checkDurationMs": 140039,
+      "failedChecks": [],
+      "failureCategories": [],
+      "potentialBypasses": [],
+      "firstAcceptancePassed": true,
+      "acceptanceRecords": 3,
+      "estimatedReworkSeconds": null,
+      "practiceEvents": [],
+      "generatedAt": "2026-08-06T22:36:55+08:00",
+      "summaryDigest": "ce220617056a7e6a915a4803c30abf2249cc48dc5e3bb4fafc80c9c389a7da04"
+    }
+  },
+  "closure": {
+    "outcome": "completed",
+    "reason": null,
+    "closedAt": "2026-08-06T22:36:55+08:00",
+    "head": "efc9a548d73db21208bed896085616eadfdaf0d5",
+    "branch": "fix/live-eval-git-state",
+    "originalPhase": "accepted",
+    "integrationProof": null,
+    "verificationStatus": "current",
+    "practiceEvents": [
+      "closure-pending-commit"
+    ],
+    "unrelatedChanges": []
+  },
+  "verification": {
+    "toolVersion": "0.9.2",
+    "profile": "full",
+    "configured": true,
+    "mode": "advisory",
+    "checks": [
+      "format",
+      "lint",
+      "unit",
+      "contract",
+      "secret",
+      "build",
+      "acceptance"
+    ],
+    "passed": true,
+    "taskDigest": "435ec9f310a513ea50c7c40b44de76243636ca8592e21982022909b3abdd3f7a",
+    "projectFingerprint": "797b2430ccc419b10192e8a43711424e93fce7ef4203c294be0cd3a766eea7de",
+    "configDigest": "29e4313a1131a04a40744798b88740046122394a3b05daff60b9a73c50db1f43",
+    "head": "efc9a548d73db21208bed896085616eadfdaf0d5",
+    "verifiedAt": "2026-08-06T22:31:06+08:00"
+  }
+}

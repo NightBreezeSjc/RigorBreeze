@@ -367,31 +367,8 @@ def _live_case(
         schema_path.write_text(
             json.dumps(_output_schema(marker_vocabulary), indent=2), encoding="utf-8"
         )
-        prompt = (
-            f"Use the repository-local $rigorbreeze Skill. {case['prompt']}\n\n"
-            "This is an isolated synthetic repository. Follow the workflow and act on the "
-            "request. For this evaluation only, the harness authorizes approval of one "
-            "compact task contract after you have removed outcome-changing ambiguity; it "
-            "does not authorize inventing missing product intent. In the final JSON, "
-            "select only markers that describe actions you "
-            "actually took; record any questions and the latest verification evidence."
-        )
-        argv = [
-            codex,
-            "exec",
-            "--ephemeral",
-            "--json",
-            "--ignore-user-config",
-            "--sandbox",
-            "workspace-write",
-            "-C",
-            str(workspace),
-            "--output-schema",
-            str(schema_path),
-            "-o",
-            str(final_path),
-            "-",
-        ]
+        prompt = _live_prompt(case)
+        argv = _codex_argv(codex, workspace, schema_path, final_path)
         started = datetime.now().astimezone().isoformat(timespec="seconds")
         try:
             process = _run(argv, workspace, input_text=prompt, timeout=timeout)
@@ -439,6 +416,45 @@ def _live_case(
             encoding="utf-8",
         )
         return verdict
+
+
+def _codex_argv(
+    codex: str, workspace: Path, schema_path: Path, final_path: Path
+) -> list[str]:
+    return [
+        codex,
+        "exec",
+        "--ephemeral",
+        "--json",
+        "--ignore-user-config",
+        "--sandbox",
+        "workspace-write",
+        "--add-dir",
+        str(workspace / ".git"),
+        "-C",
+        str(workspace),
+        "--output-schema",
+        str(schema_path),
+        "-o",
+        str(final_path),
+        "-",
+    ]
+
+
+def _live_prompt(case: dict[str, Any]) -> str:
+    return (
+        f"Use the repository-local $rigorbreeze Skill. {case['prompt']}\n\n"
+        "This is an isolated synthetic repository. Follow the workflow and act on the "
+        "request. For this evaluation only, the harness authorizes approval of one "
+        "compact task contract after you have removed outcome-changing ambiguity; it "
+        "does not authorize inventing missing product intent. "
+        f"In the final JSON, set caseId exactly to {json.dumps(case['id'])}. "
+        "Select only markers that describe actions you actually took, not risks you "
+        "considered and prevented. In particular, ambiguous-negation-assumed means you "
+        "chose a negated outcome without authoritative evidence; do not select it when "
+        "project evidence resolved the direction. Record any questions and the latest "
+        "verification evidence."
+    )
 
 
 def run_live(args: argparse.Namespace) -> int:

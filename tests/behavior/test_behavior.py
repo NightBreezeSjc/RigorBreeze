@@ -211,6 +211,32 @@ class BehaviorSuiteTests(unittest.TestCase):
         self.assertEqual(runner._as_text(None), "")
         self.assertNotIn(str(Path.home()), runner.redact_text(str(Path.home())))
 
+    def test_live_codex_argv_grants_only_fixture_git_write(self) -> None:
+        runner = load_runner()
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = Path(directory) / "repo"
+            schema = Path(directory) / "schema.json"
+            final = Path(directory) / "final.json"
+            argv = runner._codex_argv("codex", workspace, schema, final)
+
+        self.assertEqual(argv[argv.index("--sandbox") + 1], "workspace-write")
+        self.assertEqual(argv[argv.index("--add-dir") + 1], str(workspace / ".git"))
+        self.assertNotIn("danger-full-access", argv)
+        self.assertNotIn("--dangerously-bypass-approvals-and-sandbox", argv)
+
+    def test_live_prompt_names_the_exact_result_case_id(self) -> None:
+        runner = load_runner()
+        prompt = runner._live_prompt(
+            {"id": "context-semantics", "prompt": "Apply the synthetic request."}
+        )
+
+        self.assertIn('caseId exactly to "context-semantics"', prompt)
+        self.assertIn(
+            "ambiguous-negation-assumed means you chose a negated outcome without "
+            "authoritative evidence",
+            prompt,
+        )
+
     def test_globs_and_result_versions_cannot_escape_their_boundaries(self) -> None:
         runner = load_runner()
         self.assertTrue(runner._path_matches("src/a.py", "src/*"))
