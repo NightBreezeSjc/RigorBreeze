@@ -1,0 +1,177 @@
+{
+  "workflowVersion": 4,
+  "taskId": "RB-AUTONOMOUS-DEVELOPMENT-VISION",
+  "baseline": {
+    "taskDigest": "f4f8f360768f3c5c4b4a43ffb0f94e07a9e67725417957e396771398718b3a36",
+    "head": "4c9490289f00fe25908574884ec75f34eaf98cb0",
+    "projectFingerprint": "fa716b981fc84f036d9a7e601da272fb02d148ef62c98d87933dde44692531c7",
+    "configDigest": "29e4313a1131a04a40744798b88740046122394a3b05daff60b9a73c50db1f43",
+    "workingTreePaths": [
+      "spec/changes/RB-AUTONOMOUS-DEVELOPMENT-VISION.md"
+    ],
+    "workingTreeDigests": {
+      "spec/changes/RB-AUTONOMOUS-DEVELOPMENT-VISION.md": "f4f8f360768f3c5c4b4a43ffb0f94e07a9e67725417957e396771398718b3a36"
+    },
+    "approvedAt": "2026-08-06T11:21:14+08:00"
+  },
+  "red": [],
+  "verifications": [
+    {
+      "toolVersion": "0.9.2",
+      "profile": "affected",
+      "configured": true,
+      "mode": "advisory",
+      "checks": [
+        "format",
+        "lint",
+        "unit",
+        "secret"
+      ],
+      "passed": true,
+      "taskDigest": "f4f8f360768f3c5c4b4a43ffb0f94e07a9e67725417957e396771398718b3a36",
+      "projectFingerprint": "3c5f829aa0c5640ad22edcb68594e073098c654931ed29a73828e4684b6ec1b1",
+      "configDigest": "29e4313a1131a04a40744798b88740046122394a3b05daff60b9a73c50db1f43",
+      "head": "4c9490289f00fe25908574884ec75f34eaf98cb0",
+      "verifiedAt": "2026-08-06T11:29:55+08:00"
+    }
+  ],
+  "checkRuns": [
+    {
+      "checkId": "format",
+      "category": "static-quality",
+      "profile": "affected",
+      "mode": "advisory",
+      "command": [
+        "python3",
+        "-m",
+        "ruff",
+        "format",
+        "--check",
+        "rigorbreeze/scripts",
+        "tests/behavior"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 62,
+      "summary": "15 files already formatted",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "f4f8f360768f3c5c4b4a43ffb0f94e07a9e67725417957e396771398718b3a36",
+      "projectFingerprint": "3c5f829aa0c5640ad22edcb68594e073098c654931ed29a73828e4684b6ec1b1",
+      "head": "4c9490289f00fe25908574884ec75f34eaf98cb0",
+      "recordedAt": "2026-08-06T11:27:21+08:00"
+    },
+    {
+      "checkId": "lint",
+      "category": "static-quality",
+      "profile": "affected",
+      "mode": "advisory",
+      "command": [
+        "python3",
+        "-m",
+        "ruff",
+        "check",
+        "rigorbreeze/scripts",
+        "tests/behavior"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 23,
+      "summary": "All checks passed!",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "f4f8f360768f3c5c4b4a43ffb0f94e07a9e67725417957e396771398718b3a36",
+      "projectFingerprint": "3c5f829aa0c5640ad22edcb68594e073098c654931ed29a73828e4684b6ec1b1",
+      "head": "4c9490289f00fe25908574884ec75f34eaf98cb0",
+      "recordedAt": "2026-08-06T11:27:21+08:00"
+    },
+    {
+      "checkId": "unit",
+      "category": "behavior",
+      "profile": "affected",
+      "mode": "advisory",
+      "command": [
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "rigorbreeze/scripts/tests",
+        "-v"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 154464,
+      "summary": "irst_run_cli_commands_exist (test_skill_contract.SkillContractTests.test_documented_first_run_cli_commands_exist) ... ok\ntest_every_user_facing_english_document_has_chinese (test_skill_contract.SkillContractTests.test_every_user_facing_english_document_has_chinese) ... ok\ntest_installable_skill_excludes_repository_documents (test_skill_contract.SkillContractTests.test_installable_skill_excludes_repository_documents) ... ok\ntest_installable_skill_has_no_project_specific_policy (test_skill_contract.SkillContractTests.test_installable_skill_has_no_project_specific_policy) ... ok\ntest_long_references_have_a_table_of_contents (test_skill_contract.SkillContractTests.test_long_references_have_a_table_of_contents) ... ok\ntest_public_markdown_relative_links_resolve (test_skill_contract.SkillContractTests.test_public_markdown_relative_links_resolve) ... ok\ntest_public_readmes_cover_the_same_first_run_contract (test_skill_contract.SkillContractTests.test_public_readmes_cover_the_same_first_run_contract) ... ok\ntest_repository_has_minimal_open_source_governance (test_skill_contract.SkillContractTests.test_repository_has_minimal_open_source_governance) ... ok\ntest_repository_has_skill_owned_ci (test_skill_contract.SkillContractTests.test_repository_has_skill_owned_ci) ... ok\ntest_skill_completes_context_and_rechecks_follow_up_writes (test_skill_contract.SkillContractTests.test_skill_completes_context_and_rechecks_follow_up_writes) ... ok\ntest_skill_encodes_behavior_reliability_rules_once (test_skill_contract.SkillContractTests.test_skill_encodes_behavior_reliability_rules_once) ... ok\ntest_skill_entrypoint_stays_compact_and_links_every_reference (test_skill_contract.SkillContractTests.test_skill_entrypoint_stays_compact_and_links_every_reference) ... ok\ntest_skill_metadata_matches_public_name (test_skill_contract.SkillContractTests.test_skill_metadata_matches_public_name) ... ok\n\n----------------------------------------------------------------------\nRan 121 tests in 154.349s\n\nOK",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "f4f8f360768f3c5c4b4a43ffb0f94e07a9e67725417957e396771398718b3a36",
+      "projectFingerprint": "3c5f829aa0c5640ad22edcb68594e073098c654931ed29a73828e4684b6ec1b1",
+      "head": "4c9490289f00fe25908574884ec75f34eaf98cb0",
+      "recordedAt": "2026-08-06T11:29:55+08:00"
+    },
+    {
+      "checkId": "secret",
+      "category": "secrets",
+      "profile": "affected",
+      "mode": "advisory",
+      "command": [
+        "python3",
+        "-c",
+        "import pathlib,re,sys; files=[p for p in pathlib.Path('.').rglob('*') if p.is_file() and '.git' not in p.parts and 'tests' not in p.parts and p.name != 'rigorbreeze.toml']; pattern=re.compile(r'(?i)(api[_-]?key|token|password|secret)\\s*[:=]\\s*\\S{20,}'); hits=[str(p) for p in files if pattern.search(p.read_text(errors='ignore'))]; print('\\n'.join(hits)); sys.exit(bool(hits))"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 143,
+      "summary": "",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "f4f8f360768f3c5c4b4a43ffb0f94e07a9e67725417957e396771398718b3a36",
+      "projectFingerprint": "3c5f829aa0c5640ad22edcb68594e073098c654931ed29a73828e4684b6ec1b1",
+      "head": "4c9490289f00fe25908574884ec75f34eaf98cb0",
+      "recordedAt": "2026-08-06T11:29:55+08:00"
+    }
+  ],
+  "tddChain": [],
+  "artifacts": [],
+  "acceptance": [],
+  "release": [],
+  "automation": [],
+  "practice": {
+    "confirmation": null,
+    "events": []
+  },
+  "closure": {
+    "outcome": "completed",
+    "reason": null,
+    "closedAt": "2026-08-06T11:30:26+08:00",
+    "head": "4c9490289f00fe25908574884ec75f34eaf98cb0",
+    "branch": "main",
+    "originalPhase": "verified",
+    "integrationProof": null,
+    "verificationStatus": "current",
+    "practiceEvents": [
+      "closure-pending-commit"
+    ],
+    "unrelatedChanges": []
+  },
+  "verification": {
+    "toolVersion": "0.9.2",
+    "profile": "affected",
+    "configured": true,
+    "mode": "advisory",
+    "checks": [
+      "format",
+      "lint",
+      "unit",
+      "secret"
+    ],
+    "passed": true,
+    "taskDigest": "f4f8f360768f3c5c4b4a43ffb0f94e07a9e67725417957e396771398718b3a36",
+    "projectFingerprint": "3c5f829aa0c5640ad22edcb68594e073098c654931ed29a73828e4684b6ec1b1",
+    "configDigest": "29e4313a1131a04a40744798b88740046122394a3b05daff60b9a73c50db1f43",
+    "head": "4c9490289f00fe25908574884ec75f34eaf98cb0",
+    "verifiedAt": "2026-08-06T11:29:55+08:00"
+  }
+}
