@@ -136,6 +136,36 @@ class SkillContractTests(unittest.TestCase):
         self.assertIn("already completed", handbook)
         self.assertIn("remaining action", handbook)
 
+    def test_skill_shapes_only_genuinely_unbounded_initiatives(self) -> None:
+        skill = (SKILL_DIR / "SKILL.md").read_text(encoding="utf-8")
+        metadata = (SKILL_DIR / "agents" / "openai.yaml").read_text(encoding="utf-8")
+        handbook = (SKILL_DIR / "references" / "handbook.md").read_text(
+            encoding="utf-8"
+        )
+        chinese = (SKILL_DIR / "references" / "handbook.zh-CN.md").read_text(
+            encoding="utf-8"
+        )
+        readme = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
+        readme_chinese = (REPO_ROOT / "README.zh-CN.md").read_text(encoding="utf-8")
+
+        for phrase in (
+            "initiative shaping",
+            "new product, new business domain, broad legacy migration",
+            "two or three viable approaches",
+            "value, usability, feasibility, and viability",
+            "first vertical slice",
+        ):
+            with self.subTest(phrase=phrase):
+                self.assertIn(phrase, skill.lower())
+
+        self.assertIn("do not create a delivery task", skill.lower())
+        self.assertIn("ordinary bounded work", skill.lower())
+        self.assertIn("unshaped initiative", metadata.lower())
+        self.assertIn("one compact initiative brief", handbook.lower())
+        self.assertIn("一个精简的项目塑形简报", chinese)
+        self.assertIn("Shape an initiative before the first task", readme)
+        self.assertIn("在首个任务前塑形项目", readme_chinese)
+
     def test_skill_encodes_behavior_reliability_rules_once(self) -> None:
         skill = (SKILL_DIR / "SKILL.md").read_text(encoding="utf-8")
         generated_policy = (SKILL_DIR / "scripts" / "flow_state.py").read_text(

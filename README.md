@@ -11,7 +11,7 @@ An evidence-backed, risk-adaptive AI engineering workflow for solo developers us
 
 English · [简体中文](README.zh-CN.md)
 
-RigorBreeze turns a conversation into one approved task contract, observed TDD evidence, configured quality checks, real-runtime acceptance, and a recoverable delivery record. It is deliberately smaller than a full project-management system: one task Markdown, one machine evidence file, and no document maze.
+RigorBreeze turns a rough initiative or bounded request into an approved task contract, observed TDD evidence, configured quality checks, real-runtime acceptance, and a recoverable delivery record. It is deliberately smaller than a full project-management system: one task Markdown, one machine evidence file, and no document maze.
 
 > **Public Preview:** v0.9.2 is usable today and closes real-delivery gaps around workflow baselines, stale integrated tasks, post-archive delivery, incomplete or compound prompts, repeated external operations, Agent behavior under pressure, and avoidable local verification friction. It has not yet completed the validation required for v1.0, so interfaces may still change in response to further delivery evidence.
 
@@ -89,6 +89,22 @@ $rigorbreeze inspect this project and tell me whether the workflow is initialize
 
 Codex should load the Skill, inspect the repository, and either report the current `nextAction` or offer to initialize the project.
 
+## Shape an initiative before the first task
+
+When an idea is a new product, a new business domain, a broad legacy migration,
+or still contains several possible outcomes, ask RigorBreeze to shape it before
+creating a delivery task:
+
+```text
+$rigorbreeze shape this initiative before creating a task. Recover project facts first; distinguish evidence, assumptions and unknowns; compare two or three viable approaches; cover the user journey, desired outcome, success measure, four product risks, appetite, rabbit holes and no-gos; recommend the first vertical slice and wait for my approval.
+```
+
+This is optional. A bounded feature or fix goes directly to the normal task
+contract. Shaping reuses one versioned product/design source or creates one
+compact initiative brief outside the Spec Tree. It does not manufacture a PRD
+tree, implementation DAG, or product truth from a persona or reference code.
+After approval, only the first slice becomes a RigorBreeze task.
+
 ## Your first task
 
 You normally interact with the Skill in Codex chat, not by operating every internal command yourself:
@@ -141,7 +157,8 @@ That command is primarily for Codex, CI, and troubleshooting. Run `python3 scrip
 ## How the workflow works
 
 ```text
-frame one vertical slice
+optionally shape an initiative whose outcome is not yet stable
+→ frame one vertical slice
 → approve the task digest
 → observe RED
 → implement GREEN and refactor

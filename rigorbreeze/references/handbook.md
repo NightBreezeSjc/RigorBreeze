@@ -70,6 +70,37 @@ Do not lower risk to bypass a gate. Raise it when scope or consequences expand. 
 
 ## 3. Run one vertical slice
 
+### Shape an initiative before the first task
+
+Use a short shaping pass only when the request is a new product, a new business
+domain, a broad legacy migration, or a collection of outcomes that cannot yet
+be approved as one vertical slice. A normal bounded feature or fix skips this
+pass.
+
+Read project and reference evidence before questioning the developer. Reuse an
+existing versioned product/design source or create one compact initiative brief
+outside the Spec Tree. It contains only:
+
+- problem, target user, critical journey, desired outcome, and success measure;
+- confirmed evidence, assumptions, unknowns, and their sources;
+- two or three viable approaches with a recommendation and trade-offs;
+- value, usability, feasibility, and viability risks;
+- appetite, rabbit holes, no-gos, and the smallest useful first slice.
+
+Ask only the few outcome-changing questions that evidence cannot answer. For
+an uncertain experience, validate a rough flow or prototype; for uncertain
+value or operations, use real user, operator, contract, analytics, or business
+evidence. Reference code proves what an older system did, not what the new
+product should do. A role prompt can challenge the brief but cannot supply
+missing intent or approve it.
+
+The developer approves the brief before task creation. Then cite its exact
+version in the first RigorBreeze contract and continue through the normal
+vertical-slice flow. Do not turn the roadmap into a task DAG, copy every open
+question into every task, or create proposal/design/task directories in
+parallel with the minimal Spec Tree. Later discoveries update the authoritative
+product source and only the affected future task.
+
 ### Frame the task
 
 Read the current requirements, design, code, interfaces, permissions, data, and tests before changing behavior. Propose the smallest observable task. Stop for unresolved business ambiguity, unapproved dependencies, unexpected migration risk, or scope expansion.

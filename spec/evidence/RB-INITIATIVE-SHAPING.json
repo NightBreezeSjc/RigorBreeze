@@ -1,0 +1,549 @@
+{
+  "workflowVersion": 4,
+  "taskId": "RB-INITIATIVE-SHAPING",
+  "baseline": {
+    "taskDigest": "136213c0d58c3793256287e925e4baf6f4e90e2200b554474a976e8c9479db45",
+    "head": "0ad9e5afbf72c96d16b303f68d9234917da9e198",
+    "projectFingerprint": "ebd102db809077710437dcc3c625a35ae7568f3789e4044c65abf015de1582f2",
+    "configDigest": "29e4313a1131a04a40744798b88740046122394a3b05daff60b9a73c50db1f43",
+    "workingTreePaths": [
+      "spec/changes/RB-INITIATIVE-SHAPING.md"
+    ],
+    "workingTreeDigests": {
+      "spec/changes/RB-INITIATIVE-SHAPING.md": "136213c0d58c3793256287e925e4baf6f4e90e2200b554474a976e8c9479db45"
+    },
+    "approvedAt": "2026-08-07T01:33:17+08:00"
+  },
+  "red": [
+    {
+      "requirement": "REQ-001",
+      "command": [
+        "python3",
+        "rigorbreeze/scripts/tests/test_skill_contract.py",
+        "SkillContractTests.test_skill_shapes_only_genuinely_unbounded_initiatives"
+      ],
+      "exitCode": 1,
+      "expectedPattern": "FAILED \\(failures=6\\)",
+      "testDigests": {
+        "rigorbreeze/scripts/tests/test_skill_contract.py": "4b1733b0a781c5c0aef7f523f3de5ea1b3202a6d2a1e989a71bce3bda59cd32c"
+      },
+      "summary": " or a wrong release;\\n- classify the cause as core, project configuration, adapter, environment, usage, or a correctly detected risk;\\n- for a confirmed core problem, write a failing regression, make the smallest change in the skill repository, and validate it in the next real slice.\\n\\nwhen asked to review evolution, scan `spec/evidence/*.json` for confirmations with `evolutioncandidate: true`; do not create another practice log. project evidence stays local. never silently rewrite the installed skill or relax a gate from one ordinary occurrence.\\n\\n## completion\\n\\nkeep the human interaction small:\\n\\n1. ask for approval of the compact task contract;\\n2. ask for real acceptance when implementation is ready;\\n3. before l1/l2/emergency archive, show the prefilled `retro --json` summary and ask only for rework reason, whether any block/next action was unreasonable, and whether the workflow helped.\\n\\ncodex runs the cli and records evidence; do not make the user operate each internal command. close in this order: verify, accept, review, confirm retrospective, archive, then guarded commit/push/merge and worktree reconciliation. l0 needs only configured affected verification; l1/l2 need full verification, applicable acceptance, review, and retrospective. use `abandoned` for a clean cancellation. if code was already externally integrated but the task remained open, use `archive --outcome reconciled --reason <reason> --expected-head <sha>` only after integration and external outcomes are proven; never invent green, acceptance, or release success. production release still requires an active `release-ready` task. before commit, archive, or any “fixed/passed/complete” claim, cite **fresh verification** run in this turn: the exact command, **exit status**, and covered scope. historical reports, partial checks, or another agent's success claim cannot substitute.\\n\"\n\n----------------------------------------------------------------------\nRan 1 test in 0.004s\n\nFAILED (failures=6)",
+      "taskDigest": "136213c0d58c3793256287e925e4baf6f4e90e2200b554474a976e8c9479db45",
+      "projectFingerprint": "92e9c759b62cb6d3c9ef5c96978aef52f7e1afa5c325d84a5196961c326f75ef",
+      "head": "0ad9e5afbf72c96d16b303f68d9234917da9e198",
+      "observedAt": "2026-08-07T01:34:54+08:00"
+    },
+    {
+      "requirement": "REQ-001",
+      "command": [
+        "python3",
+        "rigorbreeze/scripts/tests/test_skill_contract.py",
+        "SkillContractTests.test_skill_shapes_only_genuinely_unbounded_initiatives"
+      ],
+      "exitCode": 1,
+      "expectedPattern": "FAILED \\(failures=1\\)",
+      "testDigests": {
+        "rigorbreeze/scripts/tests/test_skill_contract.py": "17ac9e11a152d462e468fca7b5284a2be1e78b57f2f4dce29f1f4f8dbc4c61a5"
+      },
+      "summary": " or a wrong release;\\n- classify the cause as core, project configuration, adapter, environment, usage, or a correctly detected risk;\\n- for a confirmed core problem, write a failing regression, make the smallest change in the skill repository, and validate it in the next real slice.\\n\\nwhen asked to review evolution, scan `spec/evidence/*.json` for confirmations with `evolutioncandidate: true`; do not create another practice log. project evidence stays local. never silently rewrite the installed skill or relax a gate from one ordinary occurrence.\\n\\n## completion\\n\\nkeep the human interaction small:\\n\\n1. ask for approval of the compact task contract;\\n2. ask for real acceptance when implementation is ready;\\n3. before l1/l2/emergency archive, show the prefilled `retro --json` summary and ask only for rework reason, whether any block/next action was unreasonable, and whether the workflow helped.\\n\\ncodex runs the cli and records evidence; do not make the user operate each internal command. close in this order: verify, accept, review, confirm retrospective, archive, then guarded commit/push/merge and worktree reconciliation. l0 needs only configured affected verification; l1/l2 need full verification, applicable acceptance, review, and retrospective. use `abandoned` for a clean cancellation. if code was already externally integrated but the task remained open, use `archive --outcome reconciled --reason <reason> --expected-head <sha>` only after integration and external outcomes are proven; never invent green, acceptance, or release success. production release still requires an active `release-ready` task. before commit, archive, or any “fixed/passed/complete” claim, cite **fresh verification** run in this turn: the exact command, **exit status**, and covered scope. historical reports, partial checks, or another agent's success claim cannot substitute.\\n\"\n\n----------------------------------------------------------------------\nRan 1 test in 0.004s\n\nFAILED (failures=1)",
+      "taskDigest": "136213c0d58c3793256287e925e4baf6f4e90e2200b554474a976e8c9479db45",
+      "projectFingerprint": "60d9e08fdb73b1432d57d301d342e3f7c6348b0b440ca770299ce51728df8378",
+      "head": "0ad9e5afbf72c96d16b303f68d9234917da9e198",
+      "observedAt": "2026-08-07T01:45:52+08:00"
+    }
+  ],
+  "verifications": [
+    {
+      "toolVersion": "0.9.2",
+      "profile": "affected",
+      "configured": true,
+      "mode": "advisory",
+      "checks": [
+        "format",
+        "lint",
+        "unit",
+        "secret"
+      ],
+      "passed": false,
+      "taskDigest": "136213c0d58c3793256287e925e4baf6f4e90e2200b554474a976e8c9479db45",
+      "projectFingerprint": "98f98ca2307be576a86222a106c26dddf0ebdd9b5d1c1c7899a02b3f87c6454f",
+      "configDigest": "29e4313a1131a04a40744798b88740046122394a3b05daff60b9a73c50db1f43",
+      "head": "0ad9e5afbf72c96d16b303f68d9234917da9e198",
+      "verifiedAt": "2026-08-07T01:41:01+08:00"
+    },
+    {
+      "toolVersion": "0.9.2",
+      "profile": "full",
+      "configured": true,
+      "mode": "enforced",
+      "checks": [
+        "format",
+        "lint",
+        "unit",
+        "contract",
+        "secret",
+        "build",
+        "acceptance"
+      ],
+      "passed": true,
+      "taskDigest": "136213c0d58c3793256287e925e4baf6f4e90e2200b554474a976e8c9479db45",
+      "projectFingerprint": "28d6429742e042ddeef79bdcc0d64e1c34f1f885fcefabbeb919283ea633395e",
+      "configDigest": "29e4313a1131a04a40744798b88740046122394a3b05daff60b9a73c50db1f43",
+      "head": "0ad9e5afbf72c96d16b303f68d9234917da9e198",
+      "verifiedAt": "2026-08-07T01:48:28+08:00"
+    }
+  ],
+  "checkRuns": [
+    {
+      "checkId": "format",
+      "category": "static-quality",
+      "profile": "affected",
+      "mode": "advisory",
+      "command": [
+        "python3",
+        "-m",
+        "ruff",
+        "format",
+        "--check",
+        "rigorbreeze/scripts",
+        "tests/behavior"
+      ],
+      "exitCode": 1,
+      "passed": false,
+      "durationMs": 236,
+      "summary": "Would reformat: rigorbreeze/scripts/tests/test_skill_contract.py\n1 file would be reformatted, 14 files already formatted",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "136213c0d58c3793256287e925e4baf6f4e90e2200b554474a976e8c9479db45",
+      "projectFingerprint": "98f98ca2307be576a86222a106c26dddf0ebdd9b5d1c1c7899a02b3f87c6454f",
+      "head": "0ad9e5afbf72c96d16b303f68d9234917da9e198",
+      "recordedAt": "2026-08-07T01:38:38+08:00"
+    },
+    {
+      "checkId": "lint",
+      "category": "static-quality",
+      "profile": "affected",
+      "mode": "advisory",
+      "command": [
+        "python3",
+        "-m",
+        "ruff",
+        "check",
+        "rigorbreeze/scripts",
+        "tests/behavior"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 32,
+      "summary": "All checks passed!",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "136213c0d58c3793256287e925e4baf6f4e90e2200b554474a976e8c9479db45",
+      "projectFingerprint": "98f98ca2307be576a86222a106c26dddf0ebdd9b5d1c1c7899a02b3f87c6454f",
+      "head": "0ad9e5afbf72c96d16b303f68d9234917da9e198",
+      "recordedAt": "2026-08-07T01:38:39+08:00"
+    },
+    {
+      "checkId": "unit",
+      "category": "behavior",
+      "profile": "affected",
+      "mode": "advisory",
+      "command": [
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "rigorbreeze/scripts/tests",
+        "-v"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 142576,
+      "summary": "ill_contract.SkillContractTests.test_installable_skill_excludes_repository_documents) ... ok\ntest_installable_skill_has_no_project_specific_policy (test_skill_contract.SkillContractTests.test_installable_skill_has_no_project_specific_policy) ... ok\ntest_long_references_have_a_table_of_contents (test_skill_contract.SkillContractTests.test_long_references_have_a_table_of_contents) ... ok\ntest_public_markdown_relative_links_resolve (test_skill_contract.SkillContractTests.test_public_markdown_relative_links_resolve) ... ok\ntest_public_readmes_cover_the_same_first_run_contract (test_skill_contract.SkillContractTests.test_public_readmes_cover_the_same_first_run_contract) ... ok\ntest_repository_has_minimal_open_source_governance (test_skill_contract.SkillContractTests.test_repository_has_minimal_open_source_governance) ... ok\ntest_repository_has_skill_owned_ci (test_skill_contract.SkillContractTests.test_repository_has_skill_owned_ci) ... ok\ntest_skill_completes_context_and_rechecks_follow_up_writes (test_skill_contract.SkillContractTests.test_skill_completes_context_and_rechecks_follow_up_writes) ... ok\ntest_skill_encodes_behavior_reliability_rules_once (test_skill_contract.SkillContractTests.test_skill_encodes_behavior_reliability_rules_once) ... ok\ntest_skill_entrypoint_stays_compact_and_links_every_reference (test_skill_contract.SkillContractTests.test_skill_entrypoint_stays_compact_and_links_every_reference) ... ok\ntest_skill_keeps_lean_implementation_compatible_with_production (test_skill_contract.SkillContractTests.test_skill_keeps_lean_implementation_compatible_with_production) ... ok\ntest_skill_metadata_matches_public_name (test_skill_contract.SkillContractTests.test_skill_metadata_matches_public_name) ... ok\ntest_skill_shapes_only_genuinely_unbounded_initiatives (test_skill_contract.SkillContractTests.test_skill_shapes_only_genuinely_unbounded_initiatives) ... ok\n\n----------------------------------------------------------------------\nRan 126 tests in 142.446s\n\nOK",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "136213c0d58c3793256287e925e4baf6f4e90e2200b554474a976e8c9479db45",
+      "projectFingerprint": "98f98ca2307be576a86222a106c26dddf0ebdd9b5d1c1c7899a02b3f87c6454f",
+      "head": "0ad9e5afbf72c96d16b303f68d9234917da9e198",
+      "recordedAt": "2026-08-07T01:41:01+08:00"
+    },
+    {
+      "checkId": "secret",
+      "category": "secrets",
+      "profile": "affected",
+      "mode": "advisory",
+      "command": [
+        "python3",
+        "-c",
+        "import pathlib,re,sys; files=[p for p in pathlib.Path('.').rglob('*') if p.is_file() and '.git' not in p.parts and 'tests' not in p.parts and p.name != 'rigorbreeze.toml']; pattern=re.compile(r'(?i)(api[_-]?key|token|password|secret)\\s*[:=]\\s*\\S{20,}'); hits=[str(p) for p in files if pattern.search(p.read_text(errors='ignore'))]; print('\\n'.join(hits)); sys.exit(bool(hits))"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 42,
+      "summary": "",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "136213c0d58c3793256287e925e4baf6f4e90e2200b554474a976e8c9479db45",
+      "projectFingerprint": "98f98ca2307be576a86222a106c26dddf0ebdd9b5d1c1c7899a02b3f87c6454f",
+      "head": "0ad9e5afbf72c96d16b303f68d9234917da9e198",
+      "recordedAt": "2026-08-07T01:41:01+08:00"
+    },
+    {
+      "checkId": "format",
+      "category": "static-quality",
+      "profile": "full",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-m",
+        "ruff",
+        "format",
+        "--check",
+        "rigorbreeze/scripts",
+        "tests/behavior"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 51,
+      "summary": "15 files already formatted",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "136213c0d58c3793256287e925e4baf6f4e90e2200b554474a976e8c9479db45",
+      "projectFingerprint": "28d6429742e042ddeef79bdcc0d64e1c34f1f885fcefabbeb919283ea633395e",
+      "head": "0ad9e5afbf72c96d16b303f68d9234917da9e198",
+      "recordedAt": "2026-08-07T01:46:10+08:00"
+    },
+    {
+      "checkId": "lint",
+      "category": "static-quality",
+      "profile": "full",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-m",
+        "ruff",
+        "check",
+        "rigorbreeze/scripts",
+        "tests/behavior"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 29,
+      "summary": "All checks passed!",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "136213c0d58c3793256287e925e4baf6f4e90e2200b554474a976e8c9479db45",
+      "projectFingerprint": "28d6429742e042ddeef79bdcc0d64e1c34f1f885fcefabbeb919283ea633395e",
+      "head": "0ad9e5afbf72c96d16b303f68d9234917da9e198",
+      "recordedAt": "2026-08-07T01:46:10+08:00"
+    },
+    {
+      "checkId": "unit",
+      "category": "behavior",
+      "profile": "full",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "rigorbreeze/scripts/tests",
+        "-v"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 137339,
+      "summary": "ill_contract.SkillContractTests.test_installable_skill_excludes_repository_documents) ... ok\ntest_installable_skill_has_no_project_specific_policy (test_skill_contract.SkillContractTests.test_installable_skill_has_no_project_specific_policy) ... ok\ntest_long_references_have_a_table_of_contents (test_skill_contract.SkillContractTests.test_long_references_have_a_table_of_contents) ... ok\ntest_public_markdown_relative_links_resolve (test_skill_contract.SkillContractTests.test_public_markdown_relative_links_resolve) ... ok\ntest_public_readmes_cover_the_same_first_run_contract (test_skill_contract.SkillContractTests.test_public_readmes_cover_the_same_first_run_contract) ... ok\ntest_repository_has_minimal_open_source_governance (test_skill_contract.SkillContractTests.test_repository_has_minimal_open_source_governance) ... ok\ntest_repository_has_skill_owned_ci (test_skill_contract.SkillContractTests.test_repository_has_skill_owned_ci) ... ok\ntest_skill_completes_context_and_rechecks_follow_up_writes (test_skill_contract.SkillContractTests.test_skill_completes_context_and_rechecks_follow_up_writes) ... ok\ntest_skill_encodes_behavior_reliability_rules_once (test_skill_contract.SkillContractTests.test_skill_encodes_behavior_reliability_rules_once) ... ok\ntest_skill_entrypoint_stays_compact_and_links_every_reference (test_skill_contract.SkillContractTests.test_skill_entrypoint_stays_compact_and_links_every_reference) ... ok\ntest_skill_keeps_lean_implementation_compatible_with_production (test_skill_contract.SkillContractTests.test_skill_keeps_lean_implementation_compatible_with_production) ... ok\ntest_skill_metadata_matches_public_name (test_skill_contract.SkillContractTests.test_skill_metadata_matches_public_name) ... ok\ntest_skill_shapes_only_genuinely_unbounded_initiatives (test_skill_contract.SkillContractTests.test_skill_shapes_only_genuinely_unbounded_initiatives) ... ok\n\n----------------------------------------------------------------------\nRan 126 tests in 137.224s\n\nOK",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "136213c0d58c3793256287e925e4baf6f4e90e2200b554474a976e8c9479db45",
+      "projectFingerprint": "28d6429742e042ddeef79bdcc0d64e1c34f1f885fcefabbeb919283ea633395e",
+      "head": "0ad9e5afbf72c96d16b303f68d9234917da9e198",
+      "recordedAt": "2026-08-07T01:48:27+08:00"
+    },
+    {
+      "checkId": "contract",
+      "category": "behavior",
+      "profile": "full",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-m",
+        "py_compile",
+        "rigorbreeze/scripts/flow.py"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 40,
+      "summary": "",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "136213c0d58c3793256287e925e4baf6f4e90e2200b554474a976e8c9479db45",
+      "projectFingerprint": "28d6429742e042ddeef79bdcc0d64e1c34f1f885fcefabbeb919283ea633395e",
+      "head": "0ad9e5afbf72c96d16b303f68d9234917da9e198",
+      "recordedAt": "2026-08-07T01:48:27+08:00"
+    },
+    {
+      "checkId": "secret",
+      "category": "secrets",
+      "profile": "full",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-c",
+        "import pathlib,re,sys; files=[p for p in pathlib.Path('.').rglob('*') if p.is_file() and '.git' not in p.parts and 'tests' not in p.parts and p.name != 'rigorbreeze.toml']; pattern=re.compile(r'(?i)(api[_-]?key|token|password|secret)\\s*[:=]\\s*\\S{20,}'); hits=[str(p) for p in files if pattern.search(p.read_text(errors='ignore'))]; print('\\n'.join(hits)); sys.exit(bool(hits))"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 49,
+      "summary": "",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "136213c0d58c3793256287e925e4baf6f4e90e2200b554474a976e8c9479db45",
+      "projectFingerprint": "28d6429742e042ddeef79bdcc0d64e1c34f1f885fcefabbeb919283ea633395e",
+      "head": "0ad9e5afbf72c96d16b303f68d9234917da9e198",
+      "recordedAt": "2026-08-07T01:48:28+08:00"
+    },
+    {
+      "checkId": "build",
+      "category": "build",
+      "profile": "full",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-c",
+        "import pathlib,zipfile; out=pathlib.Path('artifacts/rigorbreeze.zip'); out.parent.mkdir(exist_ok=True); files=[p for p in pathlib.Path('rigorbreeze').rglob('*') if p.is_file() and '__pycache__' not in p.parts]; z=zipfile.ZipFile(out,'w',zipfile.ZIP_DEFLATED); [z.write(p,p.as_posix()) for p in files]; z.close()"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 35,
+      "summary": "",
+      "report": null,
+      "artifacts": [
+        "b2abdfb3d743eae31b1137b329b2d0ade89ec3fdd08864b233e8ae5091e46275"
+      ],
+      "taskDigest": "136213c0d58c3793256287e925e4baf6f4e90e2200b554474a976e8c9479db45",
+      "projectFingerprint": "28d6429742e042ddeef79bdcc0d64e1c34f1f885fcefabbeb919283ea633395e",
+      "head": "0ad9e5afbf72c96d16b303f68d9234917da9e198",
+      "recordedAt": "2026-08-07T01:48:28+08:00"
+    },
+    {
+      "checkId": "acceptance",
+      "category": "acceptance",
+      "profile": "full",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/behavior",
+        "-v"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 94,
+      "summary": "test_all_synthetic_transcripts_meet_their_contracts (test_behavior.BehaviorSuiteTests.test_all_synthetic_transcripts_meet_their_contracts) ... ok\ntest_compound_ui_case_rejects_partial_requirement_capture (test_behavior.BehaviorSuiteTests.test_compound_ui_case_rejects_partial_requirement_capture) ... ok\ntest_contract_has_exactly_six_safe_cases (test_behavior.BehaviorSuiteTests.test_contract_has_exactly_six_safe_cases) ... ok\ntest_contract_rejects_path_escape_and_invalid_regex (test_behavior.BehaviorSuiteTests.test_contract_rejects_path_escape_and_invalid_regex) ... ok\ntest_globs_and_result_versions_cannot_escape_their_boundaries (test_behavior.BehaviorSuiteTests.test_globs_and_result_versions_cannot_escape_their_boundaries) ... ok\ntest_live_codex_argv_grants_only_fixture_git_write (test_behavior.BehaviorSuiteTests.test_live_codex_argv_grants_only_fixture_git_write) ... ok\ntest_live_prompt_names_the_exact_result_case_id (test_behavior.BehaviorSuiteTests.test_live_prompt_names_the_exact_result_case_id) ... ok\ntest_prepare_fixture_stays_inside_requested_root (test_behavior.BehaviorSuiteTests.test_prepare_fixture_stays_inside_requested_root) ... ok\ntest_redaction_removes_common_secret_shapes (test_behavior.BehaviorSuiteTests.test_redaction_removes_common_secret_shapes) ... ok\ntest_score_accepts_fresh_compliant_result (test_behavior.BehaviorSuiteTests.test_score_accepts_fresh_compliant_result) ... ok\ntest_score_rejects_forbidden_action_and_stale_evidence (test_behavior.BehaviorSuiteTests.test_score_rejects_forbidden_action_and_stale_evidence) ... ok\n\n----------------------------------------------------------------------\nRan 11 tests in 0.053s\n\nOK",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "136213c0d58c3793256287e925e4baf6f4e90e2200b554474a976e8c9479db45",
+      "projectFingerprint": "28d6429742e042ddeef79bdcc0d64e1c34f1f885fcefabbeb919283ea633395e",
+      "head": "0ad9e5afbf72c96d16b303f68d9234917da9e198",
+      "recordedAt": "2026-08-07T01:48:28+08:00"
+    }
+  ],
+  "tddChain": [
+    {
+      "requirement": "REQ-001",
+      "red": {
+        "requirement": "REQ-001",
+        "command": [
+          "python3",
+          "rigorbreeze/scripts/tests/test_skill_contract.py",
+          "SkillContractTests.test_skill_shapes_only_genuinely_unbounded_initiatives"
+        ],
+        "exitCode": 1,
+        "expectedPattern": "FAILED \\(failures=6\\)",
+        "testDigests": {
+          "rigorbreeze/scripts/tests/test_skill_contract.py": "4b1733b0a781c5c0aef7f523f3de5ea1b3202a6d2a1e989a71bce3bda59cd32c"
+        },
+        "summary": " or a wrong release;\\n- classify the cause as core, project configuration, adapter, environment, usage, or a correctly detected risk;\\n- for a confirmed core problem, write a failing regression, make the smallest change in the skill repository, and validate it in the next real slice.\\n\\nwhen asked to review evolution, scan `spec/evidence/*.json` for confirmations with `evolutioncandidate: true`; do not create another practice log. project evidence stays local. never silently rewrite the installed skill or relax a gate from one ordinary occurrence.\\n\\n## completion\\n\\nkeep the human interaction small:\\n\\n1. ask for approval of the compact task contract;\\n2. ask for real acceptance when implementation is ready;\\n3. before l1/l2/emergency archive, show the prefilled `retro --json` summary and ask only for rework reason, whether any block/next action was unreasonable, and whether the workflow helped.\\n\\ncodex runs the cli and records evidence; do not make the user operate each internal command. close in this order: verify, accept, review, confirm retrospective, archive, then guarded commit/push/merge and worktree reconciliation. l0 needs only configured affected verification; l1/l2 need full verification, applicable acceptance, review, and retrospective. use `abandoned` for a clean cancellation. if code was already externally integrated but the task remained open, use `archive --outcome reconciled --reason <reason> --expected-head <sha>` only after integration and external outcomes are proven; never invent green, acceptance, or release success. production release still requires an active `release-ready` task. before commit, archive, or any “fixed/passed/complete” claim, cite **fresh verification** run in this turn: the exact command, **exit status**, and covered scope. historical reports, partial checks, or another agent's success claim cannot substitute.\\n\"\n\n----------------------------------------------------------------------\nRan 1 test in 0.004s\n\nFAILED (failures=6)",
+        "taskDigest": "136213c0d58c3793256287e925e4baf6f4e90e2200b554474a976e8c9479db45",
+        "projectFingerprint": "92e9c759b62cb6d3c9ef5c96978aef52f7e1afa5c325d84a5196961c326f75ef",
+        "head": "0ad9e5afbf72c96d16b303f68d9234917da9e198",
+        "observedAt": "2026-08-07T01:34:54+08:00"
+      },
+      "green": null
+    },
+    {
+      "requirement": "REQ-001",
+      "red": {
+        "requirement": "REQ-001",
+        "command": [
+          "python3",
+          "rigorbreeze/scripts/tests/test_skill_contract.py",
+          "SkillContractTests.test_skill_shapes_only_genuinely_unbounded_initiatives"
+        ],
+        "exitCode": 1,
+        "expectedPattern": "FAILED \\(failures=1\\)",
+        "testDigests": {
+          "rigorbreeze/scripts/tests/test_skill_contract.py": "17ac9e11a152d462e468fca7b5284a2be1e78b57f2f4dce29f1f4f8dbc4c61a5"
+        },
+        "summary": " or a wrong release;\\n- classify the cause as core, project configuration, adapter, environment, usage, or a correctly detected risk;\\n- for a confirmed core problem, write a failing regression, make the smallest change in the skill repository, and validate it in the next real slice.\\n\\nwhen asked to review evolution, scan `spec/evidence/*.json` for confirmations with `evolutioncandidate: true`; do not create another practice log. project evidence stays local. never silently rewrite the installed skill or relax a gate from one ordinary occurrence.\\n\\n## completion\\n\\nkeep the human interaction small:\\n\\n1. ask for approval of the compact task contract;\\n2. ask for real acceptance when implementation is ready;\\n3. before l1/l2/emergency archive, show the prefilled `retro --json` summary and ask only for rework reason, whether any block/next action was unreasonable, and whether the workflow helped.\\n\\ncodex runs the cli and records evidence; do not make the user operate each internal command. close in this order: verify, accept, review, confirm retrospective, archive, then guarded commit/push/merge and worktree reconciliation. l0 needs only configured affected verification; l1/l2 need full verification, applicable acceptance, review, and retrospective. use `abandoned` for a clean cancellation. if code was already externally integrated but the task remained open, use `archive --outcome reconciled --reason <reason> --expected-head <sha>` only after integration and external outcomes are proven; never invent green, acceptance, or release success. production release still requires an active `release-ready` task. before commit, archive, or any “fixed/passed/complete” claim, cite **fresh verification** run in this turn: the exact command, **exit status**, and covered scope. historical reports, partial checks, or another agent's success claim cannot substitute.\\n\"\n\n----------------------------------------------------------------------\nRan 1 test in 0.004s\n\nFAILED (failures=1)",
+        "taskDigest": "136213c0d58c3793256287e925e4baf6f4e90e2200b554474a976e8c9479db45",
+        "projectFingerprint": "60d9e08fdb73b1432d57d301d342e3f7c6348b0b440ca770299ce51728df8378",
+        "head": "0ad9e5afbf72c96d16b303f68d9234917da9e198",
+        "observedAt": "2026-08-07T01:45:52+08:00"
+      },
+      "green": {
+        "toolVersion": "0.9.2",
+        "profile": "full",
+        "configured": true,
+        "mode": "enforced",
+        "checks": [
+          "format",
+          "lint",
+          "unit",
+          "contract",
+          "secret",
+          "build",
+          "acceptance"
+        ],
+        "passed": true,
+        "taskDigest": "136213c0d58c3793256287e925e4baf6f4e90e2200b554474a976e8c9479db45",
+        "projectFingerprint": "28d6429742e042ddeef79bdcc0d64e1c34f1f885fcefabbeb919283ea633395e",
+        "configDigest": "29e4313a1131a04a40744798b88740046122394a3b05daff60b9a73c50db1f43",
+        "head": "0ad9e5afbf72c96d16b303f68d9234917da9e198",
+        "verifiedAt": "2026-08-07T01:48:28+08:00"
+      }
+    }
+  ],
+  "artifacts": [
+    {
+      "kind": "build",
+      "path": "artifacts/rigorbreeze.zip",
+      "sha256": "b2abdfb3d743eae31b1137b329b2d0ade89ec3fdd08864b233e8ae5091e46275",
+      "size": 135377,
+      "head": "0ad9e5afbf72c96d16b303f68d9234917da9e198",
+      "taskDigest": "136213c0d58c3793256287e925e4baf6f4e90e2200b554474a976e8c9479db45",
+      "projectFingerprint": "28d6429742e042ddeef79bdcc0d64e1c34f1f885fcefabbeb919283ea633395e",
+      "recordedAt": "2026-08-07T01:48:28+08:00"
+    }
+  ],
+  "acceptance": [
+    {
+      "kind": "runtime",
+      "fields": {
+        "status": "passed",
+        "environment": "local",
+        "coverage": "initiative-shaping-contract"
+      },
+      "taskDigest": "136213c0d58c3793256287e925e4baf6f4e90e2200b554474a976e8c9479db45",
+      "projectFingerprint": "28d6429742e042ddeef79bdcc0d64e1c34f1f885fcefabbeb919283ea633395e",
+      "head": "0ad9e5afbf72c96d16b303f68d9234917da9e198",
+      "artifactDigests": [
+        "b2abdfb3d743eae31b1137b329b2d0ade89ec3fdd08864b233e8ae5091e46275"
+      ],
+      "recordedAt": "2026-08-07T01:50:17+08:00",
+      "path": "rigorbreeze/scripts/tests/test_skill_contract.py",
+      "sha256": "17ac9e11a152d462e468fca7b5284a2be1e78b57f2f4dce29f1f4f8dbc4c61a5",
+      "size": 12785
+    },
+    {
+      "kind": "review",
+      "fields": {
+        "status": "passed",
+        "reviewer": "codex-two-pass",
+        "scope": "standards-and-spec"
+      },
+      "taskDigest": "136213c0d58c3793256287e925e4baf6f4e90e2200b554474a976e8c9479db45",
+      "projectFingerprint": "28d6429742e042ddeef79bdcc0d64e1c34f1f885fcefabbeb919283ea633395e",
+      "head": "0ad9e5afbf72c96d16b303f68d9234917da9e198",
+      "artifactDigests": [
+        "b2abdfb3d743eae31b1137b329b2d0ade89ec3fdd08864b233e8ae5091e46275"
+      ],
+      "recordedAt": "2026-08-07T01:50:17+08:00",
+      "path": "rigorbreeze/SKILL.md",
+      "sha256": "d00503e8e1ec8fa968ffc369cb00be51e1754100b976d5a62f08a55f314f314b",
+      "size": 18771
+    }
+  ],
+  "release": [],
+  "automation": [],
+  "practice": {
+    "confirmation": {
+      "reworkReason": "test",
+      "exceptions": "none",
+      "workflowImpact": "helped",
+      "evolutionCandidate": false,
+      "summaryDigest": "8c1085f4041e75255a49fd7c919cfaf5e2c37ffe774304557a2c9fad7c99b3bc",
+      "taskDigest": "136213c0d58c3793256287e925e4baf6f4e90e2200b554474a976e8c9479db45",
+      "projectFingerprint": "28d6429742e042ddeef79bdcc0d64e1c34f1f885fcefabbeb919283ea633395e",
+      "confirmedAt": "2026-08-07T01:50:55+08:00"
+    },
+    "events": [],
+    "summary": {
+      "taskId": "RB-INITIATIVE-SHAPING",
+      "risk": "L1",
+      "verificationRuns": 2,
+      "checkRuns": 11,
+      "checkDurationMs": 280523,
+      "failedChecks": [
+        "format"
+      ],
+      "failureCategories": [
+        "static-quality"
+      ],
+      "potentialBypasses": [
+        "format"
+      ],
+      "firstAcceptancePassed": true,
+      "acceptanceRecords": 2,
+      "estimatedReworkSeconds": 590,
+      "practiceEvents": [],
+      "generatedAt": "2026-08-07T01:50:55+08:00",
+      "summaryDigest": "8c1085f4041e75255a49fd7c919cfaf5e2c37ffe774304557a2c9fad7c99b3bc"
+    }
+  },
+  "closure": {
+    "outcome": "completed",
+    "reason": null,
+    "closedAt": "2026-08-07T01:50:56+08:00",
+    "head": "0ad9e5afbf72c96d16b303f68d9234917da9e198",
+    "branch": "rigorbreeze/rb-initiative-shaping",
+    "originalPhase": "accepted",
+    "integrationProof": null,
+    "verificationStatus": "current",
+    "practiceEvents": [
+      "closure-pending-commit"
+    ],
+    "unrelatedChanges": []
+  },
+  "verification": {
+    "toolVersion": "0.9.2",
+    "profile": "full",
+    "configured": true,
+    "mode": "enforced",
+    "checks": [
+      "format",
+      "lint",
+      "unit",
+      "contract",
+      "secret",
+      "build",
+      "acceptance"
+    ],
+    "passed": true,
+    "taskDigest": "136213c0d58c3793256287e925e4baf6f4e90e2200b554474a976e8c9479db45",
+    "projectFingerprint": "28d6429742e042ddeef79bdcc0d64e1c34f1f885fcefabbeb919283ea633395e",
+    "configDigest": "29e4313a1131a04a40744798b88740046122394a3b05daff60b9a73c50db1f43",
+    "head": "0ad9e5afbf72c96d16b303f68d9234917da9e198",
+    "verifiedAt": "2026-08-07T01:48:28+08:00"
+  }
+}

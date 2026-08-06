@@ -1,6 +1,6 @@
 ---
 name: rigorbreeze
-description: Operate and evolve RigorBreeze, an evidence-backed and risk-adaptive spec-to-delivery workflow for a solo developer using Codex. Use when initializing or resuming a project, completing an incomplete request from project evidence, implementing any non-trivial feature or follow-up fix in an initialized project, coordinating isolated parallel worktrees or an optional dependency DAG, collecting SDD/TDD and real-runtime acceptance evidence, running configured quality gates, proving merge or release readiness, or reviewing workflow friction from real delivery.
+description: Operate and evolve RigorBreeze, an evidence-backed and risk-adaptive idea-to-delivery workflow for a solo developer using Codex. Use when shaping an unbounded new product, business domain, or legacy migration before its first task; initializing or resuming a project; completing an incomplete request from project evidence; implementing any non-trivial feature or follow-up fix; coordinating isolated worktrees or an optional dependency DAG; collecting SDD/TDD and real-runtime acceptance evidence; running configured quality gates; proving delivery readiness; or reviewing workflow friction.
 ---
 
 # RigorBreeze
@@ -18,6 +18,8 @@ Deliver one observable user outcome per task. Keep one human-authored Markdown c
 Read [handbook.md](references/handbook.md) before initialization, policy changes, or L2/Emergency work. Read [spec-tree.md](references/spec-tree.md) before changing state, evidence, digest, or archive behavior. Read [ci-gates.md](references/ci-gates.md) when configuring remote enforcement or releases.
 
 Complete an imperfect prompt before creating the contract. Recover **recoverable project facts** from authoritative requirements, current code, tests, Git, interfaces, data, permissions and runtime evidence. Ask only for **outcome-changing intent** those sources cannot establish. State safe defaults and uncertainty explicitly; a persona such as “CTO” is a perspective, never evidence or approval. Trace only the affected vertical slice and its dependencies rather than rereading the whole repository.
+
+Use **initiative shaping** before task creation only for a new product, new business domain, broad legacy migration, or other unshaped initiative that cannot yet name one stable user outcome. Do not create a delivery task while shaping. Recover facts first, ask only outcome-changing questions, and compare two or three viable approaches. Maintain one compact, versioned brief covering the problem, target user and journey, desired outcome and measure, evidence versus assumptions, value, usability, feasibility, and viability risks, appetite, rabbit holes, no-gos, and the recommended first vertical slice. Obtain user approval, then cite that brief in only the first task. Ordinary bounded work skips shaping; reference code proves prior behavior, never current product intent.
 
 Write the compact result into the existing Authoritative inputs: user outcome, current behavior and evidence, business and architecture path, invariants and source of truth (including freshness/fallback semantics), requirement/design/API version, and unresolved outcome-changing ambiguity. Preserve a short exact user phrase or resolvable source, then translate every compound request into **observable atoms** (`ADD`, `REMOVE`, `MOVE`, `RETAIN`, or `REPLACE`) stated as final product behavior. Map each atom to an acceptance ID or an explicit out-of-scope reason; do not create another context report or make the developer fill these fields.
 
@@ -119,9 +121,7 @@ Use `automate commit --once` or `automate push --once --remote <name> --branch <
 
 After refreshing the baseline, inspect the `cleanup` projection from `status --all --json`. Run `reconcile --cleanup` from a different worktree when managed entries are removable. Unregistered entries remain report-only unless the current user message explicitly authorizes the exact absolute path, base branch, expected HEAD, and `--allow-unmanaged`; require a clean non-current worktree with ancestry or complete patch-equivalence proof. Partial equivalence never qualifies, and local branches are always preserved.
 
-Automation outcomes live in Git-private `.git/rigorbreeze/automation.json`, keyed
-by immutable inputs. They are projected by JSON status, validated by `doctor`,
-and never rewrite tracked task evidence after the external action.
+Automation outcomes live in Git-private `.git/rigorbreeze/automation.json`, keyed by immutable inputs. They are projected by JSON status, validated by `doctor`, and never rewrite tracked task evidence after the external action.
 
 ## Evolve from real use
 

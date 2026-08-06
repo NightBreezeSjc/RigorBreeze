@@ -8,6 +8,10 @@ The project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). 
 
 ## [Unreleased]
 
+### Added
+
+- Add an optional initiative-shaping pass for a new product, new business domain, broad legacy migration, or other idea that is not yet stable enough for one delivery contract. It compares viable approaches and closes product-risk ambiguity before only the first vertical slice enters the existing Spec Tree.
+
 ### Changed
 
 - Renamed the project, Skill ID, invocation, runner, configuration, Git-private state, and task-branch prefix from Codex Production Flow to RigorBreeze before the first public release. No legacy alias is retained.
