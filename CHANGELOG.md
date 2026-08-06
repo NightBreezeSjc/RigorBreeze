@@ -37,6 +37,7 @@ The project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). 
 ### Tests
 
 - Replaced the original semantics pressure fixture with a compound UI scenario that rejects partial capture of move/remove/retain operations and ambiguous negation while preserving the six-case suite.
+- Allow live evaluations to write only their generated fixture's Git-private workflow state, and bind structured results to the exact scenario ID so valid Agent behavior is not reported as a harness failure.
 
 ### Compatibility
 
