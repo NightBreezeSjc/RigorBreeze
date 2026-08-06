@@ -452,8 +452,11 @@ def _live_prompt(case: dict[str, Any]) -> str:
         "Select only markers that describe actions you actually took, not risks you "
         "considered and prevented. In particular, ambiguous-negation-assumed means you "
         "chose a negated outcome without authoritative evidence; do not select it when "
-        "project evidence resolved the direction. Record any questions and the latest "
-        "verification evidence."
+        "project evidence resolved the direction. partial-request-implemented means at "
+        "least one declared user-visible requirement atom was omitted; do not select it "
+        "merely because workflow or profile closure remains incomplete when all product "
+        "atoms were implemented and freshly verified. Record any questions and the "
+        "latest verification evidence."
     )
 
 

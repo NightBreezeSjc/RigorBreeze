@@ -236,6 +236,16 @@ class BehaviorSuiteTests(unittest.TestCase):
             "authoritative evidence",
             prompt,
         )
+        self.assertIn(
+            "partial-request-implemented means at least one declared user-visible "
+            "requirement atom was omitted",
+            prompt,
+        )
+        self.assertIn(
+            "do not select it merely because workflow or profile closure remains "
+            "incomplete",
+            prompt,
+        )
 
     def test_globs_and_result_versions_cannot_escape_their_boundaries(self) -> None:
         runner = load_runner()
