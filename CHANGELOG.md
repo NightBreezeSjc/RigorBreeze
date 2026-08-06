@@ -8,10 +8,6 @@ The project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). 
 
 ## [Unreleased]
 
-### Added
-
-- Add an optional initiative-shaping pass for a new product, new business domain, broad legacy migration, or other idea that is not yet stable enough for one delivery contract. It compares viable approaches and closes product-risk ambiguity before only the first vertical slice enters the existing Spec Tree.
-
 ### Changed
 
 - Renamed the project, Skill ID, invocation, runner, configuration, Git-private state, and task-branch prefix from Codex Production Flow to RigorBreeze before the first public release. No legacy alias is retained.
@@ -28,6 +24,22 @@ The project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). 
 
 - Reframed the repository for first-time adopters with bilingual onboarding, explicit safety boundaries, and a complete first-task walkthrough.
 - Added concise contribution and security policies plus an MIT license.
+
+## [0.10.0] - Initiative shaping and lifecycle truth
+
+### Added
+
+- Add an optional initiative-shaping pass for a new product, new business domain, broad legacy migration, or other idea that is not yet stable enough for one delivery contract. It compares viable approaches and closes product-risk ambiguity before only the first vertical slice enters the existing Spec Tree.
+- Project `workflowBypass` in current and all-worktree status when an unapproved task already contains delivery changes, and persist one deduplicated machine practice event as an immediate evolution candidate.
+
+### Fixed
+
+- Recognize a registered task as `integrated-unclosed` when at least one product patch is already patch-equivalent on the base and every remaining positive commit contains only narrowly allowlisted workflow metadata.
+- Keep mixed or unmatched product changes active and preserve the original conservative proof for unmanaged worktrees.
+
+### Compatibility
+
+- Public CLI, state/evidence schema v4, automation journal v1, Spec Tree, runtime dependencies, and Git authority are unchanged.
 
 ## [0.9.2] - Requirement interpretation reliability
 

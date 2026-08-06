@@ -145,7 +145,7 @@ artifacts = ["artifacts/app.bin"]
         runner = self.root / "scripts" / "flow_state.py"
         runner.write_text(
             runner.read_text(encoding="utf-8").replace(
-                'TOOL_VERSION = "0.9.2"', 'TOOL_VERSION = "0.5.1"'
+                'TOOL_VERSION = "0.10.0"', 'TOOL_VERSION = "0.5.1"'
             ),
             encoding="utf-8",
         )
@@ -155,7 +155,7 @@ artifacts = ["artifacts/app.bin"]
             status["installation"],
             {
                 "runnerVersion": "0.5.1",
-                "skillVersion": "0.9.2",
+                "skillVersion": "0.10.0",
                 "status": "outdated",
                 "upgradeSafe": False,
                 "missingComponents": [],
@@ -178,7 +178,7 @@ artifacts = ["artifacts/app.bin"]
         self.run_flow("init")
         self.assertTrue(runner.is_file())
         self.assertIn(
-            'TOOL_VERSION = "0.9.2"',
+            'TOOL_VERSION = "0.10.0"',
             (self.root / "scripts" / "flow_state.py").read_text(encoding="utf-8"),
         )
 
@@ -517,6 +517,51 @@ artifacts = ["artifacts/app.bin"]
         self.assertEqual(events[0]["count"], 2)
         summary = json.loads(self.run_flow("retro", "--json").stdout)
         self.assertEqual(summary["practiceEvents"][0]["count"], 2)
+
+    def test_status_records_unapproved_delivery_changes_as_workflow_bypass(
+        self,
+    ) -> None:
+        self.init_git()
+        self.run_flow("init")
+        self.commit_all("install workflow")
+        self.run_flow("new", "TASK-711", "--title", "bypass", "--risk", "L1")
+        self.write_task("TASK-711", risk="L1")
+        (self.root / "src").mkdir()
+        (self.root / "src" / "value.py").write_text("VALUE = 1\n", encoding="utf-8")
+
+        current = json.loads(self.run_flow("status", "--json").stdout)
+        self.assertEqual(current["workflowBypass"]["status"], "detected")
+        self.assertEqual(current["workflowBypass"]["paths"], ["src/value.py"])
+        self.assertTrue(current["workflowBypass"]["evolutionCandidate"])
+        self.assertIn("do not fabricate RED", current["nextAction"]["reason"])
+
+        aggregate = json.loads(self.run_flow("status", "--all", "--json").stdout)
+        task = next(item for item in aggregate["tasks"] if item["taskId"] == "TASK-711")
+        self.assertEqual(task["workflowBypass"]["status"], "detected")
+        self.assertEqual(task["workflowBypass"]["paths"], ["src/value.py"])
+
+        evidence = json.loads(
+            (self.root / "spec" / "evidence" / "TASK-711.json").read_text()
+        )
+        events = evidence["practice"]["events"]
+        self.assertEqual(len(events), 1)
+        self.assertEqual(events[0]["type"], "workflow-bypass")
+        self.assertTrue(events[0]["evolutionCandidate"])
+        self.assertEqual(events[0]["count"], 2)
+
+    def test_status_does_not_treat_workflow_metadata_as_delivery_bypass(self) -> None:
+        self.init_git()
+        self.run_flow("init")
+        self.commit_all("install workflow")
+        self.run_flow("new", "TASK-712", "--title", "draft", "--risk", "L1")
+        self.write_task("TASK-712", risk="L1")
+
+        status = json.loads(self.run_flow("status", "--json").stdout)
+        self.assertEqual(status["workflowBypass"]["status"], "clear")
+        evidence = json.loads(
+            (self.root / "spec" / "evidence" / "TASK-712.json").read_text()
+        )
+        self.assertEqual(evidence.get("practice", {}).get("events", []), [])
 
     def test_l2_operational_modes_must_close_before_archive(self) -> None:
         self.run_flow("init")

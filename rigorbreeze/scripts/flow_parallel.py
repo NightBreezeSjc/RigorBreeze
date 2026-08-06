@@ -548,6 +548,58 @@ def integration_status(
     return "not-integrated"
 
 
+def workflow_metadata_commit_paths(task_id: str) -> set[str]:
+    return {
+        "AGENTS.md",
+        "rigorbreeze.toml",
+        "scripts/rigorbreeze.py",
+        "scripts/flow_state.py",
+        "scripts/flow_policy.py",
+        "scripts/flow_parallel.py",
+        "scripts/flow_automation.py",
+        "rigorbreeze/scripts/flow.py",
+        "rigorbreeze/scripts/flow_state.py",
+        "rigorbreeze/scripts/flow_policy.py",
+        "rigorbreeze/scripts/flow_parallel.py",
+        "rigorbreeze/scripts/flow_automation.py",
+        "spec/index.md",
+        f"spec/changes/{task_id}.md",
+        f"spec/evidence/{task_id}.json",
+        f"spec/archive/{task_id}.md",
+    }
+
+
+def commit_paths(root: Path, commit: str) -> list[str] | None:
+    result = git(root, "show", "--format=", "--name-only", commit, "--")
+    if result.returncode != 0:
+        return None
+    return sorted({line.strip() for line in result.stdout.splitlines() if line.strip()})
+
+
+def registered_integration_status(root: Path, task: dict[str, Any]) -> str:
+    branch = task.get("branch")
+    base = task.get("baseBranch")
+    base_sha = task.get("baseSha")
+    proof = integration_status(root, branch, base, base_sha)
+    if proof != "not-integrated" or not branch or not base or not base_sha:
+        return proof
+    cherry = git(root, "cherry", base, branch, base_sha)
+    if cherry.returncode != 0:
+        return "unknown"
+    patches = [line.strip() for line in cherry.stdout.splitlines() if line.strip()]
+    if not any(line.startswith("- ") for line in patches):
+        return "not-integrated"
+    positive_commits = [line[2:].strip() for line in patches if line.startswith("+ ")]
+    if not positive_commits:
+        return "patch-equivalent"
+    allowed = workflow_metadata_commit_paths(str(task.get("taskId") or task.get("id")))
+    for commit in positive_commits:
+        paths = commit_paths(root, commit)
+        if not paths or any(path not in allowed for path in paths):
+            return "not-integrated"
+    return "patch-equivalent"
+
+
 def cleanup_unmanaged_worktree(
     root: Path,
     *,
@@ -671,9 +723,7 @@ def cleanup_projection(
         )
         clean_result = git(worktree, "status", "--porcelain")
         clean = clean_result.returncode == 0 and not clean_result.stdout.strip()
-        integration = integration_status(
-            root, branch, task.get("baseBranch"), task.get("baseSha")
-        )
+        integration = registered_integration_status(root, task)
         item = {
             "taskId": task_id,
             "worktree": str(worktree),
@@ -785,7 +835,7 @@ def is_integrated(root: Path, task: dict[str, Any]) -> bool:
     base = task.get("baseBranch")
     if not branch or not base:
         return False
-    proof = integration_status(root, branch, base, task.get("baseSha"))
+    proof = registered_integration_status(root, task)
     if proof == "contained":
         branch_head = git(root, "rev-parse", branch).stdout.strip()
         return bool(task.get("baseSha") and branch_head != task.get("baseSha"))

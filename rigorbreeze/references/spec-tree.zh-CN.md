@@ -84,7 +84,7 @@ accepted → release-ready → protected release gate
 
 私有 `state.json` 和公共注册表是机器缓存和门禁输入，不是产品需求源。不要提交 linked-worktree 状态，也不要手工修改状态绕过门禁。`doctor --all --repair` 只在明确请求时重建注册表。
 
-`status --json` 包含 `installation`、`workflowBaseline`、生命周期和 `scope` 投影。安装状态对比 bundled Skill 与项目执行器，返回 `current`、`outdated`、`missing` 或 `unmanaged`、缺失/被修改组件和是否可安全升级。`workflowBaseline` 在真正基准分支证明受管文件，返回 `current`、`missing`、`partial`、`modified` 或 `blocked`。生命周期优先报告 `integrated-unclosed` 和 `closure-pending`，不会先给出错误的过期基线建议。范围状态为 `current`、`violated` 或 `not-applicable`，计算从批准基线到 `HEAD` 的已提交变化和当前工作树变化。
+`status --json` 包含 `installation`、`workflowBaseline`、`workflowBypass`、生命周期和 `scope` 投影。安装状态对比 bundled Skill 与项目执行器，返回 `current`、`outdated`、`missing` 或 `unmanaged`、缺失/被修改组件和是否可安全升级。`workflowBaseline` 在真正基准分支证明受管文件，返回 `current`、`missing`、`partial`、`modified` 或 `blocked`。生命周期优先报告 `integrated-unclosed` 和 `closure-pending`，不会先给出错误的过期基线建议。范围状态为 `current`、`violated` 或 `not-applicable`，计算从批准基线到 `HEAD` 的已提交变化和当前工作树变化。只有活动任务尚未批准且已出现非工作流交付改动时，`workflowBypass` 才返回 `detected`，并写入一条去重的即时演进候选；该观察不会生成批准、RED、GREEN、验收或替代基线。
 
 `status --all --json` 还包含运行资源声明/冲突与 `cleanup` 投影，列出可删除的已集成受管 worktree、带安全原因的保留项、未登记 Git worktree，以及按策略保留的本地任务分支；候选同时显示干净状态、集成证明、expected HEAD 和是否需要一次性确认。未登记清理永不删除分支。该投影只从 Git 和注册表推导，是提示状态，不是第二套任务或证据事实源。
 

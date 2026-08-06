@@ -102,11 +102,15 @@ Private `state.json` and the common registry are machine caches and gate inputs,
 not product requirement sources. Do not commit linked-worktree state or edit it
 to bypass a gate. `doctor --all --repair` may rebuild the registry explicitly.
 
-`status --json` includes `installation`, `workflowBaseline`, lifecycle, and `scope` projections. Installation
+`status --json` includes `installation`, `workflowBaseline`, `workflowBypass`, lifecycle, and `scope` projections. Installation
 compares the bundled Skill with the project runner and reports `current`,
 `outdated`, `missing`, or `unmanaged`, missing/modified components, and upgrade safety. `workflowBaseline` proves managed files on the real base branch and reports `current`, `missing`, `partial`, `modified`, or `blocked`. Lifecycle prioritizes `integrated-unclosed` and `closure-pending` over stale-baseline advice. Scope is `current`,
 `violated`, or `not-applicable`, and evaluates committed changes from the
 approval baseline through `HEAD` together with current working-tree changes.
+`workflowBypass` is `detected` only when an active unapproved task already has
+non-workflow delivery changes. That observation records one deduplicated
+practice event as an immediate evolution candidate; it never creates approval,
+RED, GREEN, acceptance, or a replacement baseline.
 
 `status --all --json` also includes runtime claims/conflicts and a `cleanup` projection. It lists
 managed integrated worktrees that are removable, entries retained with a safety

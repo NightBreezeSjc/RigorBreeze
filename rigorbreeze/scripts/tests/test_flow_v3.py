@@ -1261,6 +1261,127 @@ artifacts = ["artifacts/app.bin"]
             check=True,
         )
 
+    def test_workflow_only_commits_do_not_hide_patch_equivalent_delivery(self) -> None:
+        self.init_git()
+        subprocess.run(["git", "branch", "-M", "main"], cwd=self.root, check=True)
+        self.run_flow("init")
+        self.commit_all("install flow")
+        main = self.root
+        self.run_flow(
+            "new",
+            "TASK-413",
+            "--title",
+            "workflow metadata",
+            "--risk",
+            "L0",
+            "--worktree",
+            "auto",
+        )
+        task = json.loads(self.run_flow("status", "--all", "--json").stdout)["tasks"][0]
+        worktree = Path(task["worktree"])
+        self.write_task(worktree, "TASK-413", "src")
+        subprocess.run(
+            ["git", "add", "spec/changes/TASK-413.md", "spec/evidence/TASK-413.json"],
+            cwd=worktree,
+            check=True,
+        )
+        subprocess.run(
+            ["git", "commit", "-qm", "record task metadata"],
+            cwd=worktree,
+            check=True,
+        )
+        (worktree / "src").mkdir()
+        (worktree / "src" / "value.txt").write_text("value\n", encoding="utf-8")
+        subprocess.run(["git", "add", "src/value.txt"], cwd=worktree, check=True)
+        subprocess.run(
+            ["git", "commit", "-qm", "deliver product patch"],
+            cwd=worktree,
+            check=True,
+        )
+        product_head = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=worktree,
+            text=True,
+            capture_output=True,
+            check=True,
+        ).stdout.strip()
+
+        (main / "baseline.txt").write_text("advance\n", encoding="utf-8")
+        subprocess.run(["git", "add", "baseline.txt"], cwd=main, check=True)
+        subprocess.run(
+            ["git", "commit", "-qm", "advance baseline"], cwd=main, check=True
+        )
+        subprocess.run(["git", "cherry-pick", product_head], cwd=main, check=True)
+
+        status = json.loads(self.run_flow("status", "--all", "--json").stdout)
+        task = status["tasks"][0]
+        self.assertEqual(task["readiness"], "integrated")
+        self.assertEqual(task["lifecycle"], "integrated-unclosed")
+        self.assertFalse(task["baselineStale"])
+        self.assertIn("archive --outcome reconciled", task["nextAction"]["command"])
+        self.assertEqual(
+            status["cleanup"]["removableWorktrees"][0]["integrationStatus"],
+            "patch-equivalent",
+        )
+
+    def test_mixed_product_commit_remains_not_integrated(self) -> None:
+        self.init_git()
+        subprocess.run(["git", "branch", "-M", "main"], cwd=self.root, check=True)
+        self.run_flow("init")
+        self.commit_all("install flow")
+        main = self.root
+        self.run_flow(
+            "new",
+            "TASK-414",
+            "--title",
+            "mixed patch",
+            "--risk",
+            "L0",
+            "--worktree",
+            "auto",
+        )
+        task = json.loads(self.run_flow("status", "--all", "--json").stdout)["tasks"][0]
+        worktree = Path(task["worktree"])
+        self.write_task(worktree, "TASK-414", "src")
+        (worktree / "src").mkdir()
+        (worktree / "src" / "first.txt").write_text("first\n", encoding="utf-8")
+        subprocess.run(["git", "add", "src/first.txt"], cwd=worktree, check=True)
+        subprocess.run(
+            ["git", "commit", "-qm", "deliver first patch"],
+            cwd=worktree,
+            check=True,
+        )
+        product_head = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=worktree,
+            text=True,
+            capture_output=True,
+            check=True,
+        ).stdout.strip()
+        (worktree / "src" / "second.txt").write_text("second\n", encoding="utf-8")
+        subprocess.run(
+            ["git", "add", "src/second.txt", "spec/changes/TASK-414.md"],
+            cwd=worktree,
+            check=True,
+        )
+        subprocess.run(
+            ["git", "commit", "-qm", "mix workflow and unmatched product"],
+            cwd=worktree,
+            check=True,
+        )
+
+        (main / "baseline.txt").write_text("advance\n", encoding="utf-8")
+        subprocess.run(["git", "add", "baseline.txt"], cwd=main, check=True)
+        subprocess.run(
+            ["git", "commit", "-qm", "advance baseline"], cwd=main, check=True
+        )
+        subprocess.run(["git", "cherry-pick", product_head], cwd=main, check=True)
+
+        status = json.loads(self.run_flow("status", "--all", "--json").stdout)
+        self.assertEqual(status["tasks"][0]["readiness"], "ready")
+        self.assertEqual(status["tasks"][0]["lifecycle"], "active")
+        self.assertEqual(status["cleanup"]["removableWorktrees"], [])
+
     def test_status_reports_unregistered_worktree_without_removing_it(self) -> None:
         self.init_git()
         subprocess.run(["git", "branch", "-M", "main"], cwd=self.root, check=True)

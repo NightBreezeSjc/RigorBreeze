@@ -337,6 +337,53 @@ def managed_workflow_paths(root: Path) -> tuple[str, ...]:
     )
 
 
+def workflow_metadata_paths(root: Path, task_id: str) -> set[str]:
+    return {
+        *managed_workflow_paths(root),
+        f"spec/changes/{task_id}.md",
+        f"spec/evidence/{task_id}.json",
+        f"spec/archive/{task_id}.md",
+    }
+
+
+def workflow_bypass_status(root: Path, state: dict[str, Any]) -> dict[str, Any]:
+    active = state.get("activeTask")
+    if not active or state.get("approvals", {}).get("task", {}).get("valid"):
+        return {"status": "clear", "paths": [], "evolutionCandidate": False}
+    metadata = workflow_metadata_paths(root, active["id"])
+    delivery_paths = [path for path in working_tree_paths(root) if path not in metadata]
+    if not delivery_paths:
+        return {"status": "clear", "paths": [], "evolutionCandidate": False}
+    record_practice_event(
+        root,
+        state,
+        "workflow-bypass",
+        {
+            "taskId": active["id"],
+            "approval": "invalid",
+        },
+        evolution_candidate=True,
+    )
+    return {
+        "status": "detected",
+        "paths": delivery_paths,
+        "evolutionCandidate": True,
+    }
+
+
+def workflow_bypass_action() -> dict[str, str]:
+    return {
+        "reason": (
+            "Unapproved delivery changes bypassed the workflow contract; "
+            "do not fabricate RED or silently establish a new baseline."
+        ),
+        "command": (
+            "restore the delivery changes, or integrate them externally and "
+            "archive --outcome reconciled with the bypass recorded"
+        ),
+    }
+
+
 def baseline_branch(root: Path, state: dict[str, Any] | None = None) -> str | None:
     active = (state or {}).get("activeTask") or {}
     if active.get("baseBranch"):
@@ -874,6 +921,26 @@ def command_status(
                 item["automation"] = flow_automation.action_summary(
                     flow_automation.latest_action(root, item.get("taskId"))
                 )
+                worktree = Path(str(item.get("worktree", "")))
+                item["workflowBypass"] = {
+                    "status": "clear",
+                    "paths": [],
+                    "evolutionCandidate": False,
+                }
+                if worktree.is_dir() and (
+                    state_path(worktree).is_file()
+                    or legacy_state_path(worktree).is_file()
+                ):
+                    task_state = load_state(worktree)
+                    refresh_approval(worktree, task_state)
+                    if (task_state.get("activeTask") or {}).get("id") == item.get(
+                        "taskId"
+                    ):
+                        item["workflowBypass"] = workflow_bypass_status(
+                            worktree, task_state
+                        )
+                        if item["workflowBypass"]["status"] == "detected":
+                            item["nextAction"] = workflow_bypass_action()
         except flow_automation.AutomationError as exc:
             raise FlowError(str(exc)) from exc
         if json_output:
@@ -920,6 +987,9 @@ def command_status(
         root, state, approval_valid_now, verification, full_profile
     )
     scope = task_scope_status(root, state)
+    workflow_bypass = workflow_bypass_status(root, state)
+    if workflow_bypass["status"] == "detected":
+        action = workflow_bypass_action()
     payload = {
         "phase": state.get("phase"),
         "localMode": mode,
@@ -932,6 +1002,7 @@ def command_status(
         "nextAction": action,
         "installation": installation_status(root, state),
         "workflowBaseline": workflow_baseline_status(root, state),
+        "workflowBypass": workflow_bypass,
     }
     if is_git_repo(root):
         try:

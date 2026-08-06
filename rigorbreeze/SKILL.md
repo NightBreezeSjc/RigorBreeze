@@ -13,7 +13,7 @@ Deliver one observable user outcome per task. Keep one human-authored Markdown c
 2. Before every non-trivial writing request, including a follow-up after compaction or while debugging/review skills are active, run the bundled `python <skill-dir>/scripts/flow.py --root <project> status --all --json` in Git projects; fall back to `status --json` before initialization. Other skills supplement RigorBreeze but never replace its task state and ownership check.
 3. If uninitialized, run `init`, configure `rigorbreeze.toml`, and run `doctor --json`. Report `installation.status`; never overwrite an outdated project runner while a task is active.
 4. Read `rigorbreeze.toml`, `spec/index.md`, the current task, and only its linked authoritative sources. State for every Git worktree is private under its Git directory; migrate legacy `spec/state.json` through `init` or `doctor --all --repair`, never by editing it.
-5. Follow `nextAction`; use the bundled runner's `--help` as the canonical command reference. Before product-code writes, require an approved contract and successfully claim the current worktree/window.
+5. Follow `nextAction`; use the bundled runner's `--help` as the canonical command reference. Before product-code writes, require an approved contract and successfully claim the current worktree/window. If status detects unapproved delivery changes, preserve the `workflow-bypass` candidate and restore them or close honestly as reconciled; never fabricate RED or a new baseline.
 
 Read [handbook.md](references/handbook.md) before initialization, policy changes, or L2/Emergency work. Read [spec-tree.md](references/spec-tree.md) before changing state, evidence, digest, or archive behavior. Read [ci-gates.md](references/ci-gates.md) when configuring remote enforcement or releases.
 
@@ -136,7 +136,7 @@ When a candidate is emitted:
 - classify the cause as core, project configuration, adapter, environment, usage, or a correctly detected risk;
 - for a confirmed core problem, write a failing regression, make the smallest change in the Skill repository, and validate it in the next real slice.
 
-When asked to review evolution, scan `spec/evidence/*.json` for confirmations with `evolutionCandidate: true`; do not create another practice log. Project evidence stays local. Never silently rewrite the installed Skill or relax a gate from one ordinary occurrence.
+When asked to review evolution, scan `spec/evidence/*.json` for confirmations or machine practice events with `evolutionCandidate: true`; do not create another practice log. Project evidence stays local. Never silently rewrite the installed Skill or relax a gate from one ordinary occurrence.
 
 ## Completion
 

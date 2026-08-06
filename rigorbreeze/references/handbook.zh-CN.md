@@ -290,7 +290,7 @@ L1/L2/Emergency 归档前，Codex 展示预填的 `retro --json` 摘要。只询
 | merge | 请求平台 auto-merge | 当前 Required Checks 和基线 |
 | release | 调用配置的发布适配器 | 同一 SHA/制品和完整治理 |
 
-平台结果保存在 Git 私有自动化日志中，避免外部动作污染 tracked evidence。`status --all --json` 会投影可清理、需保留和未登记 worktree，以及默认保留的任务分支，并给出干净状态、集成状态、expected HEAD 和确认要求。集成必须由祖先关系证明，或由已记录基线之后的每个任务提交都在基准分支拥有补丁等价结果证明；部分等价仍视为活动任务。受管清理要求完整创建来源；未登记清理还要求一次性明确绝对路径、base、expected HEAD、干净且无活动状态，并证明完整集成。本地分支始终保留。
+平台结果保存在 Git 私有自动化日志中，避免外部动作污染 tracked evidence。`status --all --json` 会投影可清理、需保留和未登记 worktree，以及默认保留的任务分支，并给出干净状态、集成状态、expected HEAD 和确认要求。集成必须由祖先关系或完整补丁等价证明。对于已登记任务，只有至少一个产品补丁在 `git cherry` 中为负向/已等价，且所有剩余正向提交只包含该任务白名单工作流元数据时，才可忽略这些元数据提交；任何混合或未匹配产品路径都保持活动。未登记证明继续保持原有保守策略。受管清理要求完整创建来源；未登记清理还要求一次性明确绝对路径、base、expected HEAD、干净且无活动状态，并证明完整集成。本地分支始终保留。
 
 用户明确要求交付当前任务时，Codex 可以执行 `automate commit --once`，或执行 `automate push --once --remote <名称> --branch <当前分支> --expected-head <SHA>`，且不修改 `rigorbreeze.toml`。push 不会隐式提交，会在写入前 fetch，只允许 fast-forward，不会 rebase 或 force push，并在完成后核对远端 SHA。直推集成分支还必须具备当前 full 验证、结构化验收和审查。单次授权不适用于 merge、release、生产迁移或回滚。
 

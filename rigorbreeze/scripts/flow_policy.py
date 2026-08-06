@@ -748,6 +748,8 @@ def record_practice_event(
     state: dict[str, Any],
     event_type: str,
     details: dict[str, Any],
+    *,
+    evolution_candidate: bool = False,
 ) -> None:
     active = state.get("activeTask")
     if not active:
@@ -771,17 +773,20 @@ def record_practice_event(
     if existing:
         existing["count"] = int(existing.get("count", 1)) + 1
         existing["lastSeenAt"] = timestamp
+        if evolution_candidate:
+            existing["evolutionCandidate"] = True
     else:
-        events.append(
-            {
-                "key": event_key,
-                "type": event_type,
-                "details": normalized,
-                "count": 1,
-                "firstSeenAt": timestamp,
-                "lastSeenAt": timestamp,
-            }
-        )
+        event = {
+            "key": event_key,
+            "type": event_type,
+            "details": normalized,
+            "count": 1,
+            "firstSeenAt": timestamp,
+            "lastSeenAt": timestamp,
+        }
+        if evolution_candidate:
+            event["evolutionCandidate"] = True
+        events.append(event)
     save_evidence(root, active["id"], evidence)
 
 
