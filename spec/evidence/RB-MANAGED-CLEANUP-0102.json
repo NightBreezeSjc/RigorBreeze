@@ -1,0 +1,899 @@
+{
+  "workflowVersion": 4,
+  "taskId": "RB-MANAGED-CLEANUP-0102",
+  "baseline": {
+    "taskDigest": "e7f99d9a595d27ffc8d9cca65a00b5204dc9a8d89f7127420190048dd928c415",
+    "head": "b81b5dd9a661c8c1285f86abf8224e2b2db52d8d",
+    "projectFingerprint": "c3c0ca5e2b51457ff15d32ea7ab1023660161c133c6ceed5af808643c872bf34",
+    "configDigest": "29e4313a1131a04a40744798b88740046122394a3b05daff60b9a73c50db1f43",
+    "workingTreePaths": [
+      "CHANGELOG.md",
+      "CHANGELOG.zh-CN.md",
+      "README.md",
+      "README.zh-CN.md",
+      "Skill演进与实践记录.md",
+      "rigorbreeze/scripts/tests/test_flow_v3.py",
+      "rigorbreeze/scripts/tests/test_flow_v4.py",
+      "spec/changes/RB-MANAGED-CLEANUP-0102.md"
+    ],
+    "workingTreeDigests": {
+      "CHANGELOG.md": "65cbe5364e179b419a5a9e8e0b5cbe98c953403c085ee2891749bf77450c0421",
+      "CHANGELOG.zh-CN.md": "63aa1b5509da4faaeb2414bb9cf42a6b1890fdb61816b3e66417f11699e786de",
+      "README.md": "5d7e3ff1d69ca412ac87e6e59622d1e2f098ec0fe9356086545b2cd21769115d",
+      "README.zh-CN.md": "cf40c850fb2747e0f624ce1210b1984f01409db95acbdad3a8bbe757f9601325",
+      "Skill演进与实践记录.md": "10a18091891135be9272357aaac9c524bd98ca10afb0bd0046083a66a51105ff",
+      "rigorbreeze/scripts/tests/test_flow_v3.py": "01102917cf77ce68fdd53277ce444142ff493d7e449d1ed0360d5995a3f7949f",
+      "rigorbreeze/scripts/tests/test_flow_v4.py": "3abc6ba92040ca69949066826fe69b195c77b50cc77964eec6e259f9c932d888",
+      "spec/changes/RB-MANAGED-CLEANUP-0102.md": "e7f99d9a595d27ffc8d9cca65a00b5204dc9a8d89f7127420190048dd928c415"
+    },
+    "approvedAt": "2026-08-07T12:44:31+08:00"
+  },
+  "red": [
+    {
+      "requirement": "REQ-001",
+      "command": [
+        "sh",
+        "-c",
+        "cd rigorbreeze/scripts/tests && python3 -m unittest test_flow_v3.FlowV3Tests.test_managed_cleanup_marks_every_task_that_shared_the_removed_worktree",
+        "rigorbreeze/scripts/tests/test_flow_v3.py"
+      ],
+      "exitCode": 1,
+      "expectedPattern": "TASK-404B|unmanaged|FAIL",
+      "testDigests": {
+        "rigorbreeze/scripts/tests/test_flow_v3.py": "c486e0c5e14ceb849a993a7ede71e2513c19a36de4e2209e2764aef820f4e6fa"
+      },
+      "summary": "F\n======================================================================\nFAIL: test_managed_cleanup_marks_every_task_that_shared_the_removed_worktree (test_flow_v3.FlowV3Tests.test_managed_cleanup_marks_every_task_that_shared_the_removed_worktree)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/songjincheng/LinGang-housing/rigorbreeze/rigorbreeze/scripts/tests/test_flow_v3.py\", line 1194, in test_managed_cleanup_marks_every_task_that_shared_the_removed_worktree\n    self.assertEqual(result[\"retained\"], [])\n    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Lists differ: [{'reason': 'unmanaged', 'taskId': 'TASK-404B'}] != []\n\nFirst list contains 1 additional elements.\nFirst extra element 0:\n{'reason': 'unmanaged', 'taskId': 'TASK-404B'}\n\n- [{'reason': 'unmanaged', 'taskId': 'TASK-404B'}]\n+ []\n\n----------------------------------------------------------------------\nRan 1 test in 0.877s\n\nFAILED (failures=1)",
+      "taskDigest": "85e2fbe43bb32d19b4157bdb4a52383a01daee33d169ea4d24ad7338a1ded149",
+      "projectFingerprint": "2cdfc539ac4e95d68a448a96ee71198b4b8d2cd29b5723eb66cd0e32a865e94f",
+      "head": "b81b5dd9a661c8c1285f86abf8224e2b2db52d8d",
+      "observedAt": "2026-08-07T12:33:03+08:00"
+    },
+    {
+      "requirement": "REQ-001",
+      "command": [
+        "sh",
+        "-c",
+        "cd rigorbreeze/scripts/tests && python3 -m unittest test_flow_v3.FlowV3Tests.test_managed_cleanup_marks_every_task_that_shared_the_removed_worktree",
+        "rigorbreeze/scripts/tests/test_flow_v3.py"
+      ],
+      "exitCode": 1,
+      "expectedPattern": "TASK-404B|unmanaged|FAIL",
+      "testDigests": {
+        "rigorbreeze/scripts/tests/test_flow_v3.py": "c486e0c5e14ceb849a993a7ede71e2513c19a36de4e2209e2764aef820f4e6fa"
+      },
+      "summary": "F\n======================================================================\nFAIL: test_managed_cleanup_marks_every_task_that_shared_the_removed_worktree (test_flow_v3.FlowV3Tests.test_managed_cleanup_marks_every_task_that_shared_the_removed_worktree)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/songjincheng/LinGang-housing/rigorbreeze/rigorbreeze/scripts/tests/test_flow_v3.py\", line 1194, in test_managed_cleanup_marks_every_task_that_shared_the_removed_worktree\n    self.assertEqual(result[\"retained\"], [])\n    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Lists differ: [{'reason': 'unmanaged', 'taskId': 'TASK-404B'}] != []\n\nFirst list contains 1 additional elements.\nFirst extra element 0:\n{'reason': 'unmanaged', 'taskId': 'TASK-404B'}\n\n- [{'reason': 'unmanaged', 'taskId': 'TASK-404B'}]\n+ []\n\n----------------------------------------------------------------------\nRan 1 test in 0.904s\n\nFAILED (failures=1)",
+      "taskDigest": "1eae591baba24905a0385693cb70f62802c37837d619decf45222a9cc19db7d4",
+      "projectFingerprint": "066241c0a960b3d8593fbb9c2d8bc16bedcad597516e501e99728383d8a806ff",
+      "head": "b81b5dd9a661c8c1285f86abf8224e2b2db52d8d",
+      "observedAt": "2026-08-07T12:36:07+08:00"
+    },
+    {
+      "requirement": "REQ-004",
+      "command": [
+        "sh",
+        "-c",
+        "cd rigorbreeze/scripts/tests && python3 -m unittest test_flow_v4.FlowV4Tests.test_doctor_repair_allows_archived_branch_history_with_active_primary_task",
+        "rigorbreeze/scripts/tests/test_flow_v4.py"
+      ],
+      "exitCode": 1,
+      "expectedPattern": "branch mismatch|duplicate worktree registration|FAIL",
+      "testDigests": {
+        "rigorbreeze/scripts/tests/test_flow_v4.py": "3abc6ba92040ca69949066826fe69b195c77b50cc77964eec6e259f9c932d888"
+      },
+      "summary": "\nstdout:\n{\"issues\": [\"TASK-718A branch mismatch: expected rigorbreeze/task-718a, found main\", \"duplicate worktree registration: /private/var/folders/3t/nfwgp77s1dgffqg752fg4b2m0000gn/T/tmpnb05e1s3\"], \"repairPlan\": {\"command\": \"python scripts/rigorbreeze.py doctor --all --repair --json\", \"sharedClosedWorktrees\": [], \"taskIds\": [\"TASK-718A\", \"TASK-718B\"], \"willWriteRegistry\": true}, \"status\": \"error\", \"tasks\": [{\"allowedScope\": [\"src/\"], \"archived\": true, \"baseBranch\": null, \"baseSha\": null, \"baselineStale\": false, \"branch\": \"rigorbreeze/task-718a\", \"createdAt\": null, \"createdPath\": null, \"dependsOn\": [], \"head\": \"069c277b2907bc16f0e2f276008bf697b3d15bdf\", \"lifecycle\": \"closed\", \"managedByFlow\": false, \"phase\": \"archived\", \"readiness\": \"integrated\", \"risk\": \"L0\", \"runtimeClaims\": [], \"runtimeConflicts\": [], \"taskId\": \"TASK-718A\", \"title\": \"fixture\", \"updatedAt\": \"2026-08-07T12:36:08+08:00\", \"worktree\": \"/private/var/folders/3t/nfwgp77s1dgffqg752fg4b2m0000gn/T/tmpnb05e1s3\", \"worktreeExists\": true}, {\"allowedScope\": [\"src/\"], \"archived\": false, \"baseBranch\": \"main\", \"baseSha\": \"069c277b2907bc16f0e2f276008bf697b3d15bdf\", \"baselineStale\": false, \"branch\": \"main\", \"createdAt\": null, \"createdPath\": null, \"dependsOn\": [], \"head\": \"069c277b2907bc16f0e2f276008bf697b3d15bdf\", \"lifecycle\": \"active\", \"managedByFlow\": false, \"phase\": \"draft\", \"readiness\": \"ready\", \"risk\": \"L0\", \"runtimeClaims\": [], \"runtimeConflicts\": [], \"taskId\": \"TASK-718B\", \"title\": \"active primary task\", \"updatedAt\": \"2026-08-07T12:36:09+08:00\", \"worktree\": \"/private/var/folders/3t/nfwgp77s1dgffqg752fg4b2m0000gn/T/tmpnb05e1s3\", \"worktreeExists\": true}], \"warnings\": [], \"workflowVersion\": 4}\n\nstderr:\nERROR: doctor found issues: TASK-718A branch mismatch: expected rigorbreeze/task-718a, found main; duplicate worktree registration: /private/var/folders/3t/nfwgp77s1dgffqg752fg4b2m0000gn/T/tmpnb05e1s3\n\n\n----------------------------------------------------------------------\nRan 1 test in 1.135s\n\nFAILED (failures=1)",
+      "taskDigest": "1eae591baba24905a0385693cb70f62802c37837d619decf45222a9cc19db7d4",
+      "projectFingerprint": "066241c0a960b3d8593fbb9c2d8bc16bedcad597516e501e99728383d8a806ff",
+      "head": "b81b5dd9a661c8c1285f86abf8224e2b2db52d8d",
+      "observedAt": "2026-08-07T12:36:09+08:00"
+    },
+    {
+      "requirement": "REQ-001",
+      "command": [
+        "sh",
+        "-c",
+        "cd rigorbreeze/scripts/tests && python3 -m unittest test_flow_v3.FlowV3Tests.test_managed_cleanup_marks_every_task_that_shared_the_removed_worktree",
+        "rigorbreeze/scripts/tests/test_flow_v3.py"
+      ],
+      "exitCode": 1,
+      "expectedPattern": "TASK-404B|unmanaged|FAIL",
+      "testDigests": {
+        "rigorbreeze/scripts/tests/test_flow_v3.py": "01102917cf77ce68fdd53277ce444142ff493d7e449d1ed0360d5995a3f7949f"
+      },
+      "summary": "F\n======================================================================\nFAIL: test_managed_cleanup_marks_every_task_that_shared_the_removed_worktree (test_flow_v3.FlowV3Tests.test_managed_cleanup_marks_every_task_that_shared_the_removed_worktree)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/songjincheng/LinGang-housing/rigorbreeze/rigorbreeze/scripts/tests/test_flow_v3.py\", line 1192, in test_managed_cleanup_marks_every_task_that_shared_the_removed_worktree\n    self.assertEqual(result[\"retained\"], [])\n    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Lists differ: [{'reason': 'unmanaged', 'taskId': 'TASK-404B'}] != []\n\nFirst list contains 1 additional elements.\nFirst extra element 0:\n{'reason': 'unmanaged', 'taskId': 'TASK-404B'}\n\n- [{'reason': 'unmanaged', 'taskId': 'TASK-404B'}]\n+ []\n\n----------------------------------------------------------------------\nRan 1 test in 0.914s\n\nFAILED (failures=1)",
+      "taskDigest": "e7f99d9a595d27ffc8d9cca65a00b5204dc9a8d89f7127420190048dd928c415",
+      "projectFingerprint": "c3c0ca5e2b51457ff15d32ea7ab1023660161c133c6ceed5af808643c872bf34",
+      "head": "b81b5dd9a661c8c1285f86abf8224e2b2db52d8d",
+      "observedAt": "2026-08-07T12:44:47+08:00"
+    },
+    {
+      "requirement": "REQ-004",
+      "command": [
+        "sh",
+        "-c",
+        "cd rigorbreeze/scripts/tests && python3 -m unittest test_flow_v4.FlowV4Tests.test_doctor_repair_allows_archived_branch_history_with_active_primary_task",
+        "rigorbreeze/scripts/tests/test_flow_v4.py"
+      ],
+      "exitCode": 1,
+      "expectedPattern": "branch mismatch|duplicate worktree registration|FAIL",
+      "testDigests": {
+        "rigorbreeze/scripts/tests/test_flow_v4.py": "3abc6ba92040ca69949066826fe69b195c77b50cc77964eec6e259f9c932d888"
+      },
+      "summary": "\nstdout:\n{\"issues\": [\"TASK-718A branch mismatch: expected rigorbreeze/task-718a, found main\", \"duplicate worktree registration: /private/var/folders/3t/nfwgp77s1dgffqg752fg4b2m0000gn/T/tmpal0258m3\"], \"repairPlan\": {\"command\": \"python scripts/rigorbreeze.py doctor --all --repair --json\", \"sharedClosedWorktrees\": [], \"taskIds\": [\"TASK-718A\", \"TASK-718B\"], \"willWriteRegistry\": true}, \"status\": \"error\", \"tasks\": [{\"allowedScope\": [\"src/\"], \"archived\": true, \"baseBranch\": null, \"baseSha\": null, \"baselineStale\": false, \"branch\": \"rigorbreeze/task-718a\", \"createdAt\": null, \"createdPath\": null, \"dependsOn\": [], \"head\": \"3a7dd2f932ea2331535ad8f2680b4327accf9824\", \"lifecycle\": \"closed\", \"managedByFlow\": false, \"phase\": \"archived\", \"readiness\": \"integrated\", \"risk\": \"L0\", \"runtimeClaims\": [], \"runtimeConflicts\": [], \"taskId\": \"TASK-718A\", \"title\": \"fixture\", \"updatedAt\": \"2026-08-07T12:44:48+08:00\", \"worktree\": \"/private/var/folders/3t/nfwgp77s1dgffqg752fg4b2m0000gn/T/tmpal0258m3\", \"worktreeExists\": true}, {\"allowedScope\": [\"src/\"], \"archived\": false, \"baseBranch\": \"main\", \"baseSha\": \"3a7dd2f932ea2331535ad8f2680b4327accf9824\", \"baselineStale\": false, \"branch\": \"main\", \"createdAt\": null, \"createdPath\": null, \"dependsOn\": [], \"head\": \"3a7dd2f932ea2331535ad8f2680b4327accf9824\", \"lifecycle\": \"active\", \"managedByFlow\": false, \"phase\": \"draft\", \"readiness\": \"ready\", \"risk\": \"L0\", \"runtimeClaims\": [], \"runtimeConflicts\": [], \"taskId\": \"TASK-718B\", \"title\": \"active primary task\", \"updatedAt\": \"2026-08-07T12:44:48+08:00\", \"worktree\": \"/private/var/folders/3t/nfwgp77s1dgffqg752fg4b2m0000gn/T/tmpal0258m3\", \"worktreeExists\": true}], \"warnings\": [], \"workflowVersion\": 4}\n\nstderr:\nERROR: doctor found issues: TASK-718A branch mismatch: expected rigorbreeze/task-718a, found main; duplicate worktree registration: /private/var/folders/3t/nfwgp77s1dgffqg752fg4b2m0000gn/T/tmpal0258m3\n\n\n----------------------------------------------------------------------\nRan 1 test in 1.152s\n\nFAILED (failures=1)",
+      "taskDigest": "e7f99d9a595d27ffc8d9cca65a00b5204dc9a8d89f7127420190048dd928c415",
+      "projectFingerprint": "c3c0ca5e2b51457ff15d32ea7ab1023660161c133c6ceed5af808643c872bf34",
+      "head": "b81b5dd9a661c8c1285f86abf8224e2b2db52d8d",
+      "observedAt": "2026-08-07T12:44:48+08:00"
+    },
+    {
+      "requirement": "REQ-001",
+      "command": [
+        "sh",
+        "-c",
+        "cd rigorbreeze/scripts/tests && python3 -m unittest test_flow_v3.FlowV3Tests.test_managed_cleanup_marks_every_task_that_shared_the_removed_worktree",
+        "rigorbreeze/scripts/tests/test_flow_v3.py"
+      ],
+      "exitCode": 1,
+      "expectedPattern": "TASK-404B|unmanaged|FAIL",
+      "testDigests": {
+        "rigorbreeze/scripts/tests/test_flow_v3.py": "01102917cf77ce68fdd53277ce444142ff493d7e449d1ed0360d5995a3f7949f"
+      },
+      "summary": "F\n======================================================================\nFAIL: test_managed_cleanup_marks_every_task_that_shared_the_removed_worktree (test_flow_v3.FlowV3Tests.test_managed_cleanup_marks_every_task_that_shared_the_removed_worktree)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/songjincheng/LinGang-housing/rigorbreeze/rigorbreeze/scripts/tests/test_flow_v3.py\", line 1192, in test_managed_cleanup_marks_every_task_that_shared_the_removed_worktree\n    self.assertEqual(result[\"retained\"], [])\n    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Lists differ: [{'reason': 'unmanaged', 'taskId': 'TASK-404B'}] != []\n\nFirst list contains 1 additional elements.\nFirst extra element 0:\n{'reason': 'unmanaged', 'taskId': 'TASK-404B'}\n\n- [{'reason': 'unmanaged', 'taskId': 'TASK-404B'}]\n+ []\n\n----------------------------------------------------------------------\nRan 1 test in 0.921s\n\nFAILED (failures=1)",
+      "taskDigest": "e7f99d9a595d27ffc8d9cca65a00b5204dc9a8d89f7127420190048dd928c415",
+      "projectFingerprint": "4f255550501fc5e73e5e9770ea4b5d532b486784565624d1dedceb55b280386e",
+      "head": "b81b5dd9a661c8c1285f86abf8224e2b2db52d8d",
+      "observedAt": "2026-08-07T12:46:23+08:00"
+    },
+    {
+      "requirement": "REQ-004",
+      "command": [
+        "sh",
+        "-c",
+        "cd rigorbreeze/scripts/tests && python3 -m unittest test_flow_v4.FlowV4Tests.test_doctor_repair_allows_archived_branch_history_with_active_primary_task",
+        "rigorbreeze/scripts/tests/test_flow_v4.py"
+      ],
+      "exitCode": 1,
+      "expectedPattern": "branch mismatch|duplicate worktree registration|FAIL",
+      "testDigests": {
+        "rigorbreeze/scripts/tests/test_flow_v4.py": "6f2e1f168336a4a7bc670baf928e8ca8a52d7bf40414a163dc7bd3480010722b"
+      },
+      "summary": "\nstdout:\n{\"issues\": [\"TASK-718A branch mismatch: expected rigorbreeze/task-718a, found main\", \"duplicate worktree registration: /private/var/folders/3t/nfwgp77s1dgffqg752fg4b2m0000gn/T/tmpzc9zt4b9\"], \"repairPlan\": {\"command\": \"python scripts/rigorbreeze.py doctor --all --repair --json\", \"sharedClosedWorktrees\": [], \"taskIds\": [\"TASK-718A\", \"TASK-718B\"], \"willWriteRegistry\": true}, \"status\": \"error\", \"tasks\": [{\"allowedScope\": [\"src/\"], \"archived\": true, \"baseBranch\": null, \"baseSha\": null, \"baselineStale\": false, \"branch\": \"rigorbreeze/task-718a\", \"createdAt\": null, \"createdPath\": null, \"dependsOn\": [], \"head\": \"59e4735c7efb93fcabb936b49be8467a879522f4\", \"lifecycle\": \"closed\", \"managedByFlow\": false, \"phase\": \"archived\", \"readiness\": \"integrated\", \"risk\": \"L0\", \"runtimeClaims\": [], \"runtimeConflicts\": [], \"taskId\": \"TASK-718A\", \"title\": \"fixture\", \"updatedAt\": \"2026-08-07T12:46:24+08:00\", \"worktree\": \"/private/var/folders/3t/nfwgp77s1dgffqg752fg4b2m0000gn/T/tmpzc9zt4b9\", \"worktreeExists\": true}, {\"allowedScope\": [\"src/\"], \"archived\": false, \"baseBranch\": \"main\", \"baseSha\": \"59e4735c7efb93fcabb936b49be8467a879522f4\", \"baselineStale\": false, \"branch\": \"main\", \"createdAt\": null, \"createdPath\": null, \"dependsOn\": [], \"head\": \"59e4735c7efb93fcabb936b49be8467a879522f4\", \"lifecycle\": \"active\", \"managedByFlow\": false, \"phase\": \"draft\", \"readiness\": \"ready\", \"risk\": \"L0\", \"runtimeClaims\": [], \"runtimeConflicts\": [], \"taskId\": \"TASK-718B\", \"title\": \"active primary task\", \"updatedAt\": \"2026-08-07T12:46:25+08:00\", \"worktree\": \"/private/var/folders/3t/nfwgp77s1dgffqg752fg4b2m0000gn/T/tmpzc9zt4b9\", \"worktreeExists\": true}], \"warnings\": [], \"workflowVersion\": 4}\n\nstderr:\nERROR: doctor found issues: TASK-718A branch mismatch: expected rigorbreeze/task-718a, found main; duplicate worktree registration: /private/var/folders/3t/nfwgp77s1dgffqg752fg4b2m0000gn/T/tmpzc9zt4b9\n\n\n----------------------------------------------------------------------\nRan 1 test in 1.142s\n\nFAILED (failures=1)",
+      "taskDigest": "e7f99d9a595d27ffc8d9cca65a00b5204dc9a8d89f7127420190048dd928c415",
+      "projectFingerprint": "4f255550501fc5e73e5e9770ea4b5d532b486784565624d1dedceb55b280386e",
+      "head": "b81b5dd9a661c8c1285f86abf8224e2b2db52d8d",
+      "observedAt": "2026-08-07T12:46:25+08:00"
+    }
+  ],
+  "verifications": [
+    {
+      "toolVersion": "0.10.2",
+      "profile": "full",
+      "configured": true,
+      "mode": "advisory",
+      "checks": [
+        "format",
+        "lint",
+        "unit",
+        "contract",
+        "secret",
+        "build",
+        "acceptance"
+      ],
+      "passed": false,
+      "taskDigest": "1eae591baba24905a0385693cb70f62802c37837d619decf45222a9cc19db7d4",
+      "projectFingerprint": "e8eea6795c044d5e169e0f6dd47e6a8824885fa4cb42816f0fed5f944a1b89bb",
+      "configDigest": "29e4313a1131a04a40744798b88740046122394a3b05daff60b9a73c50db1f43",
+      "head": "b81b5dd9a661c8c1285f86abf8224e2b2db52d8d",
+      "verifiedAt": "2026-08-07T12:42:42+08:00"
+    },
+    {
+      "toolVersion": "0.10.2",
+      "profile": "full",
+      "configured": true,
+      "mode": "advisory",
+      "checks": [
+        "format",
+        "lint",
+        "unit",
+        "contract",
+        "secret",
+        "build",
+        "acceptance"
+      ],
+      "passed": true,
+      "taskDigest": "e7f99d9a595d27ffc8d9cca65a00b5204dc9a8d89f7127420190048dd928c415",
+      "projectFingerprint": "19ba7a697535aabe07c88e29f0891b49c6157723d1ce82f230848577f2ca0ce4",
+      "configDigest": "29e4313a1131a04a40744798b88740046122394a3b05daff60b9a73c50db1f43",
+      "head": "b81b5dd9a661c8c1285f86abf8224e2b2db52d8d",
+      "verifiedAt": "2026-08-07T12:49:18+08:00"
+    }
+  ],
+  "checkRuns": [
+    {
+      "checkId": "format",
+      "category": "static-quality",
+      "profile": "full",
+      "mode": "advisory",
+      "command": [
+        "python3",
+        "-m",
+        "ruff",
+        "format",
+        "--check",
+        "rigorbreeze/scripts",
+        "tests/behavior"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 66,
+      "summary": "15 files already formatted",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "1eae591baba24905a0385693cb70f62802c37837d619decf45222a9cc19db7d4",
+      "projectFingerprint": "e8eea6795c044d5e169e0f6dd47e6a8824885fa4cb42816f0fed5f944a1b89bb",
+      "head": "b81b5dd9a661c8c1285f86abf8224e2b2db52d8d",
+      "recordedAt": "2026-08-07T12:40:26+08:00"
+    },
+    {
+      "checkId": "lint",
+      "category": "static-quality",
+      "profile": "full",
+      "mode": "advisory",
+      "command": [
+        "python3",
+        "-m",
+        "ruff",
+        "check",
+        "rigorbreeze/scripts",
+        "tests/behavior"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 24,
+      "summary": "All checks passed!",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "1eae591baba24905a0385693cb70f62802c37837d619decf45222a9cc19db7d4",
+      "projectFingerprint": "e8eea6795c044d5e169e0f6dd47e6a8824885fa4cb42816f0fed5f944a1b89bb",
+      "head": "b81b5dd9a661c8c1285f86abf8224e2b2db52d8d",
+      "recordedAt": "2026-08-07T12:40:26+08:00"
+    },
+    {
+      "checkId": "unit",
+      "category": "behavior",
+      "profile": "full",
+      "mode": "advisory",
+      "command": [
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "rigorbreeze/scripts/tests",
+        "-v"
+      ],
+      "exitCode": 1,
+      "passed": false,
+      "durationMs": 135387,
+      "summary": "branches: `main` is the only long-lived source of truth, while topic branches are cheap, isolated, and disposable.\\n\\nExternal contributors fork the repository and open a pull request against `main`. The maintainer decides whether and when it is merged; passing CI is necessary but does not merge or publish a change by itself. See [CONTRIBUTING.md](CONTRIBUTING.md) for the copyable workflow and verification contract.\\n\\n## Contributing and security\\n\\nRead [CONTRIBUTING.md](CONTRIBUTING.md) before proposing workflow behavior. Ordinary friction must repeat in real slices before entering the core; a gate that incorrectly permits a secret, privilege bypass, destructive migration, stale proof, or wrong release is reviewed immediately.\\n\\nReport vulnerabilities privately as described in [SECURITY.md](SECURITY.md). Do not place secrets or exploit details in public issues.\\n\\nChanges are recorded in [CHANGELOG.md](CHANGELOG.md). The project is available under the [MIT License](LICENSE).\\n\\n## Design influences\\n\\nRigorBreeze is an independent project informed by:\\n\\n- [GitHub Spec Kit](https://github.com/github/spec-kit) for spec-driven alignment;\\n- [OpenSpec](https://github.com/Fission-AI/OpenSpec) for lightweight change-oriented SDD;\\n- [Superpowers](https://github.com/obra/superpowers) for composable engineering disciplines and evidence before completion;\\n- [mattpocock/skills](https://github.com/mattpocock/skills) for small, adaptable skills and explicit feedback loops;\\n- [Wu5 Dev Flow](https://github.com/WenOwen/wu5-dev-flow) for auditable task state, TDD evidence, and Git gates.\\n\\nIdeas were adapted to a solo Codex workflow with a minimal Spec Tree, project-declared enforcement, real-runtime acceptance, isolated parallel worktrees, and manual-by-default delivery. This project is not affiliated with or a drop-in replacement for any project above.\\n'\n\n----------------------------------------------------------------------\nRan 134 tests in 135.293s\n\nFAILED (failures=3)",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "1eae591baba24905a0385693cb70f62802c37837d619decf45222a9cc19db7d4",
+      "projectFingerprint": "e8eea6795c044d5e169e0f6dd47e6a8824885fa4cb42816f0fed5f944a1b89bb",
+      "head": "b81b5dd9a661c8c1285f86abf8224e2b2db52d8d",
+      "recordedAt": "2026-08-07T12:42:42+08:00"
+    },
+    {
+      "checkId": "contract",
+      "category": "behavior",
+      "profile": "full",
+      "mode": "advisory",
+      "command": [
+        "python3",
+        "-m",
+        "py_compile",
+        "rigorbreeze/scripts/flow.py"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 40,
+      "summary": "",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "1eae591baba24905a0385693cb70f62802c37837d619decf45222a9cc19db7d4",
+      "projectFingerprint": "e8eea6795c044d5e169e0f6dd47e6a8824885fa4cb42816f0fed5f944a1b89bb",
+      "head": "b81b5dd9a661c8c1285f86abf8224e2b2db52d8d",
+      "recordedAt": "2026-08-07T12:42:42+08:00"
+    },
+    {
+      "checkId": "secret",
+      "category": "secrets",
+      "profile": "full",
+      "mode": "advisory",
+      "command": [
+        "python3",
+        "-c",
+        "import pathlib,re,sys; files=[p for p in pathlib.Path('.').rglob('*') if p.is_file() and '.git' not in p.parts and 'tests' not in p.parts and p.name != 'rigorbreeze.toml']; pattern=re.compile(r'(?i)(api[_-]?key|token|password|secret)\\s*[:=]\\s*\\S{20,}'); hits=[str(p) for p in files if pattern.search(p.read_text(errors='ignore'))]; print('\\n'.join(hits)); sys.exit(bool(hits))"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 83,
+      "summary": "",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "1eae591baba24905a0385693cb70f62802c37837d619decf45222a9cc19db7d4",
+      "projectFingerprint": "e8eea6795c044d5e169e0f6dd47e6a8824885fa4cb42816f0fed5f944a1b89bb",
+      "head": "b81b5dd9a661c8c1285f86abf8224e2b2db52d8d",
+      "recordedAt": "2026-08-07T12:42:42+08:00"
+    },
+    {
+      "checkId": "build",
+      "category": "build",
+      "profile": "full",
+      "mode": "advisory",
+      "command": [
+        "python3",
+        "-c",
+        "import pathlib,zipfile; out=pathlib.Path('artifacts/rigorbreeze.zip'); out.parent.mkdir(exist_ok=True); files=[p for p in pathlib.Path('rigorbreeze').rglob('*') if p.is_file() and '__pycache__' not in p.parts]; z=zipfile.ZipFile(out,'w',zipfile.ZIP_DEFLATED); [z.write(p,p.as_posix()) for p in files]; z.close()"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 34,
+      "summary": "",
+      "report": null,
+      "artifacts": [
+        "e6d9bc861cb4849dcf8e6b9c2667e25dc22a515c3dae86f58261faa2c90e0877"
+      ],
+      "taskDigest": "1eae591baba24905a0385693cb70f62802c37837d619decf45222a9cc19db7d4",
+      "projectFingerprint": "e8eea6795c044d5e169e0f6dd47e6a8824885fa4cb42816f0fed5f944a1b89bb",
+      "head": "b81b5dd9a661c8c1285f86abf8224e2b2db52d8d",
+      "recordedAt": "2026-08-07T12:42:42+08:00"
+    },
+    {
+      "checkId": "acceptance",
+      "category": "acceptance",
+      "profile": "full",
+      "mode": "advisory",
+      "command": [
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/behavior",
+        "-v"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 114,
+      "summary": "test_all_synthetic_transcripts_meet_their_contracts (test_behavior.BehaviorSuiteTests.test_all_synthetic_transcripts_meet_their_contracts) ... ok\ntest_compound_ui_case_rejects_partial_requirement_capture (test_behavior.BehaviorSuiteTests.test_compound_ui_case_rejects_partial_requirement_capture) ... ok\ntest_contract_has_exactly_six_safe_cases (test_behavior.BehaviorSuiteTests.test_contract_has_exactly_six_safe_cases) ... ok\ntest_contract_rejects_path_escape_and_invalid_regex (test_behavior.BehaviorSuiteTests.test_contract_rejects_path_escape_and_invalid_regex) ... ok\ntest_globs_and_result_versions_cannot_escape_their_boundaries (test_behavior.BehaviorSuiteTests.test_globs_and_result_versions_cannot_escape_their_boundaries) ... ok\ntest_live_codex_argv_grants_only_fixture_git_write (test_behavior.BehaviorSuiteTests.test_live_codex_argv_grants_only_fixture_git_write) ... ok\ntest_live_prompt_names_the_exact_result_case_id (test_behavior.BehaviorSuiteTests.test_live_prompt_names_the_exact_result_case_id) ... ok\ntest_prepare_fixture_stays_inside_requested_root (test_behavior.BehaviorSuiteTests.test_prepare_fixture_stays_inside_requested_root) ... ok\ntest_redaction_removes_common_secret_shapes (test_behavior.BehaviorSuiteTests.test_redaction_removes_common_secret_shapes) ... ok\ntest_score_accepts_fresh_compliant_result (test_behavior.BehaviorSuiteTests.test_score_accepts_fresh_compliant_result) ... ok\ntest_score_rejects_forbidden_action_and_stale_evidence (test_behavior.BehaviorSuiteTests.test_score_rejects_forbidden_action_and_stale_evidence) ... ok\n\n----------------------------------------------------------------------\nRan 11 tests in 0.073s\n\nOK",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "1eae591baba24905a0385693cb70f62802c37837d619decf45222a9cc19db7d4",
+      "projectFingerprint": "e8eea6795c044d5e169e0f6dd47e6a8824885fa4cb42816f0fed5f944a1b89bb",
+      "head": "b81b5dd9a661c8c1285f86abf8224e2b2db52d8d",
+      "recordedAt": "2026-08-07T12:42:42+08:00"
+    },
+    {
+      "checkId": "format",
+      "category": "static-quality",
+      "profile": "full",
+      "mode": "advisory",
+      "command": [
+        "python3",
+        "-m",
+        "ruff",
+        "format",
+        "--check",
+        "rigorbreeze/scripts",
+        "tests/behavior"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 59,
+      "summary": "15 files already formatted",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "e7f99d9a595d27ffc8d9cca65a00b5204dc9a8d89f7127420190048dd928c415",
+      "projectFingerprint": "19ba7a697535aabe07c88e29f0891b49c6157723d1ce82f230848577f2ca0ce4",
+      "head": "b81b5dd9a661c8c1285f86abf8224e2b2db52d8d",
+      "recordedAt": "2026-08-07T12:46:52+08:00"
+    },
+    {
+      "checkId": "lint",
+      "category": "static-quality",
+      "profile": "full",
+      "mode": "advisory",
+      "command": [
+        "python3",
+        "-m",
+        "ruff",
+        "check",
+        "rigorbreeze/scripts",
+        "tests/behavior"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 30,
+      "summary": "All checks passed!",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "e7f99d9a595d27ffc8d9cca65a00b5204dc9a8d89f7127420190048dd928c415",
+      "projectFingerprint": "19ba7a697535aabe07c88e29f0891b49c6157723d1ce82f230848577f2ca0ce4",
+      "head": "b81b5dd9a661c8c1285f86abf8224e2b2db52d8d",
+      "recordedAt": "2026-08-07T12:46:52+08:00"
+    },
+    {
+      "checkId": "unit",
+      "category": "behavior",
+      "profile": "full",
+      "mode": "advisory",
+      "command": [
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "rigorbreeze/scripts/tests",
+        "-v"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 144993,
+      "summary": "ill_contract.SkillContractTests.test_installable_skill_excludes_repository_documents) ... ok\ntest_installable_skill_has_no_project_specific_policy (test_skill_contract.SkillContractTests.test_installable_skill_has_no_project_specific_policy) ... ok\ntest_long_references_have_a_table_of_contents (test_skill_contract.SkillContractTests.test_long_references_have_a_table_of_contents) ... ok\ntest_public_markdown_relative_links_resolve (test_skill_contract.SkillContractTests.test_public_markdown_relative_links_resolve) ... ok\ntest_public_readmes_cover_the_same_first_run_contract (test_skill_contract.SkillContractTests.test_public_readmes_cover_the_same_first_run_contract) ... ok\ntest_repository_has_minimal_open_source_governance (test_skill_contract.SkillContractTests.test_repository_has_minimal_open_source_governance) ... ok\ntest_repository_has_skill_owned_ci (test_skill_contract.SkillContractTests.test_repository_has_skill_owned_ci) ... ok\ntest_skill_completes_context_and_rechecks_follow_up_writes (test_skill_contract.SkillContractTests.test_skill_completes_context_and_rechecks_follow_up_writes) ... ok\ntest_skill_encodes_behavior_reliability_rules_once (test_skill_contract.SkillContractTests.test_skill_encodes_behavior_reliability_rules_once) ... ok\ntest_skill_entrypoint_stays_compact_and_links_every_reference (test_skill_contract.SkillContractTests.test_skill_entrypoint_stays_compact_and_links_every_reference) ... ok\ntest_skill_keeps_lean_implementation_compatible_with_production (test_skill_contract.SkillContractTests.test_skill_keeps_lean_implementation_compatible_with_production) ... ok\ntest_skill_metadata_matches_public_name (test_skill_contract.SkillContractTests.test_skill_metadata_matches_public_name) ... ok\ntest_skill_shapes_only_genuinely_unbounded_initiatives (test_skill_contract.SkillContractTests.test_skill_shapes_only_genuinely_unbounded_initiatives) ... ok\n\n----------------------------------------------------------------------\nRan 134 tests in 144.906s\n\nOK",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "e7f99d9a595d27ffc8d9cca65a00b5204dc9a8d89f7127420190048dd928c415",
+      "projectFingerprint": "19ba7a697535aabe07c88e29f0891b49c6157723d1ce82f230848577f2ca0ce4",
+      "head": "b81b5dd9a661c8c1285f86abf8224e2b2db52d8d",
+      "recordedAt": "2026-08-07T12:49:17+08:00"
+    },
+    {
+      "checkId": "contract",
+      "category": "behavior",
+      "profile": "full",
+      "mode": "advisory",
+      "command": [
+        "python3",
+        "-m",
+        "py_compile",
+        "rigorbreeze/scripts/flow.py"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 42,
+      "summary": "",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "e7f99d9a595d27ffc8d9cca65a00b5204dc9a8d89f7127420190048dd928c415",
+      "projectFingerprint": "19ba7a697535aabe07c88e29f0891b49c6157723d1ce82f230848577f2ca0ce4",
+      "head": "b81b5dd9a661c8c1285f86abf8224e2b2db52d8d",
+      "recordedAt": "2026-08-07T12:49:17+08:00"
+    },
+    {
+      "checkId": "secret",
+      "category": "secrets",
+      "profile": "full",
+      "mode": "advisory",
+      "command": [
+        "python3",
+        "-c",
+        "import pathlib,re,sys; files=[p for p in pathlib.Path('.').rglob('*') if p.is_file() and '.git' not in p.parts and 'tests' not in p.parts and p.name != 'rigorbreeze.toml']; pattern=re.compile(r'(?i)(api[_-]?key|token|password|secret)\\s*[:=]\\s*\\S{20,}'); hits=[str(p) for p in files if pattern.search(p.read_text(errors='ignore'))]; print('\\n'.join(hits)); sys.exit(bool(hits))"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 85,
+      "summary": "",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "e7f99d9a595d27ffc8d9cca65a00b5204dc9a8d89f7127420190048dd928c415",
+      "projectFingerprint": "19ba7a697535aabe07c88e29f0891b49c6157723d1ce82f230848577f2ca0ce4",
+      "head": "b81b5dd9a661c8c1285f86abf8224e2b2db52d8d",
+      "recordedAt": "2026-08-07T12:49:18+08:00"
+    },
+    {
+      "checkId": "build",
+      "category": "build",
+      "profile": "full",
+      "mode": "advisory",
+      "command": [
+        "python3",
+        "-c",
+        "import pathlib,zipfile; out=pathlib.Path('artifacts/rigorbreeze.zip'); out.parent.mkdir(exist_ok=True); files=[p for p in pathlib.Path('rigorbreeze').rglob('*') if p.is_file() and '__pycache__' not in p.parts]; z=zipfile.ZipFile(out,'w',zipfile.ZIP_DEFLATED); [z.write(p,p.as_posix()) for p in files]; z.close()"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 35,
+      "summary": "",
+      "report": null,
+      "artifacts": [
+        "7eab38edb22d1416bf7dbcc22d0a421f5d530f0db4be1465a4a62fab125e5887"
+      ],
+      "taskDigest": "e7f99d9a595d27ffc8d9cca65a00b5204dc9a8d89f7127420190048dd928c415",
+      "projectFingerprint": "19ba7a697535aabe07c88e29f0891b49c6157723d1ce82f230848577f2ca0ce4",
+      "head": "b81b5dd9a661c8c1285f86abf8224e2b2db52d8d",
+      "recordedAt": "2026-08-07T12:49:18+08:00"
+    },
+    {
+      "checkId": "acceptance",
+      "category": "acceptance",
+      "profile": "full",
+      "mode": "advisory",
+      "command": [
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/behavior",
+        "-v"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 125,
+      "summary": "test_all_synthetic_transcripts_meet_their_contracts (test_behavior.BehaviorSuiteTests.test_all_synthetic_transcripts_meet_their_contracts) ... ok\ntest_compound_ui_case_rejects_partial_requirement_capture (test_behavior.BehaviorSuiteTests.test_compound_ui_case_rejects_partial_requirement_capture) ... ok\ntest_contract_has_exactly_six_safe_cases (test_behavior.BehaviorSuiteTests.test_contract_has_exactly_six_safe_cases) ... ok\ntest_contract_rejects_path_escape_and_invalid_regex (test_behavior.BehaviorSuiteTests.test_contract_rejects_path_escape_and_invalid_regex) ... ok\ntest_globs_and_result_versions_cannot_escape_their_boundaries (test_behavior.BehaviorSuiteTests.test_globs_and_result_versions_cannot_escape_their_boundaries) ... ok\ntest_live_codex_argv_grants_only_fixture_git_write (test_behavior.BehaviorSuiteTests.test_live_codex_argv_grants_only_fixture_git_write) ... ok\ntest_live_prompt_names_the_exact_result_case_id (test_behavior.BehaviorSuiteTests.test_live_prompt_names_the_exact_result_case_id) ... ok\ntest_prepare_fixture_stays_inside_requested_root (test_behavior.BehaviorSuiteTests.test_prepare_fixture_stays_inside_requested_root) ... ok\ntest_redaction_removes_common_secret_shapes (test_behavior.BehaviorSuiteTests.test_redaction_removes_common_secret_shapes) ... ok\ntest_score_accepts_fresh_compliant_result (test_behavior.BehaviorSuiteTests.test_score_accepts_fresh_compliant_result) ... ok\ntest_score_rejects_forbidden_action_and_stale_evidence (test_behavior.BehaviorSuiteTests.test_score_rejects_forbidden_action_and_stale_evidence) ... ok\n\n----------------------------------------------------------------------\nRan 11 tests in 0.083s\n\nOK",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "e7f99d9a595d27ffc8d9cca65a00b5204dc9a8d89f7127420190048dd928c415",
+      "projectFingerprint": "19ba7a697535aabe07c88e29f0891b49c6157723d1ce82f230848577f2ca0ce4",
+      "head": "b81b5dd9a661c8c1285f86abf8224e2b2db52d8d",
+      "recordedAt": "2026-08-07T12:49:18+08:00"
+    }
+  ],
+  "tddChain": [
+    {
+      "requirement": "REQ-001",
+      "red": {
+        "requirement": "REQ-001",
+        "command": [
+          "sh",
+          "-c",
+          "cd rigorbreeze/scripts/tests && python3 -m unittest test_flow_v3.FlowV3Tests.test_managed_cleanup_marks_every_task_that_shared_the_removed_worktree",
+          "rigorbreeze/scripts/tests/test_flow_v3.py"
+        ],
+        "exitCode": 1,
+        "expectedPattern": "TASK-404B|unmanaged|FAIL",
+        "testDigests": {
+          "rigorbreeze/scripts/tests/test_flow_v3.py": "c486e0c5e14ceb849a993a7ede71e2513c19a36de4e2209e2764aef820f4e6fa"
+        },
+        "summary": "F\n======================================================================\nFAIL: test_managed_cleanup_marks_every_task_that_shared_the_removed_worktree (test_flow_v3.FlowV3Tests.test_managed_cleanup_marks_every_task_that_shared_the_removed_worktree)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/songjincheng/LinGang-housing/rigorbreeze/rigorbreeze/scripts/tests/test_flow_v3.py\", line 1194, in test_managed_cleanup_marks_every_task_that_shared_the_removed_worktree\n    self.assertEqual(result[\"retained\"], [])\n    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Lists differ: [{'reason': 'unmanaged', 'taskId': 'TASK-404B'}] != []\n\nFirst list contains 1 additional elements.\nFirst extra element 0:\n{'reason': 'unmanaged', 'taskId': 'TASK-404B'}\n\n- [{'reason': 'unmanaged', 'taskId': 'TASK-404B'}]\n+ []\n\n----------------------------------------------------------------------\nRan 1 test in 0.877s\n\nFAILED (failures=1)",
+        "taskDigest": "85e2fbe43bb32d19b4157bdb4a52383a01daee33d169ea4d24ad7338a1ded149",
+        "projectFingerprint": "2cdfc539ac4e95d68a448a96ee71198b4b8d2cd29b5723eb66cd0e32a865e94f",
+        "head": "b81b5dd9a661c8c1285f86abf8224e2b2db52d8d",
+        "observedAt": "2026-08-07T12:33:03+08:00"
+      },
+      "green": null
+    },
+    {
+      "requirement": "REQ-001",
+      "red": {
+        "requirement": "REQ-001",
+        "command": [
+          "sh",
+          "-c",
+          "cd rigorbreeze/scripts/tests && python3 -m unittest test_flow_v3.FlowV3Tests.test_managed_cleanup_marks_every_task_that_shared_the_removed_worktree",
+          "rigorbreeze/scripts/tests/test_flow_v3.py"
+        ],
+        "exitCode": 1,
+        "expectedPattern": "TASK-404B|unmanaged|FAIL",
+        "testDigests": {
+          "rigorbreeze/scripts/tests/test_flow_v3.py": "c486e0c5e14ceb849a993a7ede71e2513c19a36de4e2209e2764aef820f4e6fa"
+        },
+        "summary": "F\n======================================================================\nFAIL: test_managed_cleanup_marks_every_task_that_shared_the_removed_worktree (test_flow_v3.FlowV3Tests.test_managed_cleanup_marks_every_task_that_shared_the_removed_worktree)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/songjincheng/LinGang-housing/rigorbreeze/rigorbreeze/scripts/tests/test_flow_v3.py\", line 1194, in test_managed_cleanup_marks_every_task_that_shared_the_removed_worktree\n    self.assertEqual(result[\"retained\"], [])\n    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Lists differ: [{'reason': 'unmanaged', 'taskId': 'TASK-404B'}] != []\n\nFirst list contains 1 additional elements.\nFirst extra element 0:\n{'reason': 'unmanaged', 'taskId': 'TASK-404B'}\n\n- [{'reason': 'unmanaged', 'taskId': 'TASK-404B'}]\n+ []\n\n----------------------------------------------------------------------\nRan 1 test in 0.904s\n\nFAILED (failures=1)",
+        "taskDigest": "1eae591baba24905a0385693cb70f62802c37837d619decf45222a9cc19db7d4",
+        "projectFingerprint": "066241c0a960b3d8593fbb9c2d8bc16bedcad597516e501e99728383d8a806ff",
+        "head": "b81b5dd9a661c8c1285f86abf8224e2b2db52d8d",
+        "observedAt": "2026-08-07T12:36:07+08:00"
+      },
+      "green": null
+    },
+    {
+      "requirement": "REQ-004",
+      "red": {
+        "requirement": "REQ-004",
+        "command": [
+          "sh",
+          "-c",
+          "cd rigorbreeze/scripts/tests && python3 -m unittest test_flow_v4.FlowV4Tests.test_doctor_repair_allows_archived_branch_history_with_active_primary_task",
+          "rigorbreeze/scripts/tests/test_flow_v4.py"
+        ],
+        "exitCode": 1,
+        "expectedPattern": "branch mismatch|duplicate worktree registration|FAIL",
+        "testDigests": {
+          "rigorbreeze/scripts/tests/test_flow_v4.py": "3abc6ba92040ca69949066826fe69b195c77b50cc77964eec6e259f9c932d888"
+        },
+        "summary": "\nstdout:\n{\"issues\": [\"TASK-718A branch mismatch: expected rigorbreeze/task-718a, found main\", \"duplicate worktree registration: /private/var/folders/3t/nfwgp77s1dgffqg752fg4b2m0000gn/T/tmpnb05e1s3\"], \"repairPlan\": {\"command\": \"python scripts/rigorbreeze.py doctor --all --repair --json\", \"sharedClosedWorktrees\": [], \"taskIds\": [\"TASK-718A\", \"TASK-718B\"], \"willWriteRegistry\": true}, \"status\": \"error\", \"tasks\": [{\"allowedScope\": [\"src/\"], \"archived\": true, \"baseBranch\": null, \"baseSha\": null, \"baselineStale\": false, \"branch\": \"rigorbreeze/task-718a\", \"createdAt\": null, \"createdPath\": null, \"dependsOn\": [], \"head\": \"069c277b2907bc16f0e2f276008bf697b3d15bdf\", \"lifecycle\": \"closed\", \"managedByFlow\": false, \"phase\": \"archived\", \"readiness\": \"integrated\", \"risk\": \"L0\", \"runtimeClaims\": [], \"runtimeConflicts\": [], \"taskId\": \"TASK-718A\", \"title\": \"fixture\", \"updatedAt\": \"2026-08-07T12:36:08+08:00\", \"worktree\": \"/private/var/folders/3t/nfwgp77s1dgffqg752fg4b2m0000gn/T/tmpnb05e1s3\", \"worktreeExists\": true}, {\"allowedScope\": [\"src/\"], \"archived\": false, \"baseBranch\": \"main\", \"baseSha\": \"069c277b2907bc16f0e2f276008bf697b3d15bdf\", \"baselineStale\": false, \"branch\": \"main\", \"createdAt\": null, \"createdPath\": null, \"dependsOn\": [], \"head\": \"069c277b2907bc16f0e2f276008bf697b3d15bdf\", \"lifecycle\": \"active\", \"managedByFlow\": false, \"phase\": \"draft\", \"readiness\": \"ready\", \"risk\": \"L0\", \"runtimeClaims\": [], \"runtimeConflicts\": [], \"taskId\": \"TASK-718B\", \"title\": \"active primary task\", \"updatedAt\": \"2026-08-07T12:36:09+08:00\", \"worktree\": \"/private/var/folders/3t/nfwgp77s1dgffqg752fg4b2m0000gn/T/tmpnb05e1s3\", \"worktreeExists\": true}], \"warnings\": [], \"workflowVersion\": 4}\n\nstderr:\nERROR: doctor found issues: TASK-718A branch mismatch: expected rigorbreeze/task-718a, found main; duplicate worktree registration: /private/var/folders/3t/nfwgp77s1dgffqg752fg4b2m0000gn/T/tmpnb05e1s3\n\n\n----------------------------------------------------------------------\nRan 1 test in 1.135s\n\nFAILED (failures=1)",
+        "taskDigest": "1eae591baba24905a0385693cb70f62802c37837d619decf45222a9cc19db7d4",
+        "projectFingerprint": "066241c0a960b3d8593fbb9c2d8bc16bedcad597516e501e99728383d8a806ff",
+        "head": "b81b5dd9a661c8c1285f86abf8224e2b2db52d8d",
+        "observedAt": "2026-08-07T12:36:09+08:00"
+      },
+      "green": null
+    },
+    {
+      "requirement": "REQ-001",
+      "red": {
+        "requirement": "REQ-001",
+        "command": [
+          "sh",
+          "-c",
+          "cd rigorbreeze/scripts/tests && python3 -m unittest test_flow_v3.FlowV3Tests.test_managed_cleanup_marks_every_task_that_shared_the_removed_worktree",
+          "rigorbreeze/scripts/tests/test_flow_v3.py"
+        ],
+        "exitCode": 1,
+        "expectedPattern": "TASK-404B|unmanaged|FAIL",
+        "testDigests": {
+          "rigorbreeze/scripts/tests/test_flow_v3.py": "01102917cf77ce68fdd53277ce444142ff493d7e449d1ed0360d5995a3f7949f"
+        },
+        "summary": "F\n======================================================================\nFAIL: test_managed_cleanup_marks_every_task_that_shared_the_removed_worktree (test_flow_v3.FlowV3Tests.test_managed_cleanup_marks_every_task_that_shared_the_removed_worktree)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/songjincheng/LinGang-housing/rigorbreeze/rigorbreeze/scripts/tests/test_flow_v3.py\", line 1192, in test_managed_cleanup_marks_every_task_that_shared_the_removed_worktree\n    self.assertEqual(result[\"retained\"], [])\n    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Lists differ: [{'reason': 'unmanaged', 'taskId': 'TASK-404B'}] != []\n\nFirst list contains 1 additional elements.\nFirst extra element 0:\n{'reason': 'unmanaged', 'taskId': 'TASK-404B'}\n\n- [{'reason': 'unmanaged', 'taskId': 'TASK-404B'}]\n+ []\n\n----------------------------------------------------------------------\nRan 1 test in 0.914s\n\nFAILED (failures=1)",
+        "taskDigest": "e7f99d9a595d27ffc8d9cca65a00b5204dc9a8d89f7127420190048dd928c415",
+        "projectFingerprint": "c3c0ca5e2b51457ff15d32ea7ab1023660161c133c6ceed5af808643c872bf34",
+        "head": "b81b5dd9a661c8c1285f86abf8224e2b2db52d8d",
+        "observedAt": "2026-08-07T12:44:47+08:00"
+      },
+      "green": {
+        "toolVersion": "0.10.2",
+        "profile": "full",
+        "configured": true,
+        "mode": "advisory",
+        "checks": [
+          "format",
+          "lint",
+          "unit",
+          "contract",
+          "secret",
+          "build",
+          "acceptance"
+        ],
+        "passed": true,
+        "taskDigest": "e7f99d9a595d27ffc8d9cca65a00b5204dc9a8d89f7127420190048dd928c415",
+        "projectFingerprint": "19ba7a697535aabe07c88e29f0891b49c6157723d1ce82f230848577f2ca0ce4",
+        "configDigest": "29e4313a1131a04a40744798b88740046122394a3b05daff60b9a73c50db1f43",
+        "head": "b81b5dd9a661c8c1285f86abf8224e2b2db52d8d",
+        "verifiedAt": "2026-08-07T12:49:18+08:00"
+      }
+    },
+    {
+      "requirement": "REQ-004",
+      "red": {
+        "requirement": "REQ-004",
+        "command": [
+          "sh",
+          "-c",
+          "cd rigorbreeze/scripts/tests && python3 -m unittest test_flow_v4.FlowV4Tests.test_doctor_repair_allows_archived_branch_history_with_active_primary_task",
+          "rigorbreeze/scripts/tests/test_flow_v4.py"
+        ],
+        "exitCode": 1,
+        "expectedPattern": "branch mismatch|duplicate worktree registration|FAIL",
+        "testDigests": {
+          "rigorbreeze/scripts/tests/test_flow_v4.py": "3abc6ba92040ca69949066826fe69b195c77b50cc77964eec6e259f9c932d888"
+        },
+        "summary": "\nstdout:\n{\"issues\": [\"TASK-718A branch mismatch: expected rigorbreeze/task-718a, found main\", \"duplicate worktree registration: /private/var/folders/3t/nfwgp77s1dgffqg752fg4b2m0000gn/T/tmpal0258m3\"], \"repairPlan\": {\"command\": \"python scripts/rigorbreeze.py doctor --all --repair --json\", \"sharedClosedWorktrees\": [], \"taskIds\": [\"TASK-718A\", \"TASK-718B\"], \"willWriteRegistry\": true}, \"status\": \"error\", \"tasks\": [{\"allowedScope\": [\"src/\"], \"archived\": true, \"baseBranch\": null, \"baseSha\": null, \"baselineStale\": false, \"branch\": \"rigorbreeze/task-718a\", \"createdAt\": null, \"createdPath\": null, \"dependsOn\": [], \"head\": \"3a7dd2f932ea2331535ad8f2680b4327accf9824\", \"lifecycle\": \"closed\", \"managedByFlow\": false, \"phase\": \"archived\", \"readiness\": \"integrated\", \"risk\": \"L0\", \"runtimeClaims\": [], \"runtimeConflicts\": [], \"taskId\": \"TASK-718A\", \"title\": \"fixture\", \"updatedAt\": \"2026-08-07T12:44:48+08:00\", \"worktree\": \"/private/var/folders/3t/nfwgp77s1dgffqg752fg4b2m0000gn/T/tmpal0258m3\", \"worktreeExists\": true}, {\"allowedScope\": [\"src/\"], \"archived\": false, \"baseBranch\": \"main\", \"baseSha\": \"3a7dd2f932ea2331535ad8f2680b4327accf9824\", \"baselineStale\": false, \"branch\": \"main\", \"createdAt\": null, \"createdPath\": null, \"dependsOn\": [], \"head\": \"3a7dd2f932ea2331535ad8f2680b4327accf9824\", \"lifecycle\": \"active\", \"managedByFlow\": false, \"phase\": \"draft\", \"readiness\": \"ready\", \"risk\": \"L0\", \"runtimeClaims\": [], \"runtimeConflicts\": [], \"taskId\": \"TASK-718B\", \"title\": \"active primary task\", \"updatedAt\": \"2026-08-07T12:44:48+08:00\", \"worktree\": \"/private/var/folders/3t/nfwgp77s1dgffqg752fg4b2m0000gn/T/tmpal0258m3\", \"worktreeExists\": true}], \"warnings\": [], \"workflowVersion\": 4}\n\nstderr:\nERROR: doctor found issues: TASK-718A branch mismatch: expected rigorbreeze/task-718a, found main; duplicate worktree registration: /private/var/folders/3t/nfwgp77s1dgffqg752fg4b2m0000gn/T/tmpal0258m3\n\n\n----------------------------------------------------------------------\nRan 1 test in 1.152s\n\nFAILED (failures=1)",
+        "taskDigest": "e7f99d9a595d27ffc8d9cca65a00b5204dc9a8d89f7127420190048dd928c415",
+        "projectFingerprint": "c3c0ca5e2b51457ff15d32ea7ab1023660161c133c6ceed5af808643c872bf34",
+        "head": "b81b5dd9a661c8c1285f86abf8224e2b2db52d8d",
+        "observedAt": "2026-08-07T12:44:48+08:00"
+      },
+      "green": null
+    },
+    {
+      "requirement": "REQ-001",
+      "red": {
+        "requirement": "REQ-001",
+        "command": [
+          "sh",
+          "-c",
+          "cd rigorbreeze/scripts/tests && python3 -m unittest test_flow_v3.FlowV3Tests.test_managed_cleanup_marks_every_task_that_shared_the_removed_worktree",
+          "rigorbreeze/scripts/tests/test_flow_v3.py"
+        ],
+        "exitCode": 1,
+        "expectedPattern": "TASK-404B|unmanaged|FAIL",
+        "testDigests": {
+          "rigorbreeze/scripts/tests/test_flow_v3.py": "01102917cf77ce68fdd53277ce444142ff493d7e449d1ed0360d5995a3f7949f"
+        },
+        "summary": "F\n======================================================================\nFAIL: test_managed_cleanup_marks_every_task_that_shared_the_removed_worktree (test_flow_v3.FlowV3Tests.test_managed_cleanup_marks_every_task_that_shared_the_removed_worktree)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/songjincheng/LinGang-housing/rigorbreeze/rigorbreeze/scripts/tests/test_flow_v3.py\", line 1192, in test_managed_cleanup_marks_every_task_that_shared_the_removed_worktree\n    self.assertEqual(result[\"retained\"], [])\n    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Lists differ: [{'reason': 'unmanaged', 'taskId': 'TASK-404B'}] != []\n\nFirst list contains 1 additional elements.\nFirst extra element 0:\n{'reason': 'unmanaged', 'taskId': 'TASK-404B'}\n\n- [{'reason': 'unmanaged', 'taskId': 'TASK-404B'}]\n+ []\n\n----------------------------------------------------------------------\nRan 1 test in 0.921s\n\nFAILED (failures=1)",
+        "taskDigest": "e7f99d9a595d27ffc8d9cca65a00b5204dc9a8d89f7127420190048dd928c415",
+        "projectFingerprint": "4f255550501fc5e73e5e9770ea4b5d532b486784565624d1dedceb55b280386e",
+        "head": "b81b5dd9a661c8c1285f86abf8224e2b2db52d8d",
+        "observedAt": "2026-08-07T12:46:23+08:00"
+      },
+      "green": {
+        "toolVersion": "0.10.2",
+        "profile": "full",
+        "configured": true,
+        "mode": "advisory",
+        "checks": [
+          "format",
+          "lint",
+          "unit",
+          "contract",
+          "secret",
+          "build",
+          "acceptance"
+        ],
+        "passed": true,
+        "taskDigest": "e7f99d9a595d27ffc8d9cca65a00b5204dc9a8d89f7127420190048dd928c415",
+        "projectFingerprint": "19ba7a697535aabe07c88e29f0891b49c6157723d1ce82f230848577f2ca0ce4",
+        "configDigest": "29e4313a1131a04a40744798b88740046122394a3b05daff60b9a73c50db1f43",
+        "head": "b81b5dd9a661c8c1285f86abf8224e2b2db52d8d",
+        "verifiedAt": "2026-08-07T12:49:18+08:00"
+      }
+    },
+    {
+      "requirement": "REQ-004",
+      "red": {
+        "requirement": "REQ-004",
+        "command": [
+          "sh",
+          "-c",
+          "cd rigorbreeze/scripts/tests && python3 -m unittest test_flow_v4.FlowV4Tests.test_doctor_repair_allows_archived_branch_history_with_active_primary_task",
+          "rigorbreeze/scripts/tests/test_flow_v4.py"
+        ],
+        "exitCode": 1,
+        "expectedPattern": "branch mismatch|duplicate worktree registration|FAIL",
+        "testDigests": {
+          "rigorbreeze/scripts/tests/test_flow_v4.py": "6f2e1f168336a4a7bc670baf928e8ca8a52d7bf40414a163dc7bd3480010722b"
+        },
+        "summary": "\nstdout:\n{\"issues\": [\"TASK-718A branch mismatch: expected rigorbreeze/task-718a, found main\", \"duplicate worktree registration: /private/var/folders/3t/nfwgp77s1dgffqg752fg4b2m0000gn/T/tmpzc9zt4b9\"], \"repairPlan\": {\"command\": \"python scripts/rigorbreeze.py doctor --all --repair --json\", \"sharedClosedWorktrees\": [], \"taskIds\": [\"TASK-718A\", \"TASK-718B\"], \"willWriteRegistry\": true}, \"status\": \"error\", \"tasks\": [{\"allowedScope\": [\"src/\"], \"archived\": true, \"baseBranch\": null, \"baseSha\": null, \"baselineStale\": false, \"branch\": \"rigorbreeze/task-718a\", \"createdAt\": null, \"createdPath\": null, \"dependsOn\": [], \"head\": \"59e4735c7efb93fcabb936b49be8467a879522f4\", \"lifecycle\": \"closed\", \"managedByFlow\": false, \"phase\": \"archived\", \"readiness\": \"integrated\", \"risk\": \"L0\", \"runtimeClaims\": [], \"runtimeConflicts\": [], \"taskId\": \"TASK-718A\", \"title\": \"fixture\", \"updatedAt\": \"2026-08-07T12:46:24+08:00\", \"worktree\": \"/private/var/folders/3t/nfwgp77s1dgffqg752fg4b2m0000gn/T/tmpzc9zt4b9\", \"worktreeExists\": true}, {\"allowedScope\": [\"src/\"], \"archived\": false, \"baseBranch\": \"main\", \"baseSha\": \"59e4735c7efb93fcabb936b49be8467a879522f4\", \"baselineStale\": false, \"branch\": \"main\", \"createdAt\": null, \"createdPath\": null, \"dependsOn\": [], \"head\": \"59e4735c7efb93fcabb936b49be8467a879522f4\", \"lifecycle\": \"active\", \"managedByFlow\": false, \"phase\": \"draft\", \"readiness\": \"ready\", \"risk\": \"L0\", \"runtimeClaims\": [], \"runtimeConflicts\": [], \"taskId\": \"TASK-718B\", \"title\": \"active primary task\", \"updatedAt\": \"2026-08-07T12:46:25+08:00\", \"worktree\": \"/private/var/folders/3t/nfwgp77s1dgffqg752fg4b2m0000gn/T/tmpzc9zt4b9\", \"worktreeExists\": true}], \"warnings\": [], \"workflowVersion\": 4}\n\nstderr:\nERROR: doctor found issues: TASK-718A branch mismatch: expected rigorbreeze/task-718a, found main; duplicate worktree registration: /private/var/folders/3t/nfwgp77s1dgffqg752fg4b2m0000gn/T/tmpzc9zt4b9\n\n\n----------------------------------------------------------------------\nRan 1 test in 1.142s\n\nFAILED (failures=1)",
+        "taskDigest": "e7f99d9a595d27ffc8d9cca65a00b5204dc9a8d89f7127420190048dd928c415",
+        "projectFingerprint": "4f255550501fc5e73e5e9770ea4b5d532b486784565624d1dedceb55b280386e",
+        "head": "b81b5dd9a661c8c1285f86abf8224e2b2db52d8d",
+        "observedAt": "2026-08-07T12:46:25+08:00"
+      },
+      "green": {
+        "toolVersion": "0.10.2",
+        "profile": "full",
+        "configured": true,
+        "mode": "advisory",
+        "checks": [
+          "format",
+          "lint",
+          "unit",
+          "contract",
+          "secret",
+          "build",
+          "acceptance"
+        ],
+        "passed": true,
+        "taskDigest": "e7f99d9a595d27ffc8d9cca65a00b5204dc9a8d89f7127420190048dd928c415",
+        "projectFingerprint": "19ba7a697535aabe07c88e29f0891b49c6157723d1ce82f230848577f2ca0ce4",
+        "configDigest": "29e4313a1131a04a40744798b88740046122394a3b05daff60b9a73c50db1f43",
+        "head": "b81b5dd9a661c8c1285f86abf8224e2b2db52d8d",
+        "verifiedAt": "2026-08-07T12:49:18+08:00"
+      }
+    }
+  ],
+  "artifacts": [
+    {
+      "kind": "build",
+      "path": "artifacts/rigorbreeze.zip",
+      "sha256": "e6d9bc861cb4849dcf8e6b9c2667e25dc22a515c3dae86f58261faa2c90e0877",
+      "size": 140314,
+      "head": "b81b5dd9a661c8c1285f86abf8224e2b2db52d8d",
+      "taskDigest": "1eae591baba24905a0385693cb70f62802c37837d619decf45222a9cc19db7d4",
+      "projectFingerprint": "e8eea6795c044d5e169e0f6dd47e6a8824885fa4cb42816f0fed5f944a1b89bb",
+      "recordedAt": "2026-08-07T12:42:42+08:00"
+    },
+    {
+      "kind": "build",
+      "path": "artifacts/rigorbreeze.zip",
+      "sha256": "7eab38edb22d1416bf7dbcc22d0a421f5d530f0db4be1465a4a62fab125e5887",
+      "size": 140318,
+      "head": "b81b5dd9a661c8c1285f86abf8224e2b2db52d8d",
+      "taskDigest": "e7f99d9a595d27ffc8d9cca65a00b5204dc9a8d89f7127420190048dd928c415",
+      "projectFingerprint": "19ba7a697535aabe07c88e29f0891b49c6157723d1ce82f230848577f2ca0ce4",
+      "recordedAt": "2026-08-07T12:49:18+08:00"
+    }
+  ],
+  "acceptance": [
+    {
+      "kind": "review",
+      "fields": {
+        "status": "passed",
+        "reviewer": "codex-scope-review"
+      },
+      "taskDigest": "e7f99d9a595d27ffc8d9cca65a00b5204dc9a8d89f7127420190048dd928c415",
+      "projectFingerprint": "19ba7a697535aabe07c88e29f0891b49c6157723d1ce82f230848577f2ca0ce4",
+      "head": "b81b5dd9a661c8c1285f86abf8224e2b2db52d8d",
+      "artifactDigests": [
+        "7eab38edb22d1416bf7dbcc22d0a421f5d530f0db4be1465a4a62fab125e5887"
+      ],
+      "recordedAt": "2026-08-07T12:50:25+08:00",
+      "path": "rigorbreeze/scripts/tests/test_flow_v3.py",
+      "sha256": "01102917cf77ce68fdd53277ce444142ff493d7e449d1ed0360d5995a3f7949f",
+      "size": 65121
+    },
+    {
+      "kind": "review",
+      "fields": {
+        "status": "passed",
+        "reviewer": "codex-quality-review"
+      },
+      "taskDigest": "e7f99d9a595d27ffc8d9cca65a00b5204dc9a8d89f7127420190048dd928c415",
+      "projectFingerprint": "19ba7a697535aabe07c88e29f0891b49c6157723d1ce82f230848577f2ca0ce4",
+      "head": "b81b5dd9a661c8c1285f86abf8224e2b2db52d8d",
+      "artifactDigests": [
+        "7eab38edb22d1416bf7dbcc22d0a421f5d530f0db4be1465a4a62fab125e5887"
+      ],
+      "recordedAt": "2026-08-07T12:50:25+08:00",
+      "path": "rigorbreeze/scripts/tests/test_flow_v4.py",
+      "sha256": "6f2e1f168336a4a7bc670baf928e8ca8a52d7bf40414a163dc7bd3480010722b",
+      "size": 42046
+    }
+  ],
+  "release": [],
+  "automation": [],
+  "practice": {
+    "confirmation": {
+      "reworkReason": "mixed",
+      "exceptions": "Initial RED invocation used the wrong import context and was discarded; contract scope and formatted test digests were corrected before final verification; no gate bypass.",
+      "workflowImpact": "helped",
+      "evolutionCandidate": true,
+      "summaryDigest": "43bee581202449d3eba68c3458768b5df8dd6a3da6fe14fa40fb2f6bf1fa9f10",
+      "taskDigest": "e7f99d9a595d27ffc8d9cca65a00b5204dc9a8d89f7127420190048dd928c415",
+      "projectFingerprint": "19ba7a697535aabe07c88e29f0891b49c6157723d1ce82f230848577f2ca0ce4",
+      "confirmedAt": "2026-08-07T12:50:45+08:00"
+    },
+    "events": [],
+    "summary": {
+      "taskId": "RB-MANAGED-CLEANUP-0102",
+      "risk": "L1",
+      "verificationRuns": 2,
+      "checkRuns": 14,
+      "checkDurationMs": 281117,
+      "failedChecks": [
+        "unit"
+      ],
+      "failureCategories": [
+        "behavior"
+      ],
+      "potentialBypasses": [
+        "unit"
+      ],
+      "firstAcceptancePassed": true,
+      "acceptanceRecords": 2,
+      "estimatedReworkSeconds": 396,
+      "practiceEvents": [],
+      "generatedAt": "2026-08-07T12:50:45+08:00",
+      "summaryDigest": "43bee581202449d3eba68c3458768b5df8dd6a3da6fe14fa40fb2f6bf1fa9f10"
+    }
+  },
+  "closure": {
+    "outcome": "completed",
+    "reason": null,
+    "closedAt": "2026-08-07T12:50:56+08:00",
+    "head": "b81b5dd9a661c8c1285f86abf8224e2b2db52d8d",
+    "branch": "main",
+    "originalPhase": "accepted",
+    "integrationProof": null,
+    "verificationStatus": "current",
+    "practiceEvents": [
+      "closure-pending-commit"
+    ],
+    "unrelatedChanges": []
+  },
+  "verification": {
+    "toolVersion": "0.10.2",
+    "profile": "full",
+    "configured": true,
+    "mode": "advisory",
+    "checks": [
+      "format",
+      "lint",
+      "unit",
+      "contract",
+      "secret",
+      "build",
+      "acceptance"
+    ],
+    "passed": true,
+    "taskDigest": "e7f99d9a595d27ffc8d9cca65a00b5204dc9a8d89f7127420190048dd928c415",
+    "projectFingerprint": "19ba7a697535aabe07c88e29f0891b49c6157723d1ce82f230848577f2ca0ce4",
+    "configDigest": "29e4313a1131a04a40744798b88740046122394a3b05daff60b9a73c50db1f43",
+    "head": "b81b5dd9a661c8c1285f86abf8224e2b2db52d8d",
+    "verifiedAt": "2026-08-07T12:49:18+08:00"
+  }
+}

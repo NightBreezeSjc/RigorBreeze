@@ -2384,7 +2384,7 @@ def command_doctor(
             aggregate = flow_parallel.aggregate(root)
             tasks = aggregate["tasks"]
             issues.extend(aggregate["issues"])
-            seen_worktrees: dict[str, bool] = {}
+            active_worktrees: set[str] = set()
             for task in tasks:
                 worktree = str(task.get("worktree", ""))
                 if (
@@ -2395,14 +2395,12 @@ def command_doctor(
                     issues.append(
                         f"{task.get('taskId')} worktree is missing: {worktree}"
                     )
-                if worktree in seen_worktrees and not (
-                    seen_worktrees[worktree] and task.get("archived")
-                ):
-                    issues.append(f"duplicate worktree registration: {worktree}")
-                if worktree:
-                    seen_worktrees[worktree] = bool(task.get("archived"))
+                if worktree and not task.get("archived"):
+                    if worktree in active_worktrees:
+                        issues.append(f"duplicate worktree registration: {worktree}")
+                    active_worktrees.add(worktree)
                 expected = task.get("branch")
-                if task.get("worktreeExists") and expected:
+                if task.get("worktreeExists") and expected and not task.get("archived"):
                     actual = flow_parallel.branch_name(Path(worktree))
                     if actual != expected:
                         issues.append(

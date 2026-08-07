@@ -145,7 +145,7 @@ artifacts = ["artifacts/app.bin"]
         runner = self.root / "scripts" / "flow_state.py"
         runner.write_text(
             runner.read_text(encoding="utf-8").replace(
-                'TOOL_VERSION = "0.10.1"', 'TOOL_VERSION = "0.5.1"'
+                'TOOL_VERSION = "0.10.2"', 'TOOL_VERSION = "0.5.1"'
             ),
             encoding="utf-8",
         )
@@ -155,7 +155,7 @@ artifacts = ["artifacts/app.bin"]
             status["installation"],
             {
                 "runnerVersion": "0.5.1",
-                "skillVersion": "0.10.1",
+                "skillVersion": "0.10.2",
                 "status": "outdated",
                 "upgradeSafe": False,
                 "missingComponents": [],
@@ -178,7 +178,7 @@ artifacts = ["artifacts/app.bin"]
         self.run_flow("init")
         self.assertTrue(runner.is_file())
         self.assertIn(
-            'TOOL_VERSION = "0.10.1"',
+            'TOOL_VERSION = "0.10.2"',
             (self.root / "scripts" / "flow_state.py").read_text(encoding="utf-8"),
         )
 
@@ -1074,6 +1074,72 @@ command = {json.dumps([sys.executable, "-c", "print('passed')"])}
         self.assertTrue(tasks["TASK-718"]["archived"])
         self.assertTrue(tasks["TASK-719"]["archived"])
         self.assertEqual(tasks["TASK-718"]["worktree"], tasks["TASK-719"]["worktree"])
+
+    def test_doctor_repair_allows_archived_branch_history_with_active_primary_task(
+        self,
+    ) -> None:
+        self.init_git()
+        subprocess.run(["git", "branch", "-M", "main"], cwd=self.root, check=True)
+        self.run_flow("init")
+        self.commit_all("install workflow")
+        created = self.run_flow(
+            "new",
+            "TASK-718A",
+            "--title",
+            "closed branch history",
+            "--risk",
+            "L0",
+            "--worktree",
+            "auto",
+        )
+        worktree = Path(created.stdout.split("worktree: ", 1)[1].splitlines()[0])
+        self.write_task("TASK-718A", root=worktree)
+        self.run_at(
+            worktree,
+            "archive",
+            "--outcome",
+            "abandoned",
+            "--reason",
+            "fixture task ended before implementation",
+        )
+        subprocess.run(["git", "add", "spec"], cwd=worktree, check=True)
+        subprocess.run(
+            ["git", "commit", "-qm", "close branch fixture"],
+            cwd=worktree,
+            check=True,
+        )
+        subprocess.run(
+            ["git", "merge", "--ff-only", "rigorbreeze/task-718a"],
+            cwd=self.root,
+            check=True,
+            capture_output=True,
+        )
+        subprocess.run(
+            ["git", "worktree", "remove", str(worktree)],
+            cwd=self.root,
+            check=True,
+            capture_output=True,
+        )
+
+        self.run_flow(
+            "new",
+            "TASK-718B",
+            "--title",
+            "active primary task",
+            "--risk",
+            "L0",
+        )
+        self.write_task("TASK-718B")
+        self.registry_path().write_text("{broken", encoding="utf-8")
+
+        repaired = json.loads(
+            self.run_flow("doctor", "--all", "--repair", "--json").stdout
+        )
+        tasks = {item["taskId"]: item for item in repaired["tasks"]}
+        self.assertEqual(set(tasks), {"TASK-718A", "TASK-718B"})
+        self.assertTrue(tasks["TASK-718A"]["archived"])
+        self.assertFalse(tasks["TASK-718B"]["archived"])
+        self.assertEqual(tasks["TASK-718A"]["worktree"], tasks["TASK-718B"]["worktree"])
 
     def test_doctor_json_previews_registry_repair_before_mutation(self) -> None:
         self.init_git()

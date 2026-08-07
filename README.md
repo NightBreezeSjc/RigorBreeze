@@ -13,7 +13,7 @@ English · [简体中文](README.zh-CN.md)
 
 RigorBreeze turns a rough initiative or bounded request into an approved task contract, observed TDD evidence, configured quality checks, real-runtime acceptance, and a recoverable delivery record. It is deliberately smaller than a full project-management system: one task Markdown, one machine evidence file, and no document maze.
 
-> **Public Preview:** v0.10.1 is usable today and closes real-delivery gaps around initiative shaping, workflow baselines, stale integrated tasks, unapproved delivery bypasses, post-archive delivery, incomplete or compound prompts, repeated external operations, Agent behavior under pressure, and avoidable local verification friction. It has not yet completed the validation required for v1.0, so interfaces may still change in response to further delivery evidence.
+> **Public Preview:** v0.10.2 is usable today and closes real-delivery gaps around initiative shaping, workflow baselines, stale integrated tasks, unapproved delivery bypasses, post-archive delivery, incomplete or compound prompts, repeated external operations, Agent behavior under pressure, and avoidable local verification friction. It has not yet completed the validation required for v1.0, so interfaces may still change in response to further delivery evidence.
 
 ## Why this exists
 
@@ -130,7 +130,7 @@ Before approval, RigorBreeze checks the task for placeholders, contradictions, a
 
 Allowed Scope entries are repository-relative paths, directory prefixes, or globs; `*` matches one path segment and `**` crosses directories. Acceptance criteria use unique machine-readable IDs. A contract cannot be reapproved over production changes: restore the approved contract and finish, or revert those changes before amending the same outcome. A new user outcome or acceptance condition becomes a dependent slice.
 
-After initialization and project-check configuration, establish a human-controlled Git baseline before the first enforced L1/L2 approval. `status --json` reports the exact base-branch state under `workflowBaseline`. When the user explicitly authorizes it, Codex may run `automate commit --once --workflow-baseline --expected-head <SHA>`; it stages only managed workflow files, rejects mixed product changes and secrets, and does not persist Git authority. The installed Skill always checks through its bundled v0.10.1 runner, reports missing or modified components separately, and does not overwrite it while an implementation task is active. If delivery files change while the task is unapproved, status reports `workflowBypass=detected`, records one deduplicated evolution candidate, and directs an honest restore or reconciled close instead of permitting a fabricated RED or new baseline.
+After initialization and project-check configuration, establish a human-controlled Git baseline before the first enforced L1/L2 approval. `status --json` reports the exact base-branch state under `workflowBaseline`. When the user explicitly authorizes it, Codex may run `automate commit --once --workflow-baseline --expected-head <SHA>`; it stages only managed workflow files, rejects mixed product changes and secrets, and does not persist Git authority. The installed Skill always checks through its bundled v0.10.2 runner, reports missing or modified components separately, and does not overwrite it while an implementation task is active. If delivery files change while the task is unapproved, status reports `workflowBypass=detected`, records one deduplicated evolution candidate, and directs an honest restore or reconciled close instead of permitting a fabricated RED or new baseline.
 
 After initialization, the project contains:
 
@@ -257,7 +257,7 @@ For a manual install, remove only the `rigorbreeze` directory or symlink from yo
 
 ## Public Preview and v1.0
 
-v0.10.1 keeps the minimal Spec Tree and existing command surface while making lifecycle repair executable and lossless. The same registered integration proof now drives both status and reconciled archive; registry repair recovers every archived task even when several tasks used one worktree, and JSON doctor failures include a repair preview before any mutation. Mixed product changes and unmanaged cleanup retain conservative proof. Maturity beyond preview must still come from repeated real use rather than more features.
+v0.10.2 keeps the minimal Spec Tree and existing command surface while closing the final shared-worktree repair edge found during three-repository governance. A successful managed cleanup marks every historical record for the removed path, and doctor repair distinguishes sequential archived history from duplicate active ownership without comparing historical branches to the current primary branch. Mixed product changes and unmanaged cleanup retain conservative proof. Maturity beyond preview must still come from repeated real use rather than more features.
 
 Before v1.0, the workflow must complete and learn from:
 

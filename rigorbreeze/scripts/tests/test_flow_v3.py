@@ -1139,6 +1139,72 @@ artifacts = ["artifacts/app.bin"]
         doctor = json.loads(self.run_flow("doctor", "--all", "--json").stdout)
         self.assertEqual(doctor["status"], "ok")
 
+    def test_managed_cleanup_marks_every_task_that_shared_the_removed_worktree(
+        self,
+    ) -> None:
+        self.init_git()
+        subprocess.run(["git", "branch", "-M", "main"], cwd=self.root, check=True)
+        self.run_flow("init")
+        self.commit_all("install flow")
+        self.run_flow(
+            "new",
+            "TASK-404A",
+            "--title",
+            "managed cleanup owner",
+            "--risk",
+            "L0",
+            "--worktree",
+            "auto",
+        )
+        task = json.loads(self.run_flow("status", "--all", "--json").stdout)["tasks"][0]
+        worktree = Path(task["worktree"])
+        self.write_task(worktree, "TASK-404A", "src")
+        (worktree / "src").mkdir()
+        (worktree / "src" / "value.txt").write_text("value\n", encoding="utf-8")
+        subprocess.run(["git", "add", "."], cwd=worktree, check=True)
+        subprocess.run(
+            ["git", "commit", "-qm", "task change"], cwd=worktree, check=True
+        )
+        subprocess.run(
+            ["git", "merge", "--ff-only", "rigorbreeze/task-404a"],
+            cwd=self.root,
+            check=True,
+            capture_output=True,
+        )
+
+        registry = json.loads(self.registry_path().read_text(encoding="utf-8"))
+        registry["tasks"]["TASK-404A"]["archived"] = True
+        historical = dict(registry["tasks"]["TASK-404A"])
+        historical.update(
+            {
+                "taskId": "TASK-404B",
+                "archived": True,
+                "integrated": True,
+                "managedByFlow": False,
+                "createdPath": None,
+            }
+        )
+        registry["tasks"]["TASK-404B"] = historical
+        self.registry_path().write_text(json.dumps(registry), encoding="utf-8")
+
+        result = json.loads(self.run_flow("reconcile", "--cleanup").stdout)
+        self.assertEqual(result["removed"], ["TASK-404A"])
+        self.assertEqual(result["retained"], [])
+        self.assertFalse(worktree.exists())
+        repaired = json.loads(self.registry_path().read_text(encoding="utf-8"))
+        self.assertTrue(repaired["tasks"]["TASK-404A"]["worktreeRemoved"])
+        self.assertTrue(repaired["tasks"]["TASK-404B"]["worktreeRemoved"])
+        doctor = json.loads(self.run_flow("doctor", "--all", "--json").stdout)
+        self.assertEqual(doctor["status"], "ok")
+        self.assertEqual(
+            subprocess.run(
+                ["git", "show-ref", "--verify", "refs/heads/rigorbreeze/task-404a"],
+                cwd=self.root,
+                capture_output=True,
+            ).returncode,
+            0,
+        )
+
     def test_patch_equivalent_cherry_pick_is_integrated_and_cleanup_safe(self) -> None:
         self.init_git()
         subprocess.run(["git", "branch", "-M", "main"], cwd=self.root, check=True)

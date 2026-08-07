@@ -607,7 +607,13 @@ def reconcile_integrations(root: Path, cleanup: bool = False) -> dict[str, Any]:
             continue
         result = git(root, "worktree", "remove", str(worktree))
         if result.returncode == 0:
-            task["worktreeRemoved"] = True
+            for related in registry["tasks"].values():
+                related_worktree = related.get("worktree")
+                if (
+                    related_worktree
+                    and Path(str(related_worktree)).resolve() == worktree
+                ):
+                    related["worktreeRemoved"] = True
             removed.append(task_id)
         else:
             retained.append({"taskId": task_id, "reason": "remove-failed"})

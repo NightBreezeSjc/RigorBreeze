@@ -25,6 +25,18 @@ The project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). 
 - Reframed the repository for first-time adopters with bilingual onboarding, explicit safety boundaries, and a complete first-task walkthrough.
 - Added concise contribution and security policies plus an MIT license.
 
+## [0.10.2] - Shared worktree repair consistency
+
+### Fixed
+
+- Mark every registry record that references an exactly matched managed worktree as removed after Git confirms the physical cleanup, preventing later projections from entering a deleted directory.
+- Treat archived records and the current active task in one primary worktree as sequential history rather than duplicate active ownership.
+- Skip current-branch mismatch checks for archived historical records reconstructed after their original worktree was removed; duplicate active tasks remain blocked.
+
+### Compatibility
+
+- Public CLI, schema v4, automation journal v1, Spec Tree, dependencies, branch-retention policy, and Git authority are unchanged.
+
 ## [0.10.1] - Lossless historical repair
 
 ### Fixed
