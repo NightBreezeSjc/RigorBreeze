@@ -1324,6 +1324,60 @@ artifacts = ["artifacts/app.bin"]
             "patch-equivalent",
         )
 
+        archived = subprocess.run(
+            [
+                *self.flow_command()[:3],
+                str(worktree),
+                "archive",
+                "--outcome",
+                "reconciled",
+                "--reason",
+                "Product patch is integrated; preserve incomplete workflow evidence.",
+                "--expected-head",
+                product_head,
+            ],
+            text=True,
+            encoding="utf-8",
+            capture_output=True,
+        )
+        self.assertEqual(archived.returncode, 0, archived.stderr)
+        closed = json.loads(self.run_flow("status", "--all", "--json").stdout)
+        self.assertEqual(closed["tasks"][0]["lifecycle"], "closed")
+        subprocess.run(["git", "add", "spec"], cwd=worktree, check=True)
+        subprocess.run(
+            ["git", "commit", "-qm", "close workflow record"],
+            cwd=worktree,
+            check=True,
+        )
+        closed_head = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=worktree,
+            text=True,
+            capture_output=True,
+            check=True,
+        ).stdout.strip()
+        registry = json.loads(self.registry_path().read_text(encoding="utf-8"))
+        registry["tasks"]["TASK-413"]["managedByFlow"] = False
+        registry["tasks"]["TASK-413"]["createdPath"] = None
+        self.registry_path().write_text(json.dumps(registry), encoding="utf-8")
+        self.run_flow(
+            "reconcile",
+            "--cleanup",
+            "--worktree",
+            str(worktree),
+            "--base",
+            "main",
+            "--expected-head",
+            closed_head,
+            "--allow-unmanaged",
+        )
+        self.assertFalse(worktree.exists())
+        doctor = json.loads(self.run_flow("doctor", "--all", "--json").stdout)
+        repaired_task = next(
+            item for item in doctor["tasks"] if item["taskId"] == "TASK-413"
+        )
+        self.assertFalse(repaired_task["worktreeExists"])
+
     def test_mixed_product_commit_remains_not_integrated(self) -> None:
         self.init_git()
         subprocess.run(["git", "branch", "-M", "main"], cwd=self.root, check=True)

@@ -2213,8 +2213,8 @@ def command_archive(
                 )
             integration_proof = "confirmed-on-base-head"
         else:
-            integration_proof = flow_parallel.integration_status(
-                root, branch, base, active.get("baseSha")
+            integration_proof = flow_parallel.registered_integration_status(
+                root, active
             )
             if integration_proof not in {"contained", "patch-equivalent"}:
                 raise FlowError(
@@ -2378,12 +2378,13 @@ def command_doctor(
             except FlowError as exc:
                 issues.append(str(exc))
     tasks: list[dict[str, Any]] = []
+    repair_plan: dict[str, Any] | None = None
     if all_worktrees and is_git_repo(root):
         try:
             aggregate = flow_parallel.aggregate(root)
             tasks = aggregate["tasks"]
             issues.extend(aggregate["issues"])
-            seen_worktrees: set[str] = set()
+            seen_worktrees: dict[str, bool] = {}
             for task in tasks:
                 worktree = str(task.get("worktree", ""))
                 if (
@@ -2394,9 +2395,12 @@ def command_doctor(
                     issues.append(
                         f"{task.get('taskId')} worktree is missing: {worktree}"
                     )
-                if worktree in seen_worktrees:
+                if worktree in seen_worktrees and not (
+                    seen_worktrees[worktree] and task.get("archived")
+                ):
                     issues.append(f"duplicate worktree registration: {worktree}")
-                seen_worktrees.add(worktree)
+                if worktree:
+                    seen_worktrees[worktree] = bool(task.get("archived"))
                 expected = task.get("branch")
                 if task.get("worktreeExists") and expected:
                     actual = flow_parallel.branch_name(Path(worktree))
@@ -2407,7 +2411,25 @@ def command_doctor(
                         )
         except flow_parallel.ParallelError as exc:
             issues.append(str(exc))
+        try:
+            repair_plan = flow_parallel.registry_repair_plan(root)
+        except flow_parallel.ParallelError as exc:
+            warnings.append(f"registry repair preview unavailable: {exc}")
     if issues:
+        if json_output:
+            print(
+                json.dumps(
+                    {
+                        "status": "error",
+                        "issues": sorted(set(issues)),
+                        "warnings": warnings,
+                        "workflowVersion": VERSION,
+                        "tasks": tasks if all_worktrees else None,
+                        "repairPlan": repair_plan,
+                    },
+                    sort_keys=True,
+                )
+            )
         raise FlowError("doctor found issues: " + "; ".join(issues))
     if json_output:
         print(
@@ -2418,6 +2440,7 @@ def command_doctor(
                     "warnings": warnings,
                     "workflowVersion": VERSION,
                     "tasks": tasks if all_worktrees else None,
+                    **({"repairPlan": repair_plan} if repair else {}),
                 },
                 sort_keys=True,
             )

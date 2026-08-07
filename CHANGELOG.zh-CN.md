@@ -26,6 +26,19 @@ RigorBreeze 的重要变更都会记录在本文档中。
 - 增加精简的贡献指南、安全策略和 MIT 许可证。
 - 为全部用户文档和 Skill 参考文档建立中文版本及一致性检查。
 
+## [0.10.1] - 历史状态无损修复
+
+### 修复
+
+- `integrated-unclosed` 状态与 `archive --outcome reconciled` 统一使用已登记集成证明，确保只剩白名单工作流提交时，建议的安全收口动作能够真实执行。
+- 从全部归档合同和证据重建 Git 私有注册表，保留历史上合法共享同一 worktree 的多条已关闭任务。
+- 允许多个已关闭任务引用同一保留 worktree，同时继续阻断重复的活动写入所有权。
+- JSON doctor 阻断时先输出机器可读修复计划，再由用户显式执行 `doctor --all --repair --json` 修改可重建索引。
+
+### 兼容性
+
+- 公共 CLI、schema v4、automation journal v1、Spec Tree、依赖和 Git 权限均不改变。
+
 ## [0.10.0] - 项目塑形与生命周期真实性
 
 ### 新增

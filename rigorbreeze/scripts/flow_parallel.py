@@ -283,9 +283,36 @@ def mark_managed_worktree(root: Path, task_id: str, worktree: Path) -> None:
     save_registry(root, registry)
 
 
-def rebuild_registry(root: Path) -> dict[str, Any]:
+def archived_task_metadata(path: Path) -> dict[str, Any]:
+    content = path.read_text(encoding="utf-8", errors="replace")
+    heading = re.search(r"(?m)^#\s+[^:]+:\s*(.+?)\s*$", content)
+    risk = re.search(r"(?m)^Risk:\s*(\S+)\s*$", content)
+    dependencies = re.search(r"(?m)^Depends-On:\s*(.+?)\s*$", content)
+    scopes: list[str] = []
+    match = re.search(r"(?ms)^## Allowed scope\s*$\n(.*?)(?=^## |\Z)", content)
+    if match:
+        for line in match.group(1).splitlines():
+            value = re.sub(r"^\s*[-*]\s+", "", line).strip().strip("`")
+            if value:
+                scopes.append(value.replace("\\", "/"))
+    depends_on: list[str] = []
+    if dependencies and dependencies.group(1).strip().lower() not in {"", "none"}:
+        depends_on = [
+            item.strip() for item in dependencies.group(1).split(",") if item.strip()
+        ]
+    return {
+        "title": heading.group(1).strip() if heading else None,
+        "risk": risk.group(1).strip() if risk else None,
+        "dependsOn": depends_on,
+        "allowedScope": scopes,
+        "runtimeClaims": parse_runtime_claims(content),
+    }
+
+
+def rebuild_registry(root: Path, *, persist: bool = True) -> dict[str, Any]:
     registry: dict[str, Any] = {"version": 1, "tasks": {}}
-    for item in worktrees(root):
+    worktree_items = worktrees(root)
+    for item in worktree_items:
         worktree_value = item.get("worktree")
         if not worktree_value:
             continue
@@ -332,8 +359,87 @@ def rebuild_registry(root: Path) -> dict[str, Any]:
             "archived": state.get("phase") == "archived",
         }
         registry["tasks"][task_id] = entry
-    save_registry(root, registry)
+
+    branch_worktrees = {
+        item.get("branch", "").removeprefix("refs/heads/"): item
+        for item in worktree_items
+        if item.get("branch") and item.get("worktree")
+    }
+    for worktree_value in dict.fromkeys(
+        item.get("worktree") for item in worktree_items if item.get("worktree")
+    ):
+        worktree = Path(str(worktree_value))
+        archive_dir = worktree / "spec" / "archive"
+        if not archive_dir.is_dir():
+            continue
+        for task_file in sorted(archive_dir.glob("*.md")):
+            task_id = task_file.stem
+            metadata = archived_task_metadata(task_file)
+            evidence_file = worktree / "spec" / "evidence" / f"{task_id}.json"
+            evidence: dict[str, Any] = {}
+            if evidence_file.is_file():
+                try:
+                    loaded = json.loads(evidence_file.read_text(encoding="utf-8"))
+                    if isinstance(loaded, dict):
+                        evidence = loaded
+                except (OSError, json.JSONDecodeError):
+                    pass
+            closure = evidence.get("closure") or {}
+            branch = closure.get("branch")
+            matched = branch_worktrees.get(branch) if branch else None
+            existing = registry["tasks"].get(task_id, {})
+            target_worktree = Path(
+                str(
+                    (matched or {}).get("worktree")
+                    or existing.get("worktree")
+                    or worktree
+                )
+            )
+            baseline = evidence.get("baseline") or {}
+            registry["tasks"][task_id] = {
+                **existing,
+                "taskId": task_id,
+                "title": existing.get("title") or metadata["title"],
+                "risk": existing.get("risk") or metadata["risk"],
+                "phase": "archived",
+                "dependsOn": existing.get("dependsOn") or metadata["dependsOn"],
+                "worktree": str(target_worktree.resolve()),
+                "branch": branch or existing.get("branch"),
+                "baseBranch": existing.get("baseBranch"),
+                "baseSha": existing.get("baseSha") or baseline.get("head"),
+                "head": closure.get("head") or existing.get("head"),
+                "allowedScope": existing.get("allowedScope")
+                or metadata["allowedScope"],
+                "runtimeClaims": [],
+                "managedByFlow": existing.get("managedByFlow", False),
+                "createdPath": existing.get("createdPath"),
+                "createdAt": existing.get("createdAt"),
+                "updatedAt": closure.get("closedAt") or existing.get("updatedAt"),
+                "archived": True,
+            }
+    if persist:
+        save_registry(root, registry)
     return registry
+
+
+def registry_repair_plan(root: Path) -> dict[str, Any]:
+    candidate = rebuild_registry(root, persist=False)
+    shared: dict[str, list[str]] = {}
+    for task_id, task in candidate["tasks"].items():
+        worktree = str(task.get("worktree") or "")
+        if worktree:
+            shared.setdefault(worktree, []).append(task_id)
+    return {
+        "command": "python scripts/rigorbreeze.py doctor --all --repair --json",
+        "taskIds": sorted(candidate["tasks"]),
+        "sharedClosedWorktrees": [
+            {"worktree": worktree, "taskIds": sorted(task_ids)}
+            for worktree, task_ids in sorted(shared.items())
+            if len(task_ids) > 1
+            and all(candidate["tasks"][task_id].get("archived") for task_id in task_ids)
+        ],
+        "willWriteRegistry": True,
+    }
 
 
 def default_session_id() -> str:
@@ -600,6 +706,38 @@ def registered_integration_status(root: Path, task: dict[str, Any]) -> str:
     return "patch-equivalent"
 
 
+def archived_worktree_integration_status(
+    root: Path,
+    tasks: list[dict[str, Any]],
+    branch: str | None,
+    base: str,
+) -> str:
+    proof = integration_status(root, branch, base)
+    if proof != "not-integrated" or not branch:
+        return proof
+    if not tasks or any(not task.get("archived") for task in tasks):
+        return proof
+    common = git(root, "merge-base", branch, base)
+    if common.returncode != 0 or not common.stdout.strip():
+        return "unknown"
+    cherry = git(root, "cherry", base, branch, common.stdout.strip())
+    if cherry.returncode != 0:
+        return "unknown"
+    patches = [line.strip() for line in cherry.stdout.splitlines() if line.strip()]
+    if not any(line.startswith("- ") for line in patches):
+        return "not-integrated"
+    allowed: set[str] = set()
+    for task in tasks:
+        allowed.update(
+            workflow_metadata_commit_paths(str(task.get("taskId") or task.get("id")))
+        )
+    for commit in (line[2:].strip() for line in patches if line.startswith("+ ")):
+        paths = commit_paths(root, commit)
+        if not paths or any(path not in allowed for path in paths):
+            return "not-integrated"
+    return "patch-equivalent"
+
+
 def cleanup_unmanaged_worktree(
     root: Path,
     *,
@@ -640,7 +778,18 @@ def cleanup_unmanaged_worktree(
         if state.get("activeTask"):
             raise ParallelError("unmanaged worktree still has an active private task")
     branch = actual.get("branch", "").removeprefix("refs/heads/") or None
-    proof = integration_status(root, branch, base)
+    try:
+        registry = load_registry(root)
+    except ParallelError:
+        registry = None
+    registered = [
+        task
+        for task in (registry or {"tasks": {}})["tasks"].values()
+        if task.get("worktree")
+        and Path(str(task["worktree"])).resolve() == target
+        and (not task.get("branch") or task.get("branch") == branch)
+    ]
+    proof = archived_worktree_integration_status(root, registered, branch, base)
     if proof not in {"contained", "patch-equivalent"}:
         raise ParallelError(
             f"unmanaged worktree is not proven integrated into {base}: {proof}"
@@ -648,6 +797,12 @@ def cleanup_unmanaged_worktree(
     result = git(root, "worktree", "remove", str(target))
     if result.returncode != 0:
         raise ParallelError(result.stderr.strip() or "unable to remove worktree")
+    if registry is not None:
+        for task in registry["tasks"].values():
+            worktree_value = task.get("worktree")
+            if worktree_value and Path(str(worktree_value)).resolve() == target:
+                task["worktreeRemoved"] = True
+        save_registry(root, registry)
     return {
         "integrated": [],
         "removed": [str(target)],

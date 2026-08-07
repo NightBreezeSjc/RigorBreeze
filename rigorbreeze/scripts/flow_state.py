@@ -17,7 +17,7 @@ from typing import Any, Iterable
 import flow_parallel
 
 VERSION = 4
-TOOL_VERSION = "0.10.0"
+TOOL_VERSION = "0.10.1"
 SPEC_DIR = "spec"
 CONFIG_NAME = "rigorbreeze.toml"
 MODES = ("advisory", "enforced")

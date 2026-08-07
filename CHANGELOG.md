@@ -25,6 +25,19 @@ The project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). 
 - Reframed the repository for first-time adopters with bilingual onboarding, explicit safety boundaries, and a complete first-task walkthrough.
 - Added concise contribution and security policies plus an MIT license.
 
+## [0.10.1] - Lossless historical repair
+
+### Fixed
+
+- Use the same registered integration proof for `integrated-unclosed` status and `archive --outcome reconciled`, so the suggested safe closure is executable when only allowlisted workflow commits remain.
+- Rebuild the Git-private registry from every archived contract and evidence record, preserving multiple closed tasks that legitimately shared one historical worktree.
+- Allow multiple closed task records to reference one preserved worktree while continuing to block duplicate active ownership.
+- Emit a machine-readable registry repair plan on JSON doctor failures before `doctor --all --repair --json` mutates the disposable index.
+
+### Compatibility
+
+- Public CLI, schema v4, automation journal v1, Spec Tree, dependencies, and Git authority are unchanged.
+
 ## [0.10.0] - Initiative shaping and lifecycle truth
 
 ### Added

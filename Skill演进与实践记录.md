@@ -337,6 +337,14 @@ v0.10.0 只修复这两个 P0 闭环。当前与全 worktree status 会在活动
 
 “多个历史任务与 partial baseline 的统一收口顺序”和“重复注册的预览修复计划”继续作为 P1 验证候选，不因一次审计直接进入核心。下一步先用 v0.10.0 对三仓执行状态治理，观察新投影是否准确、是否产生误判，再决定是否需要更高层的采用流程。
 
+### 第十二次真实摩擦：正确建议无法执行且修复索引遗漏历史（v0.10.1）
+
+三仓治理实际执行时，v0.10.0 已能把“产品补丁进入 main、只剩工作流元数据”的任务显示为 `integrated-unclosed`，但同一任务执行建议的 `archive --outcome reconciled` 却仍调用旧的保守证明并返回 `not-integrated`。这证明状态投影与写入门禁没有共享同一个决策函数。随后 API 中两个已关闭任务曾共享同一 worktree，现有 `doctor --repair` 虽能消除重复注册，却只从该 worktree 的最后一份私有 state 重建任务，导致较早归档任务从可重建索引消失；合同和 evidence 文件仍在，因此没有事实数据丢失，但索引不完整。
+
+v0.10.1 只收口这两个真实失败。reconciled archive 与全局状态统一调用已登记集成证明；注册表 repair 除私有 state 外还扫描所有 worktree 的归档合同和 evidence，以 task ID 去重并保留同一 worktree 的多条已关闭历史。多个关闭记录共享保留 worktree 不再被当成活动写入冲突，活动任务重复仍阻断。`doctor --all --json` 发生问题时先输出机器可读 `repairPlan`，只有显式加入 `--repair` 才写入 Git 私有索引。
+
+这次验证说明 P1 应当进入核心，但只需要无损重建与预览，不需要新增任务看板、第二套状态、CLI 命令或统一治理向导。三仓在清理后继续观察 repair 是否能稳定恢复全部任务；若仍有遗漏，优先修复证据发现规则，不增加人工计划字段。
+
 ### 来自 Vercel eve AGENTS.md 的精简规则校准
 
 2026-08 的网络转述将一组精简编码原则称为“Next.js 团队消耗 60B tokens 得出的 8 条 AGENTS.md”。能核验的一手资料是 [vercel/eve 的 AGENTS.md](https://github.com/vercel/eve/blob/main/AGENTS.md)：它确实有 8 条仓库编码原则，但内容与转述并不一致，其破坏性变更规则也明确限定为 eve 的 pre-1.0 阶段。暂无一手证据证明“Next.js 团队”和“60B tokens”的完整归因，因此 RigorBreeze 不传播该数字或身份声称。

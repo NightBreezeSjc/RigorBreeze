@@ -145,7 +145,7 @@ artifacts = ["artifacts/app.bin"]
         runner = self.root / "scripts" / "flow_state.py"
         runner.write_text(
             runner.read_text(encoding="utf-8").replace(
-                'TOOL_VERSION = "0.10.0"', 'TOOL_VERSION = "0.5.1"'
+                'TOOL_VERSION = "0.10.1"', 'TOOL_VERSION = "0.5.1"'
             ),
             encoding="utf-8",
         )
@@ -155,7 +155,7 @@ artifacts = ["artifacts/app.bin"]
             status["installation"],
             {
                 "runnerVersion": "0.5.1",
-                "skillVersion": "0.10.0",
+                "skillVersion": "0.10.1",
                 "status": "outdated",
                 "upgradeSafe": False,
                 "missingComponents": [],
@@ -178,7 +178,7 @@ artifacts = ["artifacts/app.bin"]
         self.run_flow("init")
         self.assertTrue(runner.is_file())
         self.assertIn(
-            'TOOL_VERSION = "0.10.0"',
+            'TOOL_VERSION = "0.10.1"',
             (self.root / "scripts" / "flow_state.py").read_text(encoding="utf-8"),
         )
 
@@ -1005,3 +1005,114 @@ command = {json.dumps([sys.executable, "-c", "print('passed')"])}
             ).returncode,
             0,
         )
+
+    def test_doctor_repair_preserves_multiple_closed_tasks_from_one_worktree(
+        self,
+    ) -> None:
+        self.init_git()
+        subprocess.run(["git", "branch", "-M", "main"], cwd=self.root, check=True)
+        self.run_flow("init")
+        self.commit_all("install workflow")
+        created = self.run_flow(
+            "new",
+            "TASK-718",
+            "--title",
+            "first closed task",
+            "--risk",
+            "L0",
+            "--worktree",
+            "auto",
+        )
+        worktree = Path(created.stdout.split("worktree: ", 1)[1].splitlines()[0])
+        self.write_task("TASK-718", root=worktree)
+        self.run_at(
+            worktree,
+            "archive",
+            "--outcome",
+            "abandoned",
+            "--reason",
+            "fixture task ended before implementation",
+        )
+        subprocess.run(["git", "add", "spec"], cwd=worktree, check=True)
+        subprocess.run(
+            ["git", "commit", "-qm", "close first fixture"],
+            cwd=worktree,
+            check=True,
+        )
+
+        self.run_at(
+            worktree,
+            "new",
+            "TASK-719",
+            "--title",
+            "second closed task",
+            "--risk",
+            "L0",
+        )
+        self.write_task("TASK-719", root=worktree)
+        self.run_at(
+            worktree,
+            "archive",
+            "--outcome",
+            "abandoned",
+            "--reason",
+            "second fixture task ended before implementation",
+        )
+        subprocess.run(["git", "add", "spec"], cwd=worktree, check=True)
+        subprocess.run(
+            ["git", "commit", "-qm", "close second fixture"],
+            cwd=worktree,
+            check=True,
+        )
+
+        self.registry_path().write_text("{broken", encoding="utf-8")
+        repaired = json.loads(
+            self.run_flow("doctor", "--all", "--repair", "--json").stdout
+        )
+        tasks = {item["taskId"]: item for item in repaired["tasks"]}
+        self.assertEqual(set(tasks), {"TASK-718", "TASK-719"})
+        self.assertTrue(tasks["TASK-718"]["archived"])
+        self.assertTrue(tasks["TASK-719"]["archived"])
+        self.assertEqual(tasks["TASK-718"]["worktree"], tasks["TASK-719"]["worktree"])
+
+    def test_doctor_json_previews_registry_repair_before_mutation(self) -> None:
+        self.init_git()
+        subprocess.run(["git", "branch", "-M", "main"], cwd=self.root, check=True)
+        self.run_flow("init")
+        self.commit_all("install workflow")
+        head = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=self.root,
+            text=True,
+            capture_output=True,
+            check=True,
+        ).stdout.strip()
+        duplicate = {
+            "version": 1,
+            "tasks": {
+                task_id: {
+                    "taskId": task_id,
+                    "phase": "draft",
+                    "worktree": str(self.root.resolve()),
+                    "branch": "main",
+                    "baseBranch": "main",
+                    "baseSha": head,
+                    "dependsOn": [],
+                    "allowedScope": [],
+                    "runtimeClaims": [],
+                    "managedByFlow": False,
+                }
+                for task_id in ("TASK-720", "TASK-721")
+            },
+        }
+        self.registry_path().write_text(json.dumps(duplicate), encoding="utf-8")
+
+        result = self.run_flow("doctor", "--all", "--json", expected=2)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "error")
+        self.assertIn("duplicate worktree registration", " ".join(payload["issues"]))
+        self.assertEqual(
+            payload["repairPlan"]["command"],
+            "python scripts/rigorbreeze.py doctor --all --repair --json",
+        )
+        self.assertTrue(payload["repairPlan"]["willWriteRegistry"])
