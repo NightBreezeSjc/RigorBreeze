@@ -351,6 +351,12 @@ v0.10.1 只收口这两个真实失败。reconciled archive 与全局状态统�
 
 v0.10.2 不新增能力，只统一清理后的索引事实：Git 成功删除精确 worktree 后，所有引用该路径的记录在同一次原子写入中标记已移除；doctor 只对活动任务检查重复物理所有权和当前分支，归档记录保留历史分支作为审计信息。两个活动任务共享同一 worktree 仍然阻断，分支继续保留，未证明集成或不干净的目录仍不删除。这个补丁由真实清理顺序触发，并用两个独立失败回归证明，不扩大 CLI、Schema、Spec Tree、依赖或 Git 权限。
 
+### 第十四次真实摩擦：重复成功检查让机器证据遮蔽业务改动（v0.10.3）
+
+奕家“全部楼层”真实切片中，约 220 行新增回归测试持续保护分页、楼层边界、稳定排序和 UI 分组行为，应长期保留；但 UI evidence 单文件达到 573 行、34,681 字节，其中同一组五项检查重复运行三轮。15 条 `checkRuns` 中有 10 条重复 ID 记录；保留其中一次真实失败后，可安全省略 9 条已被后续成功结果取代的明细。问题不在测试数量，而在正常完成后仍永久保存每轮成功输出，并额外建立普通 review Markdown。
+
+v0.10.3 只在正常 completed archive 时压缩重复检查明细：每个 profile/check 保留最新记录，若曾失败再保留最近一次失败，并在同一 JSON 中保存总数、通过、失败、保留和省略数量。全部 `verifications`、RED/GREEN、验收、制品、实践和关闭事实保持不变；abandoned 与 reconciled 历史不压缩。普通审查优先写入结构化 evidence，只有独立可核查发现才建立外部报告，完整临时日志进入忽略目录或限时 CI Artifact。该收口不删除回归测试、不改变门禁、不增加 CLI、Spec 类型、Schema 版本或依赖。
+
 ### 来自 Vercel eve AGENTS.md 的精简规则校准
 
 2026-08 的网络转述将一组精简编码原则称为“Next.js 团队消耗 60B tokens 得出的 8 条 AGENTS.md”。能核验的一手资料是 [vercel/eve 的 AGENTS.md](https://github.com/vercel/eve/blob/main/AGENTS.md)：它确实有 8 条仓库编码原则，但内容与转述并不一致，其破坏性变更规则也明确限定为 eve 的 pre-1.0 阶段。暂无一手证据证明“Next.js 团队”和“60B tokens”的完整归因，因此 RigorBreeze 不传播该数字或身份声称。

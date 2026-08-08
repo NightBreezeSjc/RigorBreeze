@@ -13,7 +13,7 @@
 
 RigorBreeze 把粗略项目想法或边界明确的需求连接成一份经过批准的任务合同、真实观察到的 TDD 证据、项目配置的质量检查、真实环境验收和可恢复的交付记录。它刻意小于完整项目管理系统：一个任务 Markdown、一个机器证据 JSON，不创建文档迷宫。
 
-> **Public Preview：** v0.10.2 当前已经可以使用，并补齐真实交付暴露的项目塑形、工作流基线、已集成旧任务、未批准交付绕过、归档后交付、不完整或复合提示词、重复外部操作、压力下 Agent 行为和可避免的本地验证摩擦；但尚未完成 v1.0 所要求的验证，接口仍可能根据后续真实交付证据调整。
+> **Public Preview：** v0.10.3 当前已经可以使用，并补齐真实交付暴露的项目塑形、工作流基线、已集成旧任务、未批准交付绕过、归档后交付、不完整或复合提示词、重复外部操作、压力下 Agent 行为和可避免的本地验证摩擦；但尚未完成 v1.0 所要求的验证，接口仍可能根据后续真实交付证据调整。
 
 ## 为什么需要它
 
@@ -128,7 +128,7 @@ Codex 会：
 
 Allowed Scope 只能填写仓库相对路径、目录前缀或 glob；`*` 只匹配一层路径，`**` 才跨目录。验收条件必须使用唯一且机器可读的 ID。不能在生产代码变化之上重新批准：应恢复已批准合同并完成，或先回退生产变化，再修订同一用户结果。新增用户结果或验收条件才建立依赖切片。
 
-初始化并配置项目检查后，应在首个 enforced L1/L2 批准前由人建立 Git 工作流基线。`status --json` 会在 `workflowBaseline` 中报告真正基准分支的状态。用户明确授权后，Codex 可以执行 `automate commit --once --workflow-baseline --expected-head <SHA>`；它只暂存受管工作流文件，遇到混入产品改动或秘密时阻断，且不会持久化 Git 权限。安装后的 Skill 始终使用自身 v0.10.2 bundled runner 检查项目，分别报告缺失或被修改的组件，活动实施任务存在期间不会静默覆盖。任务尚未批准却已修改交付文件时，status 会报告 `workflowBypass=detected`、记录一条去重演进候选，并要求诚实恢复或 reconciled 收口，不允许补造 RED 或重建基线。
+初始化并配置项目检查后，应在首个 enforced L1/L2 批准前由人建立 Git 工作流基线。`status --json` 会在 `workflowBaseline` 中报告真正基准分支的状态。用户明确授权后，Codex 可以执行 `automate commit --once --workflow-baseline --expected-head <SHA>`；它只暂存受管工作流文件，遇到混入产品改动或秘密时阻断，且不会持久化 Git 权限。安装后的 Skill 始终使用自身 v0.10.3 bundled runner 检查项目，分别报告缺失或被修改的组件，活动实施任务存在期间不会静默覆盖。任务尚未批准却已修改交付文件时，status 会报告 `workflowBypass=detected`、记录一条去重演进候选，并要求诚实恢复或 reconciled 收口，不允许补造 RED 或重建基线。
 
 初始化后，项目会包含：
 
@@ -187,6 +187,8 @@ python3 scripts/rigorbreeze.py status --json
 每个变更只有一份人工 Markdown 合同和一份机器 JSON 证据。需求通过链接引用，不复制成 proposal、design、plan、test-plan 和 report 等多份文档。
 
 任务合同记录当前依据、机器可检查的允许和禁止范围、验收 ID、测试接缝、独占 `Runtime-Claims`、条件化 `Operational-Modes` 和适用风险。证据 JSON 记录批准摘要、RED、检查、报告、验收、制品身份、发布操作快照和复盘事实。相关源码、测试、配置、依赖、迁移或任务摘要变化后，旧证据会自动失效。`status --json` 同时投影安装状态和范围漂移，旧执行器或范围外改动不能被通过的验证掩盖。
+
+回归测试属于长期产品资产。任务正常完成归档时，重复检查明细会压缩为每个 profile/check 的最新记录和最近一次历史失败，并在同一 evidence JSON 中保留汇总次数；abandoned 与 reconciled 历史保持完整。普通审查事实直接进入结构化 evidence，只有确实需要独立核查的发现才建立单独报告；临时完整日志放入忽略目录或有期限的 CI Artifact。
 
 权威顺序和失效规则见安装包内的 [Spec Tree 合同](rigorbreeze/references/spec-tree.zh-CN.md)。
 
@@ -255,7 +257,7 @@ npx skills@latest remove rigorbreeze -g -a codex -y
 
 ## Public Preview 与 v1.0
 
-v0.10.2 保持最小 Spec Tree 和现有命令面，并收口三仓治理中最后暴露的共享 worktree 修复边界。安全删除一个受管 worktree 后，所有引用该路径的历史记录都会同步标记已移除；doctor repair 会区分串行归档历史与重复活动所有权，也不会拿历史任务分支和当前主工作区分支做错误比较。混合产品改动和未登记清理仍使用保守证明。更高成熟度仍必须来自反复真实使用，而不是继续增加功能。
+v0.10.3 保持最小 Spec Tree 和现有命令面，并阻止正常完成任务的重复成功检查明细无限累积。它保留最终结果、最近一次历史失败、汇总次数、全部 profile 级验证历史、TDD、验收、实践和关闭事实；不会删除回归测试或非完成任务历史。更高成熟度仍必须来自反复真实使用，而不是继续增加功能。
 
 达到 v1.0 前至少需要完成：
 

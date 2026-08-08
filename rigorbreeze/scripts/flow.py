@@ -103,6 +103,7 @@ from flow_state import (  # noqa: E402
     config_path,
     config_template,
     clean_managed_bytecode,
+    compact_completed_check_runs,
     current_head,
     effective_mode,
     empty_evidence,
@@ -1436,13 +1437,30 @@ def command_evidence_add(
                 "product-review, review, device, or wechat-device"
             )
         missing = sorted(required - fields.keys())
-        if not file or missing:
+        fileless_review = kind in {"review", "product-review"} and not file
+        structured_review_missing = sorted(
+            {"standards", "spec", "findings"} - fields.keys()
+        )
+        if missing or (not file and not fileless_review):
             raise FlowError(
                 f"{kind} evidence requires a real file and fields: "
                 + ", ".join(missing)
             )
+        if fileless_review and structured_review_missing:
+            raise FlowError(
+                f"fileless {kind} evidence requires structured fields: "
+                + ", ".join(structured_review_missing)
+            )
         if fields["status"].lower() != "passed":
             raise FlowError(f"{kind} evidence status must be passed")
+        if fileless_review and (
+            fields["standards"].lower() != "passed"
+            or fields["spec"].lower() != "passed"
+            or not fields["findings"].strip()
+        ):
+            raise FlowError(
+                f"fileless {kind} evidence must pass standards/spec and describe findings"
+            )
         if state.get("phase") != "release-ready":
             state["phase"] = "accepted"
     elif section == "release":
@@ -2262,6 +2280,8 @@ def command_archive(
         ),
     }
     evidence["closure"] = closure
+    if outcome == "completed":
+        compact_completed_check_runs(evidence)
     save_evidence(root, active["id"], evidence)
     source.replace(destination)
     archive_relative = f"spec/archive/{active['id']}.md"

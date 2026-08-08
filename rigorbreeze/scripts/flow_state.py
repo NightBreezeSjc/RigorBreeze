@@ -17,7 +17,7 @@ from typing import Any, Iterable
 import flow_parallel
 
 VERSION = 4
-TOOL_VERSION = "0.10.2"
+TOOL_VERSION = "0.10.3"
 SPEC_DIR = "spec"
 CONFIG_NAME = "rigorbreeze.toml"
 MODES = ("advisory", "enforced")
@@ -220,6 +220,62 @@ def empty_evidence(task_id: str) -> dict[str, Any]:
         "practice": {"confirmation": None, "events": []},
         "closure": None,
         "verification": None,
+    }
+
+
+def compact_completed_check_runs(evidence: dict[str, Any]) -> None:
+    """Keep final check truth without retaining every repeated successful run."""
+    runs = evidence.get("checkRuns")
+    if not isinstance(runs, list) or len(runs) < 2:
+        return
+
+    grouped: dict[tuple[str, str], list[int]] = {}
+    retained_indexes: set[int] = set()
+    for index, record in enumerate(runs):
+        if not isinstance(record, dict):
+            retained_indexes.add(index)
+            continue
+        key = (
+            str(record.get("profile") or "unknown"),
+            str(record.get("checkId") or "unknown"),
+        )
+        grouped.setdefault(key, []).append(index)
+
+    groups: list[dict[str, Any]] = []
+    for (profile, check_id), indexes in sorted(grouped.items()):
+        latest = indexes[-1]
+        retained = {latest}
+        failed_indexes = [
+            index for index in indexes if runs[index].get("passed") is not True
+        ]
+        if failed_indexes:
+            retained.add(failed_indexes[-1])
+        retained_indexes.update(retained)
+        passed_count = sum(runs[index].get("passed") is True for index in indexes)
+        groups.append(
+            {
+                "profile": profile,
+                "checkId": check_id,
+                "total": len(indexes),
+                "passed": passed_count,
+                "failed": len(indexes) - passed_count,
+                "retained": len(retained),
+            }
+        )
+
+    retained_runs = [
+        record for index, record in enumerate(runs) if index in retained_indexes
+    ]
+    omitted = len(runs) - len(retained_runs)
+    if omitted <= 0:
+        return
+    evidence["checkRuns"] = retained_runs
+    evidence["checkRunSummary"] = {
+        "policy": "latest-per-profile-check-plus-latest-failure",
+        "total": len(runs),
+        "retained": len(retained_runs),
+        "omitted": omitted,
+        "groups": groups,
     }
 
 

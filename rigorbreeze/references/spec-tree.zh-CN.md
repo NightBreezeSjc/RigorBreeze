@@ -99,6 +99,8 @@ accepted → release-ready → protected release gate
 
 单次 profile 调用内，`checkRuns[*].reusedFromCheckId` 可以标识完全相同的进程结果来自哪个前序检查。它只表示执行来源：后续检查仍保留自己的通过/失败、报告、制品、类别和时间；缺少该字段时继续兼容现有 schema v4 证据。
 
+任务正常完成归档时会压缩重复检查明细，但不改变门禁历史：每个 `(profile, checkId)` 保留最新记录，存在历史失败时再保留最近一次失败，并把汇总次数写入可选 `checkRunSummary`。`verifications`、RED/GREEN、验收、制品、实践和关闭事实保持不变；abandoned 与 reconciled 历史永不压缩。没有该字段的既有证据继续有效。
+
 schema v4 的稳定区段包括 `baseline`、`checkRuns`、`tddChain`、`artifacts`、`acceptance`、`release`、`automation`、`practice`、`red`、`verifications` 和表示 completed/abandoned/reconciled 结果的 `closure`。`release` 可保存经过校验的 `operation-plan` 与 `operation-result` 快照，`practice` 可保存去重机器事件。历史 evidence 中的 `automation` 记录继续可读，但新的外部动作结果只写入 Git 私有日志。实践确认只为负向流程信号设置 `evolutionCandidate`，直接从证据汇总候选，不建立额外日志。升级 schema v1/v2/v3 时不得删除 RED、验证、验收、发布、自动化或实践历史。
 
 不得保存凭证、生产数据、包含个人信息的完整日志或无法验证的结论。

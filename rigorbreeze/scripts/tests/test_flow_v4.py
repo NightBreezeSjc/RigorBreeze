@@ -145,7 +145,7 @@ artifacts = ["artifacts/app.bin"]
         runner = self.root / "scripts" / "flow_state.py"
         runner.write_text(
             runner.read_text(encoding="utf-8").replace(
-                'TOOL_VERSION = "0.10.2"', 'TOOL_VERSION = "0.5.1"'
+                'TOOL_VERSION = "0.10.3"', 'TOOL_VERSION = "0.5.1"'
             ),
             encoding="utf-8",
         )
@@ -155,7 +155,7 @@ artifacts = ["artifacts/app.bin"]
             status["installation"],
             {
                 "runnerVersion": "0.5.1",
-                "skillVersion": "0.10.2",
+                "skillVersion": "0.10.3",
                 "status": "outdated",
                 "upgradeSafe": False,
                 "missingComponents": [],
@@ -178,7 +178,7 @@ artifacts = ["artifacts/app.bin"]
         self.run_flow("init")
         self.assertTrue(runner.is_file())
         self.assertIn(
-            'TOOL_VERSION = "0.10.2"',
+            'TOOL_VERSION = "0.10.3"',
             (self.root / "scripts" / "flow_state.py").read_text(encoding="utf-8"),
         )
 
@@ -816,6 +816,233 @@ command = {json.dumps([sys.executable, "-c", "print('passed')"])}
             ).returncode,
             0,
         )
+
+    def test_completed_archive_compacts_repeated_successful_check_runs(self) -> None:
+        self.init_git()
+        self.run_flow("init")
+        (self.root / "rigorbreeze.toml").write_text(
+            f"""version = 4
+[policy]
+local_mode = "advisory"
+test_paths = ["tests"]
+source_paths = ["src"]
+migration_paths = ["migrations"]
+[profiles]
+affected = ["lint", "unit"]
+full = ["lint", "unit"]
+[automation]
+level = "manual"
+[[checks]]
+id = "lint"
+command = {json.dumps([sys.executable, "-c", "print('lint passed')"])}
+[[checks]]
+id = "unit"
+command = {json.dumps([sys.executable, "-c", "print('unit passed')"])}
+""",
+            encoding="utf-8",
+        )
+        self.commit_all("install workflow")
+        self.run_flow("new", "TASK-713A", "--title", "compact checks", "--risk", "L0")
+        self.write_task("TASK-713A", scope="src/")
+        self.run_flow("approve", "task")
+
+        for _ in range(3):
+            self.run_flow("verify", "--profile", "affected")
+        before = json.loads(
+            (self.root / "spec" / "evidence" / "TASK-713A.json").read_text()
+        )
+        self.assertEqual(len(before["checkRuns"]), 6)
+
+        self.run_flow("archive")
+
+        after = json.loads(
+            (self.root / "spec" / "evidence" / "TASK-713A.json").read_text()
+        )
+        self.assertEqual(
+            [(run["profile"], run["checkId"]) for run in after["checkRuns"]],
+            [("affected", "lint"), ("affected", "unit")],
+        )
+        self.assertEqual(
+            after["checkRunSummary"],
+            {
+                "policy": "latest-per-profile-check-plus-latest-failure",
+                "total": 6,
+                "retained": 2,
+                "omitted": 4,
+                "groups": [
+                    {
+                        "profile": "affected",
+                        "checkId": "lint",
+                        "total": 3,
+                        "passed": 3,
+                        "failed": 0,
+                        "retained": 1,
+                    },
+                    {
+                        "profile": "affected",
+                        "checkId": "unit",
+                        "total": 3,
+                        "passed": 3,
+                        "failed": 0,
+                        "retained": 1,
+                    },
+                ],
+            },
+        )
+        self.assertEqual(after["closure"]["outcome"], "completed")
+        self.assertEqual(len(after["verifications"]), 3)
+
+    def test_completed_archive_keeps_latest_failure_and_final_check(self) -> None:
+        self.init_git()
+        self.run_flow("init")
+        check = (
+            "import pathlib,sys; "
+            "sys.exit(0 if pathlib.Path('src/pass').exists() else 1)"
+        )
+        (self.root / "rigorbreeze.toml").write_text(
+            f"""version = 4
+[policy]
+local_mode = "advisory"
+test_paths = ["tests"]
+source_paths = ["src"]
+migration_paths = ["migrations"]
+[profiles]
+affected = ["unit"]
+full = ["unit"]
+[automation]
+level = "manual"
+[[checks]]
+id = "unit"
+command = {json.dumps([sys.executable, "-c", check])}
+""",
+            encoding="utf-8",
+        )
+        self.commit_all("install workflow")
+        self.run_flow("new", "TASK-713B", "--title", "retain failure", "--risk", "L0")
+        self.write_task("TASK-713B", scope="src/")
+        self.run_flow("approve", "task")
+
+        self.run_flow("verify", "--profile", "affected")
+        marker = self.root / "src" / "pass"
+        marker.parent.mkdir()
+        marker.write_text("passed\n", encoding="utf-8")
+        self.run_flow("verify", "--profile", "affected")
+        self.run_flow("verify", "--profile", "affected")
+        self.run_flow("archive")
+
+        evidence = json.loads(
+            (self.root / "spec" / "evidence" / "TASK-713B.json").read_text()
+        )
+        self.assertEqual(
+            [run["passed"] for run in evidence["checkRuns"]], [False, True]
+        )
+        self.assertEqual(evidence["checkRunSummary"]["total"], 3)
+        self.assertEqual(evidence["checkRunSummary"]["retained"], 2)
+        self.assertEqual(evidence["checkRunSummary"]["omitted"], 1)
+        self.assertEqual(
+            evidence["checkRunSummary"]["groups"][0],
+            {
+                "profile": "affected",
+                "checkId": "unit",
+                "total": 3,
+                "passed": 2,
+                "failed": 1,
+                "retained": 2,
+            },
+        )
+
+    def test_non_completed_archive_preserves_check_run_history(self) -> None:
+        self.init_git()
+        self.run_flow("init")
+        self.commit_all("install workflow")
+        self.run_flow("new", "TASK-713C", "--title", "preserve history", "--risk", "L0")
+        self.write_task("TASK-713C", scope="src/")
+        self.run_flow("approve", "task")
+        evidence_path = self.root / "spec" / "evidence" / "TASK-713C.json"
+        evidence = json.loads(evidence_path.read_text())
+        evidence["checkRuns"] = [
+            {"profile": "affected", "checkId": "unit", "passed": False},
+            {"profile": "affected", "checkId": "unit", "passed": True},
+            {"profile": "affected", "checkId": "unit", "passed": True},
+        ]
+        evidence_path.write_text(json.dumps(evidence), encoding="utf-8")
+
+        self.run_flow("archive", "--outcome", "abandoned", "--reason", "cancelled")
+
+        preserved = json.loads(evidence_path.read_text())
+        self.assertEqual(len(preserved["checkRuns"]), 3)
+        self.assertNotIn("checkRunSummary", preserved)
+
+    def test_reconciled_archive_preserves_check_run_history(self) -> None:
+        self.init_git()
+        self.run_flow("init")
+        self.commit_all("install workflow")
+        self.run_flow(
+            "new", "TASK-713D", "--title", "reconcile history", "--risk", "L0"
+        )
+        self.write_task("TASK-713D", scope="src/")
+        self.run_flow("approve", "task")
+        evidence_path = self.root / "spec" / "evidence" / "TASK-713D.json"
+        evidence = json.loads(evidence_path.read_text())
+        evidence["checkRuns"] = [
+            {"profile": "affected", "checkId": "unit", "passed": False},
+            {"profile": "affected", "checkId": "unit", "passed": True},
+            {"profile": "affected", "checkId": "unit", "passed": True},
+        ]
+        evidence_path.write_text(json.dumps(evidence), encoding="utf-8")
+        self.commit_all("externally integrated task record")
+        head = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=self.root,
+            text=True,
+            capture_output=True,
+            check=True,
+        ).stdout.strip()
+
+        self.run_flow(
+            "archive",
+            "--outcome",
+            "reconciled",
+            "--reason",
+            "external workflow closure",
+            "--expected-head",
+            head,
+        )
+
+        preserved = json.loads(evidence_path.read_text())
+        self.assertEqual(len(preserved["checkRuns"]), 3)
+        self.assertNotIn("checkRunSummary", preserved)
+
+    def test_review_can_be_recorded_without_a_duplicate_report_file(self) -> None:
+        self.prepare_release_evidence_task("TASK-713E")
+
+        self.run_flow(
+            "evidence",
+            "add",
+            "--section",
+            "acceptance",
+            "--kind",
+            "review",
+            "--field",
+            "status=passed",
+            "--field",
+            "reviewer=independent-fresh-context",
+            "--field",
+            "standards=passed",
+            "--field",
+            "spec=passed",
+            "--field",
+            "findings=none",
+        )
+
+        evidence = json.loads(
+            (self.root / "spec" / "evidence" / "TASK-713E.json").read_text()
+        )
+        review = evidence["acceptance"][-1]
+        self.assertEqual(review["kind"], "review")
+        self.assertNotIn("path", review)
+        self.assertEqual(review["fields"]["standards"], "passed")
+        self.assertEqual(review["fields"]["spec"], "passed")
 
     def test_reconciled_archive_is_honest_and_releases_the_task_slot(self) -> None:
         self.init_git()

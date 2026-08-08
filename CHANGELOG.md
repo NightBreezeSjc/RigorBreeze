@@ -25,6 +25,18 @@ The project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). 
 - Reframed the repository for first-time adopters with bilingual onboarding, explicit safety boundaries, and a complete first-task walkthrough.
 - Added concise contribution and security policies plus an MIT license.
 
+## [0.10.3] - Compact completed verification evidence
+
+### Changed
+
+- Compact repeated `checkRuns` only when a task is normally completed: retain the latest record for every profile/check pair, the latest earlier failure, and aggregate pass/failure/omission counts.
+- Keep regression tests, profile-level verification history, RED/GREEN, acceptance, artifacts, practice, closure, and abandoned/reconciled histories unchanged.
+- Prefer structured review evidence over a second task-specific Markdown report; keep transient full logs in ignored or time-limited CI artifact storage.
+
+### Compatibility
+
+- Public CLI, schema v4, automation journal v1, Spec Tree, dependencies, Git authority, and pre-archive gate behavior are unchanged. Existing evidence without `checkRunSummary` remains valid.
+
 ## [0.10.2] - Shared worktree repair consistency
 
 ### Fixed

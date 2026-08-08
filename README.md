@@ -13,7 +13,7 @@ English · [简体中文](README.zh-CN.md)
 
 RigorBreeze turns a rough initiative or bounded request into an approved task contract, observed TDD evidence, configured quality checks, real-runtime acceptance, and a recoverable delivery record. It is deliberately smaller than a full project-management system: one task Markdown, one machine evidence file, and no document maze.
 
-> **Public Preview:** v0.10.2 is usable today and closes real-delivery gaps around initiative shaping, workflow baselines, stale integrated tasks, unapproved delivery bypasses, post-archive delivery, incomplete or compound prompts, repeated external operations, Agent behavior under pressure, and avoidable local verification friction. It has not yet completed the validation required for v1.0, so interfaces may still change in response to further delivery evidence.
+> **Public Preview:** v0.10.3 is usable today and closes real-delivery gaps around initiative shaping, workflow baselines, stale integrated tasks, unapproved delivery bypasses, post-archive delivery, incomplete or compound prompts, repeated external operations, Agent behavior under pressure, and avoidable local verification friction. It has not yet completed the validation required for v1.0, so interfaces may still change in response to further delivery evidence.
 
 ## Why this exists
 
@@ -130,7 +130,7 @@ Before approval, RigorBreeze checks the task for placeholders, contradictions, a
 
 Allowed Scope entries are repository-relative paths, directory prefixes, or globs; `*` matches one path segment and `**` crosses directories. Acceptance criteria use unique machine-readable IDs. A contract cannot be reapproved over production changes: restore the approved contract and finish, or revert those changes before amending the same outcome. A new user outcome or acceptance condition becomes a dependent slice.
 
-After initialization and project-check configuration, establish a human-controlled Git baseline before the first enforced L1/L2 approval. `status --json` reports the exact base-branch state under `workflowBaseline`. When the user explicitly authorizes it, Codex may run `automate commit --once --workflow-baseline --expected-head <SHA>`; it stages only managed workflow files, rejects mixed product changes and secrets, and does not persist Git authority. The installed Skill always checks through its bundled v0.10.2 runner, reports missing or modified components separately, and does not overwrite it while an implementation task is active. If delivery files change while the task is unapproved, status reports `workflowBypass=detected`, records one deduplicated evolution candidate, and directs an honest restore or reconciled close instead of permitting a fabricated RED or new baseline.
+After initialization and project-check configuration, establish a human-controlled Git baseline before the first enforced L1/L2 approval. `status --json` reports the exact base-branch state under `workflowBaseline`. When the user explicitly authorizes it, Codex may run `automate commit --once --workflow-baseline --expected-head <SHA>`; it stages only managed workflow files, rejects mixed product changes and secrets, and does not persist Git authority. The installed Skill always checks through its bundled v0.10.3 runner, reports missing or modified components separately, and does not overwrite it while an implementation task is active. If delivery files change while the task is unapproved, status reports `workflowBypass=detected`, records one deduplicated evolution candidate, and directs an honest restore or reconciled close instead of permitting a fabricated RED or new baseline.
 
 After initialization, the project contains:
 
@@ -189,6 +189,8 @@ For conditional L2 integrations, `Operational-Modes` binds enabled, disabled, an
 Each change has one human-authored Markdown contract and one machine JSON evidence file. Requirements are linked, not copied into proposal, design, plan, test-plan, and report documents.
 
 The task contract records the current sources, machine-checkable allowed and forbidden scope, acceptance IDs, test seams, exclusive `Runtime-Claims`, conditional `Operational-Modes`, and applicable risks. The evidence JSON records approval digests, RED, checks, reports, acceptance, artifact identity, release-operation snapshots, and retrospective facts. Changes to relevant source, tests, configuration, dependencies, migrations, or the task digest invalidate stale proof automatically. `status --json` also projects installation and scope drift, so an old runner or a change outside the contract cannot be hidden by a passing verification.
+
+Regression tests remain durable product assets. On a normally completed archive, repeated check details are compacted to the latest record per profile/check plus the latest earlier failure, with aggregate counts retained in the same evidence JSON. Abandoned and reconciled histories remain complete. Ordinary review facts belong in structured evidence; create a separate report only when independently inspectable findings require one, and keep transient raw logs in ignored or time-limited CI artifact storage.
 
 See the installable Skill's [Spec Tree contract](rigorbreeze/references/spec-tree.md) for authority and invalidation rules.
 
@@ -257,7 +259,7 @@ For a manual install, remove only the `rigorbreeze` directory or symlink from yo
 
 ## Public Preview and v1.0
 
-v0.10.2 keeps the minimal Spec Tree and existing command surface while closing the final shared-worktree repair edge found during three-repository governance. A successful managed cleanup marks every historical record for the removed path, and doctor repair distinguishes sequential archived history from duplicate active ownership without comparing historical branches to the current primary branch. Mixed product changes and unmanaged cleanup retain conservative proof. Maturity beyond preview must still come from repeated real use rather than more features.
+v0.10.3 keeps the minimal Spec Tree and existing command surface while preventing repeated successful verification details from growing indefinitely in normally completed task evidence. It retains the latest result, the latest earlier failure, aggregate execution counts, all profile-level verification history, TDD, acceptance, practice, and closure truth. Regression tests and non-completed histories are never deleted. Maturity beyond preview must still come from repeated real use rather than more features.
 
 Before v1.0, the workflow must complete and learn from:
 
