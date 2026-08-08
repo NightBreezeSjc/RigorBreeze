@@ -130,6 +130,8 @@ Evidence JSON may store:
 
 Within one profile invocation, `checkRuns[*].reusedFromCheckId` may identify the earlier check whose identical process result was reused. It is execution provenance only: the later check retains its own pass/fail, report, artifacts, category, and timestamp. Its absence preserves compatibility with existing schema-v4 evidence.
 
+On a normally completed archive, repeated check details are compacted without changing gate history: keep the latest record for each `(profile, checkId)`, keep the latest earlier failure when present, and store aggregate counts in optional `checkRunSummary`. `verifications`, RED/GREEN, acceptance, artifacts, practice, and closure remain unchanged. Abandoned and reconciled histories are never compacted. Evidence created before this field remains valid.
+
 Stable schema-v4 sections are `baseline`, `checkRuns`, `tddChain`,
 `artifacts`, `acceptance`, `release`, `automation`, `practice`, `red`, and
 `verifications`, plus `closure` for completed, abandoned, or reconciled outcomes. Release

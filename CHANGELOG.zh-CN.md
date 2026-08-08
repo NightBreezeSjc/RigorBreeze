@@ -26,6 +26,18 @@ RigorBreeze 的重要变更都会记录在本文档中。
 - 增加精简的贡献指南、安全策略和 MIT 许可证。
 - 为全部用户文档和 Skill 参考文档建立中文版本及一致性检查。
 
+## [0.10.3] - 已完成验证证据压缩
+
+### 变更
+
+- 只在任务正常完成归档时压缩重复 `checkRuns`：每个 profile/check 保留最新记录和最近一次历史失败，并保存通过、失败和省略数量汇总。
+- 回归测试、profile 级验证历史、RED/GREEN、验收、制品、实践、关闭事实以及 abandoned/reconciled 历史全部保持不变。
+- 普通审查优先写入结构化 evidence，不再默认创建第二份任务 Markdown；临时完整日志放入忽略目录或有期限的 CI Artifact。
+
+### 兼容性
+
+- 公共 CLI、schema v4、automation journal v1、Spec Tree、依赖、Git 权限和归档前门禁行为均不改变；没有 `checkRunSummary` 的现有证据继续有效。
+
 ## [0.10.2] - 共享 worktree 修复一致性
 
 ### 修复

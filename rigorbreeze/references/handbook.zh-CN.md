@@ -202,6 +202,8 @@ commit、archive 或声称“已修复、已通过、已完成”前，必须引
 
 在单次 profile 调用内，argv、解析后 cwd、有效环境和 timeout 完全一致的检查共享一次进程结果。每个检查仍独立校验自己的报告和制品，并以 `reusedFromCheckId` 说明复用来源；不会跨 profile、Session 或项目变化缓存结果。
 
+回归测试属于长期产品资产。任务活动期间保留诊断和门禁需要的全部检查记录；正常完成归档时，将重复明细压缩为每个 profile/check 的最新记录和最近一次历史失败，并在 `checkRunSummary` 中保留通过、失败和省略数量。abandoned 与 reconciled 历史不压缩。普通审查事实通过 `standards`、`spec` 和非空 `findings` 摘要写入结构化 evidence，只有发现本身需要独立核查时才建立单独报告。完整原始日志进入忽略的本地输出或有期限的 CI Artifact，不进入 tracked evidence。
+
 L2 的 `full` 根据风险和实际变化推导不可省略的最低集合：secret、build、至少一项静态质量检查和至少一项行为检查。修改依赖清单时额外要求 dependency、license、SBOM 检查及非空报告；修改迁移时要求配置的 migration 适配器与报告。L0/L1 仍由项目声明，不继承与任务无关的企业工具。
 
 始终保留以下边界：

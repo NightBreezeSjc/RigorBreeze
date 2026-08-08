@@ -208,6 +208,8 @@ One-off exploration and debugging commands may run directly but do not satisfy w
 
 Within one profile invocation, checks with identical argv, resolved cwd, effective environment, and timeout share one process result. Each check still validates its own report and artifacts and records `reusedFromCheckId`; no result is cached across profiles, sessions, or project changes.
 
+Keep regression tests as durable product assets. While a task is active, retain every check record needed for diagnosis and gating. On normal completed archive, compact repeated details to the latest record for each profile/check plus the latest earlier failure, and preserve aggregate pass/failure/omission counts in `checkRunSummary`. Do not compact abandoned or reconciled histories. Record ordinary review facts in structured evidence with `standards`, `spec`, and a non-empty `findings` summary; create a separate review report only when its findings must remain independently inspectable. Raw full logs belong in ignored local output or time-limited CI artifacts, not tracked evidence.
+
 L2 `full` derives a non-negotiable minimum from risk and actual changes: secret scanning, build, at least one static-quality check, and at least one behavioral check. Dependency-manifest changes additionally require dependency, license, and SBOM checks with non-empty reports. Migration changes require the configured migration adapter and report. L0/L1 remain project-declared and do not inherit unrelated enterprise tooling.
 
 Always preserve these boundaries:
