@@ -65,8 +65,8 @@ def load_contract(path: Path = DEFAULT_CONTRACT) -> dict[str, Any]:
     if not isinstance(contract, dict) or contract.get("schemaVersion") != 1:
         raise ValueError("behavior contract schemaVersion must be 1")
     cases = contract.get("cases")
-    if not isinstance(cases, list) or len(cases) != 9:
-        raise ValueError("behavior contract must define exactly nine cases")
+    if not isinstance(cases, list) or len(cases) != 11:
+        raise ValueError("behavior contract must define exactly eleven cases")
 
     seen: set[str] = set()
     for case in cases:
@@ -113,6 +113,11 @@ def load_contract(path: Path = DEFAULT_CONTRACT) -> dict[str, Any]:
                         raise ValueError(
                             f"invalid regex in {case_id}.{key}: {exc}"
                         ) from exc
+        max_questions = case.get("maxQuestions")
+        if max_questions is not None and (
+            not isinstance(max_questions, int) or max_questions < 0
+        ):
+            raise ValueError(f"{case_id}.maxQuestions must be a non-negative integer")
     return contract
 
 
@@ -197,6 +202,11 @@ def score_case(
         issues.append("result questions must be a list")
     elif not case["allowQuestions"] and questions:
         issues.append("scenario does not allow questions")
+    elif (
+        isinstance(case.get("maxQuestions"), int)
+        and len(questions) > case["maxQuestions"]
+    ):
+        issues.append(f"scenario allows at most {case['maxQuestions']} questions")
     if "fresh-verification" in case["requiredMarkers"]:
         verification = result.get("verification")
         if not (
@@ -522,7 +532,7 @@ def build_parser() -> argparse.ArgumentParser:
     live = subparsers.add_parser("run", help="run live Codex behavior evaluations")
     live.add_argument("--contract", type=Path, default=DEFAULT_CONTRACT)
     live.add_argument("--skill", type=Path, default=REPO_ROOT / "rigorbreeze")
-    live.add_argument("--version", default="0.9.2")
+    live.add_argument("--version", default="0.12.0")
     live.add_argument("--repetitions", type=int, default=2)
     live.add_argument("--case", help="run one scenario while debugging the suite")
     live.add_argument("--codex", default="codex")

@@ -39,7 +39,7 @@ class SkillContractTests(unittest.TestCase):
 
         shared_contract = (
             "$rigorbreeze",
-            "v0.11.0",
+            "v0.12.0",
             "nightbreezesjc/rigorbreeze",
             "npx skills@latest add nightbreezesjc/rigorbreeze --skill rigorbreeze -g -a codex -y",
             "python3 scripts/rigorbreeze.py status --json",
@@ -195,6 +195,47 @@ class SkillContractTests(unittest.TestCase):
         self.assertIn("一个精简的项目塑形简报", chinese)
         self.assertIn("Shape an initiative before the first task", readme)
         self.assertIn("在首个任务前塑形项目", readme_chinese)
+
+    def test_skill_bounds_decisions_prototypes_and_abstractions(self) -> None:
+        skill = (SKILL_DIR / "SKILL.md").read_text(encoding="utf-8").lower()
+        generated_policy = (
+            (SKILL_DIR / "scripts" / "flow_state.py")
+            .read_text(encoding="utf-8")
+            .lower()
+        )
+
+        for phrase in (
+            "decision frontier",
+            "three questions",
+            "one decision question",
+            "deletion test",
+        ):
+            with self.subTest(phrase=phrase):
+                self.assertEqual(skill.count(phrase), 1)
+                self.assertIn(phrase, generated_policy)
+
+    def test_contributor_rules_require_an_observable_instruction_delta(self) -> None:
+        english = (REPO_ROOT / "CONTRIBUTING.md").read_text(encoding="utf-8")
+        chinese = (REPO_ROOT / "CONTRIBUTING.zh-CN.md").read_text(encoding="utf-8")
+
+        for phrase in ("trigger", "completion criterion", "behavior-evaluation delta"):
+            self.assertIn(phrase, english.lower())
+        for phrase in ("触发条件", "完成条件", "行为测试变化"):
+            self.assertIn(phrase, chinese)
+
+    def test_installation_docs_separate_stable_and_contributor_channels(self) -> None:
+        english = (REPO_ROOT / "README.md").read_text(encoding="utf-8").lower()
+        chinese = (REPO_ROOT / "README.zh-CN.md").read_text(encoding="utf-8")
+
+        for phrase in (
+            "stable release",
+            "contributor checkout",
+            "upgradesafe",
+            "do not pull",
+        ):
+            self.assertIn(phrase, english)
+        for phrase in ("稳定发布", "贡献者工作区", "upgradeSafe", "不要拉取"):
+            self.assertIn(phrase, chinese)
 
     def test_skill_encodes_behavior_reliability_rules_once(self) -> None:
         skill = (SKILL_DIR / "SKILL.md").read_text(encoding="utf-8")

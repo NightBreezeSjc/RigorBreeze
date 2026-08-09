@@ -25,6 +25,25 @@ The project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). 
 - Reframed the repository for first-time adopters with bilingual onboarding, explicit safety boundaries, and a complete first-task walkthrough.
 - Added concise contribution and security policies plus an MIT license.
 
+## [0.12.0] - Improve Agent decisions without adding workflow weight
+
+### Changed
+
+- Bound initiative shaping and genuinely branching L2 ambiguity to a decision frontier: recover facts first, ask at most three currently answerable outcome-changing questions per round, and include a recommendation, rationale, and result impact.
+- Treat a prototype as one disposable artifact answering one decision question; preserve its reference, observation, and verdict without treating it as production implementation or acceptance.
+- Apply an abstraction deletion test before retaining helpers, adapters, wrappers, configuration layers, or shared abstractions; remove layers whose complexity disappears and retain boundaries that localize proven caller or safety complexity.
+- Require every new always-loaded Skill instruction to identify its trigger, completion criterion, and behavior-evaluation delta; remove no-op wording or move detail to an existing reference.
+- Separate stable released installations from contributor symlinks and defer project Runner upgrades until status reports `outdated` with `upgradeSafe=true` after active tasks close.
+
+### Validation
+
+- Expand the deterministic behavior contract from nine to eleven scenarios with decision-frontier and one-question-prototype cases, and add the deletion test to review skepticism.
+- Require two manual live Codex runs per scenario for a release candidate; ordinary commits, configured profiles, and CI still never invoke a model.
+
+### Compatibility
+
+- Public CLI, Spec Tree, state/evidence schema v4, automation journal v1, dependencies, default Git authority, and ordinary L0/L1 interaction remain unchanged.
+
 ## [0.11.0] - Keep routine solo work light without weakening production gates
 
 ### Changed
