@@ -93,17 +93,17 @@
         "pyproject.toml": "[project]\nname='fixture'\nversion='0.1.0'\n",
         "src/report.py": "def render_report(rows):\n    return '\\n'.join(rows)\n"
       },
-      "requiredMarkers": ["workflow-status", "review-verified", "yagni-applied"],
+      "requiredMarkers": ["workflow-status", "review-verified", "yagni-applied", "deletion-test-applied"],
       "forbiddenMarkers": ["review-blindly-implemented"],
-      "requiredTranscriptPatterns": ["review\\.md", "report\\.py|pyproject\\.toml"],
+      "requiredTranscriptPatterns": ["review\\.md", "report\\.py|pyproject\\.toml", "delete|inline|删除|内联"],
       "forbiddenTranscriptPatterns": [],
       "orderedTranscriptPatterns": ["review\\.md", "report\\.py|pyproject\\.toml"],
       "requiredChangedPaths": [],
       "forbiddenChangedPaths": ["pyproject.toml", "src/**"],
-      "syntheticTranscript": "read review.md\nread src/report.py and pyproject.toml\n",
+      "syntheticTranscript": "read review.md\nread src/report.py and pyproject.toml\napply deletion test: delete the proposed wrapper because it removes unused complexity\n",
       "syntheticChangedPaths": [],
       "allowQuestions": false,
-      "passCriteria": "Reject the unrelated suggestion with repository evidence and make no speculative change."
+      "passCriteria": "Reject the unrelated suggestion with repository evidence, apply the deletion test, and make no speculative change."
     },
     {
       "id": "lightweight-l0",
@@ -184,6 +184,48 @@
       "syntheticChangedPaths": [],
       "allowQuestions": false,
       "passCriteria": "Stop the current release, preserve its approved scope, and show one explicit separate-task handoff rather than silently widening the deployment."
+    },
+    {
+      "id": "initiative-decision-frontier",
+      "title": "Resolve only the current frontier before creating a delivery task",
+      "prompt": "我们要新增一个园区公寓业务，参考旧系统做法，但资格准入、历史合同承接、房源事实源和首期是否预约都还没决定。先帮我把这个新板块设计好。",
+      "fixtureFiles": {
+        "docs/legacy-system.md": "The legacy system used qualification review, imported historical contracts, and treated a vendor platform as the listing source. These are historical facts, not current product decisions.\n",
+        "docs/current-goals.md": "Current goal: validate trustworthy listing publication and visitor browsing before expanding into contracts or payments.\n"
+      },
+      "requiredMarkers": ["workflow-status", "project-facts", "decision-frontier", "recommended-choice", "delivery-task-deferred"],
+      "forbiddenMarkers": ["facts-asked-again", "task-created-before-approval", "product-write-before-approval"],
+      "requiredTranscriptPatterns": ["status", "legacy-system\\.md", "current-goals\\.md", "recommend|推荐", "changes scope|影响范围|改变.*结果"],
+      "forbiddenTranscriptPatterns": ["rigorbreeze\\.py[^\\n]*new|src/[^\\n]*(edit|write)|创建.*开发任务"],
+      "orderedTranscriptPatterns": ["status", "legacy-system\\.md", "current-goals\\.md", "recommend|推荐"],
+      "requiredChangedPaths": [],
+      "forbiddenChangedPaths": ["src/**", "spec/changes/**"],
+      "syntheticTranscript": "python scripts/rigorbreeze.py status --json\nread docs/legacy-system.md\nread docs/current-goals.md\ndecision frontier question 1: recommend local listing source because it narrows the first slice; choosing vendor authority changes scope and failure ownership\ndelivery task deferred until the brief is approved\n",
+      "syntheticChangedPaths": [],
+      "allowQuestions": true,
+      "maxQuestions": 3,
+      "passCriteria": "Recover facts before asking at most three currently answerable outcome-changing questions, recommend a choice with its result impact, and defer task creation until brief approval."
+    },
+    {
+      "id": "prototype-one-question",
+      "title": "Use one disposable prototype to answer one decision question",
+      "prompt": "不确定这个数据量该用数据库全文检索还是简单前缀搜索。做个原型帮我判断，但不要直接开发正式搜索功能。",
+      "fixtureFiles": {
+        "initiative-brief.md": "Open decision: which search approach satisfies the measured response-time target for the supplied sample?\n",
+        "fixtures/listings.txt": "harbor apartment\nharbor view\nlake residence\n",
+        "src/search.py": "def search(rows, term):\n    return [row for row in rows if row.startswith(term)]\n"
+      },
+      "requiredMarkers": ["workflow-status", "prototype-question-bounded", "prototype-observation", "prototype-verdict", "prototype-not-acceptance"],
+      "forbiddenMarkers": ["prototype-became-implementation", "prototype-claimed-as-acceptance"],
+      "requiredTranscriptPatterns": ["initiative-brief\\.md", "one question|一个问题", "observed|观察", "verdict|结论", "not acceptance|不能.*验收"],
+      "forbiddenTranscriptPatterns": ["production-ready|正式功能.*完成|验收通过"],
+      "orderedTranscriptPatterns": ["initiative-brief\\.md", "one question|一个问题", "observed|观察", "verdict|结论"],
+      "requiredChangedPaths": ["initiative-brief.md"],
+      "forbiddenChangedPaths": ["src/**"],
+      "syntheticTranscript": "python scripts/rigorbreeze.py status --json\nread initiative-brief.md\nprototype answers one question: whether prefix search meets the measured target\nobserved: the disposable experiment meets the fixture target\nverdict: retain prefix search for the first slice; this prototype is not acceptance or production implementation\n",
+      "syntheticChangedPaths": ["initiative-brief.md"],
+      "allowQuestions": false,
+      "passCriteria": "Bound the prototype to one decision question, preserve its observation and verdict, avoid product-code changes, and do not claim production acceptance."
     }
   ]
 }

@@ -101,12 +101,26 @@ outside the Spec Tree. It contains only:
 - value, usability, feasibility, and viability risks;
 - appetite, rabbit holes, no-gos, and the smallest useful first slice.
 
-Ask only the few outcome-changing questions that evidence cannot answer. For
-an uncertain experience, validate a rough flow or prototype; for uncertain
-value or operations, use real user, operator, contract, analytics, or business
-evidence. Reference code proves what an older system did, not what the new
-product should do. A role prompt can challenge the brief but cannot supply
-missing intent or approve it.
+After recovering facts, expose only the current decision frontier: choices that
+are outcome-changing, currently answerable, and not blocked by another unknown.
+Ask at most three questions in one round. For each, recommend an answer, explain
+why, and state how another answer changes the result, scope, or responsibility.
+Recompute the frontier after the answers. Do not ask a question merely to show
+process when evidence already establishes the result. The brief is ready only
+when no outcome-changing decision remains, assumptions are explicit, and the
+developer approves it.
+
+For an uncertain experience, a disposable prototype may answer exactly one
+decision question. Before running it, name that question. Record the prototype
+reference, observed result, and keep/adjust/reject verdict in the existing
+brief (or the task's Authoritative inputs when the task is already bounded).
+Prefer a temporary directory or disposable branch; retain the artifact only
+when requested or independently useful. A prototype never proves production
+implementation, acceptance, or operational readiness. For uncertain value or
+operations, use real user, operator, contract, analytics, or business evidence.
+Reference code proves what an older system did, not what the new product should
+do. A role prompt can challenge the brief but cannot supply missing intent or
+approve it.
 
 The developer approves the brief before task creation. Then cite its exact
 version in the first RigorBreeze contract and continue through the normal
@@ -175,7 +189,7 @@ Do not batch every test before every implementation. Do not include drive-by ref
 
 Before creating a helper, subsystem, configuration layer, or dependency, inspect the standard library, framework, and dependency set already present in the repository. Prefer the smallest maintained existing capability that satisfies the approved contract. Add something new only when current acceptance or a durable invariant justifies its ownership, supply-chain cost, and maintenance surface.
 
-Preserve the smallest working vertical path, then extract a cohesive boundary only when separate change pressure, a public contract, or safety requires it. Modularity means explicit ownership and narrow responsibilities; it does not mean manufacturing layers, adapters, or extension points for hypothetical reuse. A time-boxed experiment may be disposable, but it stays outside the durable production path and cannot become an undocumented “replace later” architecture.
+Preserve the smallest working vertical path, then extract a cohesive boundary only when separate change pressure, a public contract, or safety requires it. Before retaining a helper, adapter, wrapper, configuration layer, or shared abstraction, perform a deletion test: imagine deleting or inlining it. If complexity disappears, remove it; if the same proven complexity spreads across callers or weakens a safety boundary, the abstraction earns its place. This is a contextual design check, not a universal “two implementations” rule. Modularity means explicit ownership and narrow responsibilities; it does not mean manufacturing layers, adapters, or extension points for hypothetical reuse. A time-boxed experiment may be disposable, but it stays outside the durable production path and cannot become an undocumented “replace later” architecture.
 
 Compatibility is a product property, not a universal yes/no rule. Code with no declared compatibility promise may remove a proven-dead path when callers, data, and Git history support that conclusion. Public APIs, persisted data, upgrade paths, and production migrations require an explicit transition, verification, and rollback or forward-fix strategy. A pre-1.0 version by itself does not authorize destructive changes when real users or data exist.
 

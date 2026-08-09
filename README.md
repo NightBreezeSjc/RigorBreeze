@@ -13,7 +13,7 @@ English · [简体中文](README.zh-CN.md)
 
 RigorBreeze turns a rough initiative or bounded request into an approved task contract, observed TDD evidence, configured quality checks, real-runtime acceptance, and a recoverable delivery record. It is deliberately smaller than a full project-management system: one task Markdown, one machine evidence file, and no document maze.
 
-> **Public Preview:** v0.11.0 is usable today. It keeps ordinary solo work light while preserving the production controls learned from real delivery: no-task read-only diagnosis, consequence-based risk selection, frozen release scope, visible cross-task handoffs, and compact completed evidence. It has not yet completed the validation required for v1.0, so interfaces may still change in response to further delivery evidence.
+> **Public Preview:** v0.12.0 is usable today. It keeps ordinary solo work light while preserving the production controls learned from real delivery, and adds bounded decision-frontier shaping, one-question prototypes, and an abstraction deletion test. It has not yet completed the validation required for v1.0, so interfaces may still change in response to further delivery evidence.
 
 ## Why this exists
 
@@ -71,13 +71,15 @@ mkdir -p ~/.codex/skills
 cp -R rigorbreeze/rigorbreeze ~/.codex/skills/rigorbreeze
 ```
 
-For local Skill development, use a symlink instead of the final copy command:
+For local Skill development, use a symlink from a dedicated contributor checkout instead of the final copy command:
 
 ```bash
 ln -s "$(pwd)/rigorbreeze/rigorbreeze" ~/.codex/skills/rigorbreeze
 ```
 
 The outer directory is the repository; the inner directory is the installable Skill.
+
+Treat installer-managed copies and a checkout pinned to a stable release as the normal user channel. A contributor checkout is intentionally live: do not pull updates into it when it has uncommitted changes or an active RigorBreeze task. Project Runner upgrades are separate from Skill installation; run them only when status reports `installation.status=outdated` and `upgradeSafe=true`. Active tasks keep their current Runner until they close.
 
 ### Verify the installation
 
@@ -103,7 +105,11 @@ This is optional. A bounded feature or fix goes directly to the normal task
 contract. Shaping reuses one versioned product/design source or creates one
 compact initiative brief outside the Spec Tree. It does not manufacture a PRD
 tree, implementation DAG, or product truth from a persona or reference code.
-After approval, only the first slice becomes a RigorBreeze task.
+After recovering facts, RigorBreeze asks at most three current decision-frontier
+questions per round, with a recommendation, reason, and result impact for each.
+A disposable prototype answers one decision question and records its observation
+and verdict; it is never production acceptance. After the frontier is resolved
+and the brief is approved, only the first slice becomes a RigorBreeze task.
 
 ## Your first task
 
@@ -137,11 +143,11 @@ Risk follows consequence, not line count, elapsed time, or how urgent the reques
 
 You do not need to write a perfect prompt or prepend a persona such as “act as a unicorn CTO.” RigorBreeze recovers project facts, current behavior, architecture paths, invariants and data-freshness/fallback semantics itself. It asks only when evidence cannot determine an intent that would materially change the result. For external Git, deployment, developer-tool or platform writes, it first reports what is already completed, the current immutable identifiers, the one remaining action and stop conditions so an old checklist is not replayed.
 
-Before approval, RigorBreeze checks the task for placeholders, contradictions, an oversized slice, and ambiguous outcome/source/fallback semantics. Compound requests become observable ADD/REMOVE/MOVE/RETAIN/REPLACE atoms, each mapped to acceptance or explicit exclusion. For UI changes, the final-state checklist covers presence, absence, order/location, and retained behavior; negative wording is resolved as either a current defect or desired result from evidence, with one short question only when the direction remains outcome-changing. Completion claims must name a fresh command, exit status, and covered scope. Review suggestions are checked against repository reality and YAGNI, while three failed hypotheses for the same defect trigger an architecture stop instead of a fourth speculative patch. Maintainers validate these rules with nine synthetic Agent-pressure scenarios; the suite is not installed into user projects and never calls a model from CI.
+Before approval, RigorBreeze checks the task for placeholders, contradictions, an oversized slice, and ambiguous outcome/source/fallback semantics. Compound requests become observable ADD/REMOVE/MOVE/RETAIN/REPLACE atoms, each mapped to acceptance or explicit exclusion. For UI changes, the final-state checklist covers presence, absence, order/location, and retained behavior; negative wording is resolved as either a current defect or desired result from evidence, with one short question only when the direction remains outcome-changing. Completion claims must name a fresh command, exit status, and covered scope. Review suggestions are checked against repository reality and YAGNI; speculative layers face a deletion test, while three failed hypotheses for the same defect trigger an architecture stop instead of a fourth patch. Maintainers validate these rules with eleven synthetic Agent-pressure scenarios; the suite is not installed into user projects and never calls a model from CI.
 
 Allowed Scope entries are repository-relative paths, directory prefixes, or globs; `*` matches one path segment and `**` crosses directories. Acceptance criteria use unique machine-readable IDs. A contract cannot be reapproved over production changes: restore the approved contract and finish, or revert those changes before amending the same outcome. A new user outcome or acceptance condition becomes a dependent slice.
 
-After initialization and project-check configuration, establish a human-controlled Git baseline before creating a new L1/L2 task. `status --json` reports the exact base-branch state under `workflowBaseline`; L0 remains lightweight. When the user explicitly authorizes it, Codex may run `automate commit --once --workflow-baseline --expected-head <SHA>`; it stages only managed workflow files, rejects mixed product changes and secrets, and does not persist Git authority. The installed Skill always checks through its bundled v0.11.0 runner, reports missing or modified components separately, and does not overwrite it while an implementation task is active. A missing active contract is reported as `orphaned-record` with a restore action rather than crashing status; intentional prepared drafts expose compact `Task-Origin` and `Waiting-On` facts. Recorded evolution candidates appear in status with the copyable `$rigorbreeze 汇总这个项目的演进候选` reminder. A high-risk task may not replace broken workflow state with an informal task card: restore the record or establish an explicit Emergency contract first.
+After initialization and project-check configuration, establish a human-controlled Git baseline before creating a new L1/L2 task. `status --json` reports the exact base-branch state under `workflowBaseline`; L0 remains lightweight. When the user explicitly authorizes it, Codex may run `automate commit --once --workflow-baseline --expected-head <SHA>`; it stages only managed workflow files, rejects mixed product changes and secrets, and does not persist Git authority. The installed Skill always checks through its bundled v0.12.0 runner, reports missing or modified components separately, and does not overwrite it while an implementation task is active. A missing active contract is reported as `orphaned-record` with a restore action rather than crashing status; intentional prepared drafts expose compact `Task-Origin` and `Waiting-On` facts. Recorded evolution candidates appear in status with the copyable `$rigorbreeze 汇总这个项目的演进候选` reminder. A high-risk task may not replace broken workflow state with an informal task card: restore the record or establish an explicit Emergency contract first.
 
 After initialization, the project contains:
 
@@ -272,7 +278,7 @@ For a manual install, remove only the `rigorbreeze` directory or symlink from yo
 
 ## Public Preview and v1.0
 
-v0.11.0 keeps the minimal Spec Tree and existing command surface while making ordinary solo work lighter. Completed evidence retains the final valid GREEN chain, the latest useful earlier failure for each acceptance ID, aggregate counts, profile-level verification, acceptance, practice, and closure truth. Regression tests and active, abandoned, or reconciled task histories are never compacted. Repository source still carries the maintainer regression suite, while the installable ZIP excludes maintainer tests and caches. Task contracts and compact evidence remain versioned audit records; raw logs and generated reports stay ignored or in CI artifacts. RigorBreeze deliberately does not add a second local-only evidence store until real use proves that its migration and authority cost is worthwhile.
+v0.12.0 keeps the minimal Spec Tree and existing command surface while improving Agent decisions before code is written. Decision-frontier questions are bounded, prototypes answer one question, and speculative abstractions face a deletion test. Completed evidence retains the final valid GREEN chain, the latest useful earlier failure for each acceptance ID, aggregate counts, profile-level verification, acceptance, practice, and closure truth. Regression tests and active, abandoned, or reconciled task histories are never compacted. Repository source still carries the maintainer regression suite, while the installable ZIP excludes maintainer tests and caches. Task contracts and compact evidence remain versioned audit records; raw logs and generated reports stay ignored or in CI artifacts. RigorBreeze deliberately does not add a second local-only evidence store until real use proves that its migration and authority cost is worthwhile.
 
 Before v1.0, the workflow must complete and learn from:
 

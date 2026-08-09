@@ -22,12 +22,12 @@ def load_runner():
 
 
 class BehaviorSuiteTests(unittest.TestCase):
-    def test_contract_has_exactly_nine_safe_cases(self) -> None:
+    def test_contract_has_exactly_eleven_safe_cases(self) -> None:
         runner = load_runner()
         contract = runner.load_contract(SCENARIOS_PATH)
 
         self.assertEqual(contract["schemaVersion"], 1)
-        self.assertEqual(len(contract["cases"]), 9)
+        self.assertEqual(len(contract["cases"]), 11)
         self.assertEqual(
             {case["id"] for case in contract["cases"]},
             {
@@ -40,8 +40,33 @@ class BehaviorSuiteTests(unittest.TestCase):
                 "broken-workflow-high-risk",
                 "read-only-diagnosis",
                 "release-scope-freeze",
+                "initiative-decision-frontier",
+                "prototype-one-question",
             },
         )
+
+    def test_decision_frontier_rejects_more_than_three_questions(self) -> None:
+        runner = load_runner()
+        case = next(
+            case
+            for case in runner.load_contract(SCENARIOS_PATH)["cases"]
+            if case["id"] == "initiative-decision-frontier"
+        )
+        result = {
+            "caseId": case["id"],
+            "markers": case["requiredMarkers"],
+            "questions": ["q1", "q2", "q3", "q4"],
+            "verification": None,
+        }
+        verdict = runner.score_case(
+            case,
+            result,
+            case["syntheticTranscript"],
+            case["syntheticChangedPaths"],
+        )
+
+        self.assertFalse(verdict["passed"])
+        self.assertIn("at most 3", " ".join(verdict["issues"]))
 
     def test_contract_rejects_path_escape_and_invalid_regex(self) -> None:
         runner = load_runner()
