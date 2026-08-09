@@ -22,12 +22,12 @@ def load_runner():
 
 
 class BehaviorSuiteTests(unittest.TestCase):
-    def test_contract_has_exactly_seven_safe_cases(self) -> None:
+    def test_contract_has_exactly_nine_safe_cases(self) -> None:
         runner = load_runner()
         contract = runner.load_contract(SCENARIOS_PATH)
 
         self.assertEqual(contract["schemaVersion"], 1)
-        self.assertEqual(len(contract["cases"]), 7)
+        self.assertEqual(len(contract["cases"]), 9)
         self.assertEqual(
             {case["id"] for case in contract["cases"]},
             {
@@ -38,6 +38,8 @@ class BehaviorSuiteTests(unittest.TestCase):
                 "review-skepticism",
                 "lightweight-l0",
                 "broken-workflow-high-risk",
+                "read-only-diagnosis",
+                "release-scope-freeze",
             },
         )
 

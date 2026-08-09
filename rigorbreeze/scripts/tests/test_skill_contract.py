@@ -1,9 +1,13 @@
 from __future__ import annotations
 
 import re
+import shutil
 import subprocess
 import sys
+import tempfile
+import tomllib
 import unittest
+import zipfile
 from pathlib import Path
 from urllib.parse import unquote
 
@@ -35,7 +39,7 @@ class SkillContractTests(unittest.TestCase):
 
         shared_contract = (
             "$rigorbreeze",
-            "v0.10.4",
+            "v0.11.0",
             "nightbreezesjc/rigorbreeze",
             "npx skills@latest add nightbreezesjc/rigorbreeze --skill rigorbreeze -g -a codex -y",
             "python3 scripts/rigorbreeze.py status --json",
@@ -113,6 +117,32 @@ class SkillContractTests(unittest.TestCase):
         }
         packaged_names = {path.name for path in SKILL_DIR.rglob("*") if path.is_file()}
         self.assertTrue(forbidden.isdisjoint(packaged_names))
+
+    def test_distribution_archive_excludes_maintainer_tests_and_caches(self) -> None:
+        config = tomllib.loads(
+            (REPO_ROOT / "rigorbreeze.toml").read_text(encoding="utf-8")
+        )
+        build = next(check for check in config["checks"] if check["id"] == "build")
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            shutil.copytree(SKILL_DIR, root / "rigorbreeze")
+            (root / "rigorbreeze" / ".ruff_cache").mkdir(exist_ok=True)
+            (root / "rigorbreeze" / ".ruff_cache" / "cache").write_text("cache")
+            (root / "rigorbreeze" / "scripts" / "__pycache__").mkdir(exist_ok=True)
+            (root / "rigorbreeze" / "scripts" / "__pycache__" / "flow.pyc").write_bytes(
+                b"cache"
+            )
+
+            subprocess.run(build["command"], cwd=root, check=True)
+
+            with zipfile.ZipFile(root / build["artifacts"][0]) as archive:
+                names = archive.namelist()
+        self.assertIn("rigorbreeze/SKILL.md", names)
+        self.assertIn("rigorbreeze/scripts/flow.py", names)
+        self.assertFalse(any("/scripts/tests/" in name for name in names))
+        self.assertFalse(any(".ruff_cache" in name for name in names))
+        self.assertFalse(any("__pycache__" in name for name in names))
+        self.assertFalse(any(name.endswith((".pyc", ".pyo")) for name in names))
 
     def test_skill_metadata_matches_public_name(self) -> None:
         skill = (SKILL_DIR / "SKILL.md").read_text(encoding="utf-8")
@@ -211,6 +241,27 @@ class SkillContractTests(unittest.TestCase):
         self.assertIn("informal task card", skill)
         self.assertIn("restore the authoritative record", skill)
         self.assertIn("explicit emergency", skill)
+
+    def test_skill_routes_read_only_work_and_freezes_release_scope(self) -> None:
+        skill = (SKILL_DIR / "SKILL.md").read_text(encoding="utf-8").lower()
+        handbook = (
+            (SKILL_DIR / "references" / "handbook.md")
+            .read_text(encoding="utf-8")
+            .lower()
+        )
+
+        for phrase in (
+            "no-task path",
+            "risk follows consequence",
+            "freeze the approved operation scope",
+            "visible handoff",
+        ):
+            with self.subTest(phrase=phrase):
+                self.assertIn(phrase, skill)
+        self.assertIn("read-only answer", skill)
+        self.assertIn("separate governance task", skill)
+        self.assertIn("preparation cost", handbook)
+        self.assertIn("never downgrade l2", handbook)
 
     def test_skill_keeps_lean_implementation_compatible_with_production(self) -> None:
         skill = (SKILL_DIR / "SKILL.md").read_text(encoding="utf-8")

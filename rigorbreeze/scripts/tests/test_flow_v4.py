@@ -11,6 +11,8 @@ SCRIPTS_DIR = Path(__file__).resolve().parents[1]
 if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
+import flow_state  # noqa: E402
+
 
 class FlowV4Tests(FlowTestCase):
     def write_task(
@@ -145,7 +147,7 @@ artifacts = ["artifacts/app.bin"]
         runner = self.root / "scripts" / "flow_state.py"
         runner.write_text(
             runner.read_text(encoding="utf-8").replace(
-                'TOOL_VERSION = "0.10.4"', 'TOOL_VERSION = "0.5.1"'
+                'TOOL_VERSION = "0.11.0"', 'TOOL_VERSION = "0.5.1"'
             ),
             encoding="utf-8",
         )
@@ -155,7 +157,7 @@ artifacts = ["artifacts/app.bin"]
             status["installation"],
             {
                 "runnerVersion": "0.5.1",
-                "skillVersion": "0.10.4",
+                "skillVersion": "0.11.0",
                 "status": "outdated",
                 "upgradeSafe": False,
                 "missingComponents": [],
@@ -178,7 +180,7 @@ artifacts = ["artifacts/app.bin"]
         self.run_flow("init")
         self.assertTrue(runner.is_file())
         self.assertIn(
-            'TOOL_VERSION = "0.10.4"',
+            'TOOL_VERSION = "0.11.0"',
             (self.root / "scripts" / "flow_state.py").read_text(encoding="utf-8"),
         )
 
@@ -1068,6 +1070,87 @@ command = {json.dumps([sys.executable, "-c", check])}
             },
         )
 
+    def test_completed_tdd_history_keeps_final_green_and_latest_failed_chain(
+        self,
+    ) -> None:
+        def red(requirement: str, label: str) -> dict[str, object]:
+            return {
+                "requirement": requirement,
+                "command": [sys.executable, f"tests/{label}.py"],
+                "exitCode": 1,
+                "expectedPattern": label,
+                "testDigests": {f"tests/{label}.py": label},
+                "summary": f"full failure output for {label}",
+                "taskDigest": "task-digest",
+                "projectFingerprint": f"fingerprint-{label}",
+                "head": f"head-{label}",
+                "observedAt": f"2026-08-09T00:00:0{label[-1]}Z",
+            }
+
+        final_green = {"profile": "full", "passed": True, "verifiedAt": "now"}
+        chains = [
+            {
+                "requirement": "REQ-001",
+                "red": red("REQ-001", "attempt1"),
+                "green": None,
+            },
+            {
+                "requirement": "REQ-001",
+                "red": red("REQ-001", "attempt2"),
+                "green": None,
+            },
+            {
+                "requirement": "REQ-001",
+                "red": red("REQ-001", "attempt3"),
+                "green": final_green,
+            },
+            {
+                "requirement": "REQ-002",
+                "red": red("REQ-002", "attempt4"),
+                "green": final_green,
+            },
+        ]
+        evidence = {
+            "tddChain": chains.copy(),
+            "red": [chain["red"] for chain in chains],
+        }
+
+        flow_state.compact_completed_tdd_history(evidence)
+
+        self.assertEqual(
+            [chain["red"]["expectedPattern"] for chain in evidence["tddChain"]],
+            ["attempt2", "attempt3", "attempt4"],
+        )
+        self.assertEqual(evidence["tddSummary"]["total"], 4)
+        self.assertEqual(evidence["tddSummary"]["retained"], 3)
+        self.assertEqual(evidence["tddSummary"]["omitted"], 1)
+        self.assertEqual(len(evidence["red"]), 3)
+        self.assertNotIn("summary", evidence["red"][0])
+        self.assertNotIn("command", evidence["red"][0])
+        self.assertEqual(evidence["red"][0]["expectedPattern"], "attempt2")
+
+    def test_completed_tdd_history_does_not_change_single_or_empty_history(
+        self,
+    ) -> None:
+        empty = {"tddChain": [], "red": []}
+        single = {
+            "tddChain": [
+                {
+                    "requirement": "REQ-001",
+                    "red": {"requirement": "REQ-001", "summary": "keep"},
+                    "green": {"profile": "full", "passed": True},
+                }
+            ],
+            "red": [{"requirement": "REQ-001", "summary": "keep"}],
+        }
+
+        flow_state.compact_completed_tdd_history(empty)
+        flow_state.compact_completed_tdd_history(single)
+
+        self.assertEqual(empty, {"tddChain": [], "red": []})
+        self.assertEqual(single["red"][0]["summary"], "keep")
+        self.assertNotIn("tddSummary", single)
+
     def test_non_completed_archive_preserves_check_run_history(self) -> None:
         self.init_git()
         self.run_flow("init")
@@ -1082,13 +1165,21 @@ command = {json.dumps([sys.executable, "-c", check])}
             {"profile": "affected", "checkId": "unit", "passed": True},
             {"profile": "affected", "checkId": "unit", "passed": True},
         ]
+        evidence["tddChain"] = [
+            {"requirement": "REQ-001", "red": {"summary": "first"}, "green": None},
+            {"requirement": "REQ-001", "red": {"summary": "second"}, "green": None},
+        ]
+        evidence["red"] = [chain["red"] for chain in evidence["tddChain"]]
         evidence_path.write_text(json.dumps(evidence), encoding="utf-8")
 
         self.run_flow("archive", "--outcome", "abandoned", "--reason", "cancelled")
 
         preserved = json.loads(evidence_path.read_text())
         self.assertEqual(len(preserved["checkRuns"]), 3)
+        self.assertEqual(len(preserved["tddChain"]), 2)
+        self.assertEqual(len(preserved["red"]), 2)
         self.assertNotIn("checkRunSummary", preserved)
+        self.assertNotIn("tddSummary", preserved)
 
     def test_reconciled_archive_preserves_check_run_history(self) -> None:
         self.init_git()

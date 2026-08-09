@@ -105,6 +105,7 @@ from flow_state import (  # noqa: E402
     config_template,
     clean_managed_bytecode,
     compact_completed_check_runs,
+    compact_completed_tdd_history,
     current_head,
     effective_mode,
     empty_evidence,
@@ -2401,6 +2402,7 @@ def command_archive(
     evidence["closure"] = closure
     if outcome == "completed":
         compact_completed_check_runs(evidence)
+        compact_completed_tdd_history(evidence)
     save_evidence(root, active["id"], evidence)
     source.replace(destination)
     archive_relative = f"spec/archive/{active['id']}.md"

@@ -74,6 +74,8 @@ Git and release automation remain `manual` unless the project explicitly selects
 
 Do not lower risk to bypass a gate. Raise it when scope or consequences expand. A second human is required only by project policy or a real consequential decision; an AI reviewer never impersonates human approval.
 
+Risk follows consequence, not diff size, duration, urgency, or the amount of ceremony already spent. Status questions, log explanations, screenshot analysis, recommendations, and other no-write diagnosis use the no-task path: answer the question first and report workflow drift separately. If preparation cost exceeds the implementation cost of a genuinely isolated L0 change, remove unrelated ceremony and keep the lowest applicable lane. Never downgrade L2 merely to recover speed; data, payment, authorization, external integration, infrastructure, and production-write consequences stay L2.
+
 If an L2/release task cannot load its contract or authoritative workflow state,
 stop before product, deployment, migration, or production writes. Restore the
 record from Git/the originating worktree, or deliberately establish the
@@ -257,6 +259,8 @@ Only an explicit production release requires:
 - executable rollback or forward-fix command;
 - applicable business metric and user-feedback evidence.
 
+Freeze the approved operation scope before the first remote write. A newly discovered critical risk stops the release. An unrelated base-image, operating-system, database-engine, scanner, framework, or platform upgrade becomes a separate governance task instead of silently expanding the business deployment. Ordinary release work must not absorb a security modernization program simply because both touch the same image or server.
+
 An L2 release also requires a machine JSON `operation-plan` bound to the current Git SHA and artifact digest. It lists ordered backup, configuration-freeze, migration, deployment, acceptance, traffic-switch, and observation stages; every step has a success condition, plus stop conditions, safe recovery points, and rollback limitations. Show the full plan and identify the single step about to run before any remote write.
 
 Before any external Git, deployment, developer-tool, or platform write, inspect the external system rather than trusting an old plan or chat summary. Present the observed current state, what is already completed, current immutable identifiers, the one remaining action, and stop conditions. Do not rebuild, upload, migrate, deploy, or promote a version again merely because that step still appears in an earlier checklist.
@@ -293,6 +297,8 @@ one project entry
 ```
 
 Keep a stable `RIGORBREEZE_SESSION_ID` per Codex window. A second live session cannot claim the same worktree. `status --all --json` is the read-only interface for every window and optional external orchestrator.
+
+Before one task asks another task or window to act, show a visible handoff: destination task, observable result, allowed scope, forbidden scope, dependency or blocker, and owner. This notice improves user understanding but does not create another authority; the receiving task contract remains controlling.
 
 All worktree state is Git-private. `status --json` projects the workflow baseline from the real base branch and distinguishes missing, partial, modified, current, and blocked states. A one-time baseline commit is allowed only on that branch, at the expected HEAD, with no active task or mixed product changes.
 
