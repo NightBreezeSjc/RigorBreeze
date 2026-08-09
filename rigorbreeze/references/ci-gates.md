@@ -74,6 +74,8 @@ rollback limitations. After execution, store an `operation-result`; paused or
 failed work has one safe-state description and one resume action. CI remains a
 gate and artifact carrier, not a resident deployment state machine.
 
+The approved release profile and operation scope are frozen before remote writes. A newly discovered critical risk stops the candidate. Unrelated base-image, operating-system, database-engine, scanner, framework, or platform upgrades require a separate governance task and their own verification; a routine business release must not silently grow new security or infrastructure work while running.
+
 ## Enforcement boundary
 
 Local mode defaults to advisory. Local hooks can remind but are not the

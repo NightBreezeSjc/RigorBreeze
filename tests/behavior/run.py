@@ -65,8 +65,8 @@ def load_contract(path: Path = DEFAULT_CONTRACT) -> dict[str, Any]:
     if not isinstance(contract, dict) or contract.get("schemaVersion") != 1:
         raise ValueError("behavior contract schemaVersion must be 1")
     cases = contract.get("cases")
-    if not isinstance(cases, list) or len(cases) != 7:
-        raise ValueError("behavior contract must define exactly seven cases")
+    if not isinstance(cases, list) or len(cases) != 9:
+        raise ValueError("behavior contract must define exactly nine cases")
 
     seen: set[str] = set()
     for case in cases:

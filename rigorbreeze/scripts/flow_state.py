@@ -17,7 +17,7 @@ from typing import Any, Iterable
 import flow_parallel
 
 VERSION = 4
-TOOL_VERSION = "0.10.4"
+TOOL_VERSION = "0.11.0"
 SPEC_DIR = "spec"
 CONFIG_NAME = "rigorbreeze.toml"
 MODES = ("advisory", "enforced")
@@ -274,6 +274,80 @@ def compact_completed_check_runs(evidence: dict[str, Any]) -> None:
         "policy": "latest-per-profile-check-plus-latest-failure",
         "total": len(runs),
         "retained": len(retained_runs),
+        "omitted": omitted,
+        "groups": groups,
+    }
+
+
+def compact_completed_tdd_history(evidence: dict[str, Any]) -> None:
+    """Keep final TDD proof plus the latest useful failed attempt per requirement."""
+    chains = evidence.get("tddChain")
+    if not isinstance(chains, list) or len(chains) < 2:
+        return
+
+    grouped: dict[str, list[int]] = {}
+    retained_indexes: set[int] = set()
+    for index, chain in enumerate(chains):
+        if not isinstance(chain, dict):
+            retained_indexes.add(index)
+            continue
+        requirement = str(chain.get("requirement") or "unknown")
+        grouped.setdefault(requirement, []).append(index)
+
+    groups: list[dict[str, Any]] = []
+    for requirement, indexes in sorted(grouped.items()):
+        green_indexes = [index for index in indexes if chains[index].get("green")]
+        final_index = green_indexes[-1] if green_indexes else indexes[-1]
+        retained = {final_index}
+        failed_before_final = [
+            index
+            for index in indexes
+            if index < final_index and not chains[index].get("green")
+        ]
+        if failed_before_final:
+            retained.add(failed_before_final[-1])
+        retained_indexes.update(retained)
+        groups.append(
+            {
+                "requirement": requirement,
+                "total": len(indexes),
+                "green": len(green_indexes),
+                "failedOrInvalidated": len(indexes) - len(green_indexes),
+                "retained": len(retained),
+            }
+        )
+
+    retained_chains = [
+        chain for index, chain in enumerate(chains) if index in retained_indexes
+    ]
+    omitted = len(chains) - len(retained_chains)
+    if omitted <= 0:
+        return
+
+    compact_red_fields = (
+        "requirement",
+        "exitCode",
+        "expectedPattern",
+        "testDigests",
+        "taskDigest",
+        "head",
+        "observedAt",
+    )
+    compact_red: list[dict[str, Any]] = []
+    for chain in retained_chains:
+        red = chain.get("red") if isinstance(chain, dict) else None
+        if not isinstance(red, dict):
+            continue
+        compact_red.append(
+            {field: red[field] for field in compact_red_fields if field in red}
+        )
+
+    evidence["tddChain"] = retained_chains
+    evidence["red"] = compact_red
+    evidence["tddSummary"] = {
+        "policy": "final-green-plus-latest-prior-failure",
+        "total": len(chains),
+        "retained": len(retained_chains),
         "omitted": omitted,
         "groups": groups,
     }

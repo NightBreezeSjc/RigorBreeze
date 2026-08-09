@@ -25,6 +25,25 @@ The project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). 
 - Reframed the repository for first-time adopters with bilingual onboarding, explicit safety boundaries, and a complete first-task walkthrough.
 - Added concise contribution and security policies plus an MIT license.
 
+## [0.11.0] - Keep routine solo work light without weakening production gates
+
+### Changed
+
+- Route status questions, log explanations, screenshot analysis, recommendations, and other no-write diagnosis through a no-task path; stale workflow state is reported but does not block the read-only answer.
+- Select L0/L1/L2 from consequence rather than diff size or urgency, and remove unrelated ceremony when an isolated L0 preparation would cost more than its implementation.
+- Freeze an approved release scope before remote writes; critical findings stop the release while unrelated image, operating-system, database, scanner, framework, or platform upgrades become separate governance tasks.
+- Require visible cross-task handoffs that name the destination, result, allowed and forbidden scope, dependency or blocker, and owner.
+
+### Fixed
+
+- Compact normally completed TDD history to the final valid GREEN and latest useful earlier failed or invalidated chain per acceptance ID, with aggregate counts; active, abandoned, and reconciled histories remain intact.
+- Exclude maintainer tests, bytecode, and caches from the distributable Skill ZIP without deleting regression tests from source control.
+
+### Compatibility
+
+- Public CLI commands, state/evidence schema v4, automation journal v1, Spec Tree, dependencies, Git authority, and project adapter boundaries are unchanged.
+- Compact tracked task/evidence records remain the audit model; a second local-only evidence store is deliberately deferred.
+
 ## [0.10.4] - Recover stale workflow records before risky work
 
 ### Fixed

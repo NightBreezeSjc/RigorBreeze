@@ -10,7 +10,7 @@ Deliver one observable user outcome per task. Keep one human-authored Markdown c
 ## Start or resume
 
 1. Resolve the project root.
-2. Before every non-trivial writing request, including a follow-up after compaction or while debugging/review skills are active, run the bundled `python <skill-dir>/scripts/flow.py --root <project> status --all --json` in Git projects; fall back to `status --json` before initialization. Other skills supplement RigorBreeze but never replace its task state and ownership check.
+2. Route status questions, log explanations, screenshot analysis, recommendations, and other no-write diagnosis through a **no-task path**. Give the read-only answer even when workflow state is stale; report drift without making repair a prerequisite. Before every non-trivial writing request, including a follow-up after compaction or while debugging/review skills are active, run the bundled `python <skill-dir>/scripts/flow.py --root <project> status --all --json` in Git projects; fall back to `status --json` before initialization. Other skills supplement RigorBreeze but never replace its task state and ownership check.
 3. If uninitialized, run `init`, configure `rigorbreeze.toml`, and run `doctor --json`. Report `installation.status`; never overwrite an outdated project runner while a task is active.
 4. Read `rigorbreeze.toml`, `spec/index.md`, the current task, and only its linked authoritative sources. State for every Git worktree is private under its Git directory; migrate legacy `spec/state.json` through `init` or `doctor --all --repair`, never by editing it.
 5. Follow `nextAction`; use the bundled runner's `--help` as the canonical command reference. Before product-code writes, require an approved contract and successfully claim the current worktree/window. If status detects unapproved delivery changes, preserve the `workflow-bypass` candidate and restore them or close honestly as reconciled; never fabricate RED or a new baseline. If a high-risk task cannot load authoritative status or its contract, stop instead of substituting an informal task card: restore the authoritative record or establish an explicit Emergency contract before any product, deployment, or production write.
@@ -25,7 +25,7 @@ Write the compact result into the existing Authoritative inputs: user outcome, c
 
 ## Frame one vertical slice
 
-Choose the lane:
+Risk follows consequence, not diff size or elapsed time. Choose the lane:
 
 - `L0`: documentation or isolated non-behavioral/visual change.
 - `L1`: normal feature, fix, or end-to-end user flow.
@@ -87,7 +87,7 @@ Validate the real product, not only the build:
 - UI: real runtime, key states, screenshots, accessibility, and Playwright visual evidence.
 - Mini-app: formal build, developer-tool automation, real AppID/HTTPS environment, and device evidence.
 - Migration: cloned-data rehearsal, assertions, backup/restore or forward-fix proof.
-- Release, only when requested: one SHA/artifact across tests and UAT plus applicable governance. Before L2 remote writes, show the complete operation-plan stages and the one stage being executed; after pause/failure record the safe state and single resume action.
+- Release, only when requested: one SHA/artifact across tests and UAT plus applicable governance. Freeze the approved operation scope before remote writes. A newly discovered critical risk stops the release; unrelated image, OS, database-engine, scanner, or deployment-framework work becomes a separate governance task instead of silently expanding the current release. Show the complete operation-plan stages and the one stage being executed; after pause/failure record the safe state and single resume action.
 
 Before any external Git, deployment, developer-tool, or platform write, reconstruct the **observed current state** from the system itself. Summarize already completed steps, current immutable identifiers, the one remaining action, and stop conditions; never repeat a completed step from an old plan or chat summary.
 
@@ -101,7 +101,7 @@ Use compact outputs and read only the next needed source. `status --all --json` 
 
 For a large repository, an installed code-graph tool may help locate impact radius and affected tests only when its index reports the current Git SHA. Treat graph risk scores as hints, never as correctness gates or sources of truth.
 
-External multi-agent tools may consume `status --all --json`, but they never become a second source of truth. The task Markdown, task evidence, Git, and the runner remain authoritative.
+External multi-agent tools may consume `status --all --json`, but they never become a second source of truth. Before cross-task work, show one **visible handoff** naming destination, observable result, allowed scope, forbidden scope, dependency/blocker, and owner; the receiving task stays authoritative. The task Markdown, task evidence, Git, and the runner remain authoritative.
 
 `Depends-On` is repository-local. For cross-repository delivery, link the counterpart task and API/data contract under Authoritative inputs; do not complete consumer acceptance before the provider is integrated and verified.
 
@@ -146,4 +146,4 @@ Keep the human interaction small:
 2. ask for real acceptance when implementation is ready;
 3. before L1/L2/Emergency archive, show the prefilled `retro --json` summary and ask only for rework reason, whether any block/next action was unreasonable, and whether the workflow helped.
 
-Codex runs the CLI and records evidence; do not make the user operate each internal command. Close in this order: verify, accept, review, confirm retrospective, archive, then guarded commit/push/merge and worktree reconciliation. Normal completion compacts repeated check details while retaining final proof, the latest earlier failure and aggregate counts; it never deletes regression tests, and non-completed histories stay intact. L0 needs only configured affected verification; L1/L2 need full verification, applicable acceptance, review, and retrospective. Use `abandoned` for a clean cancellation. If code was already externally integrated but the task remained open, use `archive --outcome reconciled --reason <reason> --expected-head <sha>` only after integration and external outcomes are proven; never invent GREEN, acceptance, or release success. Production release still requires an active `release-ready` task. Before commit, archive, or any “fixed/passed/complete” claim, cite **fresh verification** run in this turn: the exact command, **exit status**, and covered scope. Historical reports, partial checks, or another Agent's success claim cannot substitute.
+Codex runs the CLI and records evidence; do not make the user operate each internal command. Close in this order: verify, accept, review, confirm retrospective, archive, then guarded commit/push/merge and worktree reconciliation. Normal completion compacts repeated check and TDD details while retaining final proof, the latest useful earlier failure, and aggregate counts; it never deletes regression tests, and non-completed histories stay intact. L0 needs only configured affected verification; L1/L2 need full verification, applicable acceptance, review, and retrospective. Use `abandoned` for a clean cancellation. If code was already externally integrated but the task remained open, use `archive --outcome reconciled --reason <reason> --expected-head <sha>` only after integration and external outcomes are proven; never invent GREEN, acceptance, or release success. Production release still requires an active `release-ready` task. Before commit, archive, or any “fixed/passed/complete” claim, cite **fresh verification** run in this turn: the exact command, **exit status**, and covered scope. Historical reports, partial checks, or another Agent's success claim cannot substitute.

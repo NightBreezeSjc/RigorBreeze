@@ -51,7 +51,7 @@ command = ["python3", "-c", "import pathlib,re,sys; files=[p for p in pathlib.Pa
 
 [[checks]]
 id = "build"
-command = ["python3", "-c", "import pathlib,zipfile; out=pathlib.Path('artifacts/rigorbreeze.zip'); out.parent.mkdir(exist_ok=True); files=[p for p in pathlib.Path('rigorbreeze').rglob('*') if p.is_file() and '__pycache__' not in p.parts]; z=zipfile.ZipFile(out,'w',zipfile.ZIP_DEFLATED); [z.write(p,p.as_posix()) for p in files]; z.close()"]
+command = ["python3", "-c", "import pathlib,zipfile; out=pathlib.Path('artifacts/rigorbreeze.zip'); out.parent.mkdir(exist_ok=True); files=[p for p in pathlib.Path('rigorbreeze').rglob('*') if p.is_file() and not p.as_posix().startswith('rigorbreeze/scripts/tests/') and not {'.ruff_cache','__pycache__'}.intersection(p.parts) and p.suffix not in {'.pyc','.pyo'}]; z=zipfile.ZipFile(out,'w',zipfile.ZIP_DEFLATED); [z.write(p,p.as_posix()) for p in files]; z.close()"]
 artifacts = ["artifacts/rigorbreeze.zip"]
 
 [[checks]]
