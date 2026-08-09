@@ -35,7 +35,7 @@ class SkillContractTests(unittest.TestCase):
 
         shared_contract = (
             "$rigorbreeze",
-            "v0.10.3",
+            "v0.10.4",
             "nightbreezesjc/rigorbreeze",
             "npx skills@latest add nightbreezesjc/rigorbreeze --skill rigorbreeze -g -a codex -y",
             "python3 scripts/rigorbreeze.py status --json",
@@ -202,6 +202,15 @@ class SkillContractTests(unittest.TestCase):
             "three failed hypotheses",
         ):
             self.assertIn(phrase, generated_policy.lower())
+
+    def test_skill_blocks_informal_high_risk_fallback_when_workflow_state_breaks(
+        self,
+    ) -> None:
+        skill = (SKILL_DIR / "SKILL.md").read_text(encoding="utf-8").lower()
+
+        self.assertIn("informal task card", skill)
+        self.assertIn("restore the authoritative record", skill)
+        self.assertIn("explicit emergency", skill)
 
     def test_skill_keeps_lean_implementation_compatible_with_production(self) -> None:
         skill = (SKILL_DIR / "SKILL.md").read_text(encoding="utf-8")

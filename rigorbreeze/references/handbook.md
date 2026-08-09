@@ -41,6 +41,12 @@ Each change has one human-authored Markdown contract containing:
 - exact project verification commands;
 - only the UI, security, migration, or release controls that apply.
 
+`Task-Origin` stores one compact, resolvable source such as the current request,
+an approved initiative brief, or a predecessor task. `Waiting-On` is `none` for
+ready work and names the unresolved decision or upstream event for an
+intentional prepared draft. A waiting draft cannot be approved, and lack of
+implementation is not evidence that the draft is accidental or disposable.
+
 `Runtime-Claims` names only exclusive resources actually used by the task: `port`, `service`, `process`, `app`, or `environment`; use `none` otherwise. Worktree isolation does not isolate these resources, so active claim conflicts block approval and window ownership. RigorBreeze reports conflicts but never kills processes, closes tools, or takes ports.
 
 For conditional L2 integrations, `Operational-Modes` maps `enabled`, `disabled`, and `unavailable` to declared acceptance IDs. Each mapped behavior must close through current RED/GREEN or requirement-bound real-runtime evidence. Use `N/A - <reason>` when no conditional runtime behavior exists.
@@ -67,6 +73,12 @@ Git and release automation remain `manual` unless the project explicitly selects
 | Emergency | Smallest safe production repair | Reproduction, critical regression, rollback, monitoring, later evidence repair |
 
 Do not lower risk to bypass a gate. Raise it when scope or consequences expand. A second human is required only by project policy or a real consequential decision; an AI reviewer never impersonates human approval.
+
+If an L2/release task cannot load its contract or authoritative workflow state,
+stop before product, deployment, migration, or production writes. Restore the
+record from Git/the originating worktree, or deliberately establish the
+existing Emergency path. An informal task card is not a substitute for a
+failed safety gate.
 
 ## 3. Run one vertical slice
 

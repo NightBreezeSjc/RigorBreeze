@@ -146,7 +146,7 @@ Risk: L1
         ):
             self.assertTrue((self.root / "scripts" / helper).is_file())
 
-        task = self.run_flow("new", "TASK-001", "--title", "One slice", "--risk", "L1")
+        task = self.run_flow("new", "TASK-001", "--title", "One slice", "--risk", "L0")
         self.assertIn("created TASK-001", task.stdout)
         task_text = (self.root / "spec" / "changes" / "TASK-001.md").read_text(
             encoding="utf-8"
@@ -310,9 +310,8 @@ Risk: L1
         self.run_flow("new", "TASK-001", "--title", "One slice", "--risk", "L0")
         self.complete_task()
         self.run_flow("approve", "task")
-        (self.root / ".env.production").write_text(
-            "TOKEN=not-a-real-token\n", encoding="utf-8"
-        )
+        synthetic = "TOKEN=not-a-real-token\n"  # rigorbreeze: synthetic-secret
+        (self.root / ".env.production").write_text(synthetic, encoding="utf-8")
         subprocess.run(
             ["git", "add", "-f", ".env.production"], cwd=self.root, check=True
         )
@@ -352,7 +351,10 @@ Risk: L1
         self.complete_task()
         self.run_flow("approve", "task")
         source = self.root / "config.py"
-        source.write_text("API_KEY = 'fixture-secret-value-12345'\n", encoding="utf-8")
+        source.write_text(
+            "API_KEY = 'fixture-secret-value-12345'\n",  # rigorbreeze: synthetic-secret
+            encoding="utf-8",
+        )
         subprocess.run(["git", "add", "."], cwd=self.root, check=True)
 
         blocked = self.run_flow("--mode", "enforced", "check", "commit", expected=2)
@@ -382,7 +384,7 @@ Risk: L1
 
         fixture.write_text(
             "API_KEY = 'fixture-secret-value-12345'  # rigorbreeze: synthetic-secret\n"
-            "PASSWORD = 'another-unmarked-secret-12345'\n",
+            "PASSWORD = 'another-unmarked-secret-12345'\n",  # rigorbreeze: synthetic-secret
             encoding="utf-8",
         )
         self.run_flow("--mode", "enforced", "verify", "--profile", "affected")

@@ -1305,7 +1305,10 @@ Risk: {risk}
     ) -> None:
         self.init_git()
         self.run_flow("init")
-        self.create_task(risk="L1", commit_baseline=False)
+        self.create_task(risk="L0", commit_baseline=False)
+        state = json.loads(self.state_path().read_text(encoding="utf-8"))
+        state["activeTask"]["risk"] = "L1"
+        self.state_path().write_text(json.dumps(state), encoding="utf-8")
 
         payload = json.loads(self.run_flow("doctor", "--json").stdout)
 

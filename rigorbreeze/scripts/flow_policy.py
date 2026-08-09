@@ -156,6 +156,19 @@ def declared_dependencies(root: Path, state: dict[str, Any]) -> list[str]:
     return list(dict.fromkeys(dependencies))
 
 
+def task_context(root: Path, state: dict[str, Any]) -> dict[str, str]:
+    active = active_task(state)
+    content = task_path(root, active["id"]).read_text(encoding="utf-8")
+    parsed = flow_parallel.parse_task_context(content)
+    origin = parsed["taskOrigin"].strip()
+    waiting_on = parsed["waitingOn"].strip()
+    if not origin or len(origin) > 160:
+        raise FlowError("Task-Origin must be a compact resolvable source")
+    if len(waiting_on) > 160:
+        raise FlowError("Waiting-On must be a compact blocking condition")
+    return {"taskOrigin": origin, "waitingOn": waiting_on or "none"}
+
+
 def runtime_claims(root: Path, state: dict[str, Any]) -> list[str]:
     active = active_task(state)
     content = task_path(root, active["id"]).read_text(encoding="utf-8")
