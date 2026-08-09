@@ -73,6 +73,7 @@ from flow_policy import (  # noqa: E402
     secret_content_paths,
     staged_files,
     task_change_paths,
+    task_context,
     task_owned_path,
     task_scope_status,
     runtime_claims,
@@ -385,6 +386,50 @@ def workflow_bypass_action() -> dict[str, str]:
     }
 
 
+def orphaned_record_action(task_id: str) -> dict[str, str]:
+    return {
+        "reason": (
+            f"The active task contract for {task_id} is missing; no approval, "
+            "verification, or completion may be inferred."
+        ),
+        "command": (
+            f"restore spec/changes/{task_id}.md from Git or the originating "
+            "worktree, then run doctor --all --json"
+        ),
+    }
+
+
+def evolution_projection(roots: list[Path]) -> dict[str, Any]:
+    candidates: set[str] = set()
+    seen: set[Path] = set()
+    for project in roots:
+        evidence_dir = project / "spec" / "evidence"
+        if not evidence_dir.is_dir():
+            continue
+        for path in sorted(evidence_dir.glob("*.json")):
+            resolved = path.resolve()
+            if resolved in seen:
+                continue
+            seen.add(resolved)
+            try:
+                evidence = read_json(path)
+            except FlowError:
+                continue
+            practice = evidence.get("practice", {})
+            confirmation = practice.get("confirmation") or {}
+            events = practice.get("events") or []
+            if confirmation.get("evolutionCandidate") is True or any(
+                isinstance(event, dict) and event.get("evolutionCandidate") is True
+                for event in events
+            ):
+                candidates.add(str(evidence.get("taskId") or path.stem))
+    return {
+        "candidateCount": len(candidates),
+        "taskIds": sorted(candidates),
+        "command": ("$rigorbreeze 汇总这个项目的演进候选" if candidates else None),
+    }
+
+
 def baseline_branch(root: Path, state: dict[str, Any] | None = None) -> str | None:
     active = (state or {}).get("activeTask") or {}
     if active.get("baseBranch"):
@@ -589,12 +634,25 @@ def command_new(
     depends_on: list[str] | None = None,
 ) -> None:
     dependencies = list(dict.fromkeys(depends_on or []))
-    if state_path(root).is_file():
+    existing_state = None
+    if state_path(root).is_file() or legacy_state_path(root).is_file():
         existing_state = load_state(root)
         lifecycle, _ = current_task_lifecycle(root, existing_state)
         if lifecycle in {"integrated-unclosed", "closure-pending"}:
             raise FlowError(
                 f"{lifecycle} task must be closed and committed before starting another task"
+            )
+    if risk in {"L1", "L2"} and is_git_repo(root):
+        if existing_state is None:
+            raise FlowError("initialize RigorBreeze before starting an L1/L2 task")
+        installation = installation_status(root, existing_state)
+        baseline = workflow_baseline_status(root, existing_state)
+        if installation["status"] != "current" or baseline["status"] != "current":
+            raise FlowError(
+                "workflow baseline and runner must be current before creating an "
+                f"{risk} task: baseline={baseline['status']}, "
+                f"installation={installation['status']}; "
+                f"{baseline['nextAction']['command']}"
             )
     if task_id in dependencies:
         raise FlowError("a task cannot depend on itself")
@@ -708,6 +766,12 @@ def command_approve(
         active["dependsOn"] = declared_dependencies(root, state)
         active["runtimeClaims"] = runtime_claims(root, state)
         active["operationalModes"] = operational_modes(root, state)
+        active.update(task_context(root, state))
+        if active["waitingOn"].lower() not in {"", "none", "n/a"}:
+            raise FlowError(
+                f"task is waiting on {active['waitingOn']}; resolve Waiting-On "
+                "before approval"
+            )
         declared_acceptance = set(acceptance_ids(root, state))
         undeclared_modes = sorted(
             requirement
@@ -928,6 +992,8 @@ def command_status(
                     "paths": [],
                     "evolutionCandidate": False,
                 }
+                if item.get("lifecycle") == "orphaned-record":
+                    continue
                 if worktree.is_dir() and (
                     state_path(worktree).is_file()
                     or legacy_state_path(worktree).is_file()
@@ -944,6 +1010,13 @@ def command_status(
                             item["nextAction"] = workflow_bypass_action()
         except flow_automation.AutomationError as exc:
             raise FlowError(str(exc)) from exc
+        roots = [root]
+        roots.extend(
+            Path(str(item["worktree"]))
+            for item in payload["tasks"]
+            if item.get("worktree")
+        )
+        payload["evolution"] = evolution_projection(roots)
         if json_output:
             print(json.dumps(payload, ensure_ascii=False, sort_keys=True))
             return
@@ -958,6 +1031,8 @@ def command_status(
                 )
         for issue in payload["issues"]:
             print(f"issue: {issue}")
+        if payload["evolution"]["candidateCount"]:
+            print(f"evolution: {payload['evolution']['command']}")
         cleanup = payload["cleanup"]
         if any(cleanup.values()):
             print(
@@ -968,6 +1043,39 @@ def command_status(
             )
         return
     state = load_state(root)
+    active = state.get("activeTask")
+    if active and not task_path(root, active["id"]).is_file():
+        action = orphaned_record_action(active["id"])
+        payload = {
+            "phase": state.get("phase"),
+            "localMode": load_config(root)
+            .get("policy", {})
+            .get("local_mode", "advisory"),
+            "activeTask": active["id"],
+            "approval": "invalid",
+            "verification": "missing/stale",
+            "fullProfile": "missing/stale",
+            "scope": {"status": "not-applicable", "outOfScope": []},
+            "lifecycle": "orphaned-record",
+            "nextAction": action,
+            "installation": installation_status(root, state),
+            "workflowBaseline": workflow_baseline_status(root, state),
+            "workflowBypass": {
+                "status": "clear",
+                "paths": [],
+                "evolutionCandidate": False,
+            },
+            "automation": None,
+            "evolution": evolution_projection([root]),
+        }
+        if json_output:
+            print(json.dumps(payload, ensure_ascii=False, sort_keys=True))
+            return
+        print("lifecycle: orphaned-record")
+        print(f"next action: {action['command']} ({action['reason']})")
+        if payload["evolution"]["candidateCount"]:
+            print(f"evolution: {payload['evolution']['command']}")
+        return
     refresh_approval(root, state)
     active = state.get("activeTask")
     approval = state["approvals"]["task"]
@@ -1004,7 +1112,16 @@ def command_status(
         "installation": installation_status(root, state),
         "workflowBaseline": workflow_baseline_status(root, state),
         "workflowBypass": workflow_bypass,
+        "evolution": evolution_projection([root]),
     }
+    if active and task_path(root, active["id"]).is_file():
+        payload.update(
+            flow_parallel.parse_task_context(
+                task_path(root, active["id"]).read_text(
+                    encoding="utf-8", errors="replace"
+                )
+            )
+        )
     if is_git_repo(root):
         try:
             payload["automation"] = flow_automation.action_summary(
@@ -1026,6 +1143,8 @@ def command_status(
     print(f"verification: {payload['verification']}")
     print(f"full profile: {payload['fullProfile']}")
     print(f"next action: {action['command']} ({action['reason']})")
+    if payload["evolution"]["candidateCount"]:
+        print(f"evolution: {payload['evolution']['command']}")
 
 
 def command_red(

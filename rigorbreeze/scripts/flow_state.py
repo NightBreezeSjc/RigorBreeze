@@ -17,7 +17,7 @@ from typing import Any, Iterable
 import flow_parallel
 
 VERSION = 4
-TOOL_VERSION = "0.10.3"
+TOOL_VERSION = "0.10.4"
 SPEC_DIR = "spec"
 CONFIG_NAME = "rigorbreeze.toml"
 MODES = ("advisory", "enforced")
@@ -333,6 +333,10 @@ Risk: {risk}
 
 Depends-On: none
 
+Task-Origin: current-request
+
+Waiting-On: none
+
 Runtime-Claims: none
 
 Operational-Modes: N/A - no conditional runtime behavior
@@ -395,11 +399,12 @@ Before every non-trivial product-code write, including a follow-up after context
 Complete incomplete prompts from evidence before approval: recover project facts from requirements, code, tests, Git and runtime state; ask only for outcome-changing intent that cannot be recovered; state safe defaults instead of hiding assumptions. Record the compact result in Authoritative inputs rather than creating another context document.
 Translate compound requests into observable atoms (`ADD`/`REMOVE`/`MOVE`/`RETAIN`/`REPLACE`) and map each to an acceptance ID or explicit out-of-scope reason. For negative wording, distinguish a current defect from the desired result using project evidence; ask one short outcome question only when evidence cannot decide. UI acceptance covers presence, absence, order/location, and retained behavior.
 Before approval, perform a semantic self-review for placeholders, contradictions, oversized scope, and ambiguous outcome, source-of-truth, freshness, or fallback meaning; show a compact final-state checklist, resolve project facts directly, and ask only about outcome-changing ambiguity.
-One worktree may own only one active writing task. Use `new --worktree auto` for parallel tasks and `status --all --json` for the project view. Declare exclusive ports, services, processes, apps, or environments in `Runtime-Claims`; worktrees do not isolate them. Complex DAGs are proposed once, then represented only by `Depends-On`.
+One worktree may own only one active writing task. Use `new --worktree auto` for parallel tasks and `status --all --json` for the project view. Record a resolvable `Task-Origin` and keep an intentional draft's `Waiting-On` condition explicit until approval. Declare exclusive ports, services, processes, apps, or environments in `Runtime-Claims`; worktrees do not isolate them. Complex DAGs are proposed once, then represented only by `Depends-On`.
 Local mode is advisory; CI, L2, merge, and release use enforced profiles. L0 closes after configured verification; L1/L2 require current full verification, applicable acceptance, review, and retrospective confirmation. Verify review feedback against the requirement, actual use, compatibility constraints, tests, and YAGNI before implementation. Immutable artifacts and release governance are required only when release is actually requested.
 Use `archive --outcome abandoned --reason <reason>` for a clean cancelled task; use `reconciled` only for proven externally integrated history. Archive before guarded delivery and preserve branches. Conditional L2 integrations map enabled/disabled/unavailable behavior in `Operational-Modes`, and L2 remote release requires an operation plan with one safe recovery entry.
 Git automation defaults to manual and never increases during an upgrade. A current-message request may authorize one guarded commit/push. Ordinary commit requires current configured affected/full evidence; archive, merge, and integration-branch delivery retain full gates. Provider merge and release require standing project configuration.
 Before any external write, report the observed current state, already completed steps, immutable identifiers, remaining action and stop conditions. Never repeat a completed operation from a stale plan or chat summary. A completion claim requires fresh verification from this turn with its command, exit status, and covered scope; history or another Agent's claim is insufficient.
+If a high-risk task cannot load its authoritative contract or workflow state, restore the record or create an explicit Emergency contract before product or production writes; never replace the failed workflow with an informal task card.
 After three failed hypotheses for the same defect, make an architecture stop: preserve the evidence and re-evaluate boundaries, shared state, and assumptions before another patch.
 {AGENTS_END}"""
 

@@ -46,7 +46,9 @@ scripts/flow_automation.py
   worktrees. Existing `spec/state.json` is copied on first read; `init` or
   explicit repair removes it only when it is untracked and identical. A tracked
   or divergent legacy file is retained and reported.
-- `changes/<TASK-ID>.md`: the only human-authored change contract.
+- `changes/<TASK-ID>.md`: the only human-authored change contract. New contracts
+  carry compact `Task-Origin` and `Waiting-On` lines; they are lifecycle facts,
+  not another planning document or evidence schema.
 - `evidence/<TASK-ID>.json`: baseline, check runs, TDD chain, verification,
   artifact digests, acceptance, release, and the prefilled practice summary.
 - `archive/<TASK-ID>.md`: the same task moved after its risk-appropriate close gate; never a duplicate.
@@ -102,7 +104,7 @@ Private `state.json` and the common registry are machine caches and gate inputs,
 not product requirement sources. Do not commit linked-worktree state or edit it
 to bypass a gate. `doctor --all --repair` may rebuild the registry explicitly.
 
-`status --json` includes `installation`, `workflowBaseline`, `workflowBypass`, lifecycle, and `scope` projections. Installation
+`status --json` includes `installation`, `workflowBaseline`, `workflowBypass`, lifecycle, `scope`, and compact `evolution` projections. Installation
 compares the bundled Skill with the project runner and reports `current`,
 `outdated`, `missing`, or `unmanaged`, missing/modified components, and upgrade safety. `workflowBaseline` proves managed files on the real base branch and reports `current`, `missing`, `partial`, `modified`, or `blocked`. Lifecycle prioritizes `integrated-unclosed` and `closure-pending` over stale-baseline advice. Scope is `current`,
 `violated`, or `not-applicable`, and evaluates committed changes from the
@@ -111,6 +113,12 @@ approval baseline through `HEAD` together with current working-tree changes.
 non-workflow delivery changes. That observation records one deduplicated
 practice event as an immediate evolution candidate; it never creates approval,
 RED, GREEN, acceptance, or a replacement baseline.
+
+If an active contract is missing, current and aggregate status project
+`lifecycle=orphaned-record`, block readiness, and identify the exact contract to
+restore. Existing evidence candidates are summarized by task ID with the
+copyable `$rigorbreeze 汇总这个项目的演进候选` instruction; status never mutates
+that evidence while projecting the reminder.
 
 `status --all --json` also includes runtime claims/conflicts and a `cleanup` projection. It lists
 managed integrated worktrees that are removable, entries retained with a safety

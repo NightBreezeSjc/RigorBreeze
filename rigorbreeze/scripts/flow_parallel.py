@@ -254,6 +254,10 @@ def update_task(
         "runtimeClaims": list(
             task_values.get("runtimeClaims", existing.get("runtimeClaims", []))
         ),
+        "taskOrigin": task_values.get(
+            "taskOrigin", existing.get("taskOrigin", "legacy-unspecified")
+        ),
+        "waitingOn": task_values.get("waitingOn", existing.get("waitingOn", "none")),
         "managedByFlow": existing.get("managedByFlow", False),
         "createdPath": existing.get("createdPath"),
         "createdAt": existing.get("createdAt"),
@@ -562,6 +566,17 @@ def parse_runtime_claims(content: str) -> list[str]:
     return sorted(
         {item.strip().lower() for item in match.group(1).split(",") if item.strip()}
     )
+
+
+def parse_task_context(content: str) -> dict[str, str]:
+    def value(name: str, fallback: str) -> str:
+        match = re.search(rf"(?mi)^{re.escape(name)}:\s*(.+?)\s*$", content)
+        return match.group(1).strip() if match else fallback
+
+    return {
+        "taskOrigin": value("Task-Origin", "legacy-unspecified"),
+        "waitingOn": value("Waiting-On", "none"),
+    }
 
 
 def runtime_claim_conflicts(
@@ -1028,6 +1043,16 @@ def aggregate(root: Path) -> dict[str, Any]:
         )
         worktree = Path(str(item.get("worktree", "")))
         item["worktreeExists"] = worktree.is_dir()
+        task_file = worktree / "spec" / "changes" / f"{task_id}.md"
+        if task_file.is_file():
+            item.update(
+                parse_task_context(
+                    task_file.read_text(encoding="utf-8", errors="replace")
+                )
+            )
+        else:
+            item.setdefault("taskOrigin", "legacy-unspecified")
+            item.setdefault("waitingOn", "none")
         observed_head = (
             git(worktree, "rev-parse", "HEAD") if item["worktreeExists"] else None
         )
@@ -1042,7 +1067,30 @@ def aggregate(root: Path) -> dict[str, Any]:
             and item.get("baseSha")
             and base_head.stdout.strip() != item.get("baseSha")
         )
-        if item["readiness"] == "integrated" and not item.get("archived"):
+        orphaned = bool(
+            item["worktreeExists"]
+            and not item.get("archived")
+            and not task_file.is_file()
+        )
+        waiting_on = str(item.get("waitingOn", "none")).strip()
+        if orphaned:
+            item["lifecycle"] = "orphaned-record"
+            item["readiness"] = "blocked"
+            item["baselineStale"] = False
+            item["verification"] = "missing/stale"
+            item["fullProfile"] = "missing/stale"
+            item["nextAction"] = {
+                "reason": (
+                    f"The active task contract for {task_id} is missing; no approval, "
+                    "verification, or completion may be inferred."
+                ),
+                "command": (
+                    f"restore spec/changes/{task_id}.md from Git or the originating "
+                    "worktree, then run doctor --all --json"
+                ),
+            }
+            errors.append(f"{task_id} active task contract is missing: {task_file}")
+        elif item["readiness"] == "integrated" and not item.get("archived"):
             item["lifecycle"] = "integrated-unclosed"
             item["baselineStale"] = False
             item["nextAction"] = {
@@ -1056,6 +1104,13 @@ def aggregate(root: Path) -> dict[str, Any]:
             item["lifecycle"] = "closed"
             item["baselineStale"] = False
             item.pop("nextAction", None)
+        elif waiting_on.lower() not in {"", "none", "n/a"}:
+            item["lifecycle"] = "waiting"
+            item["readiness"] = "waiting"
+            item["nextAction"] = {
+                "reason": f"The intentional draft is waiting on {waiting_on}.",
+                "command": "resolve Waiting-On in the task contract before approval",
+            }
         elif item["baselineStale"]:
             item["lifecycle"] = "active"
             item["verification"] = "missing/stale"
@@ -1073,6 +1128,7 @@ def aggregate(root: Path) -> dict[str, Any]:
         else:
             item["lifecycle"] = "active"
         result.append(item)
+    errors = sorted(set(errors))
     order = [] if errors else topological_order(tasks)
     return {
         "tasks": result,

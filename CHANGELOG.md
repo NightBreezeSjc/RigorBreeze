@@ -25,6 +25,20 @@ The project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). 
 - Reframed the repository for first-time adopters with bilingual onboarding, explicit safety boundaries, and a complete first-task walkthrough.
 - Added concise contribution and security policies plus an MIT license.
 
+## [0.10.4] - Recover stale workflow records before risky work
+
+### Fixed
+
+- Keep `status` and `doctor` consistent when an active contract is missing: project an `orphaned-record`, block inferred completion, and provide a non-destructive restore action instead of aborting one command while another appears healthy.
+- Surface existing evolution candidates through status with one copyable review instruction, without copying or mutating task evidence.
+- Preflight the installed runner and real base-branch workflow baseline before creating a new Git-backed L1/L2 task; L0 and existing-task recovery remain lightweight.
+- Preserve compact `Task-Origin` and `Waiting-On` facts for intentional prepared drafts so absence of implementation is not mistaken for permission to discard them.
+- Add a seventh repository-only Agent pressure case that rejects replacing a broken high-risk workflow with an informal task card.
+
+### Compatibility
+
+- Public CLI commands, evidence/state schema v4, automation journal v1, Spec Tree, dependencies, Git authority, and project-specific adapter boundaries are unchanged.
+
 ## [0.10.3] - Compact completed verification evidence
 
 ### Changed

@@ -145,7 +145,7 @@ artifacts = ["artifacts/app.bin"]
         runner = self.root / "scripts" / "flow_state.py"
         runner.write_text(
             runner.read_text(encoding="utf-8").replace(
-                'TOOL_VERSION = "0.10.3"', 'TOOL_VERSION = "0.5.1"'
+                'TOOL_VERSION = "0.10.4"', 'TOOL_VERSION = "0.5.1"'
             ),
             encoding="utf-8",
         )
@@ -155,7 +155,7 @@ artifacts = ["artifacts/app.bin"]
             status["installation"],
             {
                 "runnerVersion": "0.5.1",
-                "skillVersion": "0.10.3",
+                "skillVersion": "0.10.4",
                 "status": "outdated",
                 "upgradeSafe": False,
                 "missingComponents": [],
@@ -178,21 +178,23 @@ artifacts = ["artifacts/app.bin"]
         self.run_flow("init")
         self.assertTrue(runner.is_file())
         self.assertIn(
-            'TOOL_VERSION = "0.10.3"',
+            'TOOL_VERSION = "0.10.4"',
             (self.root / "scripts" / "flow_state.py").read_text(encoding="utf-8"),
         )
 
     def test_l2_approval_requires_a_tracked_workflow_baseline(self) -> None:
         self.init_git()
         self.run_flow("init")
-        self.run_flow("new", "TASK-702", "--title", "baseline", "--risk", "L2")
-        self.write_task("TASK-702", risk="L2")
-
-        blocked = self.run_flow("approve", "task", expected=2)
-        self.assertIn("workflow baseline branch is not current", blocked.stderr)
+        blocked = self.run_flow(
+            "new", "TASK-702", "--title", "baseline", "--risk", "L2", expected=2
+        )
+        self.assertIn("workflow baseline and runner must be current", blocked.stderr)
         self.assertIn("baseline=missing", blocked.stderr)
+        self.assertFalse((self.root / "spec" / "changes" / "TASK-702.md").exists())
 
         self.commit_all("track workflow baseline")
+        self.run_flow("new", "TASK-702", "--title", "baseline", "--risk", "L2")
+        self.write_task("TASK-702", risk="L2")
         self.run_flow("approve", "task")
 
     def test_nested_test_path_is_not_treated_as_production_before_red(self) -> None:
@@ -563,6 +565,117 @@ artifacts = ["artifacts/app.bin"]
         )
         self.assertEqual(evidence.get("practice", {}).get("events", []), [])
 
+    def test_missing_active_contract_is_a_recoverable_orphan_in_status_and_doctor(
+        self,
+    ) -> None:
+        self.init_git()
+        self.run_flow("init")
+        self.commit_all("install workflow")
+        self.run_flow("new", "TASK-716", "--title", "orphan", "--risk", "L0")
+        contract = self.root / "spec" / "changes" / "TASK-716.md"
+        contract.unlink()
+
+        current = json.loads(self.run_flow("status", "--json").stdout)
+        self.assertEqual(current["lifecycle"], "orphaned-record")
+        self.assertIn("restore", current["nextAction"]["command"])
+
+        aggregate = json.loads(self.run_flow("status", "--all", "--json").stdout)
+        task = next(item for item in aggregate["tasks"] if item["taskId"] == "TASK-716")
+        self.assertEqual(task["lifecycle"], "orphaned-record")
+        self.assertEqual(task["readiness"], "blocked")
+        self.assertTrue(any("TASK-716" in issue for issue in aggregate["issues"]))
+
+        doctor = self.run_flow("doctor", "--all", "--json", expected=2)
+        diagnosis = json.loads(doctor.stdout)
+        diagnosed = next(
+            item for item in diagnosis["tasks"] if item["taskId"] == "TASK-716"
+        )
+        self.assertEqual(diagnosed["lifecycle"], "orphaned-record")
+        self.assertTrue(any("TASK-716" in issue for issue in diagnosis["issues"]))
+
+    def test_status_surfaces_existing_evolution_candidates_without_new_log(
+        self,
+    ) -> None:
+        self.init_git()
+        self.run_flow("init")
+        self.commit_all("install workflow")
+        self.run_flow("new", "TASK-717", "--title", "candidate", "--risk", "L0")
+        evidence_path = self.root / "spec" / "evidence" / "TASK-717.json"
+        evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
+        evidence["practice"] = {
+            "events": [
+                {
+                    "type": "workflow-bypass",
+                    "evolutionCandidate": True,
+                    "count": 2,
+                }
+            ]
+        }
+        evidence_path.write_text(json.dumps(evidence), encoding="utf-8")
+        before = evidence_path.read_bytes()
+
+        current = json.loads(self.run_flow("status", "--json").stdout)
+        self.assertEqual(current["evolution"]["candidateCount"], 1)
+        self.assertEqual(current["evolution"]["taskIds"], ["TASK-717"])
+        self.assertEqual(
+            current["evolution"]["command"],
+            "$rigorbreeze 汇总这个项目的演进候选",
+        )
+        aggregate = json.loads(self.run_flow("status", "--all", "--json").stdout)
+        self.assertEqual(aggregate["evolution"]["candidateCount"], 1)
+        self.assertEqual(evidence_path.read_bytes(), before)
+
+    def test_new_l1_preflights_installation_and_baseline_before_creating_files(
+        self,
+    ) -> None:
+        self.init_git()
+        self.run_flow("init")
+
+        blocked = self.run_flow(
+            "new", "TASK-718", "--title", "preflight", "--risk", "L1", expected=2
+        )
+        self.assertIn("workflow baseline", blocked.stderr)
+        self.assertFalse((self.root / "spec" / "changes" / "TASK-718.md").exists())
+        self.assertFalse((self.root / "spec" / "evidence" / "TASK-718.json").exists())
+        state = json.loads(self.state_path().read_text(encoding="utf-8"))
+        self.assertIsNone(state["activeTask"])
+
+        self.run_flow("new", "TASK-719", "--title", "lightweight", "--risk", "L0")
+        self.assertTrue((self.root / "spec" / "changes" / "TASK-719.md").is_file())
+
+    def test_task_origin_and_waiting_condition_are_projected_from_the_contract(
+        self,
+    ) -> None:
+        self.init_git()
+        self.run_flow("init")
+        self.commit_all("install workflow")
+        self.run_flow("new", "TASK-720", "--title", "prepared draft", "--risk", "L0")
+        contract = self.root / "spec" / "changes" / "TASK-720.md"
+        content = contract.read_text(encoding="utf-8")
+        self.assertIn("Task-Origin: current-request", content)
+        self.assertIn("Waiting-On: none", content)
+        self.write_task("TASK-720")
+        content = contract.read_text(encoding="utf-8").replace(
+            "Depends-On: none\n",
+            "Depends-On: none\n\nTask-Origin: current-request\n\nWaiting-On: none\n",
+        )
+        contract.write_text(
+            content.replace(
+                "Task-Origin: current-request",
+                "Task-Origin: initiative:XINYUAN-BRIEF-v1",
+            ).replace("Waiting-On: none", "Waiting-On: product-approval"),
+            encoding="utf-8",
+        )
+
+        aggregate = json.loads(self.run_flow("status", "--all", "--json").stdout)
+        task = next(item for item in aggregate["tasks"] if item["taskId"] == "TASK-720")
+        self.assertEqual(task["taskOrigin"], "initiative:XINYUAN-BRIEF-v1")
+        self.assertEqual(task["waitingOn"], "product-approval")
+        self.assertEqual(task["readiness"], "waiting")
+        self.assertIn("product-approval", task["nextAction"]["reason"])
+        blocked = self.run_flow("approve", "task", expected=2)
+        self.assertIn("resolve Waiting-On", blocked.stderr)
+
     def test_l2_operational_modes_must_close_before_archive(self) -> None:
         self.run_flow("init")
         checks = []
@@ -697,6 +810,7 @@ level = "manual"
             capture_output=True,
             check=True,
         ).stdout.strip()
+        self.assertTrue(base)
         subprocess.run(
             ["git", "checkout", "-qb", "rigorbreeze/task-branch"],
             cwd=self.root,
@@ -704,14 +818,17 @@ level = "manual"
         )
         self.run_flow("init")
         self.commit_all("workflow exists only on task branch")
-        self.run_flow("new", "TASK-712", "--title", "baseline branch", "--risk", "L2")
-        self.write_task("TASK-712", risk="L2")
-
-        status = json.loads(self.run_flow("status", "--json").stdout)
-        self.assertEqual(status["workflowBaseline"]["baseBranch"], base)
-        self.assertEqual(status["workflowBaseline"]["status"], "missing")
-        blocked = self.run_flow("--mode", "enforced", "approve", "task", expected=2)
-        self.assertIn("baseline branch", blocked.stderr)
+        blocked = self.run_flow(
+            "new",
+            "TASK-712",
+            "--title",
+            "baseline branch",
+            "--risk",
+            "L2",
+            expected=2,
+        )
+        self.assertIn("baseline=missing", blocked.stderr)
+        self.assertFalse((self.root / "spec" / "changes" / "TASK-712.md").exists())
 
     def test_completed_archive_can_be_committed_from_last_closed_context(self) -> None:
         import flow_parallel

@@ -42,7 +42,7 @@ scripts/flow_automation.py
 
 - `index.md`：只保存权威顺序和导航。
 - Git 私有 `state.json`：主 worktree 和 linked worktree 都在各自 Git 私有目录保存 schema v4 阶段、活动任务、批准、最新 RED/验证、警告和最后关闭记录。首次读取会复制旧 `spec/state.json`；只有在它未被跟踪且与迁移结果一致时，`init` 或明确 repair 才删除。已跟踪或内容不同的旧文件会保留并报告。
-- `changes/<TASK-ID>.md`：唯一人工变更合同。
+- `changes/<TASK-ID>.md`：唯一人工变更合同。新合同包含精简的 `Task-Origin` 与 `Waiting-On` 行；它们是生命周期事实，不是第二份计划文档或 evidence schema。
 - `evidence/<TASK-ID>.json`：基线、检查、TDD 链、验证、制品摘要、验收、发布和预填实践摘要。
 - `archive/<TASK-ID>.md`：完成适用风险门禁后移动的同一任务，不创建副本。
 - `rigorbreeze.toml`：标准检查、profile、命令、报告、制品、超时和风险适用性。
@@ -84,7 +84,9 @@ accepted → release-ready → protected release gate
 
 私有 `state.json` 和公共注册表是机器缓存和门禁输入，不是产品需求源。不要提交 linked-worktree 状态，也不要手工修改状态绕过门禁。`doctor --all --repair` 只在明确请求时重建注册表。
 
-`status --json` 包含 `installation`、`workflowBaseline`、`workflowBypass`、生命周期和 `scope` 投影。安装状态对比 bundled Skill 与项目执行器，返回 `current`、`outdated`、`missing` 或 `unmanaged`、缺失/被修改组件和是否可安全升级。`workflowBaseline` 在真正基准分支证明受管文件，返回 `current`、`missing`、`partial`、`modified` 或 `blocked`。生命周期优先报告 `integrated-unclosed` 和 `closure-pending`，不会先给出错误的过期基线建议。范围状态为 `current`、`violated` 或 `not-applicable`，计算从批准基线到 `HEAD` 的已提交变化和当前工作树变化。只有活动任务尚未批准且已出现非工作流交付改动时，`workflowBypass` 才返回 `detected`，并写入一条去重的即时演进候选；该观察不会生成批准、RED、GREEN、验收或替代基线。
+`status --json` 包含 `installation`、`workflowBaseline`、`workflowBypass`、生命周期、`scope` 和精简 `evolution` 投影。安装状态对比 bundled Skill 与项目执行器，返回 `current`、`outdated`、`missing` 或 `unmanaged`、缺失/被修改组件和是否可安全升级。`workflowBaseline` 在真正基准分支证明受管文件，返回 `current`、`missing`、`partial`、`modified` 或 `blocked`。生命周期优先报告 `integrated-unclosed` 和 `closure-pending`，不会先给出错误的过期基线建议。范围状态为 `current`、`violated` 或 `not-applicable`，计算从批准基线到 `HEAD` 的已提交变化和当前工作树变化。只有活动任务尚未批准且已出现非工作流交付改动时，`workflowBypass` 才返回 `detected`，并写入一条去重的即时演进候选；该观察不会生成批准、RED、GREEN、验收或替代基线。
+
+活动合同缺失时，当前与聚合状态会投影 `lifecycle=orphaned-record`、阻断就绪并指出需要恢复的准确合同。已有 evidence 演进候选只按任务 ID 汇总，并给出可复制的 `$rigorbreeze 汇总这个项目的演进候选`；status 展示提醒时不会修改原 evidence。
 
 `status --all --json` 还包含运行资源声明/冲突与 `cleanup` 投影，列出可删除的已集成受管 worktree、带安全原因的保留项、未登记 Git worktree，以及按策略保留的本地任务分支；候选同时显示干净状态、集成证明、expected HEAD 和是否需要一次性确认。未登记清理永不删除分支。该投影只从 Git 和注册表推导，是提示状态，不是第二套任务或证据事实源。
 
