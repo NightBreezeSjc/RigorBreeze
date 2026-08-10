@@ -51,10 +51,6 @@ the actual project commands in `rigorbreeze.toml`; the YAML calls the policy
 runner directly and contains no second command registry. Preserve evidence, reports, screenshots, migration
 logs, SBOM, and artifact digests.
 
-Large scanner inventories are transient diagnostics, not proof by themselves.
-Track compact digests, counts, unmatched samples, and the independent expected
-source/ownership oracle; keep raw inventories local or in time-limited CI artifacts.
-
 Use protected branches/environments, required pipelines, environment-scoped secrets, and manual production approval. Do not place credentials in YAML.
 
 ## GitHub Actions

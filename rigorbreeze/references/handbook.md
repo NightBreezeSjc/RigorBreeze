@@ -82,12 +82,6 @@ record from Git/the originating worktree, or deliberately establish the
 existing Emergency path. An informal task card is not a substitute for a
 failed safety gate.
 
-Read-only evidence-only tooling, inventory generation, and scanner maintenance
-normally remain L1 with targeted contract, unit, and secret checks. Raise them
-to L2 only when they actually mutate migrations, credentials, production,
-infrastructure, or release state; do not run an entire application release
-profile merely because the evidence describes a future L2 migration.
-
 ## 3. Run one vertical slice
 
 ### Shape an initiative before the first task
@@ -127,13 +121,6 @@ operations, use real user, operator, contract, analytics, or business evidence.
 Reference code proves what an older system did, not what the new product should
 do. A role prompt can challenge the brief but cannot supply missing intent or
 approve it.
-
-A completeness or ownership claim needs an oracle independent of the scanner.
-Filename, token, regex, or semantic similarity can produce candidates, but it
-cannot prove that every relevant object belongs to the initiative. Use a
-separately curated identifier set, authoritative registration/export, database
-relation, or a human-reviewed mapping; report unmatched and ambiguous objects
-instead of turning the heuristic into its own proof.
 
 The developer approves the brief before task creation. Then cite its exact
 version in the first RigorBreeze contract and continue through the normal
@@ -250,12 +237,6 @@ One-off exploration and debugging commands may run directly but do not satisfy w
 Within one profile invocation, checks with identical argv, resolved cwd, effective environment, and timeout share one process result. Each check still validates its own report and artifacts and records `reusedFromCheckId`; no result is cached across profiles, sessions, or project changes.
 
 Keep regression tests as durable product assets. While a task is active, retain every check record needed for diagnosis and gating. On normal completed archive, compact repeated details to the latest record for each profile/check plus the latest earlier failure, and preserve aggregate pass/failure/omission counts in `checkRunSummary`. Do not compact abandoned or reconciled histories. Record ordinary review facts in structured evidence with `standards`, `spec`, and a non-empty `findings` summary; create a separate review report only when its findings must remain independently inspectable. Raw full logs belong in ignored local output or time-limited CI artifacts, not tracked evidence.
-
-Track compact manifests, counts, digests, unmatched samples, and resolvable
-source references. Keep raw inventories and large generated snapshots in
-ignored local storage or time-limited CI artifacts unless the raw file is an
-approved product deliverable. A second prose rendering of the same machine
-inventory is not additional evidence.
 
 L2 `full` derives a non-negotiable minimum from risk and actual changes: secret scanning, build, at least one static-quality check, and at least one behavioral check. Dependency-manifest changes additionally require dependency, license, and SBOM checks with non-empty reports. Migration changes require the configured migration adapter and report. L0/L1 remain project-declared and do not inherit unrelated enterprise tooling.
 

@@ -32,14 +32,44 @@ TRANSLATED_DOCS = {
 }
 
 
+def current_tool_version() -> str:
+    source = (SKILL_DIR / "scripts" / "flow_state.py").read_text(encoding="utf-8")
+    match = re.search(r'^TOOL_VERSION = "([^"]+)"$', source, re.MULTILINE)
+    if match is None:
+        raise AssertionError("flow_state.py does not define TOOL_VERSION")
+    return match.group(1)
+
+
 class SkillContractTests(unittest.TestCase):
+    def test_maintainer_task_records_stay_local_to_the_source_repository(self) -> None:
+        ignore = (REPO_ROOT / ".gitignore").read_text(encoding="utf-8").splitlines()
+        for pattern in (
+            "/spec/changes/*.md",
+            "/spec/evidence/*.json",
+            "/spec/archive/*.md",
+        ):
+            self.assertIn(pattern, ignore)
+
+        for directory, suffix in (
+            (REPO_ROOT / "spec" / "changes", ".md"),
+            (REPO_ROOT / "spec" / "evidence", ".json"),
+            (REPO_ROOT / "spec" / "archive", ".md"),
+        ):
+            self.assertTrue((directory / ".gitkeep").is_file())
+            probe = directory / f"maintainer-record{suffix}"
+            result = subprocess.run(
+                ["git", "check-ignore", "-q", str(probe.relative_to(REPO_ROOT))],
+                cwd=REPO_ROOT,
+            )
+            self.assertEqual(0, result.returncode)
+
     def test_public_readmes_cover_the_same_first_run_contract(self) -> None:
         english = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
         chinese = (REPO_ROOT / "README.zh-CN.md").read_text(encoding="utf-8")
 
         shared_contract = (
             "$rigorbreeze",
-            "v0.12.0",
+            f"v{current_tool_version()}",
             "nightbreezesjc/rigorbreeze",
             "npx skills@latest add nightbreezesjc/rigorbreeze --skill rigorbreeze -g -a codex -y",
             "python3 scripts/rigorbreeze.py status --json",
@@ -53,6 +83,28 @@ class SkillContractTests(unittest.TestCase):
         self.assertNotIn("production-ready", english.lower())
         self.assertIn("README.zh-CN.md", english)
         self.assertIn("README.md", chinese)
+
+    def test_current_version_is_consistent_across_release_surfaces(self) -> None:
+        version = current_tool_version()
+        marker = f"v{version}"
+
+        for relative in ("README.md", "README.zh-CN.md"):
+            with self.subTest(relative=relative):
+                self.assertIn(
+                    marker, (REPO_ROOT / relative).read_text(encoding="utf-8")
+                )
+        for relative in ("CHANGELOG.md", "CHANGELOG.zh-CN.md"):
+            with self.subTest(relative=relative):
+                self.assertIn(
+                    f"## [{version}]",
+                    (REPO_ROOT / relative).read_text(encoding="utf-8"),
+                )
+        for relative in ("CONTRIBUTING.md", "CONTRIBUTING.zh-CN.md"):
+            with self.subTest(relative=relative):
+                self.assertIn(
+                    f"--version {version}",
+                    (REPO_ROOT / relative).read_text(encoding="utf-8"),
+                )
 
     def test_public_markdown_relative_links_resolve(self) -> None:
         public_docs = [
@@ -214,7 +266,9 @@ class SkillContractTests(unittest.TestCase):
                 self.assertEqual(skill.count(phrase), 1)
                 self.assertIn(phrase, generated_policy)
 
-    def test_skill_keeps_business_tasks_separate_and_evidence_lean(self) -> None:
+    def test_skill_keeps_business_tasks_separate_and_reuses_sequential_worktrees(
+        self,
+    ) -> None:
         skill = (SKILL_DIR / "SKILL.md").read_text(encoding="utf-8").lower()
         handbook = (
             (SKILL_DIR / "references" / "handbook.md")
@@ -228,18 +282,13 @@ class SkillContractTests(unittest.TestCase):
         for phrase in (
             "separate skill task",
             "sequential initiative work",
-            "independent attribution oracle",
         ):
             with self.subTest(phrase=phrase):
                 self.assertIn(phrase, skill)
-        for phrase in (
-            "raw inventories",
-            "evidence-only tooling",
-            "genuinely concurrent writer",
-        ):
+        for phrase in ("genuinely concurrent writer", "separate skill task"):
             with self.subTest(phrase=phrase):
                 self.assertIn(phrase, handbook)
-        for phrase in ("原始清单", "证据型工具", "真正并发的写任务"):
+        for phrase in ("真正并发的写任务", "独立 Skill 任务"):
             with self.subTest(phrase=phrase):
                 self.assertIn(phrase, chinese)
 

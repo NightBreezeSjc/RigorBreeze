@@ -10,6 +10,7 @@ The project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). 
 
 ### Changed
 
+- Keep RigorBreeze-maintainer task contracts, evidence, and archives local to the source checkout; public release proof now stays in commits, the changelog, regression tests, and CI without changing initialized projects' evidence behavior.
 - Renamed the project, Skill ID, invocation, runner, configuration, Git-private state, and task-branch prefix from Codex Production Flow to RigorBreeze before the first public release. No legacy alias is retained.
 - Require inspection of the standard library, framework, and current dependency set before adding custom code or packages; new dependencies and abstractions need current acceptance or a durable invariant.
 - Keep compatibility risk-adaptive: proven-dead private preview paths may be removed, while public APIs, persisted data, upgrade paths, and production migrations retain explicit transition, verification, and rollback requirements.
@@ -35,12 +36,10 @@ The project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). 
 
 - When business work exposes a reusable RigorBreeze defect, preserve the business contract and record the blocker or evolution candidate, then fix the workflow in a separate Skill task instead of widening the product task or patching its private Runner.
 - Reuse a designated integration worktree for sequential initiative slices; create another worktree only for a genuinely concurrent writer or a disposable risky experiment.
-- Keep read-only scanners and evidence generators at L1 unless they can change migrations, credentials, production, infrastructure, or release state; retain compact manifests and summaries while raw inventories stay local or in time-limited CI artifacts.
-- Require an independent attribution oracle for source-completeness and ownership claims; filename, token, regex, and semantic heuristics may shortlist candidates but cannot prove their own completeness.
 
 ### Validation
 
-- Expand the deterministic Agent-behavior contract from eleven to thirteen scenarios with business-task/workflow-defect separation and sequential-initiative evidence-economy cases.
+- Expand the deterministic Agent-behavior contract from eleven to thirteen scenarios with business-task/workflow-defect separation and sequential-initiative worktree-reuse cases.
 
 ### Compatibility
 

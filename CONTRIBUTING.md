@@ -52,13 +52,13 @@ python3 -B tests/behavior/run.py run --version 0.13.0 --repetitions 2
 
 Any hard-rule failure blocks the candidate. Inspect only the redacted Git-private results under `.git/rigorbreeze/behavior-evals/0.13.0/`; do not commit them or use real credentials and services in a fixture.
 
-The source repository must retain its regression and behavior-contract tests. The distributable Skill ZIP excludes maintainer tests, caches, and bytecode; verify that boundary with the contract suite instead of deleting test assets.
+The source repository must retain its regression and behavior-contract tests. The distributable Skill ZIP excludes maintainer tests, caches, and bytecode; verify that boundary with the contract suite instead of deleting test assets. Maintainer task contracts, machine evidence, and archives stay local and ignored in this source repository; commits, the changelog, tests, and CI are the public contribution record.
 
 ## Change rules
 
 1. Add or identify a failing regression that represents the real problem.
 2. Make the smallest change that fixes that failure.
-3. Preserve one task Markdown plus one evidence JSON as the task source of truth.
+3. Preserve one local task Markdown plus one local evidence JSON as the task source of truth while the work is active; do not publish those maintainer records from this source repository.
 4. Do not add dependencies, public CLI commands, Spec file types, or default automation levels without evidence and explicit design review.
 5. Keep `SKILL.md` compact and move detailed policy into an existing reference.
 6. Verify the full suite and a clean temporary-project flow before submitting.

@@ -45,7 +45,7 @@ Use existing domain glossaries and ADRs when they help decode terms or constrain
 Before approval, agree:
 
 - which public interface or boundary the test exercises;
-- which independent oracle proves the expected result; source-completeness or ownership classification requires an **independent attribution oracle**, never the scanner's own filename, token, or semantic heuristic;
+- which independent oracle proves the expected result;
 - which production paths may change;
 - which requirement/design version defines acceptance.
 
@@ -71,7 +71,7 @@ Before writing a custom mechanism or adding a dependency, inspect the **standard
 
 For bugs, first build a tight feedback loop that is deterministic, fast, agent-runnable, and capable of turning red. Minimize the reproduction, rank falsifiable hypotheses, instrument only to distinguish them, remove temporary probes, then retain a regression test. After **three failed hypotheses** for the same defect, make an **architecture stop**: preserve evidence and re-examine boundaries, shared state, and assumptions before another patch.
 
-Run one-off debugging or exploratory commands directly. Workflow validity comes only from configured profiles. A profile is the project's declared contract: every listed check must run, while unrelated capabilities stay outside it. Read-only evidence/scanner tooling stays L1 with targeted project-declared checks unless it actually writes migration, production, credentials, infrastructure, or release state.
+Run one-off debugging or exploratory commands directly. Workflow validity comes only from configured profiles. A profile is the project's declared contract: every listed check must run, while unrelated capabilities stay outside it.
 
 ## Review and accept
 

@@ -13,3 +13,8 @@ Authority order:
 6. `archive/` history
 
 Do not copy requirement bodies into multiple files. Move a completed task to `archive/`; do not duplicate it.
+
+In the RigorBreeze source repository, maintainer task contracts, evidence, and
+archives are local-only and ignored. Git history, the changelog, regression
+tests, and CI are the public release record. This repository policy does not
+change the evidence contract of projects initialized with RigorBreeze.

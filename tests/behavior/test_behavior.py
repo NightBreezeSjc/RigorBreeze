@@ -43,7 +43,7 @@ class BehaviorSuiteTests(unittest.TestCase):
                 "initiative-decision-frontier",
                 "prototype-one-question",
                 "business-task-exposes-workflow-defect",
-                "sequential-initiative-evidence-economy",
+                "sequential-initiative-worktree-reuse",
             },
         )
 

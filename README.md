@@ -13,7 +13,7 @@ English · [简体中文](README.zh-CN.md)
 
 RigorBreeze turns a rough initiative or bounded request into an approved task contract, observed TDD evidence, configured quality checks, real-runtime acceptance, and a recoverable delivery record. It is deliberately smaller than a full project-management system: one task Markdown, one machine evidence file, and no document maze.
 
-> **Public Preview:** v0.13.0 is usable today. It keeps ordinary solo work light while preserving production controls, and now isolates reusable workflow repairs from business tasks, reuses sequential initiative worktrees, scopes migration checks to current changes, and keeps generated source proof compact and independently verifiable. It has not yet completed the validation required for v1.0, so interfaces may still change in response to further delivery evidence.
+> **Public Preview:** v0.13.0 is usable today. It keeps ordinary solo work light while preserving production controls, and now isolates reusable workflow repairs from business tasks, reuses sequential initiative worktrees, and scopes migration checks to current changes. It has not yet completed the validation required for v1.0, so interfaces may still change in response to further delivery evidence.
 
 ## Why this exists
 
@@ -211,6 +211,8 @@ The task contract records the current sources, machine-checkable allowed and for
 
 Regression tests remain durable product assets. On a normally completed archive, repeated check details are compacted to the latest record per profile/check plus the latest earlier failure, with aggregate counts retained in the same evidence JSON. Abandoned and reconciled histories remain complete. Ordinary review facts belong in structured evidence; create a separate report only when independently inspectable findings require one, and keep transient raw logs in ignored or time-limited CI artifact storage.
 
+This source repository keeps its maintainer task contracts, evidence, and archives local rather than publishing machine records that contain workstation paths or transient command output. Public release history lives in Git commits, this changelog, regression tests, and CI. Projects initialized with RigorBreeze keep their normal project evidence policy.
+
 See the installable Skill's [Spec Tree contract](rigorbreeze/references/spec-tree.md) for authority and invalidation rules.
 
 ## Safety and privacy defaults
@@ -278,7 +280,7 @@ For a manual install, remove only the `rigorbreeze` directory or symlink from yo
 
 ## Public Preview and v1.0
 
-v0.13.0 keeps the minimal Spec Tree and existing command surface while applying lessons from a real legacy source-baseline delivery. Historical destructive SQL no longer blocks unrelated verification; a changed destructive migration still does. Sequential initiative work reuses its integration worktree, scanner/evidence tooling stays consequence-based, reusable workflow defects move to a separate Skill task, and source-completeness claims require independent attribution rather than self-proving semantic matches. Completed evidence remains compact; raw inventories and generated snapshots stay ignored or in CI artifacts unless they are approved product deliverables.
+v0.13.0 keeps the minimal Spec Tree and existing command surface while applying three reusable lessons from real delivery. Historical destructive SQL no longer blocks unrelated verification, while a changed destructive migration still does. Sequential initiative work reuses its integration worktree, and reusable workflow defects move to a separate Skill task instead of widening a business task.
 
 The v0.12.0 decision-frontier, one-question prototype, and abstraction-deletion contracts remain part of this release.
 

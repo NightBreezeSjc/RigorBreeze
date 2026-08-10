@@ -10,10 +10,6 @@ from flow_test_support import FlowTestCase
 
 
 class FlowV3Tests(FlowTestCase):
-    def commit_all(self, message: str) -> None:
-        subprocess.run(["git", "add", "."], cwd=self.root, check=True)
-        subprocess.run(["git", "commit", "-qm", message], cwd=self.root, check=True)
-
     def write_task(self, root: Path, task_id: str, scope: str) -> None:
         (root / "spec" / "changes" / f"{task_id}.md").write_text(
             f"""# {task_id}: fixture
