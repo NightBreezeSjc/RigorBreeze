@@ -10,11 +10,11 @@ Operational-Modes: N/A - no conditional runtime behavior
 
 ## Authoritative inputs
 - User outcome: ADD an optional, low-friction product-shaping step for a new product, new business domain, broad legacy migration, or idea that is not yet ready to become one observable delivery task.
-- Current behavior and evidence: RigorBreeze recovers facts and self-reviews a task contract, but immediately frames one vertical slice. The real Xinyuan planning session produced strong source-code migration analysis while leaving product value, usability evidence, success outcomes, and the actual task contract unresolved.
+- Current behavior and evidence: RigorBreeze recovers facts and self-reviews a task contract, but immediately frames one vertical slice. A real legacy-domain planning session produced strong source-code migration analysis while leaving product value, usability evidence, success outcomes, and the actual task contract unresolved.
 - Business and architecture path: keep RigorBreeze as the delivery control plane; before task creation only when the initiative is genuinely unshaped, produce or refine one compact, versioned initiative brief, compare approaches, expose assumptions and product risks, obtain user approval, then convert only the first slice into the existing contract.
 - Invariants and source of truth: no new CLI command, schema, Spec file type, runtime dependency, mandatory PRD tree, or gate for ordinary tasks. Project/business evidence outranks personas and reference-source inference. The initiative brief is an authoritative input, not machine evidence or a substitute for task acceptance.
-- Requirement/design/API version: RigorBreeze Unreleased initiative-shaping protocol, derived from the 2026-08-07 Xinyuan real-use review.
-- Unresolved outcome-changing ambiguity: none; the user approved the optional minimal protocol and requested implementation without modifying the active Xinyuan product work.
+- Requirement/design/API version: RigorBreeze Unreleased initiative-shaping protocol, derived from a 2026-08-07 real-use review.
+- Unresolved outcome-changing ambiguity: none; the user approved the optional minimal protocol and requested implementation without modifying the active product work.
 
 ## Allowed scope
 - README.md
@@ -32,7 +32,7 @@ Operational-Modes: N/A - no conditional runtime behavior
 
 ## Forbidden scope
 - Public CLI commands, state/evidence schemas, runner policy, risk levels, Git automation, release gates, and Spec Tree file types.
-- Project-specific Xinyuan requirements, business code, or product documents.
+- Project-specific requirements, business code, or product documents.
 - Mandatory initiative documents for ordinary L0/L1/L2 tasks that already have a stable observable outcome.
 
 ## Acceptance criteria

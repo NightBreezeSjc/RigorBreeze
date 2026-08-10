@@ -420,15 +420,22 @@ def migration_files(root: Path) -> list[Path]:
     )
 
 
-def destructive_migrations(root: Path) -> list[str]:
+def destructive_migrations(root: Path, relative_paths: Iterable[str]) -> list[str]:
     found: list[str] = []
-    for path in migration_files(root):
+    for relative in sorted(
+        {path.strip().replace("\\", "/") for path in relative_paths if path.strip()}
+    ):
+        if not is_configured_migration_path(root, relative):
+            continue
+        path = root / relative
+        if not path.is_file():
+            continue
         try:
             content = path.read_text(encoding="utf-8", errors="replace")
         except OSError:
             continue
         if DESTRUCTIVE_MIGRATION_PATTERN.search(content):
-            found.append(path.relative_to(root).as_posix())
+            found.append(relative)
     return found
 
 

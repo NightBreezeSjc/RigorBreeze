@@ -22,12 +22,12 @@ def load_runner():
 
 
 class BehaviorSuiteTests(unittest.TestCase):
-    def test_contract_has_exactly_eleven_safe_cases(self) -> None:
+    def test_contract_has_exactly_thirteen_safe_cases(self) -> None:
         runner = load_runner()
         contract = runner.load_contract(SCENARIOS_PATH)
 
         self.assertEqual(contract["schemaVersion"], 1)
-        self.assertEqual(len(contract["cases"]), 11)
+        self.assertEqual(len(contract["cases"]), 13)
         self.assertEqual(
             {case["id"] for case in contract["cases"]},
             {
@@ -42,6 +42,8 @@ class BehaviorSuiteTests(unittest.TestCase):
                 "release-scope-freeze",
                 "initiative-decision-frontier",
                 "prototype-one-question",
+                "business-task-exposes-workflow-defect",
+                "sequential-initiative-evidence-economy",
             },
         )
 

@@ -32,7 +32,7 @@ Risk follows consequence, not diff size or elapsed time. Choose the lane:
 - `L2`: permissions, sensitive data, migration, payments, external integration, architecture, or production release.
 - `Emergency`: smallest safe hotfix followed by evidence repair and incident review.
 
-Create one task with an observable title. For a single task, stay in the current worktree. When another writing task must run concurrently, use `new ... --worktree auto`; never let two writing windows share one physical worktree.
+Create one task with an observable title. For a single task, stay in the current worktree. **Sequential initiative work** reuses its designated integration worktree; use `new ... --worktree auto` only for a genuinely concurrent writer or an explicitly disposable risky experiment, and never let two writing windows share one physical worktree.
 
 For an ordinary independent task, do not create a DAG. If a complex requirement has real ordering constraints, first show one compact proposal containing task outcome, `Depends-On`, allowed scope, acceptance result, and parallel-ready nodes. After one user confirmation, create the isolated tasks with repeated `--depends-on`. The task contracts are the DAG; do not create a second planning tree.
 
@@ -45,7 +45,7 @@ Use existing domain glossaries and ADRs when they help decode terms or constrain
 Before approval, agree:
 
 - which public interface or boundary the test exercises;
-- which independent oracle proves the expected result;
+- which independent oracle proves the expected result; source-completeness or ownership classification requires an **independent attribution oracle**, never the scanner's own filename, token, or semantic heuristic;
 - which production paths may change;
 - which requirement/design version defines acceptance.
 
@@ -71,7 +71,7 @@ Before writing a custom mechanism or adding a dependency, inspect the **standard
 
 For bugs, first build a tight feedback loop that is deterministic, fast, agent-runnable, and capable of turning red. Minimize the reproduction, rank falsifiable hypotheses, instrument only to distinguish them, remove temporary probes, then retain a regression test. After **three failed hypotheses** for the same defect, make an **architecture stop**: preserve evidence and re-examine boundaries, shared state, and assumptions before another patch.
 
-Run one-off debugging or exploratory commands directly. Workflow validity comes only from configured profiles. A profile is the project's declared contract: every listed check must run, while unrelated capabilities stay outside the profile.
+Run one-off debugging or exploratory commands directly. Workflow validity comes only from configured profiles. A profile is the project's declared contract: every listed check must run, while unrelated capabilities stay outside it. Read-only evidence/scanner tooling stays L1 with targeted project-declared checks unless it actually writes migration, production, credentials, infrastructure, or release state.
 
 ## Review and accept
 
@@ -125,7 +125,7 @@ Automation outcomes live in Git-private `.git/rigorbreeze/automation.json`, keye
 
 ## Evolve from real use
 
-At every L1/L2/Emergency close, run the retrospective without asking the user to remember metrics. Runner drift, occupied tasks, resource conflicts, missing operation plans, and gate failures are deduplicated as task practice events. When the user corrects an interpretation (“I meant”, “you missed”, “understood it backwards”), classify the existing retrospective evidence as `requirement-interpretation-correction` with `missing-atom`, `reversed-intent`, `wrong-source`, or `scope-change`; never retain the chat transcript. Pass `none` when no human exception exists. Only a judged workflow rework, unreasonable block/next action, bypass, or `hurt` impact becomes an evolution candidate; correct blocks remain statistics.
+At every L1/L2/Emergency close, run the retrospective without asking the user to remember metrics. Runner drift, occupied tasks, resource conflicts, missing operation plans, and gate failures are deduplicated as task practice events. When the user corrects an interpretation (“I meant”, “you missed”, “understood it backwards”), classify the existing retrospective evidence as `requirement-interpretation-correction` with `missing-atom`, `reversed-intent`, `wrong-source`, or `scope-change`; never retain the chat transcript. If a business task exposes a reusable workflow defect, preserve its contract, record the blocker/candidate, and open a **separate Skill task**; never widen the business scope or patch its private runner. Pass `none` when no human exception exists. Only a judged workflow rework, unreasonable block/next action, bypass, or `hurt` impact becomes an evolution candidate; correct blocks remain statistics.
 
 When a candidate is emitted:
 

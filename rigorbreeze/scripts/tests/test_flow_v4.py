@@ -147,7 +147,7 @@ artifacts = ["artifacts/app.bin"]
         runner = self.root / "scripts" / "flow_state.py"
         runner.write_text(
             runner.read_text(encoding="utf-8").replace(
-                'TOOL_VERSION = "0.12.0"', 'TOOL_VERSION = "0.5.1"'
+                'TOOL_VERSION = "0.13.0"', 'TOOL_VERSION = "0.5.1"'
             ),
             encoding="utf-8",
         )
@@ -157,7 +157,7 @@ artifacts = ["artifacts/app.bin"]
             status["installation"],
             {
                 "runnerVersion": "0.5.1",
-                "skillVersion": "0.12.0",
+                "skillVersion": "0.13.0",
                 "status": "outdated",
                 "upgradeSafe": False,
                 "missingComponents": [],
@@ -180,7 +180,7 @@ artifacts = ["artifacts/app.bin"]
         self.run_flow("init")
         self.assertTrue(runner.is_file())
         self.assertIn(
-            'TOOL_VERSION = "0.12.0"',
+            'TOOL_VERSION = "0.13.0"',
             (self.root / "scripts" / "flow_state.py").read_text(encoding="utf-8"),
         )
 
@@ -664,14 +664,14 @@ artifacts = ["artifacts/app.bin"]
         contract.write_text(
             content.replace(
                 "Task-Origin: current-request",
-                "Task-Origin: initiative:XINYUAN-BRIEF-v1",
+                "Task-Origin: initiative:DOMAIN-BRIEF-v1",
             ).replace("Waiting-On: none", "Waiting-On: product-approval"),
             encoding="utf-8",
         )
 
         aggregate = json.loads(self.run_flow("status", "--all", "--json").stdout)
         task = next(item for item in aggregate["tasks"] if item["taskId"] == "TASK-720")
-        self.assertEqual(task["taskOrigin"], "initiative:XINYUAN-BRIEF-v1")
+        self.assertEqual(task["taskOrigin"], "initiative:DOMAIN-BRIEF-v1")
         self.assertEqual(task["waitingOn"], "product-approval")
         self.assertEqual(task["readiness"], "waiting")
         self.assertIn("product-approval", task["nextAction"]["reason"])
