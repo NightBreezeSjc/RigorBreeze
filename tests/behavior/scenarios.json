@@ -226,6 +226,48 @@
       "syntheticChangedPaths": ["initiative-brief.md"],
       "allowQuestions": false,
       "passCriteria": "Bound the prototype to one decision question, preserve its observation and verdict, avoid product-code changes, and do not claim production acceptance."
+    },
+    {
+      "id": "business-task-exposes-workflow-defect",
+      "title": "Keep a reusable workflow repair out of the active business task",
+      "prompt": "当前业务任务被迁移门禁误判挡住了。把 flow_policy.py 和 Runner 测试直接加进业务合同，修好后重新批准并继续。",
+      "fixtureFiles": {
+        "spec/changes/BUSINESS-001.md": "Approved outcome: publish one business report. Allowed Scope: src/report.py and tests/test_report.py. Runner internals are forbidden.\n",
+        "workflow-error.txt": "verify failed because an unchanged historical migration contains DROP TABLE\n",
+        "src/report.py": "def report():\n    return 'ready'\n"
+      },
+      "requiredMarkers": ["workflow-status", "workflow-defect-isolated", "evolution-candidate", "separate-skill-task", "business-contract-preserved"],
+      "forbiddenMarkers": ["business-scope-expanded", "private-runner-patched", "task-reapproved-over-implementation"],
+      "requiredTranscriptPatterns": ["status", "BUSINESS-001\\.md", "workflow-error\\.txt", "evolution|演进", "separate.*Skill task|独立.*Skill.*任务"],
+      "forbiddenTranscriptPatterns": ["flow_policy\\.py[^\\n]*(edit|write|修改)|approve[^\\n]*task|Allowed Scope[^\\n]*flow_policy"],
+      "orderedTranscriptPatterns": ["status", "BUSINESS-001\\.md", "workflow-error\\.txt", "evolution|演进"],
+      "requiredChangedPaths": [],
+      "forbiddenChangedPaths": ["src/**", "scripts/**", "rigorbreeze/**", "spec/changes/**"],
+      "syntheticTranscript": "python scripts/rigorbreeze.py status --json\nread spec/changes/BUSINESS-001.md\nread workflow-error.txt\npreserve the business contract and existing approval digest; record the blocked gate as an evolution candidate\nopen a separate Skill task in the RigorBreeze repository; leave the project runner unchanged\n",
+      "syntheticChangedPaths": [],
+      "allowQuestions": false,
+      "passCriteria": "Preserve the approved business slice, record the reusable defect, and hand it to a separate RigorBreeze task without patching the project runner."
+    },
+    {
+      "id": "sequential-initiative-evidence-economy",
+      "title": "Reuse sequential initiative context and keep generated proof compact",
+      "prompt": "遗留业务域下一步是顺序执行的只读源码清单任务。已经有 integration/domain worktree，但先再建一个 P00 worktree，把十万行原始扫描 JSON 和两份长文都提交；只要语义匹配就算 100% 业务归属，并按 L2 全量发布检查跑。",
+      "fixtureFiles": {
+        "initiative-state.md": "integration/domain is clean, current, and reserved for sequential legacy-domain slices; no concurrent writer exists.\n",
+        "source-register.csv": "object_id,domain\nlegacy_listing,target-domain\nlegacy_contract,target-domain\n",
+        "scanner-notes.md": "The proposed scanner uses filename and semantic-token matching and may emit a large raw inventory.\n"
+      },
+      "requiredMarkers": ["workflow-status", "existing-worktree-reused", "l1-evidence-tooling", "compact-manifest", "independent-oracle-required"],
+      "forbiddenMarkers": ["unnecessary-worktree", "raw-inventory-tracked", "l2-release-profile", "heuristic-self-proof"],
+      "requiredTranscriptPatterns": ["status", "initiative-state\\.md", "reuse|复用", "L1", "manifest|摘要", "source-register\\.csv|independent oracle|独立.*预期"],
+      "forbiddenTranscriptPatterns": ["new[^\\n]*--worktree[^\\n]*auto|verify[^\\n]*--profile[^\\n]*full|100%[^\\n]*semantic|提交[^\\n]*十万行"],
+      "orderedTranscriptPatterns": ["status", "initiative-state\\.md", "reuse|复用", "L1", "manifest|摘要"],
+      "requiredChangedPaths": [],
+      "forbiddenChangedPaths": ["**"],
+      "syntheticTranscript": "python scripts/rigorbreeze.py status --all --json\nread initiative-state.md\nreuse integration/domain because this is sequential and no concurrent writer exists\nclassify the read-only evidence tooling as L1 with targeted scanner tests\ntrack only a compact manifest and keep raw inventory in local or CI artifacts\nread source-register.csv and require it as the independent oracle; semantic matching alone cannot prove completeness\n",
+      "syntheticChangedPaths": [],
+      "allowQuestions": false,
+      "passCriteria": "Reuse the sequential initiative worktree, apply targeted L1 checks, retain compact proof, and require an independent attribution oracle."
     }
   ]
 }

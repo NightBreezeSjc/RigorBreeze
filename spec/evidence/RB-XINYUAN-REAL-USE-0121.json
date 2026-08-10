@@ -1,0 +1,668 @@
+{
+  "workflowVersion": 4,
+  "taskId": "RB-XINYUAN-REAL-USE-0121",
+  "baseline": {
+    "taskDigest": "a346357077db639825c0a2b17744acef050d9e6431105eb412c1b26d4125cc50",
+    "head": "5e4fc41974be47813dd787a0fe4c4fd0d9acb75d",
+    "projectFingerprint": "47956af59cfc00db1c57b17a8a6fd02c0fef4eef030716a6e11c2b1654f1489e",
+    "configDigest": "f6bffc9751f96b358e4c736e9240e49a35dbe17af23b23ee4ee46f8cca2a942d",
+    "workingTreePaths": [
+      "spec/changes/RB-XINYUAN-REAL-USE-0121.md"
+    ],
+    "workingTreeDigests": {
+      "spec/changes/RB-XINYUAN-REAL-USE-0121.md": "a346357077db639825c0a2b17744acef050d9e6431105eb412c1b26d4125cc50"
+    },
+    "approvedAt": "2026-08-10T19:29:59+08:00"
+  },
+  "red": [
+    {
+      "requirement": "REQ-001",
+      "command": [
+        "/usr/bin/env",
+        "RB_TEST=rigorbreeze/scripts/tests/test_flow_v2.py",
+        "PYTHONPATH=rigorbreeze/scripts/tests:rigorbreeze/scripts",
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "test_flow_v2.FlowV2Tests.test_unchanged_historical_destructive_migration_does_not_block_verify",
+        "-v"
+      ],
+      "exitCode": 1,
+      "expectedPattern": "destructive migration detected",
+      "testDigests": {
+        "rigorbreeze/scripts/tests/test_flow_v2.py": "eb1c39c59de541377ce6fc89a56b4a9f4d3c3a630a356f95691ca6c24c2bac11"
+      },
+      "summary": "test_unchanged_historical_destructive_migration_does_not_block_verify (test_flow_v2.FlowV2Tests.test_unchanged_historical_destructive_migration_does_not_block_verify) ... FAIL\n\n======================================================================\nFAIL: test_unchanged_historical_destructive_migration_does_not_block_verify (test_flow_v2.FlowV2Tests.test_unchanged_historical_destructive_migration_does_not_block_verify)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/songjincheng/LinGang-housing/.rigorbreeze-worktrees/rb-xinyuan-real-use-0121/rigorbreeze/scripts/tests/test_flow_v2.py\", line 606, in test_unchanged_historical_destructive_migration_does_not_block_verify\n    self.run_flow(\"verify\", \"--profile\", \"affected\")\n    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/songjincheng/LinGang-housing/.rigorbreeze-worktrees/rb-xinyuan-real-use-0121/rigorbreeze/scripts/tests/flow_test_support.py\", line 34, in run_flow\n    self.fail(\n    ~~~~~~~~~^\n        f\"flow command returned {result.returncode}, expected {expected}\\n\"\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n        f\"stdout:\\n{result.stdout}\\nstderr:\\n{result.stderr}\"\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\nAssertionError: flow command returned 2, expected 0\nstdout:\n\nstderr:\nERROR: destructive migration detected: db/migrations/001_legacy_drop.sql\n\n\n----------------------------------------------------------------------\nRan 1 test in 1.783s\n\nFAILED (failures=1)",
+      "taskDigest": "a346357077db639825c0a2b17744acef050d9e6431105eb412c1b26d4125cc50",
+      "projectFingerprint": "9a825bafb21489b83c3e3d8ea6c7d3bbacd9daf7189b605d7de2b1f1f9ca7870",
+      "head": "5e4fc41974be47813dd787a0fe4c4fd0d9acb75d",
+      "observedAt": "2026-08-10T19:32:40+08:00"
+    },
+    {
+      "requirement": "REQ-003",
+      "command": [
+        "/usr/bin/env",
+        "RB_TEST=rigorbreeze/scripts/tests/test_skill_contract.py",
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "rigorbreeze.scripts.tests.test_skill_contract.SkillContractTests.test_skill_keeps_business_tasks_separate_and_evidence_lean",
+        "-v"
+      ],
+      "exitCode": 1,
+      "expectedPattern": "separate skill task",
+      "testDigests": {
+        "rigorbreeze/scripts/tests/test_skill_contract.py": "7570d8d1503c1aa05f9de6a01184b3094354e423691c619786d1b15e77a8c005"
+      },
+      "summary": "ssion 不能认领同一 worktree。`status --all --json` 是所有窗口和可选外部编排器的只读接口。\\n\\n一个任务要求另一个任务或窗口执行工作前，必须展示可见交接：目标任务、可观察结果、允许范围、禁止范围、依赖或阻塞项和负责人。该提示只用于改善用户理解，不建立新的权威来源；接收方任务合同仍然是控制依据。\\n\\n所有 worktree 状态都保存在 Git 私有目录。`status --json` 从真正基准分支投影工作流基线，区分 missing、partial、modified、current 和 blocked。一次性 baseline commit 只能在该分支、精确 expected HEAD、无活动任务且没有混入产品改动时执行。\\n\\n独立任务不创建 DAG。真实顺序通过每个任务唯一的 `Depends-On` 保存，执行器推导 ready、环、缺失依赖和拓扑顺序。没有依赖关系的活动任务不得拥有重叠 Allowed Scope；应拆分、排序或建立共享 Integration 任务。\\n\\n`Depends-On` 只表示同仓库任务。跨仓库交付时，每个仓库各自保存合同和证据，并在 Authoritative inputs 中关联对方任务与共享 API/数据契约；提供方接口完成集成和验证前，消费方不得完成真实验收。\\n\\n自动化等级逐级包含但必须显式启用：\\n\\n| 等级 | 允许动作 | 必要边界 |\\n|---|---|---|\\n| manual | 默认只验证；可执行一次明确要求的 commit/push | 无无人值守写权限；单次授权不保留 |\\n| commit | 提交批准的任务文件 | 当前门禁，无无关修改 |\\n| push | 推送 `rigorbreeze/<task-id>` | 不推受保护分支，不 force push |\\n| merge | 请求平台 auto-merge | 当前 Required Checks 和基线 |\\n| release | 调用配置的发布适配器 | 同一 SHA/制品和完整治理 |\\n\\n平台结果保存在 Git 私有自动化日志中，避免外部动作污染 tracked evidence。`status --all --json` 会投影可清理、需保留和未登记 worktree，以及默认保留的任务分支，并给出干净状态、集成状态、expected HEAD 和确认要求。集成必须由祖先关系或完整补丁等价证明。对于已登记任务，只有至少一个产品补丁在 `git cherry` 中为负向/已等价，且所有剩余正向提交只包含该任务白名单工作流元数据时，才可忽略这些元数据提交；任何混合或未匹配产品路径都保持活动。未登记证明继续保持原有保守策略。受管清理要求完整创建来源；未登记清理还要求一次性明确绝对路径、base、expected HEAD、干净且无活动状态，并证明完整集成。本地分支始终保留。\\n\\n用户明确要求交付当前任务时，Codex 可以执行 `automate commit --once`，或执行 `automate push --once --remote <名称> --branch <当前分支> --expected-head <SHA>`，且不修改 `rigorbreeze.toml`。push 不会隐式提交，会在写入前 fetch，只允许 fast-forward，不会 rebase 或 force push，并在完成后核对远端 SHA。直推集成分支还必须具备当前 full 验证、结构化验收和审查。单次授权不适用于 merge、release、生产迁移或回滚。\\n\\n## 8. 复杂度边界\\n\\n- 不为每个证据类别创建一份人工文档；\\n- 不让每个项目声明所有标准检查；\\n- 不重复 evidence、attestation 或实践日志；\\n- 不把普通归档绑定到生产制品和灰度字段；\\n- 不为简单任务创建 worktree、DAG、代码图谱、向量索引或 Agent 控制台；\\n- automation 为 `manual` 时不执行未经用户明确要求的 Git 或生产动作；单次 commit/push 是唯一例外；\\n- 不把流程指标本身当成交付目标；\\n- 不为一次问题建立永久抽象。\\n\\n只有真实使用证明必要时才修改共享 Skill。能通过项目配置、可选适配器或更好提示解决的问题，不应增加所有用户的固定成本。\\n'\n\n----------------------------------------------------------------------\nRan 1 test in 0.002s\n\nFAILED (failures=9)",
+      "taskDigest": "a346357077db639825c0a2b17744acef050d9e6431105eb412c1b26d4125cc50",
+      "projectFingerprint": "9a825bafb21489b83c3e3d8ea6c7d3bbacd9daf7189b605d7de2b1f1f9ca7870",
+      "head": "5e4fc41974be47813dd787a0fe4c4fd0d9acb75d",
+      "observedAt": "2026-08-10T19:32:41+08:00"
+    },
+    {
+      "requirement": "REQ-004",
+      "command": [
+        "/usr/bin/env",
+        "RB_TEST=tests/behavior/test_behavior.py",
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "tests.behavior.test_behavior.BehaviorSuiteTests.test_contract_has_exactly_thirteen_safe_cases",
+        "-v"
+      ],
+      "exitCode": 1,
+      "expectedPattern": "exactly thirteen cases",
+      "testDigests": {
+        "tests/behavior/test_behavior.py": "8f0e4cb2b7185f7323d5b11edd9368948ce0dd4a6979fc491c8ffcba57936651"
+      },
+      "summary": "test_contract_has_exactly_thirteen_safe_cases (tests.behavior.test_behavior.BehaviorSuiteTests.test_contract_has_exactly_thirteen_safe_cases) ... ERROR\n\n======================================================================\nERROR: test_contract_has_exactly_thirteen_safe_cases (tests.behavior.test_behavior.BehaviorSuiteTests.test_contract_has_exactly_thirteen_safe_cases)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/songjincheng/LinGang-housing/.rigorbreeze-worktrees/rb-xinyuan-real-use-0121/tests/behavior/test_behavior.py\", line 27, in test_contract_has_exactly_thirteen_safe_cases\n    contract = runner.load_contract(SCENARIOS_PATH)\n  File \"/Users/songjincheng/LinGang-housing/.rigorbreeze-worktrees/rb-xinyuan-real-use-0121/tests/behavior/run.py\", line 69, in load_contract\n    raise ValueError(\"behavior contract must define exactly thirteen cases\")\nValueError: behavior contract must define exactly thirteen cases\n\n----------------------------------------------------------------------\nRan 1 test in 0.006s\n\nFAILED (errors=1)",
+      "taskDigest": "a346357077db639825c0a2b17744acef050d9e6431105eb412c1b26d4125cc50",
+      "projectFingerprint": "9a825bafb21489b83c3e3d8ea6c7d3bbacd9daf7189b605d7de2b1f1f9ca7870",
+      "head": "5e4fc41974be47813dd787a0fe4c4fd0d9acb75d",
+      "observedAt": "2026-08-10T19:32:41+08:00"
+    }
+  ],
+  "verifications": [
+    {
+      "toolVersion": "0.13.0",
+      "profile": "full",
+      "configured": true,
+      "mode": "enforced",
+      "checks": [
+        "format",
+        "lint",
+        "unit",
+        "contract",
+        "secret",
+        "build",
+        "acceptance"
+      ],
+      "passed": true,
+      "taskDigest": "a346357077db639825c0a2b17744acef050d9e6431105eb412c1b26d4125cc50",
+      "projectFingerprint": "a79aae7fc6aa67cd7787af9129e854cb796e88319d0d3171c70fafb55c6db719",
+      "configDigest": "f6bffc9751f96b358e4c736e9240e49a35dbe17af23b23ee4ee46f8cca2a942d",
+      "head": "5e4fc41974be47813dd787a0fe4c4fd0d9acb75d",
+      "verifiedAt": "2026-08-10T19:51:53+08:00"
+    },
+    {
+      "toolVersion": "0.13.0",
+      "profile": "full",
+      "configured": true,
+      "mode": "enforced",
+      "checks": [
+        "format",
+        "lint",
+        "unit",
+        "contract",
+        "secret",
+        "build",
+        "acceptance"
+      ],
+      "passed": true,
+      "taskDigest": "a346357077db639825c0a2b17744acef050d9e6431105eb412c1b26d4125cc50",
+      "projectFingerprint": "d0cbb96715fe830285a2ecf90ee87fbb077ccadda9420d0f5d5e5a761cf20889",
+      "configDigest": "f6bffc9751f96b358e4c736e9240e49a35dbe17af23b23ee4ee46f8cca2a942d",
+      "head": "5e4fc41974be47813dd787a0fe4c4fd0d9acb75d",
+      "verifiedAt": "2026-08-10T20:00:14+08:00"
+    }
+  ],
+  "checkRuns": [
+    {
+      "checkId": "format",
+      "category": "static-quality",
+      "profile": "full",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-m",
+        "ruff",
+        "format",
+        "--check",
+        "rigorbreeze/scripts",
+        "tests/behavior"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 26,
+      "summary": "16 files already formatted",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "a346357077db639825c0a2b17744acef050d9e6431105eb412c1b26d4125cc50",
+      "projectFingerprint": "d0cbb96715fe830285a2ecf90ee87fbb077ccadda9420d0f5d5e5a761cf20889",
+      "head": "5e4fc41974be47813dd787a0fe4c4fd0d9acb75d",
+      "recordedAt": "2026-08-10T19:57:24+08:00"
+    },
+    {
+      "checkId": "lint",
+      "category": "static-quality",
+      "profile": "full",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-m",
+        "ruff",
+        "check",
+        "rigorbreeze/scripts",
+        "tests/behavior"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 25,
+      "summary": "All checks passed!",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "a346357077db639825c0a2b17744acef050d9e6431105eb412c1b26d4125cc50",
+      "projectFingerprint": "d0cbb96715fe830285a2ecf90ee87fbb077ccadda9420d0f5d5e5a761cf20889",
+      "head": "5e4fc41974be47813dd787a0fe4c4fd0d9acb75d",
+      "recordedAt": "2026-08-10T19:57:24+08:00"
+    },
+    {
+      "checkId": "unit",
+      "category": "behavior",
+      "profile": "full",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "rigorbreeze/scripts/tests",
+        "-v"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 169440,
+      "summary": "repository_has_minimal_open_source_governance (test_skill_contract.SkillContractTests.test_repository_has_minimal_open_source_governance) ... ok\ntest_repository_has_skill_owned_ci (test_skill_contract.SkillContractTests.test_repository_has_skill_owned_ci) ... ok\ntest_skill_blocks_informal_high_risk_fallback_when_workflow_state_breaks (test_skill_contract.SkillContractTests.test_skill_blocks_informal_high_risk_fallback_when_workflow_state_breaks) ... ok\ntest_skill_bounds_decisions_prototypes_and_abstractions (test_skill_contract.SkillContractTests.test_skill_bounds_decisions_prototypes_and_abstractions) ... ok\ntest_skill_completes_context_and_rechecks_follow_up_writes (test_skill_contract.SkillContractTests.test_skill_completes_context_and_rechecks_follow_up_writes) ... ok\ntest_skill_encodes_behavior_reliability_rules_once (test_skill_contract.SkillContractTests.test_skill_encodes_behavior_reliability_rules_once) ... ok\ntest_skill_entrypoint_stays_compact_and_links_every_reference (test_skill_contract.SkillContractTests.test_skill_entrypoint_stays_compact_and_links_every_reference) ... ok\ntest_skill_keeps_business_tasks_separate_and_evidence_lean (test_skill_contract.SkillContractTests.test_skill_keeps_business_tasks_separate_and_evidence_lean) ... ok\ntest_skill_keeps_lean_implementation_compatible_with_production (test_skill_contract.SkillContractTests.test_skill_keeps_lean_implementation_compatible_with_production) ... ok\ntest_skill_metadata_matches_public_name (test_skill_contract.SkillContractTests.test_skill_metadata_matches_public_name) ... ok\ntest_skill_routes_read_only_work_and_freezes_release_scope (test_skill_contract.SkillContractTests.test_skill_routes_read_only_work_and_freezes_release_scope) ... ok\ntest_skill_shapes_only_genuinely_unbounded_initiatives (test_skill_contract.SkillContractTests.test_skill_shapes_only_genuinely_unbounded_initiatives) ... ok\n\n----------------------------------------------------------------------\nRan 154 tests in 169.299s\n\nOK",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "a346357077db639825c0a2b17744acef050d9e6431105eb412c1b26d4125cc50",
+      "projectFingerprint": "d0cbb96715fe830285a2ecf90ee87fbb077ccadda9420d0f5d5e5a761cf20889",
+      "head": "5e4fc41974be47813dd787a0fe4c4fd0d9acb75d",
+      "recordedAt": "2026-08-10T20:00:14+08:00"
+    },
+    {
+      "checkId": "contract",
+      "category": "behavior",
+      "profile": "full",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-m",
+        "py_compile",
+        "rigorbreeze/scripts/flow.py"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 43,
+      "summary": "",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "a346357077db639825c0a2b17744acef050d9e6431105eb412c1b26d4125cc50",
+      "projectFingerprint": "d0cbb96715fe830285a2ecf90ee87fbb077ccadda9420d0f5d5e5a761cf20889",
+      "head": "5e4fc41974be47813dd787a0fe4c4fd0d9acb75d",
+      "recordedAt": "2026-08-10T20:00:14+08:00"
+    },
+    {
+      "checkId": "secret",
+      "category": "secrets",
+      "profile": "full",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-c",
+        "import pathlib,re,sys; files=[p for p in pathlib.Path('.').rglob('*') if p.is_file() and '.git' not in p.parts and 'tests' not in p.parts and p.name != 'rigorbreeze.toml']; pattern=re.compile(r'(?i)(api[_-]?key|token|password|secret)\\s*[:=]\\s*\\S{20,}'); hits=[str(p) for p in files if pattern.search(p.read_text(errors='ignore'))]; print('\\n'.join(hits)); sys.exit(bool(hits))"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 64,
+      "summary": "",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "a346357077db639825c0a2b17744acef050d9e6431105eb412c1b26d4125cc50",
+      "projectFingerprint": "d0cbb96715fe830285a2ecf90ee87fbb077ccadda9420d0f5d5e5a761cf20889",
+      "head": "5e4fc41974be47813dd787a0fe4c4fd0d9acb75d",
+      "recordedAt": "2026-08-10T20:00:14+08:00"
+    },
+    {
+      "checkId": "build",
+      "category": "build",
+      "profile": "full",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-c",
+        "import pathlib,zipfile; out=pathlib.Path('artifacts/rigorbreeze.zip'); out.parent.mkdir(exist_ok=True); files=[p for p in pathlib.Path('rigorbreeze').rglob('*') if p.is_file() and not p.as_posix().startswith('rigorbreeze/scripts/tests/') and not {'.ruff_cache','__pycache__'}.intersection(p.parts) and p.suffix not in {'.pyc','.pyo'}]; z=zipfile.ZipFile(out,'w',zipfile.ZIP_DEFLATED); [z.write(p,p.as_posix()) for p in files]; z.close()"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 31,
+      "summary": "",
+      "report": null,
+      "artifacts": [
+        "496dc27b658c669783123ee824328078630fe6fc4e826b04a8725f5a59012905"
+      ],
+      "taskDigest": "a346357077db639825c0a2b17744acef050d9e6431105eb412c1b26d4125cc50",
+      "projectFingerprint": "d0cbb96715fe830285a2ecf90ee87fbb077ccadda9420d0f5d5e5a761cf20889",
+      "head": "5e4fc41974be47813dd787a0fe4c4fd0d9acb75d",
+      "recordedAt": "2026-08-10T20:00:14+08:00"
+    },
+    {
+      "checkId": "acceptance",
+      "category": "acceptance",
+      "profile": "full",
+      "mode": "enforced",
+      "command": [
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/behavior",
+        "-v"
+      ],
+      "exitCode": 0,
+      "passed": true,
+      "durationMs": 125,
+      "summary": "test_all_synthetic_transcripts_meet_their_contracts (test_behavior.BehaviorSuiteTests.test_all_synthetic_transcripts_meet_their_contracts) ... ok\ntest_compound_ui_case_rejects_partial_requirement_capture (test_behavior.BehaviorSuiteTests.test_compound_ui_case_rejects_partial_requirement_capture) ... ok\ntest_contract_has_exactly_thirteen_safe_cases (test_behavior.BehaviorSuiteTests.test_contract_has_exactly_thirteen_safe_cases) ... ok\ntest_contract_rejects_path_escape_and_invalid_regex (test_behavior.BehaviorSuiteTests.test_contract_rejects_path_escape_and_invalid_regex) ... ok\ntest_decision_frontier_rejects_more_than_three_questions (test_behavior.BehaviorSuiteTests.test_decision_frontier_rejects_more_than_three_questions) ... ok\ntest_globs_and_result_versions_cannot_escape_their_boundaries (test_behavior.BehaviorSuiteTests.test_globs_and_result_versions_cannot_escape_their_boundaries) ... ok\ntest_live_codex_argv_grants_only_fixture_git_write (test_behavior.BehaviorSuiteTests.test_live_codex_argv_grants_only_fixture_git_write) ... ok\ntest_live_prompt_names_the_exact_result_case_id (test_behavior.BehaviorSuiteTests.test_live_prompt_names_the_exact_result_case_id) ... ok\ntest_prepare_fixture_stays_inside_requested_root (test_behavior.BehaviorSuiteTests.test_prepare_fixture_stays_inside_requested_root) ... ok\ntest_redaction_removes_common_secret_shapes (test_behavior.BehaviorSuiteTests.test_redaction_removes_common_secret_shapes) ... ok\ntest_score_accepts_fresh_compliant_result (test_behavior.BehaviorSuiteTests.test_score_accepts_fresh_compliant_result) ... ok\ntest_score_rejects_forbidden_action_and_stale_evidence (test_behavior.BehaviorSuiteTests.test_score_rejects_forbidden_action_and_stale_evidence) ... ok\n\n----------------------------------------------------------------------\nRan 12 tests in 0.080s\n\nOK",
+      "report": null,
+      "artifacts": [],
+      "taskDigest": "a346357077db639825c0a2b17744acef050d9e6431105eb412c1b26d4125cc50",
+      "projectFingerprint": "d0cbb96715fe830285a2ecf90ee87fbb077ccadda9420d0f5d5e5a761cf20889",
+      "head": "5e4fc41974be47813dd787a0fe4c4fd0d9acb75d",
+      "recordedAt": "2026-08-10T20:00:14+08:00"
+    }
+  ],
+  "tddChain": [
+    {
+      "requirement": "REQ-001",
+      "red": {
+        "requirement": "REQ-001",
+        "command": [
+          "/usr/bin/env",
+          "RB_TEST=rigorbreeze/scripts/tests/test_flow_v2.py",
+          "PYTHONPATH=rigorbreeze/scripts/tests:rigorbreeze/scripts",
+          "python3",
+          "-B",
+          "-m",
+          "unittest",
+          "test_flow_v2.FlowV2Tests.test_unchanged_historical_destructive_migration_does_not_block_verify",
+          "-v"
+        ],
+        "exitCode": 1,
+        "expectedPattern": "destructive migration detected",
+        "testDigests": {
+          "rigorbreeze/scripts/tests/test_flow_v2.py": "eb1c39c59de541377ce6fc89a56b4a9f4d3c3a630a356f95691ca6c24c2bac11"
+        },
+        "summary": "test_unchanged_historical_destructive_migration_does_not_block_verify (test_flow_v2.FlowV2Tests.test_unchanged_historical_destructive_migration_does_not_block_verify) ... FAIL\n\n======================================================================\nFAIL: test_unchanged_historical_destructive_migration_does_not_block_verify (test_flow_v2.FlowV2Tests.test_unchanged_historical_destructive_migration_does_not_block_verify)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/songjincheng/LinGang-housing/.rigorbreeze-worktrees/rb-xinyuan-real-use-0121/rigorbreeze/scripts/tests/test_flow_v2.py\", line 606, in test_unchanged_historical_destructive_migration_does_not_block_verify\n    self.run_flow(\"verify\", \"--profile\", \"affected\")\n    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/songjincheng/LinGang-housing/.rigorbreeze-worktrees/rb-xinyuan-real-use-0121/rigorbreeze/scripts/tests/flow_test_support.py\", line 34, in run_flow\n    self.fail(\n    ~~~~~~~~~^\n        f\"flow command returned {result.returncode}, expected {expected}\\n\"\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n        f\"stdout:\\n{result.stdout}\\nstderr:\\n{result.stderr}\"\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\nAssertionError: flow command returned 2, expected 0\nstdout:\n\nstderr:\nERROR: destructive migration detected: db/migrations/001_legacy_drop.sql\n\n\n----------------------------------------------------------------------\nRan 1 test in 1.783s\n\nFAILED (failures=1)",
+        "taskDigest": "a346357077db639825c0a2b17744acef050d9e6431105eb412c1b26d4125cc50",
+        "projectFingerprint": "9a825bafb21489b83c3e3d8ea6c7d3bbacd9daf7189b605d7de2b1f1f9ca7870",
+        "head": "5e4fc41974be47813dd787a0fe4c4fd0d9acb75d",
+        "observedAt": "2026-08-10T19:32:40+08:00"
+      },
+      "green": {
+        "toolVersion": "0.13.0",
+        "profile": "full",
+        "configured": true,
+        "mode": "enforced",
+        "checks": [
+          "format",
+          "lint",
+          "unit",
+          "contract",
+          "secret",
+          "build",
+          "acceptance"
+        ],
+        "passed": true,
+        "taskDigest": "a346357077db639825c0a2b17744acef050d9e6431105eb412c1b26d4125cc50",
+        "projectFingerprint": "d0cbb96715fe830285a2ecf90ee87fbb077ccadda9420d0f5d5e5a761cf20889",
+        "configDigest": "f6bffc9751f96b358e4c736e9240e49a35dbe17af23b23ee4ee46f8cca2a942d",
+        "head": "5e4fc41974be47813dd787a0fe4c4fd0d9acb75d",
+        "verifiedAt": "2026-08-10T20:00:14+08:00"
+      }
+    },
+    {
+      "requirement": "REQ-003",
+      "red": {
+        "requirement": "REQ-003",
+        "command": [
+          "/usr/bin/env",
+          "RB_TEST=rigorbreeze/scripts/tests/test_skill_contract.py",
+          "python3",
+          "-B",
+          "-m",
+          "unittest",
+          "rigorbreeze.scripts.tests.test_skill_contract.SkillContractTests.test_skill_keeps_business_tasks_separate_and_evidence_lean",
+          "-v"
+        ],
+        "exitCode": 1,
+        "expectedPattern": "separate skill task",
+        "testDigests": {
+          "rigorbreeze/scripts/tests/test_skill_contract.py": "7570d8d1503c1aa05f9de6a01184b3094354e423691c619786d1b15e77a8c005"
+        },
+        "summary": "ssion 不能认领同一 worktree。`status --all --json` 是所有窗口和可选外部编排器的只读接口。\\n\\n一个任务要求另一个任务或窗口执行工作前，必须展示可见交接：目标任务、可观察结果、允许范围、禁止范围、依赖或阻塞项和负责人。该提示只用于改善用户理解，不建立新的权威来源；接收方任务合同仍然是控制依据。\\n\\n所有 worktree 状态都保存在 Git 私有目录。`status --json` 从真正基准分支投影工作流基线，区分 missing、partial、modified、current 和 blocked。一次性 baseline commit 只能在该分支、精确 expected HEAD、无活动任务且没有混入产品改动时执行。\\n\\n独立任务不创建 DAG。真实顺序通过每个任务唯一的 `Depends-On` 保存，执行器推导 ready、环、缺失依赖和拓扑顺序。没有依赖关系的活动任务不得拥有重叠 Allowed Scope；应拆分、排序或建立共享 Integration 任务。\\n\\n`Depends-On` 只表示同仓库任务。跨仓库交付时，每个仓库各自保存合同和证据，并在 Authoritative inputs 中关联对方任务与共享 API/数据契约；提供方接口完成集成和验证前，消费方不得完成真实验收。\\n\\n自动化等级逐级包含但必须显式启用：\\n\\n| 等级 | 允许动作 | 必要边界 |\\n|---|---|---|\\n| manual | 默认只验证；可执行一次明确要求的 commit/push | 无无人值守写权限；单次授权不保留 |\\n| commit | 提交批准的任务文件 | 当前门禁，无无关修改 |\\n| push | 推送 `rigorbreeze/<task-id>` | 不推受保护分支，不 force push |\\n| merge | 请求平台 auto-merge | 当前 Required Checks 和基线 |\\n| release | 调用配置的发布适配器 | 同一 SHA/制品和完整治理 |\\n\\n平台结果保存在 Git 私有自动化日志中，避免外部动作污染 tracked evidence。`status --all --json` 会投影可清理、需保留和未登记 worktree，以及默认保留的任务分支，并给出干净状态、集成状态、expected HEAD 和确认要求。集成必须由祖先关系或完整补丁等价证明。对于已登记任务，只有至少一个产品补丁在 `git cherry` 中为负向/已等价，且所有剩余正向提交只包含该任务白名单工作流元数据时，才可忽略这些元数据提交；任何混合或未匹配产品路径都保持活动。未登记证明继续保持原有保守策略。受管清理要求完整创建来源；未登记清理还要求一次性明确绝对路径、base、expected HEAD、干净且无活动状态，并证明完整集成。本地分支始终保留。\\n\\n用户明确要求交付当前任务时，Codex 可以执行 `automate commit --once`，或执行 `automate push --once --remote <名称> --branch <当前分支> --expected-head <SHA>`，且不修改 `rigorbreeze.toml`。push 不会隐式提交，会在写入前 fetch，只允许 fast-forward，不会 rebase 或 force push，并在完成后核对远端 SHA。直推集成分支还必须具备当前 full 验证、结构化验收和审查。单次授权不适用于 merge、release、生产迁移或回滚。\\n\\n## 8. 复杂度边界\\n\\n- 不为每个证据类别创建一份人工文档；\\n- 不让每个项目声明所有标准检查；\\n- 不重复 evidence、attestation 或实践日志；\\n- 不把普通归档绑定到生产制品和灰度字段；\\n- 不为简单任务创建 worktree、DAG、代码图谱、向量索引或 Agent 控制台；\\n- automation 为 `manual` 时不执行未经用户明确要求的 Git 或生产动作；单次 commit/push 是唯一例外；\\n- 不把流程指标本身当成交付目标；\\n- 不为一次问题建立永久抽象。\\n\\n只有真实使用证明必要时才修改共享 Skill。能通过项目配置、可选适配器或更好提示解决的问题，不应增加所有用户的固定成本。\\n'\n\n----------------------------------------------------------------------\nRan 1 test in 0.002s\n\nFAILED (failures=9)",
+        "taskDigest": "a346357077db639825c0a2b17744acef050d9e6431105eb412c1b26d4125cc50",
+        "projectFingerprint": "9a825bafb21489b83c3e3d8ea6c7d3bbacd9daf7189b605d7de2b1f1f9ca7870",
+        "head": "5e4fc41974be47813dd787a0fe4c4fd0d9acb75d",
+        "observedAt": "2026-08-10T19:32:41+08:00"
+      },
+      "green": {
+        "toolVersion": "0.13.0",
+        "profile": "full",
+        "configured": true,
+        "mode": "enforced",
+        "checks": [
+          "format",
+          "lint",
+          "unit",
+          "contract",
+          "secret",
+          "build",
+          "acceptance"
+        ],
+        "passed": true,
+        "taskDigest": "a346357077db639825c0a2b17744acef050d9e6431105eb412c1b26d4125cc50",
+        "projectFingerprint": "d0cbb96715fe830285a2ecf90ee87fbb077ccadda9420d0f5d5e5a761cf20889",
+        "configDigest": "f6bffc9751f96b358e4c736e9240e49a35dbe17af23b23ee4ee46f8cca2a942d",
+        "head": "5e4fc41974be47813dd787a0fe4c4fd0d9acb75d",
+        "verifiedAt": "2026-08-10T20:00:14+08:00"
+      }
+    },
+    {
+      "requirement": "REQ-004",
+      "red": {
+        "requirement": "REQ-004",
+        "command": [
+          "/usr/bin/env",
+          "RB_TEST=tests/behavior/test_behavior.py",
+          "python3",
+          "-B",
+          "-m",
+          "unittest",
+          "tests.behavior.test_behavior.BehaviorSuiteTests.test_contract_has_exactly_thirteen_safe_cases",
+          "-v"
+        ],
+        "exitCode": 1,
+        "expectedPattern": "exactly thirteen cases",
+        "testDigests": {
+          "tests/behavior/test_behavior.py": "8f0e4cb2b7185f7323d5b11edd9368948ce0dd4a6979fc491c8ffcba57936651"
+        },
+        "summary": "test_contract_has_exactly_thirteen_safe_cases (tests.behavior.test_behavior.BehaviorSuiteTests.test_contract_has_exactly_thirteen_safe_cases) ... ERROR\n\n======================================================================\nERROR: test_contract_has_exactly_thirteen_safe_cases (tests.behavior.test_behavior.BehaviorSuiteTests.test_contract_has_exactly_thirteen_safe_cases)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/Users/songjincheng/LinGang-housing/.rigorbreeze-worktrees/rb-xinyuan-real-use-0121/tests/behavior/test_behavior.py\", line 27, in test_contract_has_exactly_thirteen_safe_cases\n    contract = runner.load_contract(SCENARIOS_PATH)\n  File \"/Users/songjincheng/LinGang-housing/.rigorbreeze-worktrees/rb-xinyuan-real-use-0121/tests/behavior/run.py\", line 69, in load_contract\n    raise ValueError(\"behavior contract must define exactly thirteen cases\")\nValueError: behavior contract must define exactly thirteen cases\n\n----------------------------------------------------------------------\nRan 1 test in 0.006s\n\nFAILED (errors=1)",
+        "taskDigest": "a346357077db639825c0a2b17744acef050d9e6431105eb412c1b26d4125cc50",
+        "projectFingerprint": "9a825bafb21489b83c3e3d8ea6c7d3bbacd9daf7189b605d7de2b1f1f9ca7870",
+        "head": "5e4fc41974be47813dd787a0fe4c4fd0d9acb75d",
+        "observedAt": "2026-08-10T19:32:41+08:00"
+      },
+      "green": {
+        "toolVersion": "0.13.0",
+        "profile": "full",
+        "configured": true,
+        "mode": "enforced",
+        "checks": [
+          "format",
+          "lint",
+          "unit",
+          "contract",
+          "secret",
+          "build",
+          "acceptance"
+        ],
+        "passed": true,
+        "taskDigest": "a346357077db639825c0a2b17744acef050d9e6431105eb412c1b26d4125cc50",
+        "projectFingerprint": "d0cbb96715fe830285a2ecf90ee87fbb077ccadda9420d0f5d5e5a761cf20889",
+        "configDigest": "f6bffc9751f96b358e4c736e9240e49a35dbe17af23b23ee4ee46f8cca2a942d",
+        "head": "5e4fc41974be47813dd787a0fe4c4fd0d9acb75d",
+        "verifiedAt": "2026-08-10T20:00:14+08:00"
+      }
+    }
+  ],
+  "artifacts": [
+    {
+      "kind": "build",
+      "path": "artifacts/rigorbreeze.zip",
+      "sha256": "496dc27b658c669783123ee824328078630fe6fc4e826b04a8725f5a59012905",
+      "size": 114151,
+      "head": "5e4fc41974be47813dd787a0fe4c4fd0d9acb75d",
+      "taskDigest": "a346357077db639825c0a2b17744acef050d9e6431105eb412c1b26d4125cc50",
+      "projectFingerprint": "a79aae7fc6aa67cd7787af9129e854cb796e88319d0d3171c70fafb55c6db719",
+      "recordedAt": "2026-08-10T19:51:52+08:00"
+    },
+    {
+      "kind": "build",
+      "path": "artifacts/rigorbreeze.zip",
+      "sha256": "496dc27b658c669783123ee824328078630fe6fc4e826b04a8725f5a59012905",
+      "size": 114151,
+      "head": "5e4fc41974be47813dd787a0fe4c4fd0d9acb75d",
+      "taskDigest": "a346357077db639825c0a2b17744acef050d9e6431105eb412c1b26d4125cc50",
+      "projectFingerprint": "d0cbb96715fe830285a2ecf90ee87fbb077ccadda9420d0f5d5e5a761cf20889",
+      "recordedAt": "2026-08-10T20:00:14+08:00"
+    }
+  ],
+  "acceptance": [
+    {
+      "kind": "runtime",
+      "fields": {
+        "status": "passed",
+        "environment": "local-deterministic"
+      },
+      "taskDigest": "a346357077db639825c0a2b17744acef050d9e6431105eb412c1b26d4125cc50",
+      "projectFingerprint": "a79aae7fc6aa67cd7787af9129e854cb796e88319d0d3171c70fafb55c6db719",
+      "head": "5e4fc41974be47813dd787a0fe4c4fd0d9acb75d",
+      "artifactDigests": [
+        "496dc27b658c669783123ee824328078630fe6fc4e826b04a8725f5a59012905"
+      ],
+      "recordedAt": "2026-08-10T19:53:38+08:00",
+      "path": "tests/behavior/scenarios.json",
+      "sha256": "53a3f0bac06ec3204e6b6227a04086aadceb1c1a9221da3bd1010986c5ce667e",
+      "size": 21933
+    },
+    {
+      "kind": "review",
+      "fields": {
+        "status": "passed",
+        "reviewer": "fresh-context-two-pass",
+        "standards": "passed",
+        "spec": "passed",
+        "findings": "none; migration policy is change-scoped, new behavior rules remain consequence-based, and public interfaces are unchanged"
+      },
+      "taskDigest": "a346357077db639825c0a2b17744acef050d9e6431105eb412c1b26d4125cc50",
+      "projectFingerprint": "a79aae7fc6aa67cd7787af9129e854cb796e88319d0d3171c70fafb55c6db719",
+      "head": "5e4fc41974be47813dd787a0fe4c4fd0d9acb75d",
+      "artifactDigests": [
+        "496dc27b658c669783123ee824328078630fe6fc4e826b04a8725f5a59012905"
+      ],
+      "recordedAt": "2026-08-10T19:53:38+08:00"
+    },
+    {
+      "kind": "runtime",
+      "fields": {
+        "status": "passed",
+        "environment": "local-deterministic"
+      },
+      "taskDigest": "a346357077db639825c0a2b17744acef050d9e6431105eb412c1b26d4125cc50",
+      "projectFingerprint": "d0cbb96715fe830285a2ecf90ee87fbb077ccadda9420d0f5d5e5a761cf20889",
+      "head": "5e4fc41974be47813dd787a0fe4c4fd0d9acb75d",
+      "artifactDigests": [
+        "496dc27b658c669783123ee824328078630fe6fc4e826b04a8725f5a59012905"
+      ],
+      "recordedAt": "2026-08-10T20:00:49+08:00",
+      "path": "tests/behavior/scenarios.json",
+      "sha256": "53a3f0bac06ec3204e6b6227a04086aadceb1c1a9221da3bd1010986c5ce667e",
+      "size": 21933
+    },
+    {
+      "kind": "review",
+      "fields": {
+        "status": "passed",
+        "reviewer": "fresh-context-two-pass",
+        "standards": "passed",
+        "spec": "passed",
+        "findings": "none; all 154 core regressions and 13 deterministic behavior contracts pass, version surfaces agree, and current-change migration policy preserves the destructive-write block"
+      },
+      "taskDigest": "a346357077db639825c0a2b17744acef050d9e6431105eb412c1b26d4125cc50",
+      "projectFingerprint": "d0cbb96715fe830285a2ecf90ee87fbb077ccadda9420d0f5d5e5a761cf20889",
+      "head": "5e4fc41974be47813dd787a0fe4c4fd0d9acb75d",
+      "artifactDigests": [
+        "496dc27b658c669783123ee824328078630fe6fc4e826b04a8725f5a59012905"
+      ],
+      "recordedAt": "2026-08-10T20:00:49+08:00"
+    }
+  ],
+  "release": [],
+  "automation": [],
+  "practice": {
+    "confirmation": {
+      "reworkReason": "workflow",
+      "exceptions": "A version assertion shared the REQ-003 RED file; current-version consistency was moved to an independent release-contract regression without altering the original RED digest.",
+      "workflowImpact": "helped",
+      "evolutionCandidate": true,
+      "summaryDigest": "d373821e111f19ee94007c347a45804c927fc945c0ee2276941fd2dee6d0cae2",
+      "taskDigest": "a346357077db639825c0a2b17744acef050d9e6431105eb412c1b26d4125cc50",
+      "projectFingerprint": "d0cbb96715fe830285a2ecf90ee87fbb077ccadda9420d0f5d5e5a761cf20889",
+      "confirmedAt": "2026-08-10T20:00:50+08:00"
+    },
+    "events": [],
+    "summary": {
+      "taskId": "RB-XINYUAN-REAL-USE-0121",
+      "risk": "L1",
+      "verificationRuns": 2,
+      "checkRuns": 14,
+      "checkDurationMs": 339931,
+      "failedChecks": [],
+      "failureCategories": [],
+      "potentialBypasses": [],
+      "firstAcceptancePassed": true,
+      "acceptanceRecords": 4,
+      "estimatedReworkSeconds": null,
+      "practiceEvents": [],
+      "generatedAt": "2026-08-10T20:00:50+08:00",
+      "summaryDigest": "d373821e111f19ee94007c347a45804c927fc945c0ee2276941fd2dee6d0cae2"
+    }
+  },
+  "closure": {
+    "outcome": "completed",
+    "reason": null,
+    "closedAt": "2026-08-10T20:00:50+08:00",
+    "head": "5e4fc41974be47813dd787a0fe4c4fd0d9acb75d",
+    "branch": "rigorbreeze/rb-xinyuan-real-use-0121",
+    "originalPhase": "accepted",
+    "integrationProof": null,
+    "verificationStatus": "current",
+    "practiceEvents": [
+      "closure-pending-commit"
+    ],
+    "unrelatedChanges": []
+  },
+  "verification": {
+    "toolVersion": "0.13.0",
+    "profile": "full",
+    "configured": true,
+    "mode": "enforced",
+    "checks": [
+      "format",
+      "lint",
+      "unit",
+      "contract",
+      "secret",
+      "build",
+      "acceptance"
+    ],
+    "passed": true,
+    "taskDigest": "a346357077db639825c0a2b17744acef050d9e6431105eb412c1b26d4125cc50",
+    "projectFingerprint": "d0cbb96715fe830285a2ecf90ee87fbb077ccadda9420d0f5d5e5a761cf20889",
+    "configDigest": "f6bffc9751f96b358e4c736e9240e49a35dbe17af23b23ee4ee46f8cca2a942d",
+    "head": "5e4fc41974be47813dd787a0fe4c4fd0d9acb75d",
+    "verifiedAt": "2026-08-10T20:00:14+08:00"
+  },
+  "checkRunSummary": {
+    "policy": "latest-per-profile-check-plus-latest-failure",
+    "total": 14,
+    "retained": 7,
+    "omitted": 7,
+    "groups": [
+      {
+        "profile": "full",
+        "checkId": "acceptance",
+        "total": 2,
+        "passed": 2,
+        "failed": 0,
+        "retained": 1
+      },
+      {
+        "profile": "full",
+        "checkId": "build",
+        "total": 2,
+        "passed": 2,
+        "failed": 0,
+        "retained": 1
+      },
+      {
+        "profile": "full",
+        "checkId": "contract",
+        "total": 2,
+        "passed": 2,
+        "failed": 0,
+        "retained": 1
+      },
+      {
+        "profile": "full",
+        "checkId": "format",
+        "total": 2,
+        "passed": 2,
+        "failed": 0,
+        "retained": 1
+      },
+      {
+        "profile": "full",
+        "checkId": "lint",
+        "total": 2,
+        "passed": 2,
+        "failed": 0,
+        "retained": 1
+      },
+      {
+        "profile": "full",
+        "checkId": "secret",
+        "total": 2,
+        "passed": 2,
+        "failed": 0,
+        "retained": 1
+      },
+      {
+        "profile": "full",
+        "checkId": "unit",
+        "total": 2,
+        "passed": 2,
+        "failed": 0,
+        "retained": 1
+      }
+    ]
+  }
+}

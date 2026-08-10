@@ -1264,7 +1264,7 @@ def command_verify_profile(root: Path, profile: str, requested_mode: str | None)
             raise FlowError("current RED or incident reproduction evidence is required")
         if not test_chain_current(root, state):
             raise FlowError("RED test changed after observation; observe RED again")
-    destructive = destructive_migrations(root)
+    destructive = destructive_migrations(root, task_change_paths(root, state))
     if destructive:
         raise FlowError("destructive migration detected: " + ", ".join(destructive))
     evidence = load_evidence(root, active["id"])

@@ -25,6 +25,27 @@ The project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). 
 - Reframed the repository for first-time adopters with bilingual onboarding, explicit safety boundaries, and a complete first-task walkthrough.
 - Added concise contribution and security policies plus an MIT license.
 
+## [0.13.0] - Isolate reusable workflow repairs from business delivery
+
+### Fixed
+
+- Evaluate destructive-migration policy only against the active task's committed and working-tree change set, so an unchanged historical SQL file cannot block unrelated work while a newly changed destructive migration still fails.
+
+### Changed
+
+- When business work exposes a reusable RigorBreeze defect, preserve the business contract and record the blocker or evolution candidate, then fix the workflow in a separate Skill task instead of widening the product task or patching its private Runner.
+- Reuse a designated integration worktree for sequential initiative slices; create another worktree only for a genuinely concurrent writer or a disposable risky experiment.
+- Keep read-only scanners and evidence generators at L1 unless they can change migrations, credentials, production, infrastructure, or release state; retain compact manifests and summaries while raw inventories stay local or in time-limited CI artifacts.
+- Require an independent attribution oracle for source-completeness and ownership claims; filename, token, regex, and semantic heuristics may shortlist candidates but cannot prove their own completeness.
+
+### Validation
+
+- Expand the deterministic Agent-behavior contract from eleven to thirteen scenarios with business-task/workflow-defect separation and sequential-initiative evidence-economy cases.
+
+### Compatibility
+
+- Public CLI, Spec Tree, state/evidence schema v4, automation journal v1, dependencies, default Git authority, and ordinary L0/L1 interaction remain unchanged.
+
 ## [0.12.0] - Improve Agent decisions without adding workflow weight
 
 ### Changed
