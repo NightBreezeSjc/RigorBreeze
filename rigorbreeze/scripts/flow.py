@@ -745,6 +745,16 @@ def command_new(
     path = task_path(root, task_id)
     if path.exists() or archive_path(root, task_id).exists():
         raise FlowError(f"task ID already exists: {task_id}")
+    task_base_branch: str | None = None
+    task_base_sha: str | None = None
+    if is_git_repo(root):
+        task_base_branch = baseline_branch(root, state)
+        if not task_base_branch:
+            raise FlowError("unable to determine the task baseline branch")
+        base_head = git(root, "rev-parse", task_base_branch)
+        if base_head.returncode != 0:
+            raise FlowError(f"baseline branch is missing: {task_base_branch}")
+        task_base_sha = base_head.stdout.strip()
     content = task_template(task_id, title, risk).replace(
         "Depends-On: none",
         "Depends-On: " + (", ".join(dependencies) if dependencies else "none"),
@@ -761,12 +771,8 @@ def command_new(
                 "risk": risk,
                 "createdAt": now_iso(),
                 "dependsOn": dependencies,
-                "baseBranch": (
-                    flow_parallel.default_base_branch(root)
-                    if is_git_repo(root)
-                    else None
-                ),
-                "baseSha": current_head(root) if is_git_repo(root) else None,
+                "baseBranch": task_base_branch,
+                "baseSha": task_base_sha,
                 "worktree": str(root.resolve()),
                 "branch": (
                     flow_parallel.branch_name(root) if is_git_repo(root) else None

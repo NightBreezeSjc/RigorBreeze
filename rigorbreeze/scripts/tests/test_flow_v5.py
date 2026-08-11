@@ -15,6 +15,31 @@ import flow_state  # noqa: E402
 
 
 class FlowV5Tests(FlowTestCase):
+    def git_output(self, *args: str) -> str:
+        return subprocess.run(
+            ["git", *args],
+            cwd=self.root,
+            text=True,
+            encoding="utf-8",
+            capture_output=True,
+            check=True,
+        ).stdout.strip()
+
+    def initialize_versioned_project(self) -> None:
+        self.init_git()
+        self.git_output("branch", "-M", "main")
+        self.run_flow("init")
+        self.commit_all("install workflow")
+
+    def configure_base(self, base: str) -> None:
+        config = self.root / "rigorbreeze.toml"
+        config.write_text(
+            config.read_text(encoding="utf-8").replace(
+                'base_branch = ""', f'base_branch = "{base}"'
+            ),
+            encoding="utf-8",
+        )
+
     def private_records(self):
         common = subprocess.run(
             ["git", "rev-parse", "--git-common-dir"],
@@ -311,6 +336,71 @@ Operational-Modes: N/A - no conditional runtime behavior
         self.assertIsNone(state["verification"])
         blocked = self.run_flow("check", "merge", expected=2)
         self.assertIn("active task", blocked.stderr)
+
+    def test_current_worktree_uses_configured_integration_baseline(self) -> None:
+        self.initialize_versioned_project()
+        self.git_output("switch", "-c", "integration/initiative")
+        (self.root / "historical.txt").write_text(
+            "prior initiative slices\n", encoding="utf-8"
+        )
+        self.git_output("add", "historical.txt")
+        self.git_output("commit", "-m", "historical integration work")
+        self.configure_base("integration/initiative")
+        self.git_output("add", "rigorbreeze.toml")
+        self.git_output("commit", "-m", "designate sequential baseline")
+        expected_sha = self.git_output("rev-parse", "integration/initiative")
+
+        self.run_flow(
+            "new",
+            "TASK-506",
+            "--title",
+            "Configured baseline",
+            "--risk",
+            "L0",
+        )
+
+        state = json.loads(self.state_path().read_text(encoding="utf-8"))
+        self.assertEqual(state["activeTask"]["baseBranch"], "integration/initiative")
+        self.assertEqual(state["activeTask"]["baseSha"], expected_sha)
+
+    def test_empty_base_configuration_keeps_default_branch_and_sha(self) -> None:
+        self.initialize_versioned_project()
+        expected_sha = self.git_output("rev-parse", "main")
+
+        self.run_flow(
+            "new",
+            "TASK-507",
+            "--title",
+            "Default baseline",
+            "--risk",
+            "L0",
+        )
+
+        state = json.loads(self.state_path().read_text(encoding="utf-8"))
+        self.assertEqual(state["activeTask"]["baseBranch"], "main")
+        self.assertEqual(state["activeTask"]["baseSha"], expected_sha)
+
+    def test_missing_configured_base_fails_before_writing_task_records(self) -> None:
+        self.initialize_versioned_project()
+        self.configure_base("integration/missing")
+        self.git_output("add", "rigorbreeze.toml")
+        self.git_output("commit", "-m", "configure missing baseline")
+
+        failed = self.run_flow(
+            "new",
+            "TASK-508",
+            "--title",
+            "Missing baseline",
+            "--risk",
+            "L0",
+            expected=2,
+        )
+
+        self.assertIn("baseline branch is missing: integration/missing", failed.stderr)
+        self.assertFalse(self.task_file("TASK-508").exists())
+        self.assertFalse(self.evidence_file("TASK-508").exists())
+        state = json.loads(self.state_path().read_text(encoding="utf-8"))
+        self.assertIsNone(state["activeTask"])
 
 
 if __name__ == "__main__":
