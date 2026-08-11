@@ -573,6 +573,38 @@ Risk: {risk}
         blocked = self.run_flow("verify", "--profile", "affected", expected=2)
         self.assertIn("approved scope", blocked.stderr.lower())
 
+    def test_unchanged_historical_destructive_migration_does_not_block_verify(
+        self,
+    ) -> None:
+        self.init_git()
+        self.run_flow("init")
+        self.write_config(full=("unit",), affected=("unit",))
+        migration = self.root / "db" / "migrations" / "001_legacy_drop.sql"
+        migration.parent.mkdir(parents=True)
+        migration.write_text("DROP TABLE legacy_tenant;\n", encoding="utf-8")
+        self.commit_all("record historical migration")
+        self.create_task(risk="L1", commit_baseline=False)
+        test_file = self.root / "tests" / "test_feature.py"
+        test_file.parent.mkdir()
+        test_file.write_text(
+            "raise AssertionError('behavior missing')\n", encoding="utf-8"
+        )
+        self.run_flow("approve", "task")
+        self.run_flow(
+            "red",
+            "--requirement",
+            "REQ-001",
+            "--test",
+            "tests/test_feature.py",
+            "--expect-pattern",
+            "behavior missing",
+            "--",
+            sys.executable,
+            "tests/test_feature.py",
+        )
+
+        self.run_flow("verify", "--profile", "affected")
+
     def test_destructive_migration_and_missing_rehearsal_block_enforced_profile(
         self,
     ) -> None:

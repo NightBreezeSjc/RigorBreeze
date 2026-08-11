@@ -214,6 +214,35 @@ class SkillContractTests(unittest.TestCase):
                 self.assertEqual(skill.count(phrase), 1)
                 self.assertIn(phrase, generated_policy)
 
+    def test_skill_keeps_business_tasks_separate_and_evidence_lean(self) -> None:
+        skill = (SKILL_DIR / "SKILL.md").read_text(encoding="utf-8").lower()
+        handbook = (
+            (SKILL_DIR / "references" / "handbook.md")
+            .read_text(encoding="utf-8")
+            .lower()
+        )
+        chinese = (SKILL_DIR / "references" / "handbook.zh-CN.md").read_text(
+            encoding="utf-8"
+        )
+
+        for phrase in (
+            "separate skill task",
+            "sequential initiative work",
+            "independent attribution oracle",
+        ):
+            with self.subTest(phrase=phrase):
+                self.assertIn(phrase, skill)
+        for phrase in (
+            "raw inventories",
+            "evidence-only tooling",
+            "genuinely concurrent writer",
+        ):
+            with self.subTest(phrase=phrase):
+                self.assertIn(phrase, handbook)
+        for phrase in ("原始清单", "证据型工具", "真正并发的写任务"):
+            with self.subTest(phrase=phrase):
+                self.assertIn(phrase, chinese)
+
     def test_contributor_rules_require_an_observable_instruction_delta(self) -> None:
         english = (REPO_ROOT / "CONTRIBUTING.md").read_text(encoding="utf-8")
         chinese = (REPO_ROOT / "CONTRIBUTING.zh-CN.md").read_text(encoding="utf-8")

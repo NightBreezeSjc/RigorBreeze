@@ -34,7 +34,9 @@ and every declared check must be configured and pass. L0/L1 remain
 project-declared. L2 `full` derives a minimum of `secret`, `build`, at least one
 static-quality check, and at least one behavioral check. Dependency-manifest
 changes additionally require `dependency`, `license`, and `sbom` with non-empty
-reports; migration changes require `migration` with its report. Browser UI and
+reports; migration changes require `migration` with its report. Destructive-migration
+policy scans only migration files in the active task change set, never unchanged
+historical SQL. Browser UI and
 other unrelated capabilities remain conditional and require no N/A paperwork.
 Required failures block merge and release.
 
@@ -48,6 +50,10 @@ Adapt `assets/ci/gitlab-ci.yml` into the existing `.gitlab-ci.yml`. Configure
 the actual project commands in `rigorbreeze.toml`; the YAML calls the policy
 runner directly and contains no second command registry. Preserve evidence, reports, screenshots, migration
 logs, SBOM, and artifact digests.
+
+Large scanner inventories are transient diagnostics, not proof by themselves.
+Track compact digests, counts, unmatched samples, and the independent expected
+source/ownership oracle; keep raw inventories local or in time-limited CI artifacts.
 
 Use protected branches/environments, required pipelines, environment-scoped secrets, and manual production approval. Do not place credentials in YAML.
 
