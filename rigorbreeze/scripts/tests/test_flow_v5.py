@@ -203,6 +203,7 @@ class FlowV5Tests(FlowTestCase):
 
     def test_clean_l1_auto_closes_and_compacts_after_integration(self) -> None:
         self.init_git()
+        self.git_output("branch", "-M", "main")
         self.run_flow("init")
         (self.root / "rigorbreeze.toml").write_text(
             "version = 5\n\n"
