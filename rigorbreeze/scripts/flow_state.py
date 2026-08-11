@@ -16,8 +16,9 @@ from typing import Any, Iterable
 
 import flow_parallel
 
-VERSION = 4
-TOOL_VERSION = "0.13.0"
+VERSION = 5
+EVIDENCE_VERSION = 4
+TOOL_VERSION = "0.14.0"
 SPEC_DIR = "spec"
 CONFIG_NAME = "rigorbreeze.toml"
 MODES = ("advisory", "enforced")
@@ -177,12 +178,55 @@ def legacy_state_path(root: Path) -> Path:
     return spec_root(root) / "state.json"
 
 
+def record_settings(root: Path) -> dict[str, Any]:
+    """Return the storage policy without requiring a fully loaded config."""
+
+    path = config_path(root)
+    if not path.is_file():
+        return {"storage": "private", "publish_high_risk_summary": True}
+    try:
+        with path.open("rb") as handle:
+            raw = tomllib.load(handle)
+    except (OSError, tomllib.TOMLDecodeError):
+        return {"storage": "tracked", "publish_high_risk_summary": False}
+    version = int(raw.get("version", 1))
+    configured = raw.get("records", {})
+    return {
+        "storage": configured.get("storage", "private" if version >= 5 else "tracked"),
+        "publish_high_risk_summary": configured.get(
+            "publish_high_risk_summary", version >= 5
+        ),
+    }
+
+
+def records_root(root: Path) -> Path:
+    if record_settings(root)["storage"] == "tracked":
+        return spec_root(root)
+    if is_git_repo(root):
+        common = flow_parallel.git_common_dir(root)
+        if common is not None:
+            return common / "rigorbreeze" / "records"
+    return root / ".rigorbreeze" / "records"
+
+
 def task_path(root: Path, task_id: str) -> Path:
-    return spec_root(root) / "changes" / f"{task_id}.md"
+    return records_root(root) / "changes" / f"{task_id}.md"
 
 
 def evidence_path(root: Path, task_id: str) -> Path:
-    return spec_root(root) / "evidence" / f"{task_id}.json"
+    return records_root(root) / "evidence" / f"{task_id}.json"
+
+
+def archive_path(root: Path, task_id: str) -> Path:
+    return records_root(root) / "archive" / f"{task_id}.md"
+
+
+def history_path(root: Path, task_id: str) -> Path:
+    return records_root(root) / "history" / f"{task_id}.json"
+
+
+def audit_path(root: Path, task_id: str) -> Path:
+    return spec_root(root) / "evidence" / f"{task_id}.audit.json"
 
 
 def initial_state() -> dict[str, Any]:
@@ -206,7 +250,7 @@ def initial_state() -> dict[str, Any]:
 
 def empty_evidence(task_id: str) -> dict[str, Any]:
     return {
-        "workflowVersion": VERSION,
+        "workflowVersion": EVIDENCE_VERSION,
         "taskId": task_id,
         "baseline": None,
         "red": [],
@@ -354,7 +398,7 @@ def compact_completed_tdd_history(evidence: dict[str, Any]) -> None:
 
 
 def config_template() -> str:
-    return """version = 4
+    return """version = 5
 
 [policy]
 local_mode = "advisory"
@@ -375,6 +419,10 @@ level = "manual"
 remote = "origin"
 protected_branches = ["main", "master"]
 commit_message = "{task_id}: {title}"
+
+[records]
+storage = "private"
+publish_high_risk_summary = true
 
 # merge_check_command and merge_command must call the configured GitHub/GitLab
 # provider. release_check_command and release_command are likewise project
@@ -401,6 +449,18 @@ commit_message = "{task_id}: {title}"
 
 
 def task_template(task_id: str, title: str, risk: str) -> str:
+    authoritative = (
+        """- User outcome: TODO
+- Current behavior and evidence: TODO
+- Business and architecture path: TODO
+- Invariants and source of truth: TODO
+- Requirement/design/API version: TODO
+- Unresolved outcome-changing ambiguity: TODO"""
+        if risk in {"L2", "Emergency"}
+        else """- Result: TODO
+- Basis: TODO
+- Unresolved outcome-changing ambiguity: none"""
+    )
     return f"""# {task_id}: {title}
 
 Risk: {risk}
@@ -416,12 +476,7 @@ Runtime-Claims: none
 Operational-Modes: N/A - no conditional runtime behavior
 
 ## Authoritative inputs
-- User outcome: TODO
-- Current behavior and evidence: TODO
-- Business and architecture path: TODO
-- Invariants and source of truth: TODO
-- Requirement/design/API version: TODO
-- Unresolved outcome-changing ambiguity: TODO
+{authoritative}
 
 ## Allowed scope
 - TODO
@@ -470,14 +525,15 @@ def agents_block() -> str:
 ## RigorBreeze
 
 Before every non-trivial product-code write, including a follow-up after context compaction or while another workflow skill is active, invoke `$rigorbreeze`, inspect bundled-runner status and the real base-branch `workflowBaseline`, and require an approved task plus a successful window claim. Read `rigorbreeze.toml`, `spec/index.md`, and the active contract.
+Use Direct without a task, worktree, Spec, or evidence only for one unambiguous, low-consequence result in one repository that avoids API/data shape, auth, permissions, payments, locks, migrations, dependencies, production configuration, and release. Read status, make the smallest edit, run one targeted check, and report its command, exit status, and scope. Promote to L1/L2 immediately if a boundary is crossed.
 Complete incomplete prompts from evidence before approval: recover project facts from requirements, code, tests, Git and runtime state; ask only for outcome-changing intent that cannot be recovered; state safe defaults instead of hiding assumptions. Record the compact result in Authoritative inputs rather than creating another context document.
 For initiative shaping or genuinely branching L2 ambiguity, use a decision frontier after fact recovery: ask at most three questions per round, each with a recommendation, reason, and result impact; defer task creation until the frontier is resolved and the brief is approved. A prototype answers one decision question, records its reference, observation, and verdict, and never proves production acceptance.
 Translate compound requests into observable atoms (`ADD`/`REMOVE`/`MOVE`/`RETAIN`/`REPLACE`) and map each to an acceptance ID or explicit out-of-scope reason. For negative wording, distinguish a current defect from the desired result using project evidence; ask one short outcome question only when evidence cannot decide. UI acceptance covers presence, absence, order/location, and retained behavior.
 Before approval, perform a semantic self-review for placeholders, contradictions, oversized scope, and ambiguous outcome, source-of-truth, freshness, or fallback meaning; show a compact final-state checklist, resolve project facts directly, and ask only about outcome-changing ambiguity.
-One worktree may own only one active writing task. Reuse a designated integration worktree for sequential initiative slices; use `new --worktree auto` only for a concurrent writer or disposable risky experiment. Record a resolvable `Task-Origin` and keep an intentional draft's `Waiting-On` condition explicit until approval. Declare exclusive ports, services, processes, apps, or environments in `Runtime-Claims`; worktrees do not isolate them. Complex DAGs are proposed once, then represented only by `Depends-On`.
-Local mode is advisory; CI, L2, merge, and release use enforced profiles. L0 closes after configured verification; L1/L2 require current full verification, applicable acceptance, review, and retrospective confirmation. Verify review feedback against the requirement, actual use, compatibility constraints, tests, and YAGNI before implementation. Immutable artifacts and release governance are required only when release is actually requested.
+Risk determines gates; outside Direct, an independent outcome gets a short-lived task branch; concurrency determines extra worktrees; dependency determines a DAG. A sole writer reuses a clean physical worktree only after the prior task is closed and integrated, returning to the current base before starting a fresh task branch. Reuse a designated integration branch/worktree only for explicitly related sequential slices; use `new --worktree auto` only for a concurrent writer or disposable risky experiment. One worktree may own only one active writing task. Record a resolvable `Task-Origin` and keep an intentional draft's `Waiting-On` condition explicit until approval. Declare exclusive ports, services, processes, apps, or environments in `Runtime-Claims`; worktrees do not isolate them. Complex DAGs are proposed once, then represented only by `Depends-On`.
+Local mode is advisory; CI, L2, merge, and release use enforced profiles. A clear L1 request supplies approval once its compact contract is complete; ask only for outcome-changing ambiguity. A clean first-pass L1 records an automatic retrospective and closes, while friction and all L2/Emergency work retain human review. Verify review feedback against actual requirements, use, compatibility, tests, and YAGNI. Immutable artifacts and release governance apply only to a real release.
 Before retaining a helper, adapter, wrapper, configuration layer, or shared abstraction, apply a deletion test: delete or inline it when complexity disappears; keep it only when deletion redistributes proven caller or safety complexity.
-Use `archive --outcome abandoned --reason <reason>` for a clean cancelled task; use `reconciled` only for proven externally integrated history. Archive before guarded delivery and preserve branches. Conditional L2 integrations map enabled/disabled/unavailable behavior in `Operational-Modes`, and L2 remote release requires an operation plan with one safe recovery entry.
+Version-5 projects keep full records in Git-common private storage by default; never silently move legacy tracked records. Compact integrated L1 detail locally, retain full private L2/Emergency proof, and publish only configured sanitized audit summaries. Use `archive --outcome abandoned --reason <reason>` for a clean cancellation and `reconciled` only for proven integration. After guarded delivery, reconcile from the base worktree and remove only clean contained managed worktrees and safely deletable local branches. Conditional L2 integrations map enabled/disabled/unavailable behavior in `Operational-Modes`; L2 release requires one safe recovery entry.
 Git automation defaults to manual and never increases during an upgrade. A current-message request may authorize one guarded commit/push. Ordinary commit requires current configured affected/full evidence; archive, merge, and integration-branch delivery retain full gates. Provider merge and release require standing project configuration.
 Before any external write, report the observed current state, already completed steps, immutable identifiers, remaining action and stop conditions. Never repeat a completed operation from a stale plan or chat summary. A completion claim requires fresh verification from this turn with its command, exit status, and covered scope; history or another Agent's claim is insufficient.
 If a high-risk task cannot load its authoritative contract or workflow state, restore the record or create an explicit Emergency contract before product or production writes; never replace the failed workflow with an informal task card.
@@ -536,9 +592,9 @@ def upgrade_state(state: dict[str, Any]) -> dict[str, Any]:
 
 def upgrade_evidence(evidence: dict[str, Any], task_id: str) -> dict[str, Any]:
     version = int(evidence.get("workflowVersion", 1))
-    if version > VERSION:
+    if version > EVIDENCE_VERSION:
         raise FlowError(
-            f"evidence schema {version} is newer than supported schema {VERSION}"
+            f"evidence schema {version} is newer than supported schema {EVIDENCE_VERSION}"
         )
     defaults = empty_evidence(task_id)
     for key, value in defaults.items():
@@ -546,7 +602,7 @@ def upgrade_evidence(evidence: dict[str, Any], task_id: str) -> dict[str, Any]:
     practice = evidence.setdefault("practice", {})
     practice.setdefault("confirmation", None)
     practice.setdefault("events", [])
-    evidence["workflowVersion"] = VERSION
+    evidence["workflowVersion"] = EVIDENCE_VERSION
     evidence["taskId"] = task_id
     return evidence
 
@@ -559,9 +615,12 @@ def upgrade_persisted_data(root: Path) -> None:
         upgraded = upgrade_state(original)
         if json.dumps(upgraded, sort_keys=True) != before:
             write_json(state_file, upgraded)
-    evidence_dir = spec_root(root) / "evidence"
-    if evidence_dir.is_dir():
+    for evidence_dir in {spec_root(root) / "evidence", records_root(root) / "evidence"}:
+        if not evidence_dir.is_dir():
+            continue
         for path in sorted(evidence_dir.glob("*.json")):
+            if path.name.endswith(".audit.json"):
+                continue
             original = read_json(path)
             before = json.dumps(original, sort_keys=True)
             upgraded = upgrade_evidence(original, path.stem)
@@ -660,8 +719,19 @@ def load_config(root: Path) -> dict[str, Any]:
     except tomllib.TOMLDecodeError as exc:
         raise FlowError(f"invalid TOML: {path}: {exc}") from exc
     config_version = config.get("version")
-    if config_version not in (2, 3, VERSION):
-        raise FlowError(f"{CONFIG_NAME} must declare version = 2, 3, or {VERSION}")
+    if config_version not in (2, 3, 4, VERSION):
+        raise FlowError(f"{CONFIG_NAME} must declare version = 2, 3, 4, or {VERSION}")
+    records = config.setdefault("records", {})
+    storage = records.setdefault(
+        "storage", "private" if config_version >= 5 else "tracked"
+    )
+    if storage not in {"private", "tracked"}:
+        raise FlowError("records.storage must be private or tracked")
+    publish_summary = records.setdefault(
+        "publish_high_risk_summary", config_version >= 5
+    )
+    if not isinstance(publish_summary, bool):
+        raise FlowError("records.publish_high_risk_summary must be a boolean")
     policy = config.setdefault("policy", {})
     local_mode = policy.setdefault("local_mode", "advisory")
     if local_mode not in MODES:

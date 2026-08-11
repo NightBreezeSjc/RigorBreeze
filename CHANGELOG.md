@@ -26,6 +26,21 @@ The project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). 
 - Reframed the repository for first-time adopters with bilingual onboarding, explicit safety boundaries, and a complete first-task walkthrough.
 - Added concise contribution and security policies plus an MIT license.
 
+## [0.14.0] - Make rigor proportional to consequence
+
+### Added
+
+- Add a no-task Direct lane for one unambiguous, low-consequence change proven by one targeted check.
+- Add schema-v5 Git-common private records, explicit legacy migration, compact L1 history, and bounded sanitized L2/Emergency audit summaries.
+- Project completed/current/one-next-action interaction state, plus stateless enforced full checks for clean CI checkouts.
+
+### Changed
+
+- Separate allocation concerns: risk selects gates, non-Direct independent outcomes use short-lived branches, and only concurrent writers or disposable risky experiments receive extra worktrees; sequential independent tasks reuse the checkout but not the predecessor branch.
+- Let clear L1 requests supply approval, auto-close clean first-pass L1 work, and retain human review for friction and all L2/Emergency tasks.
+- Reconcile integrated work automatically and safely delete only contained managed worktrees and local branches without remote uncertainty.
+- Keep complete evidence schema v4 and automation journal v1; no public command, Spec file type, dependency, or production gate was added.
+
 ## [0.13.0] - Isolate reusable workflow repairs from business delivery
 
 ### Fixed

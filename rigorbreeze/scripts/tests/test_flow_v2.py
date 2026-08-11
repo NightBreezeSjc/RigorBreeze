@@ -35,9 +35,7 @@ class FlowV2Tests(FlowTestCase):
         (self.root / "rigorbreeze.toml").write_text(text, encoding="utf-8")
 
     def record_operation_plan(self, task_id: str = "TASK-001") -> None:
-        evidence = json.loads(
-            (self.root / "spec" / "evidence" / f"{task_id}.json").read_text()
-        )
+        evidence = json.loads(self.evidence_file(task_id).read_text())
         artifact_digests = [item["sha256"] for item in evidence["artifacts"]]
         head = subprocess.run(
             ["git", "rev-parse", "HEAD"],
@@ -142,7 +140,7 @@ class FlowV2Tests(FlowTestCase):
         self.run_flow(
             "new", "TASK-001", "--title", "One observable outcome", "--risk", risk
         )
-        task = self.root / "spec" / "changes" / "TASK-001.md"
+        task = self.task_file("TASK-001")
         task.write_text(
             f"""# TASK-001: One observable outcome
 
@@ -213,13 +211,11 @@ Risk: {risk}
         self.run_flow("init")
         self.assertTrue((self.root / "rigorbreeze.toml").is_file())
         state = json.loads(self.state_path().read_text(encoding="utf-8"))
-        self.assertEqual(state["workflowVersion"], 4)
+        self.assertEqual(state["workflowVersion"], 5)
 
         self.create_task(risk="L0")
         evidence = json.loads(
-            (self.root / "spec" / "evidence" / "TASK-001.json").read_text(
-                encoding="utf-8"
-            )
+            self.evidence_file("TASK-001").read_text(encoding="utf-8")
         )
         self.assertEqual(evidence["workflowVersion"], 4)
         for key in (
@@ -242,7 +238,7 @@ Risk: {risk}
         state["workflowVersion"] = 1
         state["phase"] = "baseline"
         state_path.write_text(json.dumps(state), encoding="utf-8")
-        evidence_path = self.root / "spec" / "evidence" / "OLD-001.json"
+        evidence_path = self.evidence_file("OLD-001")
         evidence_path.write_text(
             json.dumps(
                 {
@@ -268,7 +264,7 @@ Risk: {risk}
 
         upgraded_state = json.loads(state_path.read_text(encoding="utf-8"))
         upgraded_evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
-        self.assertEqual(upgraded_state["workflowVersion"], 4)
+        self.assertEqual(upgraded_state["workflowVersion"], 5)
         self.assertEqual(upgraded_evidence["workflowVersion"], 4)
         self.assertEqual(upgraded_evidence["red"][0]["requirement"], "REQ-OLD")
         self.assertIn("checkRuns", upgraded_evidence)
@@ -285,9 +281,7 @@ Risk: {risk}
         self.run_flow("--mode", "enforced", "verify", "--profile", "full")
 
         evidence = json.loads(
-            (self.root / "spec" / "evidence" / "TASK-001.json").read_text(
-                encoding="utf-8"
-            )
+            self.evidence_file("TASK-001").read_text(encoding="utf-8")
         )
         self.assertEqual(
             {item["checkId"] for item in evidence["checkRuns"]},
@@ -336,9 +330,7 @@ Risk: {risk}
             "--mode", "enforced", "verify", "--profile", "full", expected=1
         )
         self.assertNotIn("Traceback", result.stderr)
-        evidence = json.loads(
-            (self.root / "spec" / "evidence" / "TASK-001.json").read_text()
-        )
+        evidence = json.loads(self.evidence_file("TASK-001").read_text())
         record = evidence["checkRuns"][-1]
         self.assertEqual(record["exitCode"], 124)
         self.assertIn("partial stdout", record["summary"])
@@ -386,9 +378,7 @@ Risk: {risk}
         self.run_flow("--mode", "enforced", "verify", "--profile", "full")
 
         self.assertEqual(counter.read_text(), "x")
-        evidence = json.loads(
-            (self.root / "spec" / "evidence" / "TASK-001.json").read_text()
-        )
+        evidence = json.loads(self.evidence_file("TASK-001").read_text())
         records = evidence["checkRuns"][-2:]
         self.assertEqual(
             [record["checkId"] for record in records], ["unit", "acceptance"]
@@ -433,9 +423,7 @@ Risk: {risk}
         self.run_flow("--mode", "enforced", "verify", "--profile", "full", expected=1)
 
         self.assertEqual(counter.read_text(), "x")
-        evidence = json.loads(
-            (self.root / "spec" / "evidence" / "TASK-001.json").read_text()
-        )
+        evidence = json.loads(self.evidence_file("TASK-001").read_text())
         records = evidence["checkRuns"][-2:]
         self.assertEqual(records[1]["reusedFromCheckId"], "unit")
         self.assertTrue(records[0]["passed"])
@@ -474,9 +462,7 @@ Risk: {risk}
         self.run_flow("--mode", "enforced", "verify", "--profile", "full")
 
         self.assertEqual(counter.read_text(), "xx")
-        evidence = json.loads(
-            (self.root / "spec" / "evidence" / "TASK-001.json").read_text()
-        )
+        evidence = json.loads(self.evidence_file("TASK-001").read_text())
         self.assertNotIn("reusedFromCheckId", evidence["checkRuns"][-1])
 
     def test_arbitrary_verify_scope_is_not_part_of_the_public_cli(self) -> None:
@@ -511,9 +497,7 @@ Risk: {risk}
 
         result = self.run_flow("--mode", "enforced", "verify", "--profile", "full")
         evidence = json.loads(
-            (self.root / "spec" / "evidence" / "TASK-001.json").read_text(
-                encoding="utf-8"
-            )
+            self.evidence_file("TASK-001").read_text(encoding="utf-8")
         )
         self.assertEqual({item["checkId"] for item in evidence["checkRuns"]}, {"unit"})
         self.assertIn("passed", result.stdout.lower())
@@ -688,9 +672,7 @@ Risk: {risk}
             "environment=test",
         )
         evidence = json.loads(
-            (self.root / "spec" / "evidence" / "TASK-001.json").read_text(
-                encoding="utf-8"
-            )
+            self.evidence_file("TASK-001").read_text(encoding="utf-8")
         )
         self.assertEqual(len(evidence["acceptance"][0]["sha256"]), 64)
 
@@ -1191,9 +1173,7 @@ Risk: {risk}
 
         self.run_flow("--mode", "enforced", "verify", "--profile", "full")
         evidence = json.loads(
-            (self.root / "spec" / "evidence" / "TASK-001.json").read_text(
-                encoding="utf-8"
-            )
+            self.evidence_file("TASK-001").read_text(encoding="utf-8")
         )
         self.assertTrue(all(chain.get("green") for chain in evidence["tddChain"]))
 
@@ -1236,9 +1216,7 @@ Risk: {risk}
         self.run_flow("--mode", "enforced", "verify", "--profile", "full")
 
         evidence = json.loads(
-            (self.root / "spec" / "evidence" / "TASK-001.json").read_text(
-                encoding="utf-8"
-            )
+            self.evidence_file("TASK-001").read_text(encoding="utf-8")
         )
         self.assertEqual(len(evidence["tddChain"]), 2)
         self.assertIsNone(evidence["tddChain"][0]["green"])
@@ -1382,7 +1360,7 @@ Risk: {risk}
                 f"tests/test_{number}.py",
             )
         self.run_flow("--mode", "enforced", "verify", "--profile", "full")
-        evidence_path = self.root / "spec" / "evidence" / "TASK-001.json"
+        evidence_path = self.evidence_file("TASK-001")
         evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
         evidence["tddChain"][0]["green"] = None
         evidence_path.write_text(json.dumps(evidence), encoding="utf-8")

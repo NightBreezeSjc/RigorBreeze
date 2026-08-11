@@ -89,7 +89,7 @@ class FlowCliTests(FlowTestCase):
         self.run_flow(*command)
 
     def complete_task(self, task_id: str = "TASK-001") -> Path:
-        task = self.root / "spec" / "changes" / f"{task_id}.md"
+        task = self.task_file(task_id)
         task.write_text(
             f"""# {task_id}: Deliver one observable outcome
 
@@ -148,18 +148,13 @@ Risk: L1
 
         task = self.run_flow("new", "TASK-001", "--title", "One slice", "--risk", "L0")
         self.assertIn("created TASK-001", task.stdout)
-        task_text = (self.root / "spec" / "changes" / "TASK-001.md").read_text(
-            encoding="utf-8"
-        )
+        task_text = self.task_file("TASK-001").read_text(encoding="utf-8")
         self.assertIn("## Test seams", task_text)
         self.assertIn("## Conditional risks", task_text)
         for context_field in (
-            "- User outcome: TODO",
-            "- Current behavior and evidence: TODO",
-            "- Business and architecture path: TODO",
-            "- Invariants and source of truth: TODO",
-            "- Requirement/design/API version: TODO",
-            "- Unresolved outcome-changing ambiguity: TODO",
+            "- Result: TODO",
+            "- Basis: TODO",
+            "- Unresolved outcome-changing ambiguity: none",
         ):
             self.assertIn(context_field, task_text)
 
@@ -205,8 +200,8 @@ Risk: L1
             "new", "TASK-002", "--title", "Second slice", "--risk", "L1", expected=2
         )
         self.assertIn("active task", blocked.stderr.lower())
-        self.assertTrue((self.root / "spec" / "changes" / "TASK-001.md").is_file())
-        self.assertFalse((self.root / "spec" / "changes" / "TASK-002.md").exists())
+        self.assertTrue(self.task_file("TASK-001").is_file())
+        self.assertFalse(self.task_file("TASK-002").exists())
 
     def test_approval_rejects_placeholders_and_invalidates_after_change(self) -> None:
         self.run_flow("init")
@@ -221,8 +216,9 @@ Risk: L1
             encoding="utf-8",
         )
 
-        status = self.run_flow("status")
-        self.assertIn("approval: invalid", status.stdout.lower())
+        self.run_flow("status")
+        status_json = json.loads(self.run_flow("status", "--json").stdout)
+        self.assertEqual(status_json["approval"], "invalid")
         state = json.loads(self.state_path().read_text(encoding="utf-8"))
         self.assertTrue(
             state["approvals"]["task"]["valid"],
@@ -500,13 +496,13 @@ Risk: L1
         self.record_release_governance()
         self.run_flow("archive")
 
-        self.assertFalse((self.root / "spec" / "changes" / "TASK-001.md").exists())
-        self.assertTrue((self.root / "spec" / "archive" / "TASK-001.md").is_file())
+        self.assertFalse(self.task_file("TASK-001").exists())
+        self.assertTrue(self.archive_file("TASK-001").is_file())
         state = json.loads(self.state_path().read_text(encoding="utf-8"))
         self.assertEqual(state["phase"], "archived")
         self.assertIsNone(state["activeTask"])
-        status = self.run_flow("status")
-        self.assertIn("active task: none", status.stdout.lower())
+        status = json.loads(self.run_flow("status", "--json").stdout)
+        self.assertIsNone(status["activeTask"])
 
     def test_l1_release_requires_runtime_and_independent_review_evidence(self) -> None:
         self.init_git()

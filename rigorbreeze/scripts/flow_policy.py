@@ -1020,15 +1020,60 @@ def ensure_delivery_quality(root: Path, state: dict[str, Any]) -> str:
 
 def ensure_close(root: Path, state: dict[str, Any]) -> None:
     risk = ensure_delivery_quality(root, state)
-    if risk in {"L1", "L2", "Emergency"} and not retro_confirmation_current(
-        root, state
-    ):
-        summary = practice_summary(root, state)
-        raise FlowError(
-            "retrospective confirmation is required; prefilled summary: "
-            + json.dumps(summary, ensure_ascii=False, sort_keys=True)
-            + "; run retro --json, then confirm the three human judgments"
+    if risk not in {"L1", "L2", "Emergency"} or retro_confirmation_current(root, state):
+        return
+    summary = practice_summary(root, state)
+    if risk == "L1" and clean_l1_summary(root, state, summary):
+        active = active_task(state)
+        evidence = load_evidence(root, active["id"])
+        practice = evidence.setdefault("practice", {})
+        practice["summary"] = summary
+        practice["confirmation"] = {
+            "mode": "automatic-clean",
+            "reworkReason": "none",
+            "exceptions": "none",
+            "workflowImpact": "unreviewed",
+            "evolutionCandidate": False,
+            "summaryDigest": summary["summaryDigest"],
+            "taskDigest": task_digest(root, state),
+            "projectFingerprint": project_fingerprint(root),
+            "confirmedAt": now_iso(),
+        }
+        save_evidence(root, active["id"], evidence)
+        return
+    raise FlowError(
+        "retrospective confirmation is required; prefilled summary: "
+        + json.dumps(summary, ensure_ascii=False, sort_keys=True)
+        + "; run retro --json, then confirm the three human judgments"
+    )
+
+
+def clean_l1_summary(
+    root: Path, state: dict[str, Any], summary: dict[str, Any]
+) -> bool:
+    active = active_task(state)
+    evidence = load_evidence(root, active["id"])
+    events = evidence.get("practice", {}).get("events", [])
+    friction = any(
+        isinstance(event, dict)
+        and (
+            event.get("evolutionCandidate") is True
+            or event.get("type")
+            in {
+                "workflow-bypass",
+                "manual-override",
+                "scope-drift",
+                "unreasonable-next-action",
+            }
         )
+        for event in events
+    )
+    return bool(
+        not summary.get("failedChecks")
+        and not summary.get("potentialBypasses")
+        and summary.get("firstAcceptancePassed") is True
+        and not friction
+    )
 
 
 def ensure_release(root: Path, state: dict[str, Any]) -> None:

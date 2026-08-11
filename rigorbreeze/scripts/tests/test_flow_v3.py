@@ -11,7 +11,7 @@ from flow_test_support import FlowTestCase
 
 class FlowV3Tests(FlowTestCase):
     def write_task(self, root: Path, task_id: str, scope: str) -> None:
-        (root / "spec" / "changes" / f"{task_id}.md").write_text(
+        self.task_file(task_id, root).write_text(
             f"""# {task_id}: fixture
 
 Risk: L0
@@ -269,7 +269,7 @@ command = ["python3", "-c", "print('secret ok')"]
                 "--field",
                 "reviewer=user",
             )
-            evidence = self.root / "spec" / "evidence" / "TASK-310.json"
+            evidence = self.evidence_file("TASK-310")
             evidence_before = evidence.read_bytes()
 
             self.run_flow("automate", "commit", "--once")
@@ -560,7 +560,7 @@ command = ["python3", "-c", "print('secret ok')"]
         (self.root / "src" / "value.txt").write_text("value\n", encoding="utf-8")
         self.run_flow("--mode", "enforced", "verify", "--profile", "affected")
 
-        evidence_path = self.root / "spec" / "evidence" / "TASK-302.json"
+        evidence_path = self.evidence_file("TASK-302")
         evidence_before = evidence_path.read_bytes()
         self.run_flow("automate", "commit")
         files = subprocess.run(
@@ -950,7 +950,7 @@ artifacts = ["artifacts/app.bin"]
             command.extend(["--field", field])
         self.run_flow(*command)
 
-        evidence_path = self.root / "spec" / "evidence" / "TASK-306.json"
+        evidence_path = self.evidence_file("TASK-306")
         evidence_before = evidence_path.read_bytes()
         self.run_flow("automate", "release")
         repeated = self.run_flow("automate", "release")
@@ -1128,8 +1128,9 @@ artifacts = ["artifacts/app.bin"]
                 cwd=self.root,
                 capture_output=True,
             ).returncode,
-            0,
+            128,
         )
+        self.assertEqual(result["removedBranches"], ["rigorbreeze/task-404"])
         repeated = json.loads(self.run_flow("reconcile", "--cleanup").stdout)
         self.assertEqual(repeated["retained"], [])
         doctor = json.loads(self.run_flow("doctor", "--all", "--json").stdout)
@@ -1198,8 +1199,9 @@ artifacts = ["artifacts/app.bin"]
                 cwd=self.root,
                 capture_output=True,
             ).returncode,
-            0,
+            128,
         )
+        self.assertEqual(result["removedBranches"], ["rigorbreeze/task-404a"])
 
     def test_patch_equivalent_cherry_pick_is_integrated_and_cleanup_safe(self) -> None:
         self.init_git()
@@ -1327,6 +1329,7 @@ artifacts = ["artifacts/app.bin"]
         self.init_git()
         subprocess.run(["git", "branch", "-M", "main"], cwd=self.root, check=True)
         self.run_flow("init")
+        self.write_automation_config("manual")
         self.commit_all("install flow")
         main = self.root
         self.run_flow(
@@ -1444,6 +1447,7 @@ artifacts = ["artifacts/app.bin"]
         self.init_git()
         subprocess.run(["git", "branch", "-M", "main"], cwd=self.root, check=True)
         self.run_flow("init")
+        self.write_automation_config("manual")
         self.commit_all("install flow")
         main = self.root
         self.run_flow(
@@ -1532,7 +1536,7 @@ artifacts = ["artifacts/app.bin"]
             self.assertTrue(retained[0]["requiresConfirmation"])
             self.assertTrue(retained[0]["expectedHead"])
             human = self.run_flow("status", "--all").stdout
-            self.assertIn("1 retained worktree(s)", human)
+            self.assertIn("需要你操作：", human)
             self.assertTrue(worktree.exists())
             subprocess.run(
                 ["git", "worktree", "remove", "--force", str(worktree)],
@@ -1716,7 +1720,7 @@ artifacts = ["artifacts/app.bin"]
         state["workflowVersion"] = 2
         state["warnings"] = ["keep"]
         state_path.write_text(json.dumps(state), encoding="utf-8")
-        evidence_path = self.root / "spec" / "evidence" / "TASK-OLD.json"
+        evidence_path = self.evidence_file("TASK-OLD")
         evidence_path.write_text(
             json.dumps(
                 {
@@ -1733,7 +1737,7 @@ artifacts = ["artifacts/app.bin"]
         self.run_flow("init")
         upgraded_state = json.loads(state_path.read_text(encoding="utf-8"))
         upgraded_evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
-        self.assertEqual(upgraded_state["workflowVersion"], 4)
+        self.assertEqual(upgraded_state["workflowVersion"], 5)
         self.assertEqual(upgraded_state["warnings"], ["keep"])
         self.assertEqual(upgraded_evidence["workflowVersion"], 4)
         self.assertEqual(upgraded_evidence["red"][0]["summary"], "keep")

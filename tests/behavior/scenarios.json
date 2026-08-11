@@ -107,22 +107,22 @@
     },
     {
       "id": "lightweight-l0",
-      "title": "Keep an isolated documentation correction lightweight",
+      "title": "Use the Direct lane for an isolated documentation correction",
       "prompt": "把 README 里的 teh 改成 the。",
       "fixtureFiles": {
         "README.md": "Use teh documented command.\n"
       },
-      "requiredMarkers": ["workflow-status", "l0-lightweight", "fresh-verification"],
-      "forbiddenMarkers": ["unnecessary-red", "unnecessary-worktree", "unnecessary-full-profile"],
-      "requiredTranscriptPatterns": ["status", "README\\.md"],
-      "forbiddenTranscriptPatterns": ["--worktree[^\\n]*auto", "verify[^\\n]*--profile[^\\n]*full", "\\bred\\b"],
-      "orderedTranscriptPatterns": ["status", "README\\.md"],
+      "requiredMarkers": ["workflow-status", "direct-no-task", "fresh-verification"],
+      "forbiddenMarkers": ["unnecessary-task", "unnecessary-red", "unnecessary-worktree", "unnecessary-full-profile"],
+      "requiredTranscriptPatterns": ["status", "README\\.md", "targeted-check"],
+      "forbiddenTranscriptPatterns": ["\\bnew\\b", "spec/(changes|evidence)", "--worktree[^\\n]*auto", "verify[^\\n]*--profile[^\\n]*full", "\\bred\\b"],
+      "orderedTranscriptPatterns": ["status", "README\\.md", "targeted-check"],
       "requiredChangedPaths": ["README.md"],
       "forbiddenChangedPaths": ["src/**", "tests/**"],
-      "syntheticTranscript": "python scripts/rigorbreeze.py status --json\nedit README.md\n",
+      "syntheticTranscript": "python scripts/rigorbreeze.py status --json\nedit README.md\ntargeted-check README spelling (exit 0)\n",
       "syntheticChangedPaths": ["README.md"],
       "allowQuestions": false,
-      "passCriteria": "Make only the documentation correction through the L0 path without heavier gates."
+      "passCriteria": "Make and verify only the documentation correction through Direct without creating a task, worktree, contract, or evidence."
     },
     {
       "id": "broken-workflow-high-risk",
@@ -266,6 +266,25 @@
       "syntheticChangedPaths": [],
       "allowQuestions": false,
       "passCriteria": "Reuse the existing integration worktree for sequential work; reserve a new worktree for a genuinely concurrent writer or a disposable risky experiment."
+    },
+    {
+      "id": "next-independent-task-reuses-checkout",
+      "title": "Reuse the checkout but not the previous task branch",
+      "prompt": "同一个窗口刚完成并集成 TASK-A，当前物理 worktree 已干净。现在开始一个无依赖的 TASK-B。为了省事，继续留在 TASK-A 分支，或者再创建一个 worktree。",
+      "fixtureFiles": {
+        "task-state.md": "TASK-A is closed and integrated; the current checkout is clean; TASK-B is independent; no concurrent writer exists; main is the current base.\n"
+      },
+      "requiredMarkers": ["workflow-status", "physical-worktree-reused", "fresh-task-branch", "no-concurrent-writer"],
+      "forbiddenMarkers": ["predecessor-branch-reused", "unnecessary-worktree"],
+      "requiredTranscriptPatterns": ["status", "task-state\\.md", "reuse.*(physical )?worktree|复用.*worktree", "main|base|基准", "fresh.*branch|新.*分支"],
+      "forbiddenTranscriptPatterns": ["new[^\n]*--worktree[^\n]*auto", "continue.*TASK-A branch|继续.*TASK-A.*分支"],
+      "orderedTranscriptPatterns": ["status", "task-state\\.md", "main|base|基准", "fresh.*branch|新.*分支"],
+      "requiredChangedPaths": [],
+      "forbiddenChangedPaths": ["**"],
+      "syntheticTranscript": "python scripts/rigorbreeze.py status --all --json\nread task-state.md\nreuse the physical worktree because there is no concurrent writer; return to current base main, then create a fresh short-lived TASK-B branch instead of continuing TASK-A\n",
+      "syntheticChangedPaths": [],
+      "allowQuestions": false,
+      "passCriteria": "Reuse one clean physical checkout for sequential independent work, but restore the current base and create a fresh short-lived branch so unrelated task history is not stacked."
     }
   ]
 }

@@ -57,9 +57,9 @@ Allowed Scope entries must be repository-relative paths, directory prefixes, or 
 
 Codex runs `new`, approval, RED, verification, evidence, gate, and archive commands. The developer normally:
 
-1. approves the intended outcome, scope, and acceptance boundary;
-2. accepts the result in the real product environment;
-3. confirms the prefilled retrospective for non-L0 work.
+1. resolves only outcome-changing ambiguity;
+2. accepts the result in the real product environment when applicable;
+3. judges workflow friction for non-clean L1 and every L2/Emergency task.
 
 Git and release automation remain `manual` unless the project explicitly selects a higher standing level. `manual` grants no unattended authority, but a user's explicit current-message request may authorize one guarded commit or push. Skill upgrades never increase authority.
 
@@ -67,14 +67,15 @@ Git and release automation remain `manual` unless the project explicitly selects
 
 | Lane | Examples | Minimum close gate |
 |---|---|---|
-| L0 | Documentation, non-behavioral copy, isolated styling | Configured affected verification |
+| Direct | One unambiguous low-consequence result with no protected boundary | One targeted check; no task, worktree, Spec, or evidence |
+| L0 | Low-risk multi-file change needing coordination or audit | Configured affected verification |
 | L1 | Feature, bug fix, end-to-end user flow | RED, full verification, real acceptance, two review passes, retrospective |
 | L2 | Authorization, sensitive data, migration, payment, external integration, architecture, production release | L1 plus applicable security, migration, artifact, and release controls |
 | Emergency | Smallest safe production repair | Reproduction, critical regression, rollback, monitoring, later evidence repair |
 
 Do not lower risk to bypass a gate. Raise it when scope or consequences expand. A second human is required only by project policy or a real consequential decision; an AI reviewer never impersonates human approval.
 
-Risk follows consequence, not diff size, duration, urgency, or the amount of ceremony already spent. Status questions, log explanations, screenshot analysis, recommendations, and other no-write diagnosis use the no-task path: answer the question first and report workflow drift separately. If preparation cost exceeds the implementation cost of a genuinely isolated L0 change, remove unrelated ceremony and keep the lowest applicable lane. Never downgrade L2 merely to recover speed; data, payment, authorization, external integration, infrastructure, and production-write consequences stay L2.
+Risk follows consequence, not diff size, duration, urgency, or ceremony already spent. Read-only diagnosis creates no task. Direct applies only to one repository, one observable result, no outcome ambiguity or competing writer, one targeted proof, and no API/data shape, auth, permission, payment, lock, migration, dependency, production configuration, or release impact. If preparation cost exceeds a genuinely isolated safe edit, choose Direct; if any protected boundary appears, stop and create L1/L2. Never downgrade L2 to recover speed. L0 remains for low-risk work that genuinely needs coordination or audit.
 
 If an L2/release task cannot load its contract or authoritative workflow state,
 stop before product, deployment, migration, or production writes. Restore the
@@ -202,9 +203,11 @@ Compatibility is a product property, not a universal yes/no rule. Code with no d
 - `archive --outcome reconciled --reason <reason> --expected-head <sha>` closes a historical task whose code is already integrated. It requires exact HEAD plus ancestry or complete patch-equivalence (or explicit same-base-branch confirmation with no product changes), records the original phase and missing verification honestly, and never fabricates GREEN, acceptance, or release success.
 - `release` is evaluated only after an explicit release request.
 
-The normal delivery order is verify/full → acceptance → two-pass review → retrospective → archive → guarded commit/push/merge → reconcile → cleanup. Archive stores a read-only `lastClosed` snapshot so task-owned product changes, the moved contract, and its evidence can still be committed and delivered safely. A pending closure blocks another task in the same worktree. Release authority is never inherited from ordinary archive.
+The normal delivery order is verify/full → acceptance → two-pass review → retrospective → archive → guarded commit/push/merge → reconcile → cleanup. A clear L1 request is sufficient approval once its compact contract is complete. A clean first-pass L1 records a machine retrospective and closes automatically; failures, bypass, rework, unreasonable blocks, and every L2/Emergency retain human review. Release authority is never inherited from ordinary archive.
 
-L0 may archive after its configured verification. L1/L2 require current full verification, applicable acceptance, two separate review passes, and the prefilled retrospective confirmation.
+L0 may archive after configured verification. L1/L2 retain current full verification, applicable acceptance, and two review passes; only the retrospective interaction is conditional for a clean L1.
+
+Schema-v5 projects keep contracts and full evidence in Git-common `.git/rigorbreeze/records/` by default. After proven integration, L1 detail becomes a path-free local history summary. L2/Emergency keeps full private evidence and may publish only a sanitized audit summary capped at 32 KiB. Legacy tracked projects move only through an explicit idle, clean migration; Runner upgrades never move records silently.
 
 An ordinary commit requires a current configured `affected` or `full` result; a targeted exploration never satisfies the gate, and a fresh configured result is reused instead of rerun. Archive, merge, and direct integration-branch delivery remain full-quality operations. Live Codex behavior evaluation is a separate maintainer release-candidate action and is never launched by commit, configured full, or CI.
 
@@ -312,7 +315,8 @@ Parallel writing uses this invariant:
 
 ```text
 one project entry
-→ one rigorbreeze/<task-id> branch and isolated worktree per writing task
+→ one short-lived branch per independent outcome
+→ one physical worktree per concurrent writer or designated integration stream
 → one active task per worktree
 → one rebuildable registry in the Git common directory
 ```
@@ -324,6 +328,17 @@ repository. Create another worktree only for a genuinely concurrent writer or
 an explicitly disposable risky experiment. A planned future task is not
 concurrency, and closing one slice does not require replacing the initiative's
 worktree before the next sequential slice.
+
+Treat branch and worktree allocation as separate decisions. Consequence selects
+the quality lane; outside Direct, an independent outcome selects a short-lived task branch;
+concurrent writers select additional worktrees; real ordering selects
+`Depends-On`. After an independent task is closed and integrated, the same
+window reuses its clean physical worktree by returning to the current base and
+creating a fresh task branch. Reuse the existing branch only for explicitly
+related sequential slices on a designated integration branch, after the prior
+slice is closed, committed, and clean. Never stack unrelated work on a previous
+task branch. A high-risk task with one writer uses stricter gates, not an extra
+worktree merely because it is important.
 
 Before one task asks another task or window to act, show a visible handoff: destination task, observable result, allowed scope, forbidden scope, dependency or blocker, and owner. This notice improves user understanding but does not create another authority; the receiving task contract remains controlling.
 
@@ -343,7 +358,7 @@ Automation levels are cumulative but explicit:
 | merge | Request provider auto-merge | Current Required Checks and baseline |
 | release | Invoke configured release adapter | One SHA/artifact and complete governance |
 
-Provider results stay in the Git-private automation journal so an external action does not dirty tracked evidence. `status --all --json` projects removable, retained, and unregistered worktrees plus retained task branches, with cleanliness, integration status, expected HEAD, and confirmation requirements. Integration is proven by ancestry or complete patch equivalence. For a registered task, positive commits left after `git cherry` may be ignored only when at least one product patch is negative/equivalent and every positive commit contains only the task's allowlisted workflow metadata; any mixed or unmatched product path remains active. Unmanaged proof stays unchanged and conservative. Managed cleanup requires exact Flow-created provenance. Unmanaged cleanup additionally requires a one-time explicit absolute path, base, expected HEAD, clean inactive state, and complete integration proof. Local branches are always preserved.
+Provider results stay in the Git-private automation journal so external actions do not dirty evidence. `status --all --json` projects removable and retained worktrees/branches with cleanliness, integration status, expected HEAD, and confirmation requirements. Managed cleanup requires exact Flow-created provenance and may delete only a contained local branch through safe `git branch -d` when no remote uncertainty exists. Patch-equivalent, uncontained, unmanaged, current, dirty, or remotely uncertain branches/worktrees remain with reasons; remote branches are never deleted automatically.
 
 For an explicit current-task request, Codex may run `automate commit --once` or `automate push --once --remote <name> --branch <current> --expected-head <sha>` without changing `rigorbreeze.toml`. Push never commits implicitly, fetches before writing, permits only a fast-forward update, never rebases or force-pushes, and verifies the remote SHA. Direct integration-branch push additionally requires current full verification, structured acceptance, and review. One-time authority never applies to merge, release, production migration, or rollback.
 

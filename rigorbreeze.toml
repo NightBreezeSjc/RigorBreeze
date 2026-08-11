@@ -1,4 +1,8 @@
-version = 4
+version = 5
+
+[records]
+storage = "private"
+publish_high_risk_summary = true
 
 [policy]
 local_mode = "advisory"

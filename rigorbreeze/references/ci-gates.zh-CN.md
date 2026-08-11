@@ -29,13 +29,13 @@ doctor
 
 enforced profile 包含项目为该 profile 声明的检查，每项都必须配置并通过。L0/L1 继续由项目声明。L2 的 `full` 至少推导 `secret`、`build`、一项静态质量检查和一项行为检查；修改依赖清单时额外要求 `dependency`、`license`、`sbom` 及非空报告，修改迁移时要求 `migration` 及报告。破坏性迁移策略只扫描活动任务变化集中的迁移文件，不扫描未改动的历史 SQL。浏览器 UI 等无关能力仍按条件启用，不要求填写 `N/A`。必需检查失败会阻断合并和发布。
 
-普通提交是更窄的检查点：要求当前配置化 `affected` 或 `full` 证据，targeted 探索不能满足；已有新鲜证据会直接复用。正常 L1/L2 archive、merge 和直推集成分支仍要求 `full` 及适用验收与审查。维护者真实 Agent 行为测试只属于发布候选证据，commit、配置化 `full` 和 CI 都不会调用。
+普通任务提交是更窄的检查点：要求当前配置化 `affected` 或 `full` 证据，targeted 探索不能满足。干净 CI checkout 没有 Git 私有任务记录时，enforced `verify --profile full` 无状态执行配置检查；它只形成 Required Check，不能满足本地任务验收、归档、合并证据或发布治理。维护者真实 Agent 行为测试只属于发布候选，commit、配置化 `full` 和 CI 都不会调用。
 
 仅在单次 profile 调用内，argv、解析后 cwd、有效环境和 timeout 完全一致的检查只启动一次。复用进程不等于复用策略：每个检查仍独立校验自己的报告和制品，并记录 `reusedFromCheckId`。
 
 ## GitLab
 
-把 `assets/ci/gitlab-ci.yml` 调整后接入已有 `.gitlab-ci.yml`。真实项目命令配置在 `rigorbreeze.toml`；YAML 直接调用策略执行器，不保留第二套命令表。保存证据、报告、截图、迁移日志、SBOM 和制品摘要。
+把 `assets/ci/gitlab-ci.yml` 调整后接入已有 `.gitlab-ci.yml`。真实项目命令配置在 `rigorbreeze.toml`；YAML 直接调用策略执行器，不保留第二套命令表。保存报告、截图、迁移日志、SBOM、制品摘要和配置要求的脱敏高风险审计摘要，不上传 Git 私有 records。
 
 使用受保护分支和环境、Required Pipeline、环境级秘密和生产人工批准。凭证不能写入 YAML。
 

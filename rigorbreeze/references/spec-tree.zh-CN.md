@@ -13,19 +13,16 @@
 
 ## 目的
 
-最小 Spec Tree 在不重复需求的前提下保留跨 Session 状态和可审计性。不会把同一个变更复制成 proposal、design、plan、test-plan 和 verification 多份文档；每个变更只有一份人工任务文件。
+记录模型在不重复需求的前提下保留跨 Session 状态和按风险审计能力。Direct 修改不创建任务记录；任务型变更只有一份合同和一份证据，schema v5 默认私有保存。
 
 ## 目录结构
 
 ```text
 spec/
 ├── index.md
-├── changes/
-│   └── TASK-001.md
 ├── evidence/
-│   └── TASK-001.json
-└── archive/
-    └── TASK-000.md
+│   └── TASK-002.audit.json   # 可选脱敏 L2/Emergency 摘要
+└── archive/                  # 仅旧 tracked 模式
 
 rigorbreeze.toml
 scripts/rigorbreeze.py
@@ -37,20 +34,23 @@ scripts/flow_automation.py
 .git/rigorbreeze/registry.json                 # Git 公共私有状态，不提交
 .git/rigorbreeze/automation.json               # 外部动作日志
 .git/rigorbreeze/state.json                    # 主 worktree 私有状态
+.git/rigorbreeze/records/{changes,evidence,archive,history}/
 .git/worktrees/<name>/rigorbreeze/state.json   # worktree 私有状态
 ```
 
 - `index.md`：只保存权威顺序和导航。
-- Git 私有 `state.json`：主 worktree 和 linked worktree 都在各自 Git 私有目录保存 schema v4 阶段、活动任务、批准、最新 RED/验证、警告和最后关闭记录。首次读取会复制旧 `spec/state.json`；只有在它未被跟踪且与迁移结果一致时，`init` 或明确 repair 才删除。已跟踪或内容不同的旧文件会保留并报告。
-- `changes/<TASK-ID>.md`：唯一人工变更合同。新合同包含精简的 `Task-Origin` 与 `Waiting-On` 行；它们是生命周期事实，不是第二份计划文档或 evidence schema。
-- `evidence/<TASK-ID>.json`：基线、检查、TDD 链、验证、制品摘要、验收、发布和预填实践摘要。
-- `archive/<TASK-ID>.md`：完成适用风险门禁后移动的同一任务，不创建副本。
+- Git 私有 `state.json`：主 worktree 和 linked worktree 都在各自 Git 私有目录保存 schema v5 阶段、活动任务、批准、最新 RED/验证、警告和最后关闭记录。首次读取会复制旧 `spec/state.json`；只有在它未被跟踪且与迁移结果一致时，`init` 或明确 repair 才删除。已跟踪或内容不同的旧文件会保留并报告。
+- 私有 `records/changes/<TASK-ID>.md`：唯一人工变更合同。
+- 私有 `records/evidence/<TASK-ID>.json`：基线、检查、TDD 链、验证、制品摘要、验收、发布和实践摘要。
+- 私有 `records/archive/<TASK-ID>.md`：完成适用风险门禁后移动的同一任务，不创建副本。
+- 私有 `records/history/<TASK-ID>.json`：L1 被证明集成后的无路径精简历史。
+- tracked `spec/evidence/<TASK-ID>.audit.json`：可选 L2/Emergency 脱敏审计证明，不超过 32 KiB，排除绝对路径、原始输出、凭证和生产数据。
 - `rigorbreeze.toml`：标准检查、profile、命令、报告、制品、超时和风险适用性。
 - `scripts/rigorbreeze.py`：本地和 CI 使用的稳定项目入口。
 - `scripts/flow_state.py`：配置、模板、Schema 升级、state/evidence、摘要和原子读写。
 - `scripts/flow_policy.py`：任务合同、范围、TDD、新鲜度、风险和交付门禁。
 - Git common `registry.json`：可丢弃的跨 worktree 索引，可以从 worktree 和私有状态重建，不是需求或证据事实源。
-- Git common `automation.json`：以不可变输入为键的私有 commit/push/provider 动作日志，记录长期或单次授权，支持恢复和幂等，且不会在外部动作后改写 tracked evidence。
+- Git common `automation.json`：以不可变输入为键的私有动作日志，支持恢复和幂等，且不会在外部动作后改写 evidence。v2-v4 项目保持 tracked 路径，只有空闲、干净并显式执行 `doctor --all --repair --migrate-records private` 才迁移。
 
 ## 权威顺序与生命周期
 
@@ -82,9 +82,9 @@ accepted → release-ready → protected release gate
 
 ## 状态与证据
 
-私有 `state.json` 和公共注册表是机器缓存和门禁输入，不是产品需求源。不要提交 linked-worktree 状态，也不要手工修改状态绕过门禁。`doctor --all --repair` 只在明确请求时重建注册表。
+私有 `state.json`、records 和公共注册表是机器门禁输入，不是产品需求源。不要提交或手工修改它们绕过门禁。`doctor --all --repair` 只在明确请求时重建注册表。
 
-`status --json` 包含 `installation`、`workflowBaseline`、`workflowBypass`、生命周期、`scope` 和精简 `evolution` 投影。安装状态对比 bundled Skill 与项目执行器，返回 `current`、`outdated`、`missing` 或 `unmanaged`、缺失/被修改组件和是否可安全升级。`workflowBaseline` 在真正基准分支证明受管文件，返回 `current`、`missing`、`partial`、`modified` 或 `blocked`。生命周期优先报告 `integrated-unclosed` 和 `closure-pending`，不会先给出错误的过期基线建议。范围状态为 `current`、`violated` 或 `not-applicable`，计算从批准基线到 `HEAD` 的已提交变化和当前工作树变化。只有活动任务尚未批准且已出现非工作流交付改动时，`workflowBypass` 才返回 `detected`，并写入一条去重的即时演进候选；该观察不会生成批准、RED、GREEN、验收或替代基线。
+`status --json` 包含 `installation`、`workflowBaseline`、`workflowBypass`、生命周期、`scope`、`evolution` 和 `interaction`。文本只显示已完成、当前和唯一真实用户动作；`actor=codex` 的内部动作继续由 Codex 完成。其余状态继续证明安装、基线、范围与绕过，不能生成虚假批准、RED、GREEN、验收或替代基线。
 
 活动合同缺失时，当前与聚合状态会投影 `lifecycle=orphaned-record`、阻断就绪并指出需要恢复的准确合同。已有 evidence 演进候选只按任务 ID 汇总，并给出可复制的 `$rigorbreeze 汇总这个项目的演进候选`；status 展示提醒时不会修改原 evidence。
 

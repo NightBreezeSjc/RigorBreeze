@@ -292,6 +292,27 @@ class SkillContractTests(unittest.TestCase):
             with self.subTest(phrase=phrase):
                 self.assertIn(phrase, chinese)
 
+    def test_skill_allocates_branches_and_worktrees_by_distinct_causes(self) -> None:
+        skill = (SKILL_DIR / "SKILL.md").read_text(encoding="utf-8").lower()
+        handbook = (
+            (SKILL_DIR / "references" / "handbook.md")
+            .read_text(encoding="utf-8")
+            .lower()
+        )
+        chinese = (SKILL_DIR / "references" / "handbook.zh-CN.md").read_text(
+            encoding="utf-8"
+        )
+
+        for phrase in (
+            "consequence sets gates",
+            "independent outcome gets one short-lived task branch",
+            "concurrent writers—not importance—get extra worktrees",
+        ):
+            with self.subTest(phrase=phrase):
+                self.assertIn(phrase, skill)
+        self.assertIn("never stack unrelated work", handbook)
+        self.assertIn("绝不把无关任务叠加", chinese)
+
     def test_contributor_rules_require_an_observable_instruction_delta(self) -> None:
         english = (REPO_ROOT / "CONTRIBUTING.md").read_text(encoding="utf-8")
         chinese = (REPO_ROOT / "CONTRIBUTING.zh-CN.md").read_text(encoding="utf-8")
