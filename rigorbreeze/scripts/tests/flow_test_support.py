@@ -3,6 +3,7 @@ from __future__ import annotations
 import subprocess
 import sys
 import tempfile
+import tomllib
 import unittest
 from pathlib import Path
 
@@ -80,6 +81,41 @@ class FlowTestCase(unittest.TestCase):
             return project / "spec" / "state.json"
         value = Path(result.stdout.strip())
         return value.resolve() if value.is_absolute() else (project / value).resolve()
+
+    def record_root(self, root: Path | None = None) -> Path:
+        project = root or self.root
+        config_path = project / "rigorbreeze.toml"
+        config = {}
+        if config_path.is_file():
+            with config_path.open("rb") as handle:
+                config = tomllib.load(handle)
+        storage = config.get("records", {}).get(
+            "storage", "private" if int(config.get("version", 1)) >= 5 else "tracked"
+        )
+        if storage == "tracked":
+            return project / "spec"
+        common = subprocess.run(
+            ["git", "rev-parse", "--git-common-dir"],
+            cwd=project,
+            text=True,
+            encoding="utf-8",
+            capture_output=True,
+        )
+        if common.returncode == 0:
+            common_path = Path(common.stdout.strip())
+            if not common_path.is_absolute():
+                common_path = project / common_path
+            return common_path.resolve() / "rigorbreeze" / "records"
+        return project / ".rigorbreeze" / "records"
+
+    def task_file(self, task_id: str, root: Path | None = None) -> Path:
+        return self.record_root(root) / "changes" / f"{task_id}.md"
+
+    def evidence_file(self, task_id: str, root: Path | None = None) -> Path:
+        return self.record_root(root) / "evidence" / f"{task_id}.json"
+
+    def archive_file(self, task_id: str, root: Path | None = None) -> Path:
+        return self.record_root(root) / "archive" / f"{task_id}.md"
 
     def commit_all(self, message: str = "workflow baseline") -> None:
         subprocess.run(["git", "add", "."], cwd=self.root, check=True)

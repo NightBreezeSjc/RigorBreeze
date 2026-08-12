@@ -40,7 +40,7 @@ historical SQL. Browser UI and
 other unrelated capabilities remain conditional and require no N/A paperwork.
 Required failures block merge and release.
 
-An ordinary commit is a narrower checkpoint: it requires current configured `affected` or `full` evidence, and never accepts targeted exploration. Existing fresh evidence is reused. Normal L1/L2 archive, merge, and direct integration-branch delivery still require `full` plus applicable acceptance and review. Maintainer live Agent behavior runs are release-candidate evidence only; commit, configured `full`, and CI never invoke them.
+An ordinary task commit is a narrower checkpoint: it requires current configured `affected` or `full` evidence, and never accepts targeted exploration. On a clean CI checkout without Git-private task records, enforced `verify --profile full` runs the configured checks statelessly. That result is a Required Check only: it cannot satisfy local task acceptance, archive, merge evidence, or release governance. Maintainer live Agent behavior runs are release-candidate evidence only and are never invoked by commit, configured `full`, or CI.
 
 Inside one profile invocation only, an identical argv, resolved cwd, effective environment, and timeout executes once. Reusing the process does not reuse policy: each check independently validates its report and artifacts and records `reusedFromCheckId`.
 
@@ -49,11 +49,7 @@ Inside one profile invocation only, an identical argv, resolved cwd, effective e
 Adapt `assets/ci/gitlab-ci.yml` into the existing `.gitlab-ci.yml`. Configure
 the actual project commands in `rigorbreeze.toml`; the YAML calls the policy
 runner directly and contains no second command registry. Preserve evidence, reports, screenshots, migration
-logs, SBOM, and artifact digests.
-
-Large scanner inventories are transient diagnostics, not proof by themselves.
-Track compact digests, counts, unmatched samples, and the independent expected
-source/ownership oracle; keep raw inventories local or in time-limited CI artifacts.
+logs, SBOM, artifact digests, and sanitized high-risk audit summaries when the project publishes them. Do not upload Git-private records.
 
 Use protected branches/environments, required pipelines, environment-scoped secrets, and manual production approval. Do not place credentials in YAML.
 

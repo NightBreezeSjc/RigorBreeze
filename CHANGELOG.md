@@ -10,12 +10,14 @@ The project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). 
 
 ### Changed
 
+- Keep RigorBreeze-maintainer task contracts, evidence, and archives local to the source checkout; public release proof now stays in commits, the changelog, regression tests, and CI without changing initialized projects' evidence behavior.
 - Renamed the project, Skill ID, invocation, runner, configuration, Git-private state, and task-branch prefix from Codex Production Flow to RigorBreeze before the first public release. No legacy alias is retained.
 - Require inspection of the standard library, framework, and current dependency set before adding custom code or packages; new dependencies and abstractions need current acceptance or a durable invariant.
 - Keep compatibility risk-adaptive: proven-dead private preview paths may be removed, while public APIs, persisted data, upgrade paths, and production migrations retain explicit transition, verification, and rollback requirements.
 
 ### Fixed
 
+- Freeze current-worktree tasks against the configured sequential integration branch and its resolved Git SHA; fail before writing task records when that baseline is missing.
 - Use a side-effect-free native Windows process query for worktree ownership checks instead of the POSIX-only `os.kill(pid, 0)` probe.
 - Preserve repeated RED observations for audit while evaluating only the latest current chain per acceptance ID at closure gates.
 - Configure CLI stdout and stderr as UTF-8 when supported so bilingual guidance remains printable on Windows legacy code pages.
@@ -24,6 +26,21 @@ The project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). 
 
 - Reframed the repository for first-time adopters with bilingual onboarding, explicit safety boundaries, and a complete first-task walkthrough.
 - Added concise contribution and security policies plus an MIT license.
+
+## [0.14.0] - Make rigor proportional to consequence
+
+### Added
+
+- Add a no-task Direct lane for one unambiguous, low-consequence change proven by one targeted check.
+- Add schema-v5 Git-common private records, explicit legacy migration, compact L1 history, and bounded sanitized L2/Emergency audit summaries.
+- Project completed/current/one-next-action interaction state, plus stateless enforced full checks for clean CI checkouts.
+
+### Changed
+
+- Separate allocation concerns: risk selects gates, non-Direct independent outcomes use short-lived branches, and only concurrent writers or disposable risky experiments receive extra worktrees; sequential independent tasks reuse the checkout but not the predecessor branch.
+- Let clear L1 requests supply approval, auto-close clean first-pass L1 work, and retain human review for friction and all L2/Emergency tasks.
+- Reconcile integrated work automatically and safely delete only contained managed worktrees and local branches without remote uncertainty.
+- Keep complete evidence schema v4 and automation journal v1; no public command, Spec file type, dependency, or production gate was added.
 
 ## [0.13.0] - Isolate reusable workflow repairs from business delivery
 
@@ -35,12 +52,10 @@ The project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). 
 
 - When business work exposes a reusable RigorBreeze defect, preserve the business contract and record the blocker or evolution candidate, then fix the workflow in a separate Skill task instead of widening the product task or patching its private Runner.
 - Reuse a designated integration worktree for sequential initiative slices; create another worktree only for a genuinely concurrent writer or a disposable risky experiment.
-- Keep read-only scanners and evidence generators at L1 unless they can change migrations, credentials, production, infrastructure, or release state; retain compact manifests and summaries while raw inventories stay local or in time-limited CI artifacts.
-- Require an independent attribution oracle for source-completeness and ownership claims; filename, token, regex, and semantic heuristics may shortlist candidates but cannot prove their own completeness.
 
 ### Validation
 
-- Expand the deterministic Agent-behavior contract from eleven to thirteen scenarios with business-task/workflow-defect separation and sequential-initiative evidence-economy cases.
+- Expand the deterministic Agent-behavior contract from eleven to thirteen scenarios with business-task/workflow-defect separation and sequential-initiative worktree-reuse cases.
 
 ### Compatibility
 

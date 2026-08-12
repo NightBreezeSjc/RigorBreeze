@@ -65,8 +65,8 @@ def load_contract(path: Path = DEFAULT_CONTRACT) -> dict[str, Any]:
     if not isinstance(contract, dict) or contract.get("schemaVersion") != 1:
         raise ValueError("behavior contract schemaVersion must be 1")
     cases = contract.get("cases")
-    if not isinstance(cases, list) or len(cases) != 13:
-        raise ValueError("behavior contract must define exactly thirteen cases")
+    if not isinstance(cases, list) or len(cases) != 14:
+        raise ValueError("behavior contract must define exactly fourteen cases")
 
     seen: set[str] = set()
     for case in cases:
@@ -532,7 +532,7 @@ def build_parser() -> argparse.ArgumentParser:
     live = subparsers.add_parser("run", help="run live Codex behavior evaluations")
     live.add_argument("--contract", type=Path, default=DEFAULT_CONTRACT)
     live.add_argument("--skill", type=Path, default=REPO_ROOT / "rigorbreeze")
-    live.add_argument("--version", default="0.13.0")
+    live.add_argument("--version", default="0.14.0")
     live.add_argument("--repetitions", type=int, default=2)
     live.add_argument("--case", help="run one scenario while debugging the suite")
     live.add_argument("--codex", default="codex")

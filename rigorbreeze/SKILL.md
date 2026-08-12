@@ -10,7 +10,7 @@ Deliver one observable user outcome per task. Keep one human-authored Markdown c
 ## Start or resume
 
 1. Resolve the project root.
-2. Route status questions, log explanations, screenshot analysis, recommendations, and other no-write diagnosis through a **no-task path**. Give the read-only answer even when workflow state is stale; report drift without making repair a prerequisite. Before every non-trivial writing request, including a follow-up after compaction or while debugging/review skills are active, run the bundled `python <skill-dir>/scripts/flow.py --root <project> status --all --json` in Git projects; fall back to `status --json` before initialization. Other skills supplement RigorBreeze but never replace its task state and ownership check.
+2. Route status questions, log explanations, screenshot analysis, recommendations, and other no-write diagnosis through a **no-task path**. Give the read-only answer even when workflow state is stale; report drift without making repair a prerequisite. Before writing—including after compaction—run the bundled `python <skill-dir>/scripts/flow.py --root <project> status --all --json` in Git projects; fall back to `status --json` before initialization. Other skills supplement RigorBreeze but never replace its state and ownership check. Continue any `interaction.next.actor=codex` action yourself; present only an actual approval, safety stop, or external user action.
 3. If uninitialized, run `init`, configure `rigorbreeze.toml`, and run `doctor --json`. Report `installation.status`; never overwrite an outdated project runner while a task is active.
 4. Read `rigorbreeze.toml`, `spec/index.md`, the current task, and only its linked authoritative sources. State for every Git worktree is private under its Git directory; migrate legacy `spec/state.json` through `init` or `doctor --all --repair`, never by editing it.
 5. Follow `nextAction`; use the bundled runner's `--help` as the canonical command reference. Before product-code writes, require an approved contract and successfully claim the current worktree/window. If status detects unapproved delivery changes, preserve the `workflow-bypass` candidate and restore them or close honestly as reconciled; never fabricate RED or a new baseline. If a high-risk task cannot load authoritative status or its contract, stop instead of substituting an informal task card: restore the authoritative record or establish an explicit Emergency contract before any product, deployment, or production write.
@@ -27,12 +27,13 @@ Write the compact result into the existing Authoritative inputs: user outcome, c
 
 Risk follows consequence, not diff size or elapsed time. Choose the lane:
 
+- `Direct`: one low-consequence result in one repository, no outcome ambiguity or active competing writer, and no API/data shape, auth, permission, payment, lock, migration, dependency, production configuration, or release impact. Read status, reproduce or confirm, make the smallest edit, run one targeted check, and report command/exit/scope; create no task, worktree, Spec, or evidence. Stop and promote to L1/L2 as soon as the scope crosses a boundary.
 - `L0`: documentation or isolated non-behavioral/visual change.
 - `L1`: normal feature, fix, or end-to-end user flow.
 - `L2`: permissions, sensitive data, migration, payments, external integration, architecture, or production release.
 - `Emergency`: smallest safe hotfix followed by evidence repair and incident review.
 
-Create one task with an observable title. For a single task, stay in the current worktree. **Sequential initiative work** reuses its designated integration worktree; use `new ... --worktree auto` only for a genuinely concurrent writer or an explicitly disposable risky experiment, and never let two writing windows share one physical worktree.
+Except for Direct, create one task with an observable title. A clear L1 request is the user's approval source after the contract is completed; ask again only for outcome-changing ambiguity. Allocate Git isolation by cause: **consequence sets gates**, each **independent outcome gets one short-lived task branch**, and **concurrent writers—not importance—get extra worktrees**. A sole writer reuses the current clean physical worktree after the prior task is closed and integrated, returns it to the current base, and switches to a fresh task branch. **Sequential initiative work** may reuse its designated integration branch and worktree only after the prior slice is closed, committed, clean, and explicitly related. Use `new ... --worktree auto` only for a genuinely concurrent writer or an explicitly disposable risky experiment; never stack unrelated work on a predecessor branch or let two writing windows share one physical worktree.
 
 For an ordinary independent task, do not create a DAG. If a complex requirement has real ordering constraints, first show one compact proposal containing task outcome, `Depends-On`, allowed scope, acceptance result, and parallel-ready nodes. After one user confirmation, create the isolated tasks with repeated `--depends-on`. The task contracts are the DAG; do not create a second planning tree.
 
@@ -45,7 +46,7 @@ Use existing domain glossaries and ADRs when they help decode terms or constrain
 Before approval, agree:
 
 - which public interface or boundary the test exercises;
-- which independent oracle proves the expected result; source-completeness or ownership classification requires an **independent attribution oracle**, never the scanner's own filename, token, or semantic heuristic;
+- which independent oracle proves the expected result;
 - which production paths may change;
 - which requirement/design version defines acceptance.
 
@@ -54,6 +55,8 @@ Before approval, perform one **semantic self-review** for placeholders, contradi
 Before the first enforced L1/L2 approval, require `workflowBaseline.status=current` on the task's real base branch. If the user explicitly authorizes the isolated baseline commit shown by `nextAction`, use `automate commit --once --workflow-baseline --expected-head <sha>`; never mix product changes into it or treat a task-branch runner commit as the project baseline.
 
 ## Implement with evidence
+
+Use `[records].storage`: v5 defaults contracts/evidence/archive/history to Git-common private `.git/rigorbreeze/records`, while explicit `tracked` preserves cross-machine/team evidence. Never silently move legacy v2-v4 records; migrate only through an idle, clean `doctor --all --repair --migrate-records private`. After integration, compact L1 detail to a private, path-free history summary; retain full private L2/Emergency proof and publish only the sanitized bounded `.audit.json` when configured.
 
 For L1/L2/Emergency, observe RED before production implementation. L1/L2 require a real test file; Emergency may instead use a deterministic incident reproduction. RED must bind a declared acceptance ID, independent expected failure, command, exit code, baseline SHA, and file digests. Import errors, tool failures, unrelated failures, or a test that already passes are not RED. Source-string searches prove static contracts only, never user behavior or business logic.
 
@@ -71,7 +74,7 @@ Before writing a custom mechanism or adding a dependency, inspect the **standard
 
 For bugs, first build a tight feedback loop that is deterministic, fast, agent-runnable, and capable of turning red. Minimize the reproduction, rank falsifiable hypotheses, instrument only to distinguish them, remove temporary probes, then retain a regression test. After **three failed hypotheses** for the same defect, make an **architecture stop**: preserve evidence and re-examine boundaries, shared state, and assumptions before another patch.
 
-Run one-off debugging or exploratory commands directly. Workflow validity comes only from configured profiles. A profile is the project's declared contract: every listed check must run, while unrelated capabilities stay outside it. Read-only evidence/scanner tooling stays L1 with targeted project-declared checks unless it actually writes migration, production, credentials, infrastructure, or release state.
+Run one-off debugging or exploratory commands directly. Workflow validity comes only from configured profiles. A profile is the project's declared contract: every listed check must run, while unrelated capabilities stay outside it.
 
 ## Review and accept
 
@@ -119,13 +122,13 @@ Never raise the configured level during initialization or upgrade. Before an aut
 
 Use `automate commit --once` or `automate push --once --remote <name> --branch <current> --expected-head <sha>` only when the user explicitly requested that action in the current message. One-time authority never persists or covers merge/release. An ordinary commit requires current configured `affected` or `full` evidence—never targeted—and reuses it without rerunning; archive, merge, and integration-branch delivery still require current full evidence and applicable acceptance/review. Push fetches first, requires a fast-forward target, never rebases or force-pushes, and verifies the remote SHA.
 
-After refreshing the baseline, inspect the `cleanup` projection from `status --all --json`. Run `reconcile --cleanup` from a different worktree when managed entries are removable. Unregistered entries remain report-only unless the current user message explicitly authorizes the exact absolute path, base branch, expected HEAD, and `--allow-unmanaged`; require a clean non-current worktree with ancestry or complete patch-equivalence proof. Partial equivalence never qualifies, and local branches are always preserved.
+After delivery or protected integration, run `reconcile --cleanup` from the base worktree. It may remove only clean, non-current, RigorBreeze-managed worktrees proven contained in the base and may delete their local branches only with safe `git branch -d` and no remote uncertainty. Retain patch-equivalent, uncontained, unregistered, current, dirty, or remotely uncertain branches/worktrees with a reason. Unregistered worktrees remain report-only unless the current user message explicitly authorizes their exact path, base, HEAD, and `--allow-unmanaged`.
 
-Automation outcomes live in Git-private `.git/rigorbreeze/automation.json`, keyed by immutable inputs. They are projected by JSON status, validated by `doctor`, and never rewrite tracked task evidence after the external action.
+Automation outcomes live in Git-private `.git/rigorbreeze/automation.json`, keyed by immutable inputs. They are projected by JSON status, validated by `doctor`, and never rewrite task evidence after the external action.
 
 ## Evolve from real use
 
-At every L1/L2/Emergency close, run the retrospective without asking the user to remember metrics. Runner drift, occupied tasks, resource conflicts, missing operation plans, and gate failures are deduplicated as task practice events. When the user corrects an interpretation (“I meant”, “you missed”, “understood it backwards”), classify the existing retrospective evidence as `requirement-interpretation-correction` with `missing-atom`, `reversed-intent`, `wrong-source`, or `scope-change`; never retain the chat transcript. If a business task exposes a reusable workflow defect, preserve its contract, record the blocker/candidate, and open a **separate Skill task**; never widen the business scope or patch its private runner. Pass `none` when no human exception exists. Only a judged workflow rework, unreasonable block/next action, bypass, or `hurt` impact becomes an evolution candidate; correct blocks remain statistics.
+At close, let a clean first-pass L1 record an automatic machine retrospective and archive without another questionnaire; if it had failure, bypass, rework, or an unreasonable block, show one prefilled review. L2/Emergency always require human retrospective and real acceptance. Runner drift, occupied tasks, resource conflicts, missing operation plans, and gate failures are deduplicated as practice events. When the user corrects an interpretation, classify it as `requirement-interpretation-correction` with `missing-atom`, `reversed-intent`, `wrong-source`, or `scope-change`; never retain chat transcripts. A reusable workflow defect becomes a separate Skill task, never business-scope expansion. Only judged workflow rework, unreasonable block/next action, bypass, or `hurt` becomes an evolution candidate; correct blocks remain statistics.
 
 When a candidate is emitted:
 
@@ -136,14 +139,10 @@ When a candidate is emitted:
 - classify the cause as core, project configuration, adapter, environment, usage, or a correctly detected risk;
 - for a confirmed core problem, write a failing regression, make the smallest change in the Skill repository, and validate it in the next real slice.
 
-When asked to review evolution, scan `spec/evidence/*.json` for confirmations or machine practice events with `evolutionCandidate: true`; do not create another practice log. Project evidence stays local. Never silently rewrite the installed Skill or relax a gate from one ordinary occurrence.
+When asked to review evolution, scan the configured private/tracked evidence and compact history for `evolutionCandidate: true`; do not create another practice log. Project evidence stays local. Never silently rewrite the installed Skill or relax a gate from one ordinary occurrence.
 
 ## Completion
 
-Keep the human interaction small:
-
-1. ask for approval of the compact task contract;
-2. ask for real acceptance when implementation is ready;
-3. before L1/L2/Emergency archive, show the prefilled `retro --json` summary and ask only for rework reason, whether any block/next action was unreasonable, and whether the workflow helped.
+Keep human interaction small: ask only for unresolved outcome-changing approval, applicable real acceptance, and the prefilled retrospective when L1 friction exists or the task is L2/Emergency. Clean L1 closes automatically with `workflowImpact=unreviewed`.
 
 Codex runs the CLI and records evidence; do not make the user operate each internal command. Close in this order: verify, accept, review, confirm retrospective, archive, then guarded commit/push/merge and worktree reconciliation. Normal completion compacts repeated check and TDD details while retaining final proof, the latest useful earlier failure, and aggregate counts; it never deletes regression tests, and non-completed histories stay intact. L0 needs only configured affected verification; L1/L2 need full verification, applicable acceptance, review, and retrospective. Use `abandoned` for a clean cancellation. If code was already externally integrated but the task remained open, use `archive --outcome reconciled --reason <reason> --expected-head <sha>` only after integration and external outcomes are proven; never invent GREEN, acceptance, or release success. Production release still requires an active `release-ready` task. Before commit, archive, or any “fixed/passed/complete” claim, cite **fresh verification** run in this turn: the exact command, **exit status**, and covered scope. Historical reports, partial checks, or another Agent's success claim cannot substitute.

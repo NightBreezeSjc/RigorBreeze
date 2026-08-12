@@ -7,6 +7,7 @@ import json
 import os
 import re
 import subprocess
+import tomllib
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterable
@@ -89,6 +90,44 @@ def git_common_dir(root: Path) -> Path | None:
         return None
     path = Path(result.stdout.strip())
     return path if path.is_absolute() else (root / path).resolve()
+
+
+def project_records_root(root: Path) -> Path:
+    config_path = root / "rigorbreeze.toml"
+    config: dict[str, Any] = {}
+    if config_path.is_file():
+        try:
+            with config_path.open("rb") as handle:
+                config = tomllib.load(handle)
+        except (OSError, tomllib.TOMLDecodeError):
+            config = {}
+    version = int(config.get("version", 1))
+    storage = config.get("records", {}).get(
+        "storage", "private" if version >= 5 else "tracked"
+    )
+    if storage == "tracked":
+        return root / "spec"
+    common = git_common_dir(root)
+    return (
+        common / REGISTRY_DIRECTORY / "records"
+        if common is not None
+        else root / ".rigorbreeze" / "records"
+    )
+
+
+def task_record_path(root: Path, task_id: str, section: str = "changes") -> Path:
+    suffix = ".json" if section in {"evidence", "history"} else ".md"
+    relative = Path(section) / f"{task_id}{suffix}"
+    configured = project_records_root(root) / relative
+    if configured.is_file():
+        return configured
+    common = git_common_dir(root)
+    private = (
+        common / REGISTRY_DIRECTORY / "records" / relative
+        if common is not None
+        else None
+    )
+    return private if private is not None and private.is_file() else configured
 
 
 def git_dir(root: Path) -> Path | None:
@@ -332,7 +371,7 @@ def rebuild_registry(root: Path, *, persist: bool = True) -> dict[str, Any]:
         if not task_id:
             continue
         scopes: list[str] = []
-        task_file = worktree / "spec" / "changes" / f"{task_id}.md"
+        task_file = task_record_path(worktree, task_id)
         if task_file.is_file():
             content = task_file.read_text(encoding="utf-8", errors="replace")
             match = re.search(r"(?ms)^## Allowed scope\s*$\n(.*?)(?=^## |\Z)", content)
@@ -373,13 +412,13 @@ def rebuild_registry(root: Path, *, persist: bool = True) -> dict[str, Any]:
         item.get("worktree") for item in worktree_items if item.get("worktree")
     ):
         worktree = Path(str(worktree_value))
-        archive_dir = worktree / "spec" / "archive"
+        archive_dir = project_records_root(worktree) / "archive"
         if not archive_dir.is_dir():
             continue
         for task_file in sorted(archive_dir.glob("*.md")):
             task_id = task_file.stem
             metadata = archived_task_metadata(task_file)
-            evidence_file = worktree / "spec" / "evidence" / f"{task_id}.json"
+            evidence_file = task_record_path(worktree, task_id, "evidence")
             evidence: dict[str, Any] = {}
             if evidence_file.is_file():
                 try:
@@ -568,7 +607,7 @@ def parse_runtime_claims(content: str) -> list[str]:
     )
 
 
-def parse_task_context(content: str) -> dict[str, str]:
+def parse_task_context(content: str) -> dict[str, Any]:
     def value(name: str, fallback: str) -> str:
         match = re.search(rf"(?mi)^{re.escape(name)}:\s*(.+?)\s*$", content)
         return match.group(1).strip() if match else fallback
@@ -576,6 +615,7 @@ def parse_task_context(content: str) -> dict[str, str]:
     return {
         "taskOrigin": value("Task-Origin", "legacy-unspecified"),
         "waitingOn": value("Waiting-On", "none"),
+        "runtimeClaims": parse_runtime_claims(content),
     }
 
 
@@ -603,6 +643,8 @@ def reconcile_integrations(root: Path, cleanup: bool = False) -> dict[str, Any]:
     integrated: list[str] = []
     removed: list[str] = []
     retained: list[dict[str, str]] = []
+    removed_branches: list[str] = []
+    retained_branches: list[dict[str, str]] = []
     current = root.resolve()
     for task_id, task in registry["tasks"].items():
         if not is_integrated(root, task):
@@ -613,30 +655,79 @@ def reconcile_integrations(root: Path, cleanup: bool = False) -> dict[str, Any]:
         task.pop("ownerPid", None)
         integrated.append(task_id)
         worktree_value = task.get("worktree")
-        if not cleanup or not worktree_value or task.get("worktreeRemoved"):
+        if not cleanup:
             continue
-        worktree = Path(worktree_value).resolve()
-        reason = worktree_cleanup_reason(root, task, current)
-        if reason:
-            retained.append({"taskId": task_id, "reason": reason})
+        worktree_ready = not worktree_value or task.get("worktreeRemoved")
+        if worktree_value and not task.get("worktreeRemoved"):
+            worktree = Path(worktree_value).resolve()
+            reason = worktree_cleanup_reason(root, task, current)
+            if reason:
+                retained.append({"taskId": task_id, "reason": reason})
+            else:
+                result = git(root, "worktree", "remove", str(worktree))
+                if result.returncode == 0:
+                    for related in registry["tasks"].values():
+                        related_worktree = related.get("worktree")
+                        if (
+                            related_worktree
+                            and Path(str(related_worktree)).resolve() == worktree
+                        ):
+                            related["worktreeRemoved"] = True
+                    removed.append(task_id)
+                    worktree_ready = True
+                else:
+                    retained.append({"taskId": task_id, "reason": "remove-failed"})
+        branch = str(task.get("branch") or "")
+        if not branch.startswith("rigorbreeze/"):
             continue
-        result = git(root, "worktree", "remove", str(worktree))
-        if result.returncode == 0:
-            for related in registry["tasks"].values():
-                related_worktree = related.get("worktree")
-                if (
-                    related_worktree
-                    and Path(str(related_worktree)).resolve() == worktree
-                ):
-                    related["worktreeRemoved"] = True
-            removed.append(task_id)
-        else:
-            retained.append({"taskId": task_id, "reason": "remove-failed"})
+        if not worktree_ready:
+            retained_branches.append(
+                {"taskId": task_id, "branch": branch, "reason": "worktree-retained"}
+            )
+            continue
+        if branch == branch_name(root):
+            retained_branches.append(
+                {"taskId": task_id, "branch": branch, "reason": "current-branch"}
+            )
+            continue
+        if registered_integration_status(root, task) != "contained":
+            retained_branches.append(
+                {
+                    "taskId": task_id,
+                    "branch": branch,
+                    "reason": "not-contained",
+                }
+            )
+            continue
+        remote = git(root, "for-each-ref", "--format=%(refname:short)", "refs/remotes")
+        remote_matches = {
+            line.strip().split("/", 1)[-1]
+            for line in remote.stdout.splitlines()
+            if line.strip()
+        }
+        if branch in remote_matches:
+            retained_branches.append(
+                {"taskId": task_id, "branch": branch, "reason": "remote-present"}
+            )
+            continue
+        deleted = git(root, "branch", "-d", branch)
+        if deleted.returncode == 0:
+            removed_branches.append(branch)
+        elif git(root, "show-ref", "--verify", f"refs/heads/{branch}").returncode == 0:
+            retained_branches.append(
+                {"taskId": task_id, "branch": branch, "reason": "delete-refused"}
+            )
     save_registry(root, registry)
     return {
         "integrated": sorted(integrated),
         "removed": sorted(removed),
         "retained": sorted(retained, key=lambda item: item["taskId"]),
+        "removedWorktrees": sorted(removed),
+        "removedBranches": sorted(removed_branches),
+        "retainedWorktrees": sorted(retained, key=lambda item: item["taskId"]),
+        "retainedBranches": sorted(
+            retained_branches, key=lambda item: (item["taskId"], item["branch"])
+        ),
     }
 
 
@@ -1038,12 +1129,11 @@ def aggregate(root: Path) -> dict[str, Any]:
     for task_id in sorted(tasks):
         item = dict(tasks[task_id])
         item.setdefault("runtimeClaims", [])
-        item["runtimeConflicts"] = runtime_claim_conflicts(
-            tasks, task_id, item["runtimeClaims"]
-        )
         worktree = Path(str(item.get("worktree", "")))
         item["worktreeExists"] = worktree.is_dir()
-        task_file = worktree / "spec" / "changes" / f"{task_id}.md"
+        task_file = task_record_path(root, task_id)
+        if not task_file.is_file() and item["worktreeExists"]:
+            task_file = task_record_path(worktree, task_id)
         if task_file.is_file():
             item.update(
                 parse_task_context(
@@ -1053,6 +1143,10 @@ def aggregate(root: Path) -> dict[str, Any]:
         else:
             item.setdefault("taskOrigin", "legacy-unspecified")
             item.setdefault("waitingOn", "none")
+        comparison_tasks = {**tasks, task_id: item}
+        item["runtimeConflicts"] = runtime_claim_conflicts(
+            comparison_tasks, task_id, item["runtimeClaims"]
+        )
         observed_head = (
             git(worktree, "rev-parse", "HEAD") if item["worktreeExists"] else None
         )

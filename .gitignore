@@ -11,3 +11,8 @@ dist/
 build/
 /artifacts/
 /spec/state.json
+
+# Maintainer workflow records stay local in the RigorBreeze source repository.
+/spec/changes/*.md
+/spec/evidence/*.json
+/spec/archive/*.md

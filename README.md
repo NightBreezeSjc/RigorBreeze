@@ -11,9 +11,9 @@ An evidence-backed, risk-adaptive AI engineering workflow for solo developers us
 
 English · [简体中文](README.zh-CN.md)
 
-RigorBreeze turns a rough initiative or bounded request into an approved task contract, observed TDD evidence, configured quality checks, real-runtime acceptance, and a recoverable delivery record. It is deliberately smaller than a full project-management system: one task Markdown, one machine evidence file, and no document maze.
+RigorBreeze routes work by consequence: tiny safe edits go straight through a verified Direct lane, ordinary changes get compact private records, and production-risk work retains full evidence and public sanitized audit proof. It is deliberately smaller than a project-management system and keeps normal workflow mechanics out of product commits.
 
-> **Public Preview:** v0.13.0 is usable today. It keeps ordinary solo work light while preserving production controls, and now isolates reusable workflow repairs from business tasks, reuses sequential initiative worktrees, scopes migration checks to current changes, and keeps generated source proof compact and independently verifiable. It has not yet completed the validation required for v1.0, so interfaces may still change in response to further delivery evidence.
+> **Public Preview:** v0.14.0 is usable today. It adds risk-adaptive record storage, a no-task Direct lane, automatic clean-L1 closure, safe local cleanup, and a simpler three-line status without weakening L2, migration, payment, permission, or release gates. It has not yet completed the real-delivery validation required for v1.0.
 
 ## Why this exists
 
@@ -123,19 +123,20 @@ Codex will:
 
 1. inspect the current project and complete missing context from authoritative requirements, code, tests, Git and runtime evidence;
 2. propose one observable task with scope, acceptance IDs, risk, and test seams;
-3. ask you to approve that compact contract;
+3. use a clear current request as L1 approval, asking only when the intended result is still ambiguous;
 4. observe RED for L1/L2 behavior, implement in small GREEN steps, and run configured checks;
 5. show the real page, API, device, migration, or runtime evidence that applies;
-6. ask you to accept the result and confirm one prefilled retrospective before archive.
+6. ask for real acceptance where needed; clean first-pass L1 work closes automatically, while friction and L2/Emergency retain a human retrospective.
 
-You make three kinds of judgment: approve the intended outcome, accept the real result, and confirm whether the workflow helped. Codex runs and records the internal workflow commands.
+You judge only what cannot be automated safely: unresolved outcome choices, applicable real acceptance, and workflow friction or high-risk conclusions. Codex runs and records the internal mechanics.
 
 RigorBreeze does not turn every conversation into a workflow task. Status questions, log explanations, screenshot analysis, recommendations, and other no-write diagnosis use the no-task path: answer first, report relevant drift separately, and never make workflow repair a prerequisite for a read-only result. When code must change, choose the lowest lane that still covers the consequence:
 
 | Request | Default path |
 |---|---|
 | Explain state, logs, screenshots, or the next command | No task |
-| Copy, docs, or isolated non-behavioral styling | L0 |
+| Copy, isolated styling, simple display field, or low-consequence small bug | Direct: edit + targeted verification, no task |
+| Low-risk multi-file change that still needs coordination or audit | L0 |
 | Normal feature, fix, or observable behavior | L1 |
 | Data, payment, permission, external integration, infrastructure, or production write | L2 |
 
@@ -143,24 +144,23 @@ Risk follows consequence, not line count, elapsed time, or how urgent the reques
 
 You do not need to write a perfect prompt or prepend a persona such as “act as a unicorn CTO.” RigorBreeze recovers project facts, current behavior, architecture paths, invariants and data-freshness/fallback semantics itself. It asks only when evidence cannot determine an intent that would materially change the result. For external Git, deployment, developer-tool or platform writes, it first reports what is already completed, the current immutable identifiers, the one remaining action and stop conditions so an old checklist is not replayed.
 
-Before approval, RigorBreeze checks the task for placeholders, contradictions, an oversized slice, and ambiguous outcome/source/fallback semantics. Compound requests become observable ADD/REMOVE/MOVE/RETAIN/REPLACE atoms, each mapped to acceptance or explicit exclusion. For UI changes, the final-state checklist covers presence, absence, order/location, and retained behavior; negative wording is resolved as either a current defect or desired result from evidence, with one short question only when the direction remains outcome-changing. Completion claims must name a fresh command, exit status, and covered scope. Review suggestions are checked against repository reality and YAGNI; speculative layers face a deletion test, while three failed hypotheses for the same defect trigger an architecture stop instead of a fourth patch. Maintainers validate these rules with thirteen synthetic Agent-pressure scenarios; the suite is not installed into user projects and never calls a model from CI.
+Before approval, RigorBreeze checks the task for placeholders, contradictions, an oversized slice, and ambiguous outcome/source/fallback semantics. Compound requests become observable ADD/REMOVE/MOVE/RETAIN/REPLACE atoms, each mapped to acceptance or explicit exclusion. For UI changes, the final-state checklist covers presence, absence, order/location, and retained behavior; negative wording is resolved as either a current defect or desired result from evidence, with one short question only when the direction remains outcome-changing. Completion claims must name a fresh command, exit status, and covered scope. Review suggestions are checked against repository reality and YAGNI; speculative layers face a deletion test, while three failed hypotheses for the same defect trigger an architecture stop instead of a fourth patch. Maintainers validate these rules with fourteen synthetic Agent-pressure scenarios; the suite is not installed into user projects and never calls a model from CI.
 
 Allowed Scope entries are repository-relative paths, directory prefixes, or globs; `*` matches one path segment and `**` crosses directories. Acceptance criteria use unique machine-readable IDs. A contract cannot be reapproved over production changes: restore the approved contract and finish, or revert those changes before amending the same outcome. A new user outcome or acceptance condition becomes a dependent slice.
 
-After initialization and project-check configuration, establish a human-controlled Git baseline before creating a new L1/L2 task. `status --json` reports the exact base-branch state under `workflowBaseline`; L0 remains lightweight. When the user explicitly authorizes it, Codex may run `automate commit --once --workflow-baseline --expected-head <SHA>`; it stages only managed workflow files, rejects mixed product changes and secrets, and does not persist Git authority. The installed Skill always checks through its bundled v0.13.0 runner, reports missing or modified components separately, and does not overwrite it while an implementation task is active. A missing active contract is reported as `orphaned-record` with a restore action rather than crashing status; intentional prepared drafts expose compact `Task-Origin` and `Waiting-On` facts. Recorded evolution candidates appear in status with the copyable `$rigorbreeze 汇总这个项目的演进候选` reminder. A high-risk task may not replace broken workflow state with an informal task card: restore the record or establish an explicit Emergency contract first.
+After initialization and project-check configuration, establish a human-controlled Git baseline before creating a new L1/L2 task. `status --json` reports the exact base-branch state under `workflowBaseline`; Direct and L0 remain lightweight. When explicitly authorized, Codex may create the isolated baseline commit without mixing product changes or persisting Git authority. The installed Skill checks through its bundled v0.14.0 runner, reports missing or modified components separately, and does not overwrite it during implementation. A missing high-risk contract must be restored or replaced by an explicit Emergency contract, never an informal bypass.
 
 After initialization, the project contains:
 
 ```text
 spec/
 ├── index.md
-├── changes/TASK-001.md       # the only human-authored task contract
-├── evidence/TASK-001.json    # machine evidence and freshness
-└── archive/
+└── evidence/TASK-002.audit.json  # sanitized L2/Emergency audit only
 
 rigorbreeze.toml               # project checks and policy
 scripts/rigorbreeze.py         # the same runner used locally and in CI
 .git/rigorbreeze/state.json    # private state; never committed
+.git/rigorbreeze/records/      # private contracts, evidence, archives, history
 ```
 
 The expected next-action check is:
@@ -174,7 +174,8 @@ That command is primarily for Codex, CI, and troubleshooting. Run `python3 scrip
 ## How the workflow works
 
 ```text
-optionally shape an initiative whose outcome is not yet stable
+classify read-only / Direct / L0 / L1 / L2 / Emergency
+→ optionally shape an initiative whose outcome is not yet stable
 → frame one vertical slice
 → approve the task digest
 → observe RED
@@ -182,7 +183,7 @@ optionally shape an initiative whose outcome is not yet stable
 → run affected/full profiles
 → inspect the real runtime
 → review against standards and the spec
-→ confirm the prefilled retrospective
+→ auto-close a clean L1 or confirm the applicable retrospective
 → archive
 → guarded commit/push/merge when requested
 → reconcile and clean integrated worktrees
@@ -192,7 +193,8 @@ Risk controls scale with the task:
 
 | Lane | Typical change | Close requirement |
 |---|---|---|
-| L0 | Documentation or isolated non-behavioral change | Configured affected checks |
+| Direct | One unambiguous low-consequence result | One targeted check; no task or evidence |
+| L0 | Low-risk change needing coordination or audit | Configured affected checks |
 | L1 | Normal feature, fix, or user flow | RED, full verification, acceptance, review, retrospective |
 | L2 | Permissions, sensitive data, migration, payment, integration, release | L1 plus applicable security, migration, and release controls |
 | Emergency | Smallest safe production hotfix | Reproduction, critical regression, rollback, evidence repair |
@@ -205,11 +207,13 @@ For conditional L2 integrations, `Operational-Modes` binds enabled, disabled, an
 
 ## Minimal Spec Tree
 
-Each change has one human-authored Markdown contract and one machine JSON evidence file. Requirements are linked, not copied into proposal, design, plan, test-plan, and report documents.
+Direct changes create no workflow files. Task-based work has at most one human-authored contract and one machine evidence record; requirements are linked rather than copied into a document maze.
 
 The task contract records the current sources, machine-checkable allowed and forbidden scope, acceptance IDs, test seams, exclusive `Runtime-Claims`, conditional `Operational-Modes`, and applicable risks. The evidence JSON records approval digests, RED, checks, reports, acceptance, artifact identity, release-operation snapshots, and retrospective facts. Changes to relevant source, tests, configuration, dependencies, migrations, or the task digest invalidate stale proof automatically. `status --json` also projects installation and scope drift, so an old runner or a change outside the contract cannot be hidden by a passing verification.
 
-Regression tests remain durable product assets. On a normally completed archive, repeated check details are compacted to the latest record per profile/check plus the latest earlier failure, with aggregate counts retained in the same evidence JSON. Abandoned and reconciled histories remain complete. Ordinary review facts belong in structured evidence; create a separate report only when independently inspectable findings require one, and keep transient raw logs in ignored or time-limited CI artifact storage.
+Version-5 projects default to Git-common private records under `.git/rigorbreeze/records/`, readable from every worktree but absent from product commits. Integrated L1 detail is reduced to a path-free local history summary. L2/Emergency keeps full private proof and, when configured, publishes a sanitized `.audit.json` capped at 32 KiB with task/risk, acceptance IDs, immutable digests, conclusions, and honest `Tested`/`Not-tested`—never absolute paths, raw output, credentials, or production data. Explicit `tracked` mode remains available for teams and cross-machine evidence.
+
+Legacy v2-v4 projects keep tracked behavior until an explicit, idle, clean migration runs: `doctor --all --repair --migrate-records private`. Upgrading the Runner never silently moves or deletes historical evidence.
 
 See the installable Skill's [Spec Tree contract](rigorbreeze/references/spec-tree.md) for authority and invalidation rules.
 
@@ -218,11 +222,11 @@ See the installable Skill's [Spec Tree contract](rigorbreeze/references/spec-tre
 - Local checks default to advisory; CI, L2, merge, and release use enforced policy.
 - Git automation defaults to `manual`: no unattended Git write is allowed, while an explicit current-task request may authorize one safe commit or push without changing the project level. Upgrades never increase standing authority.
 - No force push or local merge is used to bypass protected branches.
-- Managed worktree cleanup requires creation provenance, exact path, integration, and cleanliness. An unmanaged worktree remains report-only unless the user explicitly supplies its absolute path, base branch, expected HEAD, and one-time `--allow-unmanaged`; the branch is always preserved.
+- Managed cleanup requires provenance, exact path, integration, and cleanliness. It may safely remove a contained local task branch with `git branch -d` only when no remote uncertainty exists; every other branch/worktree is retained with a reason. Remote branches are never deleted automatically.
 - A cancelled or superseded task may be archived as `abandoned` only when its task-owned working tree is clean and no external action has an unknown outcome; this releases its task and runtime claims without deleting its branch or worktree.
 - Workflow policy files such as `AGENTS.md`, `rigorbreeze.toml`, and the runner must be explicitly included in Allowed Scope when a task changes them.
 - External-action recovery data stays in Git-private `.git/rigorbreeze/automation.json`.
-- Project evidence stays in the project. The Skill has no telemetry and does not upload source, prompts, evidence, or metrics.
+- Private records stay in the project's Git common directory. The Skill has no telemetry and does not upload source, prompts, evidence, or metrics.
 - Secrets, credentials, production data, and sensitive full logs must never be stored in task evidence.
 - Temporary or synthetic credentials may prove buildability only; they cannot satisfy real-environment acceptance, deployment, or release evidence.
 - AI cannot approve its own visual baseline, security exception, legal conclusion, or production release.
@@ -231,7 +235,7 @@ The Skill coordinates external security, migration, CI, browser, device, and obs
 
 ## Parallel work and optional automation
 
-One physical worktree may have only one active writing task. When another Codex window must write concurrently, the Skill creates an isolated `rigorbreeze/<task-id>` branch and worktree. File isolation does not make ports, watchers, local services, environments, or developer tools independent: tasks declare only the exclusive resources they use through `Runtime-Claims`, and conflicting active claims are blocked. `status --all --json` is the shared read-only project view.
+One physical worktree may have only one active writing task. Risk chooses the gates, each non-Direct independent outcome gets a short-lived branch, and only a concurrent writer or disposable risky experiment gets another worktree. After one task is closed and integrated, the same window reuses its clean checkout by returning to the current base and starting a fresh task branch; only explicitly related sequential slices reuse a designated integration branch. When another Codex window must write concurrently, the Skill creates an isolated `rigorbreeze/<task-id>` branch and worktree. File isolation does not make ports, watchers, local services, environments, or developer tools independent: tasks declare only the exclusive resources they use through `Runtime-Claims`, and conflicting active claims are blocked. `status --all --json` is the shared read-only project view.
 
 The same status payload exposes removable, retained, and unregistered worktrees with cleanliness, integration proof, expected HEAD, and confirmation requirements. RigorBreeze recognizes ancestor merges and complete patch-equivalent cherry-picks. For a registered task, extra commits qualify only when they contain a narrow allowlist of workflow metadata and at least one product patch is already equivalent on the base; mixed or unmatched product changes remain active. Cleanup normally removes only clean worktrees with intact creation provenance. A precisely authorized unmanaged cleanup uses the original conservative proof and preserves the local branch.
 
@@ -256,7 +260,7 @@ Start with one bundled adapter:
 
 Copy the GitHub Actions or GitLab CI template from `rigorbreeze/assets/ci/`, then configure the commands your project actually uses in `rigorbreeze.toml`. A declared profile item must exist and pass in enforced mode; unrelated capabilities do not require `N/A` paperwork. For L2, `full` always derives a minimum of secrets, build, one static-quality check, and one behavioral check. Dependency changes additionally require dependency, license, and SBOM reports; migration changes require the migration adapter and report.
 
-The remote required pipeline—not a local hook—is the merge authority. The repository's own workflow tests the Skill across its declared Python and operating-system matrix once GitHub Actions runs on the public repository.
+The remote required pipeline—not a local hook—is the merge authority. On a clean CI checkout, enforced `verify --profile full` can run configured checks without private task records; that stateless result is a Required Check only and cannot impersonate task acceptance, archive, merge evidence, or a production release.
 
 ## Update and uninstall
 
@@ -274,11 +278,11 @@ To uninstall an installer-managed copy:
 npx skills@latest remove rigorbreeze -g -a codex -y
 ```
 
-For a manual install, remove only the `rigorbreeze` directory or symlink from your Codex skills directory. Existing project `spec/`, runner, evidence, and configuration are intentionally left untouched.
+For a manual install, remove only the `rigorbreeze` directory or symlink from your Codex skills directory. Existing project configuration, runner, private records, and audit summaries are intentionally left untouched.
 
 ## Public Preview and v1.0
 
-v0.13.0 keeps the minimal Spec Tree and existing command surface while applying lessons from a real legacy source-baseline delivery. Historical destructive SQL no longer blocks unrelated verification; a changed destructive migration still does. Sequential initiative work reuses its integration worktree, scanner/evidence tooling stays consequence-based, reusable workflow defects move to a separate Skill task, and source-completeness claims require independent attribution rather than self-proving semantic matches. Completed evidence remains compact; raw inventories and generated snapshots stay ignored or in CI artifacts unless they are approved product deliverables.
+v0.14.0 removes routine ceremony where consequences are low and preserves it where failure is expensive. New projects use Direct for tiny edits, private compact records for L1, full private evidence plus sanitized audit proof for L2/Emergency, automatic clean-task closure, safe post-integration cleanup, and a three-line user status. Public CLI command count and third-party dependencies do not increase; state/config becomes schema v5 while full evidence remains schema v4.
 
 The v0.12.0 decision-frontier, one-question prototype, and abstraction-deletion contracts remain part of this release.
 

@@ -15,6 +15,16 @@ import flow_state  # noqa: E402
 
 
 class FlowV4Tests(FlowTestCase):
+    def use_tracked_records(self) -> None:
+        path = self.root / "rigorbreeze.toml"
+        content = path.read_text(encoding="utf-8")
+        content = content.replace("version = 5", "version = 4")
+        content = content.replace(
+            '[records]\nstorage = "private"\npublish_high_risk_summary = true\n\n',
+            "",
+        )
+        path.write_text(content, encoding="utf-8")
+
     def write_task(
         self,
         task_id: str,
@@ -26,7 +36,7 @@ class FlowV4Tests(FlowTestCase):
         operational_modes: str = "N/A - no conditional runtime behavior",
     ) -> Path:
         project = root or self.root
-        path = project / "spec" / "changes" / f"{task_id}.md"
+        path = self.task_file(task_id, project)
         path.write_text(
             f"""# {task_id}: fixture
 
@@ -147,7 +157,7 @@ artifacts = ["artifacts/app.bin"]
         runner = self.root / "scripts" / "flow_state.py"
         runner.write_text(
             runner.read_text(encoding="utf-8").replace(
-                'TOOL_VERSION = "0.13.0"', 'TOOL_VERSION = "0.5.1"'
+                'TOOL_VERSION = "0.14.0"', 'TOOL_VERSION = "0.5.1"'
             ),
             encoding="utf-8",
         )
@@ -157,7 +167,7 @@ artifacts = ["artifacts/app.bin"]
             status["installation"],
             {
                 "runnerVersion": "0.5.1",
-                "skillVersion": "0.13.0",
+                "skillVersion": "0.14.0",
                 "status": "outdated",
                 "upgradeSafe": False,
                 "missingComponents": [],
@@ -180,7 +190,7 @@ artifacts = ["artifacts/app.bin"]
         self.run_flow("init")
         self.assertTrue(runner.is_file())
         self.assertIn(
-            'TOOL_VERSION = "0.13.0"',
+            'TOOL_VERSION = "0.14.0"',
             (self.root / "scripts" / "flow_state.py").read_text(encoding="utf-8"),
         )
 
@@ -192,7 +202,7 @@ artifacts = ["artifacts/app.bin"]
         )
         self.assertIn("workflow baseline and runner must be current", blocked.stderr)
         self.assertIn("baseline=missing", blocked.stderr)
-        self.assertFalse((self.root / "spec" / "changes" / "TASK-702.md").exists())
+        self.assertFalse(self.task_file("TASK-702").exists())
 
         self.commit_all("track workflow baseline")
         self.run_flow("new", "TASK-702", "--title", "baseline", "--risk", "L2")
@@ -255,14 +265,12 @@ artifacts = ["artifacts/app.bin"]
         )
         self.assertIn("abandoned TASK-703", result.stdout)
         state = json.loads(self.state_path().read_text())
-        evidence = json.loads(
-            (self.root / "spec" / "evidence" / "TASK-703.json").read_text()
-        )
+        evidence = json.loads(self.evidence_file("TASK-703").read_text())
         self.assertIsNone(state["activeTask"])
         self.assertEqual(state["lastClosed"]["outcome"], "abandoned")
         self.assertEqual(evidence["closure"]["outcome"], "abandoned")
         self.assertIn("notes.txt", evidence["closure"]["unrelatedChanges"])
-        self.assertTrue((self.root / "spec" / "archive" / "TASK-703.md").is_file())
+        self.assertTrue(self.archive_file("TASK-703").is_file())
         self.run_flow("new", "TASK-704", "--title", "replacement", "--risk", "L0")
 
     def test_abandoned_archive_blocks_task_owned_uncommitted_changes(self) -> None:
@@ -385,7 +393,7 @@ artifacts = ["artifacts/app.bin"]
             "practice": {"confirmation": {"workflowImpact": "helped"}},
         }
         state_path.write_text(json.dumps(state), encoding="utf-8")
-        evidence_path = self.root / "spec" / "evidence" / "TASK-OLD.json"
+        evidence_path = self.evidence_file("TASK-OLD")
         evidence_path.write_text(
             json.dumps(
                 {
@@ -404,7 +412,7 @@ artifacts = ["artifacts/app.bin"]
 
         upgraded_state = json.loads(state_path.read_text())
         upgraded_evidence = json.loads(evidence_path.read_text())
-        self.assertEqual(upgraded_state["workflowVersion"], 4)
+        self.assertEqual(upgraded_state["workflowVersion"], 5)
         self.assertEqual(upgraded_evidence["workflowVersion"], 4)
         self.assertEqual(upgraded_evidence["red"][0]["requirement"], "REQ-OLD")
         self.assertEqual(upgraded_evidence["automation"][0]["action"], "push")
@@ -412,7 +420,7 @@ artifacts = ["artifacts/app.bin"]
 
     def test_operation_plan_and_paused_result_are_validated_and_recorded(self) -> None:
         self.prepare_release_evidence_task("TASK-709")
-        evidence_path = self.root / "spec" / "evidence" / "TASK-709.json"
+        evidence_path = self.evidence_file("TASK-709")
         evidence = json.loads(evidence_path.read_text())
         artifact_digest = evidence["artifacts"][0]["sha256"]
         head = subprocess.run(
@@ -512,9 +520,7 @@ artifacts = ["artifacts/app.bin"]
             blocked = self.run_flow("check", "release", expected=2)
             self.assertIn("governance", blocked.stderr)
 
-        evidence = json.loads(
-            (self.root / "spec" / "evidence" / "TASK-710.json").read_text()
-        )
+        evidence = json.loads(self.evidence_file("TASK-710").read_text())
         events = evidence["practice"]["events"]
         self.assertEqual(len(events), 1)
         self.assertEqual(events[0]["type"], "gate-failure")
@@ -544,9 +550,7 @@ artifacts = ["artifacts/app.bin"]
         self.assertEqual(task["workflowBypass"]["status"], "detected")
         self.assertEqual(task["workflowBypass"]["paths"], ["src/value.py"])
 
-        evidence = json.loads(
-            (self.root / "spec" / "evidence" / "TASK-711.json").read_text()
-        )
+        evidence = json.loads(self.evidence_file("TASK-711").read_text())
         events = evidence["practice"]["events"]
         self.assertEqual(len(events), 1)
         self.assertEqual(events[0]["type"], "workflow-bypass")
@@ -562,9 +566,7 @@ artifacts = ["artifacts/app.bin"]
 
         status = json.loads(self.run_flow("status", "--json").stdout)
         self.assertEqual(status["workflowBypass"]["status"], "clear")
-        evidence = json.loads(
-            (self.root / "spec" / "evidence" / "TASK-712.json").read_text()
-        )
+        evidence = json.loads(self.evidence_file("TASK-712").read_text())
         self.assertEqual(evidence.get("practice", {}).get("events", []), [])
 
     def test_missing_active_contract_is_a_recoverable_orphan_in_status_and_doctor(
@@ -574,7 +576,7 @@ artifacts = ["artifacts/app.bin"]
         self.run_flow("init")
         self.commit_all("install workflow")
         self.run_flow("new", "TASK-716", "--title", "orphan", "--risk", "L0")
-        contract = self.root / "spec" / "changes" / "TASK-716.md"
+        contract = self.task_file("TASK-716")
         contract.unlink()
 
         current = json.loads(self.run_flow("status", "--json").stdout)
@@ -602,7 +604,7 @@ artifacts = ["artifacts/app.bin"]
         self.run_flow("init")
         self.commit_all("install workflow")
         self.run_flow("new", "TASK-717", "--title", "candidate", "--risk", "L0")
-        evidence_path = self.root / "spec" / "evidence" / "TASK-717.json"
+        evidence_path = self.evidence_file("TASK-717")
         evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
         evidence["practice"] = {
             "events": [
@@ -637,13 +639,13 @@ artifacts = ["artifacts/app.bin"]
             "new", "TASK-718", "--title", "preflight", "--risk", "L1", expected=2
         )
         self.assertIn("workflow baseline", blocked.stderr)
-        self.assertFalse((self.root / "spec" / "changes" / "TASK-718.md").exists())
-        self.assertFalse((self.root / "spec" / "evidence" / "TASK-718.json").exists())
+        self.assertFalse(self.task_file("TASK-718").exists())
+        self.assertFalse(self.evidence_file("TASK-718").exists())
         state = json.loads(self.state_path().read_text(encoding="utf-8"))
         self.assertIsNone(state["activeTask"])
 
         self.run_flow("new", "TASK-719", "--title", "lightweight", "--risk", "L0")
-        self.assertTrue((self.root / "spec" / "changes" / "TASK-719.md").is_file())
+        self.assertTrue(self.task_file("TASK-719").is_file())
 
     def test_task_origin_and_waiting_condition_are_projected_from_the_contract(
         self,
@@ -652,7 +654,7 @@ artifacts = ["artifacts/app.bin"]
         self.run_flow("init")
         self.commit_all("install workflow")
         self.run_flow("new", "TASK-720", "--title", "prepared draft", "--risk", "L0")
-        contract = self.root / "spec" / "changes" / "TASK-720.md"
+        contract = self.task_file("TASK-720")
         content = contract.read_text(encoding="utf-8")
         self.assertIn("Task-Origin: current-request", content)
         self.assertIn("Waiting-On: none", content)
@@ -830,7 +832,7 @@ level = "manual"
             expected=2,
         )
         self.assertIn("baseline=missing", blocked.stderr)
-        self.assertFalse((self.root / "spec" / "changes" / "TASK-712.md").exists())
+        self.assertFalse(self.task_file("TASK-712").exists())
 
     def test_completed_archive_can_be_committed_from_last_closed_context(self) -> None:
         import flow_parallel
@@ -889,9 +891,7 @@ command = {json.dumps([sys.executable, "-c", "print('passed')"])}
         )
         self.assertEqual(archived["lifecycle"], "closed")
         self.assertNotIn("nextAction", archived)
-        pending_evidence = json.loads(
-            (self.root / "spec" / "evidence" / "TASK-713.json").read_text()
-        )
+        pending_evidence = json.loads(self.evidence_file("TASK-713").read_text())
         self.assertIn(
             "closure-pending-commit", pending_evidence["closure"]["practiceEvents"]
         )
@@ -967,16 +967,12 @@ command = {json.dumps([sys.executable, "-c", "print('unit passed')"])}
 
         for _ in range(3):
             self.run_flow("verify", "--profile", "affected")
-        before = json.loads(
-            (self.root / "spec" / "evidence" / "TASK-713A.json").read_text()
-        )
+        before = json.loads(self.evidence_file("TASK-713A").read_text())
         self.assertEqual(len(before["checkRuns"]), 6)
 
         self.run_flow("archive")
 
-        after = json.loads(
-            (self.root / "spec" / "evidence" / "TASK-713A.json").read_text()
-        )
+        after = json.loads(self.evidence_file("TASK-713A").read_text())
         self.assertEqual(
             [(run["profile"], run["checkId"]) for run in after["checkRuns"]],
             [("affected", "lint"), ("affected", "unit")],
@@ -1049,9 +1045,7 @@ command = {json.dumps([sys.executable, "-c", check])}
         self.run_flow("verify", "--profile", "affected")
         self.run_flow("archive")
 
-        evidence = json.loads(
-            (self.root / "spec" / "evidence" / "TASK-713B.json").read_text()
-        )
+        evidence = json.loads(self.evidence_file("TASK-713B").read_text())
         self.assertEqual(
             [run["passed"] for run in evidence["checkRuns"]], [False, True]
         )
@@ -1158,7 +1152,7 @@ command = {json.dumps([sys.executable, "-c", check])}
         self.run_flow("new", "TASK-713C", "--title", "preserve history", "--risk", "L0")
         self.write_task("TASK-713C", scope="src/")
         self.run_flow("approve", "task")
-        evidence_path = self.root / "spec" / "evidence" / "TASK-713C.json"
+        evidence_path = self.evidence_file("TASK-713C")
         evidence = json.loads(evidence_path.read_text())
         evidence["checkRuns"] = [
             {"profile": "affected", "checkId": "unit", "passed": False},
@@ -1190,7 +1184,7 @@ command = {json.dumps([sys.executable, "-c", check])}
         )
         self.write_task("TASK-713D", scope="src/")
         self.run_flow("approve", "task")
-        evidence_path = self.root / "spec" / "evidence" / "TASK-713D.json"
+        evidence_path = self.evidence_file("TASK-713D")
         evidence = json.loads(evidence_path.read_text())
         evidence["checkRuns"] = [
             {"profile": "affected", "checkId": "unit", "passed": False},
@@ -1243,9 +1237,7 @@ command = {json.dumps([sys.executable, "-c", check])}
             "findings=none",
         )
 
-        evidence = json.loads(
-            (self.root / "spec" / "evidence" / "TASK-713E.json").read_text()
-        )
+        evidence = json.loads(self.evidence_file("TASK-713E").read_text())
         review = evidence["acceptance"][-1]
         self.assertEqual(review["kind"], "review")
         self.assertNotIn("path", review)
@@ -1278,9 +1270,7 @@ command = {json.dumps([sys.executable, "-c", check])}
             head,
         )
 
-        evidence = json.loads(
-            (self.root / "spec" / "evidence" / "TASK-714.json").read_text()
-        )
+        evidence = json.loads(self.evidence_file("TASK-714").read_text())
         state = json.loads(self.state_path().read_text())
         self.assertEqual(evidence["closure"]["outcome"], "reconciled")
         self.assertEqual(evidence["closure"]["originalPhase"], "approved")
@@ -1447,6 +1437,7 @@ command = {json.dumps([sys.executable, "-c", check])}
         self.init_git()
         subprocess.run(["git", "branch", "-M", "main"], cwd=self.root, check=True)
         self.run_flow("init")
+        self.use_tracked_records()
         self.commit_all("install workflow")
         created = self.run_flow(
             "new",
@@ -1516,6 +1507,7 @@ command = {json.dumps([sys.executable, "-c", check])}
         self.init_git()
         subprocess.run(["git", "branch", "-M", "main"], cwd=self.root, check=True)
         self.run_flow("init")
+        self.use_tracked_records()
         self.commit_all("install workflow")
         created = self.run_flow(
             "new",

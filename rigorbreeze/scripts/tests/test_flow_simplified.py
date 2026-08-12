@@ -58,7 +58,7 @@ class SimplifiedFlowTests(FlowTestCase):
         self.run_flow(
             "new", "TASK-001", "--title", "Observable outcome", "--risk", risk
         )
-        task = self.root / "spec" / "changes" / "TASK-001.md"
+        task = self.task_file("TASK-001")
         task.write_text(
             f"""# TASK-001: Observable outcome
 
@@ -166,7 +166,7 @@ Risk: {risk}
         self.run_flow(
             "new", "TASK-001", "--title", "Observable outcome", "--risk", "L0"
         )
-        task = self.root / "spec" / "changes" / "TASK-001.md"
+        task = self.task_file("TASK-001")
         content = task.read_text(encoding="utf-8")
         self.assertNotIn("## Completion report", content)
         self.assertIn("## Conditional risks", content)
@@ -182,9 +182,7 @@ Risk: {risk}
             "new", "TASK-001", "--title", "Observable outcome", "--risk", "L0"
         )
         evidence = json.loads(
-            (self.root / "spec" / "evidence" / "TASK-001.json").read_text(
-                encoding="utf-8"
-            )
+            self.evidence_file("TASK-001").read_text(encoding="utf-8")
         )
         self.assertNotIn("attestations", evidence)
 
@@ -207,9 +205,9 @@ Risk: {risk}
 
         self.run_flow("archive")
 
-        self.assertTrue((self.root / "spec" / "archive" / "TASK-001.md").is_file())
+        self.assertTrue(self.archive_file("TASK-001").is_file())
 
-    def test_l1_archive_needs_one_prefilled_retro_confirmation_not_release(
+    def test_clean_l1_archive_uses_machine_retrospective_not_release_governance(
         self,
     ) -> None:
         self.write_config()
@@ -217,30 +215,19 @@ Risk: {risk}
         self.run_flow("--mode", "enforced", "verify", "--profile", "full")
         self.add_runtime_acceptance()
 
-        blocked = self.run_flow("archive", expected=2)
-        self.assertIn("retro", blocked.stderr.lower())
-        self.assertIn("prefilled summary", blocked.stderr.lower())
-        self.assertIn("failureCategories", blocked.stderr)
-
-        summary = json.loads(self.run_flow("retro", "--json").stdout)
-        self.assertEqual(summary["taskId"], "TASK-001")
-        self.assertIn("verificationRuns", summary)
-        self.assertIn("checkRuns", summary)
-
-        confirmation = self.confirm_retro()
-        self.assertNotIn("evolution candidate", confirmation.stdout.lower())
         self.run_flow("archive")
 
         state = json.loads(self.state_path().read_text(encoding="utf-8"))
         evidence = json.loads(
-            (self.root / "spec" / "evidence" / "TASK-001.json").read_text(
-                encoding="utf-8"
-            )
+            self.evidence_file("TASK-001").read_text(encoding="utf-8")
         )
         self.assertEqual(state["phase"], "archived")
         self.assertEqual(evidence["practice"]["summary"]["taskId"], "TASK-001")
         self.assertIn("failureCategories", evidence["practice"]["summary"])
         self.assertFalse(evidence["practice"]["confirmation"]["evolutionCandidate"])
+        self.assertEqual(
+            evidence["practice"]["confirmation"]["workflowImpact"], "unreviewed"
+        )
 
     def test_negative_retro_records_and_prompts_an_evolution_candidate(self) -> None:
         self.write_config()
@@ -266,9 +253,7 @@ Risk: {risk}
             result.stdout,
         )
         evidence = json.loads(
-            (self.root / "spec" / "evidence" / "TASK-001.json").read_text(
-                encoding="utf-8"
-            )
+            self.evidence_file("TASK-001").read_text(encoding="utf-8")
         )
         self.assertTrue(evidence["practice"]["confirmation"]["evolutionCandidate"])
 
@@ -299,7 +284,7 @@ Risk: {risk}
             encoding="utf-8",
         )
         self.create_task(risk="L0")
-        task = self.root / "spec" / "changes" / "TASK-001.md"
+        task = self.task_file("TASK-001")
         task.write_text(
             task.read_text(encoding="utf-8").replace(
                 "- src/", "- src/\n- rigorbreeze.toml"
@@ -310,9 +295,7 @@ Risk: {risk}
         self.run_flow("verify", "--profile", "affected")
 
         evidence = json.loads(
-            (self.root / "spec" / "evidence" / "TASK-001.json").read_text(
-                encoding="utf-8"
-            )
+            self.evidence_file("TASK-001").read_text(encoding="utf-8")
         )
         self.assertEqual(evidence["checkRuns"][-1]["category"], "static-quality")
 

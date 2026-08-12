@@ -13,19 +13,16 @@ English · [简体中文](spec-tree.zh-CN.md)
 
 ## Purpose
 
-The tree preserves cross-session state and auditability without copying the same requirement into proposal, design, plan, test-plan, and verification documents. Each change has one human-authored task file.
+The record model preserves cross-session state and risk-appropriate auditability without copying requirements across documents. Direct changes create no task record. Task-based changes have one contract and one evidence record, private by default in schema v5.
 
 ## Tree
 
 ```text
 spec/
 ├── index.md
-├── changes/
-│   └── TASK-001.md
 ├── evidence/
-│   └── TASK-001.json
-└── archive/
-    └── TASK-000.md
+│   └── TASK-002.audit.json   # optional sanitized L2/Emergency summary
+└── archive/                  # legacy tracked mode only
 
 rigorbreeze.toml
 scripts/rigorbreeze.py
@@ -37,21 +34,24 @@ scripts/flow_automation.py
 .git/rigorbreeze/registry.json                 # primary/common, not committed
 .git/rigorbreeze/automation.json               # external-action journal
 .git/rigorbreeze/state.json                    # primary-worktree private state
+.git/rigorbreeze/records/{changes,evidence,archive,history}/
 .git/worktrees/<name>/rigorbreeze/state.json   # linked-worktree private
 ```
 
 - `index.md`: authority order and navigation only.
-- Git-private `state.json`: schema-v4 phase, active task, approvals, latest
+- Git-private `state.json`: schema-v5 phase, active task, approvals, latest
   RED/verification, warnings, and last close for both primary and linked
   worktrees. Existing `spec/state.json` is copied on first read; `init` or
   explicit repair removes it only when it is untracked and identical. A tracked
   or divergent legacy file is retained and reported.
-- `changes/<TASK-ID>.md`: the only human-authored change contract. New contracts
+- private `records/changes/<TASK-ID>.md`: the only human-authored change contract. New contracts
   carry compact `Task-Origin` and `Waiting-On` lines; they are lifecycle facts,
   not another planning document or evidence schema.
-- `evidence/<TASK-ID>.json`: baseline, check runs, TDD chain, verification,
+- private `records/evidence/<TASK-ID>.json`: baseline, check runs, TDD chain, verification,
   artifact digests, acceptance, release, and the prefilled practice summary.
-- `archive/<TASK-ID>.md`: the same task moved after its risk-appropriate close gate; never a duplicate.
+- private `records/archive/<TASK-ID>.md`: the same task moved after its risk-appropriate close gate; never a duplicate.
+- private `records/history/<TASK-ID>.json`: a path-free compact L1 history after proven integration.
+- tracked `spec/evidence/<TASK-ID>.audit.json`: optional sanitized L2/Emergency audit proof, capped at 32 KiB. It excludes absolute paths, raw output, credentials, and production data.
 - `rigorbreeze.toml`: standard checks, profiles, commands, reports, artifacts,
   timeouts, and risk applicability.
 - `scripts/rigorbreeze.py`: the stable project entry used locally and in CI.
@@ -62,7 +62,8 @@ scripts/flow_automation.py
 - Git-common `automation.json`: private commit/push/provider action journal,
   keyed by immutable inputs. It records standing versus one-time authorization,
   supports recovery and idempotency, and never rewrites tracked task evidence
-  after an external action.
+  after an external action. Version 2-4 projects retain tracked paths until an
+  explicit idle, clean `doctor --all --repair --migrate-records private`.
 
 ## Authority and lifecycle
 
@@ -100,11 +101,11 @@ or task database is introduced.
 
 ## State and evidence
 
-Private `state.json` and the common registry are machine caches and gate inputs,
+Private `state.json`, records, and the common registry are machine gate inputs,
 not product requirement sources. Do not commit linked-worktree state or edit it
 to bypass a gate. `doctor --all --repair` may rebuild the registry explicitly.
 
-`status --json` includes `installation`, `workflowBaseline`, `workflowBypass`, lifecycle, `scope`, and compact `evolution` projections. Installation
+`status --json` includes `installation`, `workflowBaseline`, `workflowBypass`, lifecycle, `scope`, compact `evolution`, and `interaction` projections. The text view is limited to completed, current, and the one genuine user action; `actor=codex` work stays internal. Installation
 compares the bundled Skill with the project runner and reports `current`,
 `outdated`, `missing`, or `unmanaged`, missing/modified components, and upgrade safety. `workflowBaseline` proves managed files on the real base branch and reports `current`, `missing`, `partial`, `modified`, or `blocked`. Lifecycle prioritizes `integrated-unclosed` and `closure-pending` over stale-baseline advice. Scope is `current`,
 `violated`, or `not-applicable`, and evaluates committed changes from the

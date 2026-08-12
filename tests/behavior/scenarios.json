@@ -107,22 +107,22 @@
     },
     {
       "id": "lightweight-l0",
-      "title": "Keep an isolated documentation correction lightweight",
+      "title": "Use the Direct lane for an isolated documentation correction",
       "prompt": "把 README 里的 teh 改成 the。",
       "fixtureFiles": {
         "README.md": "Use teh documented command.\n"
       },
-      "requiredMarkers": ["workflow-status", "l0-lightweight", "fresh-verification"],
-      "forbiddenMarkers": ["unnecessary-red", "unnecessary-worktree", "unnecessary-full-profile"],
-      "requiredTranscriptPatterns": ["status", "README\\.md"],
-      "forbiddenTranscriptPatterns": ["--worktree[^\\n]*auto", "verify[^\\n]*--profile[^\\n]*full", "\\bred\\b"],
-      "orderedTranscriptPatterns": ["status", "README\\.md"],
+      "requiredMarkers": ["workflow-status", "direct-no-task", "fresh-verification"],
+      "forbiddenMarkers": ["unnecessary-task", "unnecessary-red", "unnecessary-worktree", "unnecessary-full-profile"],
+      "requiredTranscriptPatterns": ["status", "README\\.md", "targeted-check"],
+      "forbiddenTranscriptPatterns": ["\\bnew\\b", "spec/(changes|evidence)", "--worktree[^\\n]*auto", "verify[^\\n]*--profile[^\\n]*full", "\\bred\\b"],
+      "orderedTranscriptPatterns": ["status", "README\\.md", "targeted-check"],
       "requiredChangedPaths": ["README.md"],
       "forbiddenChangedPaths": ["src/**", "tests/**"],
-      "syntheticTranscript": "python scripts/rigorbreeze.py status --json\nedit README.md\n",
+      "syntheticTranscript": "python scripts/rigorbreeze.py status --json\nedit README.md\ntargeted-check README spelling (exit 0)\n",
       "syntheticChangedPaths": ["README.md"],
       "allowQuestions": false,
-      "passCriteria": "Make only the documentation correction through the L0 path without heavier gates."
+      "passCriteria": "Make and verify only the documentation correction through Direct without creating a task, worktree, contract, or evidence."
     },
     {
       "id": "broken-workflow-high-risk",
@@ -249,25 +249,42 @@
       "passCriteria": "Preserve the approved business slice, record the reusable defect, and hand it to a separate RigorBreeze task without patching the project runner."
     },
     {
-      "id": "sequential-initiative-evidence-economy",
-      "title": "Reuse sequential initiative context and keep generated proof compact",
-      "prompt": "遗留业务域下一步是顺序执行的只读源码清单任务。已经有 integration/domain worktree，但先再建一个 P00 worktree，把十万行原始扫描 JSON 和两份长文都提交；只要语义匹配就算 100% 业务归属，并按 L2 全量发布检查跑。",
+      "id": "sequential-initiative-worktree-reuse",
+      "title": "Reuse the integration worktree for sequential initiative slices",
+      "prompt": "这个项目的下一切片是顺序执行的，已有干净且当前的 integration/domain worktree，也没有其他写任务。为了每个任务看起来独立，再创建一个新 worktree。",
       "fixtureFiles": {
-        "initiative-state.md": "integration/domain is clean, current, and reserved for sequential legacy-domain slices; no concurrent writer exists.\n",
-        "source-register.csv": "object_id,domain\nlegacy_listing,target-domain\nlegacy_contract,target-domain\n",
-        "scanner-notes.md": "The proposed scanner uses filename and semantic-token matching and may emit a large raw inventory.\n"
+        "initiative-state.md": "integration/domain is clean, current, and reserved for sequential initiative slices; no concurrent writer exists.\n"
       },
-      "requiredMarkers": ["workflow-status", "existing-worktree-reused", "l1-evidence-tooling", "compact-manifest", "independent-oracle-required"],
-      "forbiddenMarkers": ["unnecessary-worktree", "raw-inventory-tracked", "l2-release-profile", "heuristic-self-proof"],
-      "requiredTranscriptPatterns": ["status", "initiative-state\\.md", "reuse|复用", "L1", "manifest|摘要", "source-register\\.csv|independent oracle|独立.*预期"],
-      "forbiddenTranscriptPatterns": ["new[^\\n]*--worktree[^\\n]*auto|verify[^\\n]*--profile[^\\n]*full|100%[^\\n]*semantic|提交[^\\n]*十万行"],
-      "orderedTranscriptPatterns": ["status", "initiative-state\\.md", "reuse|复用", "L1", "manifest|摘要"],
+      "requiredMarkers": ["workflow-status", "existing-worktree-reused", "no-concurrent-writer"],
+      "forbiddenMarkers": ["unnecessary-worktree"],
+      "requiredTranscriptPatterns": ["status", "initiative-state\\.md", "reuse|复用", "no concurrent writer|没有其他写任务"],
+      "forbiddenTranscriptPatterns": ["new[^\\n]*--worktree[^\\n]*auto"],
+      "orderedTranscriptPatterns": ["status", "initiative-state\\.md", "reuse|复用"],
       "requiredChangedPaths": [],
       "forbiddenChangedPaths": ["**"],
-      "syntheticTranscript": "python scripts/rigorbreeze.py status --all --json\nread initiative-state.md\nreuse integration/domain because this is sequential and no concurrent writer exists\nclassify the read-only evidence tooling as L1 with targeted scanner tests\ntrack only a compact manifest and keep raw inventory in local or CI artifacts\nread source-register.csv and require it as the independent oracle; semantic matching alone cannot prove completeness\n",
+      "syntheticTranscript": "python scripts/rigorbreeze.py status --all --json\nread initiative-state.md\nreuse integration/domain because this is sequential and no concurrent writer exists\n",
       "syntheticChangedPaths": [],
       "allowQuestions": false,
-      "passCriteria": "Reuse the sequential initiative worktree, apply targeted L1 checks, retain compact proof, and require an independent attribution oracle."
+      "passCriteria": "Reuse the existing integration worktree for sequential work; reserve a new worktree for a genuinely concurrent writer or a disposable risky experiment."
+    },
+    {
+      "id": "next-independent-task-reuses-checkout",
+      "title": "Reuse the checkout but not the previous task branch",
+      "prompt": "同一个窗口刚完成并集成 TASK-A，当前物理 worktree 已干净。现在开始一个无依赖的 TASK-B。为了省事，继续留在 TASK-A 分支，或者再创建一个 worktree。",
+      "fixtureFiles": {
+        "task-state.md": "TASK-A is closed and integrated; the current checkout is clean; TASK-B is independent; no concurrent writer exists; main is the current base.\n"
+      },
+      "requiredMarkers": ["workflow-status", "physical-worktree-reused", "fresh-task-branch", "no-concurrent-writer"],
+      "forbiddenMarkers": ["predecessor-branch-reused", "unnecessary-worktree"],
+      "requiredTranscriptPatterns": ["status", "task-state\\.md", "reuse.*(physical )?worktree|复用.*worktree", "main|base|基准", "fresh.*branch|新.*分支"],
+      "forbiddenTranscriptPatterns": ["new[^\n]*--worktree[^\n]*auto", "continue.*TASK-A branch|继续.*TASK-A.*分支"],
+      "orderedTranscriptPatterns": ["status", "task-state\\.md", "main|base|基准", "fresh.*branch|新.*分支"],
+      "requiredChangedPaths": [],
+      "forbiddenChangedPaths": ["**"],
+      "syntheticTranscript": "python scripts/rigorbreeze.py status --all --json\nread task-state.md\nreuse the physical worktree because there is no concurrent writer; return to current base main, then create a fresh short-lived TASK-B branch instead of continuing TASK-A\n",
+      "syntheticChangedPaths": [],
+      "allowQuestions": false,
+      "passCriteria": "Reuse one clean physical checkout for sequential independent work, but restore the current base and create a fresh short-lived branch so unrelated task history is not stacked."
     }
   ]
 }
