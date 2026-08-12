@@ -90,6 +90,8 @@ accepted → release-ready → protected release gate
 
 `status --all --json` 还包含运行资源声明/冲突与 `cleanup` 投影，列出可删除的已集成受管 worktree、带安全原因的保留项、未登记 Git worktree，以及按策略保留的本地任务分支；候选同时显示干净状态、集成证明、expected HEAD 和是否需要一次性确认。未登记清理永不删除分支。该投影只从 Git 和注册表推导，是提示状态，不是第二套任务或证据事实源。
 
+兼容的 `tasks` 列表继续保留；新增 `worktrees` 按物理路径聚合这些记录，并分别展示实际执行的 bundled Runner 与各项目安装 Runner。cleanup 候选也按物理路径只出现一次，同时列出全部关联 `taskIds`。
+
 证据 JSON 可以保存：
 
 - 需求 ID；
@@ -106,6 +108,8 @@ accepted → release-ready → protected release gate
 仓库继续版本化保存回归测试、一份精简任务合同及其精简 evidence。原始日志、生成报告、缓存和行为评估 transcript 保存在忽略目录、CI 制品或 Git 私有位置。可分发 Skill 压缩包排除维护者测试与缓存，但源码仓库不会删除它们。当前明确不建立第二套本地 evidence 仓库：在真实重复证据证明值得之前，它只会额外制造权威来源、迁移路径和清理策略。
 
 schema v4 的稳定区段包括 `baseline`、`checkRuns`、`tddChain`、`artifacts`、`acceptance`、`release`、`automation`、`practice`、`red`、`verifications` 和表示 completed/abandoned/reconciled 结果的 `closure`。`release` 可保存经过校验的 `operation-plan` 与 `operation-result` 快照，`practice` 可保存去重机器事件。历史 evidence 中的 `automation` 记录继续可读，但新的外部动作结果只写入 Git 私有日志。实践确认只为负向流程信号设置 `evolutionCandidate`，直接从证据汇总候选，不建立额外日志。升级 schema v1/v2/v3 时不得删除 RED、验证、验收、发布、自动化或实践历史。
+
+批准后的验收结果未变化，但实现阶段补强了测试时，新 RED 可包含 `baselineReplay`。Runner 在 evidence 记录的批准 SHA 创建临时 detached worktree，只覆盖 Allowed Scope 内当前测试文件并重新执行同一 RED 命令；该字段绑定基线 SHA、上一条 RED 时间和当前测试摘要。生产源码、依赖、配置或迁移文件不得进入重放。
 
 不得保存凭证、生产数据、包含个人信息的完整日志或无法验证的结论。
 

@@ -1225,73 +1225,101 @@ def next_action(
             return {
                 "reason": str(operation.get("safeState")),
                 "command": str(operation.get("resumeAction")),
+                "actor": "user",
+                "kind": "safety-stop",
             }
     active = state.get("activeTask")
     if not active:
         return {
             "reason": "No active task exists.",
             "command": 'python scripts/rigorbreeze.py new TASK-001 --title "<observable outcome>" --risk L1',
+            "actor": "codex",
+            "kind": "work",
         }
     scope = task_scope_status(root, state)
     if scope["status"] == "violated":
         return {
             "reason": "Task changes violate the approved scope; restore them or split a dependent task.",
             "command": "python scripts/rigorbreeze.py status --json",
+            "actor": "codex",
+            "kind": "repair",
         }
     if not approval_valid_now:
         return {
             "reason": "The active task is not approved or its digest changed.",
             "command": "python scripts/rigorbreeze.py approve task",
+            "actor": "user",
+            "kind": "approval",
         }
     if active.get("risk") in {"L1", "L2", "Emergency"} and not state.get("red"):
         return {
             "reason": "This risk lane requires an observed RED before implementation.",
             "command": "python scripts/rigorbreeze.py red --help",
+            "actor": "codex",
+            "kind": "work",
         }
     if verification != "current":
         return {
             "reason": "Implement the approved slice, then run affected verification.",
             "command": "python scripts/rigorbreeze.py verify --profile affected",
+            "actor": "codex",
+            "kind": "work",
         }
     risk = active.get("risk")
     if risk in {"L1", "L2"} and full_profile != "current":
         return {
             "reason": "The merge-quality full profile is missing or stale.",
             "command": "python scripts/rigorbreeze.py --mode enforced verify --profile full",
+            "actor": "codex",
+            "kind": "work",
         }
     if state.get("phase") == "release-ready":
         return {
             "reason": "All recorded release prerequisites should now be checked.",
             "command": "python scripts/rigorbreeze.py check release",
+            "actor": "codex",
+            "kind": "work",
         }
     if risk == "L0":
         return {
             "reason": "The low-risk task is verified and may be archived.",
             "command": "python scripts/rigorbreeze.py archive",
+            "actor": "codex",
+            "kind": "work",
         }
     if risk == "Emergency":
         if not retro_confirmation_current(root, state):
             return {
                 "reason": "Review the hotfix summary and confirm three judgments.",
                 "command": "python scripts/rigorbreeze.py retro --json",
+                "actor": "user",
+                "kind": "approval",
             }
         return {
             "reason": "The hotfix verification and retrospective are current.",
             "command": "python scripts/rigorbreeze.py archive",
+            "actor": "codex",
+            "kind": "work",
         }
     if state.get("phase") == "accepted":
         if not retro_confirmation_current(root, state):
             return {
                 "reason": "Review the prefilled summary and confirm three judgments.",
                 "command": "python scripts/rigorbreeze.py retro --json",
+                "actor": "user",
+                "kind": "approval",
             }
         return {
             "reason": "Verification, acceptance, and retrospective are current.",
             "command": "python scripts/rigorbreeze.py archive",
+            "actor": "codex",
+            "kind": "work",
         }
     return {
         "reason": "Add the applicable runtime or product acceptance evidence.",
         "command": "python scripts/rigorbreeze.py evidence --help",
+        "actor": "codex",
+        "kind": "work",
     }
 
 

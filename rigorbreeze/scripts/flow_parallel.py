@@ -1030,6 +1030,50 @@ def cleanup_projection(
             }
         )
 
+    def group_worktrees(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        grouped: dict[str, dict[str, Any]] = {}
+        for item in items:
+            path = str(item.get("worktree") or "")
+            key = path or f"task:{item.get('taskId')}"
+            existing = grouped.get(key)
+            task_ids = sorted(
+                {
+                    str(value)
+                    for value in (
+                        *(existing or {}).get("taskIds", []),
+                        item.get("taskId"),
+                    )
+                    if value
+                }
+            )
+            if existing is None:
+                existing = dict(item)
+                grouped[key] = existing
+            existing["taskIds"] = task_ids
+            existing["taskId"] = task_ids[0] if task_ids else None
+        return list(grouped.values())
+
+    removable = group_worktrees(removable)
+    retained = group_worktrees(retained)
+    retained_by_path = {
+        str(item.get("worktree") or ""): item
+        for item in retained
+        if item.get("worktree")
+    }
+    safe_removable: list[dict[str, Any]] = []
+    for item in removable:
+        path = str(item.get("worktree") or "")
+        conflict = retained_by_path.get(path)
+        if conflict is None:
+            safe_removable.append(item)
+            continue
+        task_ids = sorted(
+            set(conflict.get("taskIds", [])) | set(item.get("taskIds", []))
+        )
+        conflict["taskIds"] = task_ids
+        conflict["taskId"] = task_ids[0] if task_ids else None
+    removable = safe_removable
+
     def cleanup_key(item: dict[str, Any]) -> tuple[str, str]:
         return (
             str(item.get("taskId") or ""),

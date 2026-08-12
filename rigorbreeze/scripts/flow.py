@@ -9,6 +9,7 @@ import os
 import re
 import subprocess
 import sys
+import tempfile
 import time
 from pathlib import Path
 from typing import Any
@@ -1012,9 +1013,8 @@ def interaction_projection(
     elif lifecycle in {"orphaned-record", "integrated-unclosed", "closure-pending"}:
         kind, actor = "repair", "codex"
     elif payload.get("activeTask"):
-        reason = str(action.get("reason", "")).casefold()
-        kind = "approval" if "ambigu" in reason or "approve" in reason else "work"
-        actor = "user" if kind == "approval" else "codex"
+        actor = action.get("actor", "codex")
+        kind = action.get("kind", "work")
     else:
         kind, actor = "work", "none"
     current = (
@@ -1046,6 +1046,84 @@ def print_interaction(interaction: dict[str, Any]) -> None:
     print(f"需要你操作：{user_action}")
 
 
+def worktree_status_projection(
+    root: Path, tasks: list[dict[str, Any]], cleanup: dict[str, Any]
+) -> list[dict[str, Any]]:
+    task_groups: dict[str, list[dict[str, Any]]] = {}
+    for task in tasks:
+        value = task.get("worktree")
+        if not value:
+            continue
+        path = str(Path(str(value)).resolve())
+        task_groups.setdefault(path, []).append(task)
+    actual = {
+        str(Path(item["worktree"]).resolve()): item
+        for item in flow_parallel.worktrees(root)
+        if item.get("worktree")
+    }
+    cleanup_by_path: dict[str, str] = {}
+    for bucket, label in (
+        ("removableWorktrees", "removable"),
+        ("retainedWorktrees", "retained"),
+    ):
+        for item in cleanup.get(bucket, []):
+            value = item.get("worktree")
+            if value:
+                cleanup_by_path[str(Path(str(value)).resolve())] = label
+    projected: list[dict[str, Any]] = []
+    for path in sorted(set(actual) | set(task_groups)):
+        related = task_groups.get(path, [])
+        worktree = Path(path)
+        state = None
+        if worktree.is_dir() and (
+            state_path(worktree).is_file() or legacy_state_path(worktree).is_file()
+        ):
+            try:
+                state = load_state(worktree)
+            except FlowError:
+                state = None
+        install = (
+            installation_status(worktree, state)
+            if worktree.is_dir()
+            else {
+                "runnerVersion": None,
+                "status": "missing",
+            }
+        )
+        actual_item = actual.get(path, {})
+        branches = sorted(
+            {
+                str(value).removeprefix("refs/heads/")
+                for value in (
+                    actual_item.get("branch"),
+                    *(item.get("branch") for item in related),
+                )
+                if value
+            }
+        )
+        task_ids = sorted(str(item["taskId"]) for item in related if item.get("taskId"))
+        active_ids = sorted(
+            str(item["taskId"])
+            for item in related
+            if item.get("taskId")
+            and item.get("lifecycle") not in {"closed", "integrated"}
+        )
+        projected.append(
+            {
+                "worktree": path,
+                "branch": branches[0] if len(branches) == 1 else None,
+                "taskIds": task_ids,
+                "activeTaskIds": active_ids,
+                "runnerVersion": install.get("runnerVersion"),
+                "installationStatus": install.get("status"),
+                "cleanupStatus": cleanup_by_path.get(
+                    path, "current" if worktree.resolve() == root.resolve() else "none"
+                ),
+            }
+        )
+    return projected
+
+
 def command_status(
     root: Path, json_output: bool = False, all_worktrees: bool = False
 ) -> None:
@@ -1057,6 +1135,10 @@ def command_status(
         except flow_parallel.ParallelError as exc:
             raise FlowError(str(exc)) from exc
         payload["workflowVersion"] = VERSION
+        payload["executionRunner"] = {
+            "version": TOOL_VERSION,
+            "source": "bundled",
+        }
         state = (
             load_state(root)
             if state_path(root).is_file() or legacy_state_path(root).is_file()
@@ -1102,6 +1184,9 @@ def command_status(
             if item.get("worktree")
         )
         payload["evolution"] = evolution_projection(roots)
+        payload["worktrees"] = worktree_status_projection(
+            root, payload["tasks"], payload.get("cleanup", {})
+        )
         payload["overview"] = {
             "active": sum(
                 1
@@ -1117,12 +1202,16 @@ def command_status(
                 payload.get("cleanup", {}).get("removableWorktrees", [])
             ),
             "issues": len(payload.get("issues", [])),
+            "worktrees": len(payload["worktrees"]),
         }
         if json_output:
             print(json.dumps(payload, ensure_ascii=False, sort_keys=True))
             return
         overview = payload["overview"]
-        print(f"已完成：已登记 {len(payload['tasks'])} 个任务")
+        print(
+            f"已完成：已登记 {len(payload['tasks'])} 个任务，"
+            f"归并为 {overview['worktrees']} 个工作树"
+        )
         print(
             "当前："
             f"{overview['active']} 个活动任务，{overview['blocked']} 个阻断，"
@@ -1278,11 +1367,6 @@ def command_red(
         for relative in changed_after_approval
         if path_under(relative, source_roots) and not path_under(relative, test_roots)
     ]
-    if production_changes:
-        raise FlowError(
-            "production code changed before RED was observed: "
-            + ", ".join(production_changes)
-        )
     if not tests and active["risk"] in {"L1", "L2"}:
         raise FlowError(f"{active['risk']} RED requires at least one --test file")
     if (
@@ -1301,10 +1385,109 @@ def command_red(
     ):
         raise FlowError("RED command must execute every declared --test file")
     test_digests = {relative: test_file_digest(root, relative) for relative in tests}
-    result = run_command(command, root)
+    current_digest = task_digest(root, state)
+    prior_reds = [
+        chain.get("red") or {}
+        for chain in evidence.get("tddChain", [])
+        if chain.get("requirement") == requirement
+        and (chain.get("red") or {}).get("taskDigest") == current_digest
+    ]
+    replay = bool(
+        production_changes
+        and prior_reds
+        and any(
+            prior_reds[-1].get("testDigests", {}).get(relative) != digest
+            for relative, digest in test_digests.items()
+        )
+    )
+    baseline_replay = None
+    if production_changes and not replay:
+        raise FlowError(
+            "production code changed before RED was observed: "
+            + ", ".join(production_changes)
+        )
+    if replay:
+        outside_scope = [
+            relative
+            for relative in tests
+            if not path_allowed(relative, allowed_scope(root, state))
+        ]
+        if outside_scope:
+            raise FlowError(
+                "RED replay test files are outside the approved scope: "
+                + ", ".join(outside_scope)
+            )
+        baseline_sha = str(baseline.get("head") or "")
+        if not baseline_sha or not is_git_repo(root):
+            raise FlowError(
+                "RED baseline replay requires an immutable Git baseline SHA"
+            )
+        if git(root, "cat-file", "-e", f"{baseline_sha}^{{commit}}").returncode != 0:
+            raise FlowError(f"RED baseline replay commit is missing: {baseline_sha}")
+        with tempfile.TemporaryDirectory(prefix="rigorbreeze-red-") as directory:
+            replay_root = Path(directory) / "checkout"
+            added = git(
+                root, "worktree", "add", "--detach", str(replay_root), baseline_sha
+            )
+            if added.returncode != 0:
+                raise FlowError(
+                    "failed to create RED baseline replay worktree: "
+                    + (added.stderr or added.stdout).strip()
+                )
+            try:
+                for relative in tests:
+                    source = (root / relative).resolve()
+                    destination = (replay_root / relative).resolve()
+                    try:
+                        destination.relative_to(replay_root.resolve())
+                    except ValueError as exc:
+                        raise FlowError(
+                            f"RED replay test escapes temporary worktree: {relative}"
+                        ) from exc
+                    destination.parent.mkdir(parents=True, exist_ok=True)
+                    destination.write_bytes(source.read_bytes())
+                replay_command: list[str] = []
+                for argument in command:
+                    candidate = Path(argument)
+                    if candidate.is_absolute():
+                        try:
+                            relative = candidate.resolve().relative_to(root.resolve())
+                        except ValueError:
+                            replay_command.append(argument)
+                        else:
+                            normalized = relative.as_posix()
+                            if normalized not in tests:
+                                raise FlowError(
+                                    "RED replay command references a non-test path in the "
+                                    f"current worktree: {normalized}"
+                                )
+                            replay_command.append(str(replay_root / relative))
+                    else:
+                        replay_command.append(argument)
+                result = run_command(replay_command, replay_root)
+            finally:
+                removed = git(root, "worktree", "remove", "--force", str(replay_root))
+                if removed.returncode != 0:
+                    git(root, "worktree", "prune")
+            baseline_replay = {
+                "baselineSha": baseline_sha,
+                "previousRedObservedAt": prior_reds[-1].get("observedAt"),
+                "testDigests": test_digests,
+            }
+    else:
+        result = run_command(command, root)
     output = ((result.stdout or "") + (result.stderr or "")).strip()
     if result.returncode == 0:
         raise FlowError("RED command passed; expected an observed failure")
+    unrelated_failure = result.returncode in {124, 126, 127} or re.search(
+        r"(?:ModuleNotFoundError|ImportError|No module named|command not found|permission denied)",
+        output,
+        re.I,
+    )
+    if unrelated_failure:
+        raise FlowError(
+            "RED command failed because of tooling or environment, not behavior"
+        )
     if not re.search(expect_pattern, output, re.I | re.M):
         raise FlowError("RED output did not match the expected failure pattern")
     record = {
@@ -1317,11 +1500,13 @@ def command_red(
         "expectedPattern": expect_pattern,
         "testDigests": test_digests,
         "summary": redact(output[-2000:]),
-        "taskDigest": task_digest(root, state),
+        "taskDigest": current_digest,
         "projectFingerprint": project_fingerprint(root),
         "head": current_head(root) if is_git_repo(root) else None,
         "observedAt": now_iso(),
     }
+    if baseline_replay:
+        record["baselineReplay"] = baseline_replay
     evidence["red"].append(record)
     evidence["tddChain"].append(
         {"requirement": requirement, "red": record, "green": None}
@@ -1330,7 +1515,11 @@ def command_red(
     state["red"] = record
     state["phase"] = "red"
     save_state(root, state)
-    print("RED observed and recorded")
+    print(
+        "RED re-observed against approved baseline and recorded"
+        if baseline_replay
+        else "RED observed and recorded"
+    )
 
 
 def command_verify_stateless(root: Path, config: dict[str, Any]) -> int:

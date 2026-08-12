@@ -18,7 +18,7 @@ import flow_parallel
 
 VERSION = 5
 EVIDENCE_VERSION = 4
-TOOL_VERSION = "0.14.0"
+TOOL_VERSION = "0.15.0"
 SPEC_DIR = "spec"
 CONFIG_NAME = "rigorbreeze.toml"
 MODES = ("advisory", "enforced")
@@ -376,6 +376,7 @@ def compact_completed_tdd_history(evidence: dict[str, Any]) -> None:
         "taskDigest",
         "head",
         "observedAt",
+        "baselineReplay",
     )
     compact_red: list[dict[str, Any]] = []
     for chain in retained_chains:

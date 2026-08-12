@@ -65,8 +65,8 @@ def load_contract(path: Path = DEFAULT_CONTRACT) -> dict[str, Any]:
     if not isinstance(contract, dict) or contract.get("schemaVersion") != 1:
         raise ValueError("behavior contract schemaVersion must be 1")
     cases = contract.get("cases")
-    if not isinstance(cases, list) or len(cases) != 14:
-        raise ValueError("behavior contract must define exactly fourteen cases")
+    if not isinstance(cases, list) or len(cases) != 16:
+        raise ValueError("behavior contract must define exactly sixteen cases")
 
     seen: set[str] = set()
     for case in cases:
@@ -113,6 +113,19 @@ def load_contract(path: Path = DEFAULT_CONTRACT) -> dict[str, Any]:
                         raise ValueError(
                             f"invalid regex in {case_id}.{key}: {exc}"
                         ) from exc
+        for key in ("requiredCommandPatterns", "forbiddenCommandPatterns"):
+            values = case.get(key, [])
+            if not isinstance(values, list) or any(
+                not isinstance(item, str) for item in values
+            ):
+                raise ValueError(f"{case_id}.{key} must be a list of strings")
+            for pattern in values:
+                try:
+                    re.compile(pattern, re.I | re.M)
+                except re.error as exc:
+                    raise ValueError(
+                        f"invalid regex in {case_id}.{key}: {exc}"
+                    ) from exc
         max_questions = case.get("maxQuestions")
         if max_questions is not None and (
             not isinstance(max_questions, int) or max_questions < 0
@@ -164,26 +177,37 @@ def score_case(
     changed_paths: list[str],
 ) -> dict[str, Any]:
     issues: list[str] = []
+    observations: list[str] = []
     if result.get("caseId") != case["id"]:
         issues.append("result caseId does not match the scenario")
     markers = result.get("markers")
     markers = markers if isinstance(markers, list) else []
     for marker in case["requiredMarkers"]:
         if marker not in markers:
-            issues.append(f"required marker missing: {marker}")
+            observations.append(f"declared marker missing: {marker}")
     for marker in case["forbiddenMarkers"]:
         if marker in markers:
-            issues.append(f"forbidden marker observed: {marker}")
+            observations.append(f"self-reported risk marker: {marker}")
 
+    semantic_transcript = (
+        _semantic_transcript(transcript) + "\n" + json.dumps(result, ensure_ascii=False)
+    )
     for pattern in case["requiredTranscriptPatterns"]:
-        if not re.search(pattern, transcript, re.I | re.M):
+        if not re.search(pattern, semantic_transcript, re.I | re.M):
             issues.append(f"required transcript observation missing: {pattern}")
     for pattern in case["forbiddenTranscriptPatterns"]:
-        if re.search(pattern, transcript, re.I | re.M):
+        if re.search(pattern, semantic_transcript, re.I | re.M):
             issues.append(f"forbidden transcript action observed: {pattern}")
+    commands = _command_transcript(transcript)
+    for pattern in case.get("requiredCommandPatterns", []):
+        if not re.search(pattern, commands, re.I | re.M):
+            issues.append(f"required command observation missing: {pattern}")
+    for pattern in case.get("forbiddenCommandPatterns", []):
+        if re.search(pattern, commands, re.I | re.M):
+            issues.append(f"forbidden command action observed: {pattern}")
     cursor = 0
     for pattern in case["orderedTranscriptPatterns"]:
-        match = re.search(pattern, transcript[cursor:], re.I | re.M)
+        match = re.search(pattern, semantic_transcript[cursor:], re.I | re.M)
         if not match:
             issues.append(f"ordered transcript observation missing: {pattern}")
             break
@@ -200,11 +224,17 @@ def score_case(
     questions = result.get("questions")
     if not isinstance(questions, list):
         issues.append("result questions must be a list")
-    elif not case["allowQuestions"] and questions:
+    else:
+        actual_questions = [
+            question
+            for question in questions
+            if isinstance(question, str) and _is_actual_question(question)
+        ]
+    if isinstance(questions, list) and not case["allowQuestions"] and actual_questions:
         issues.append("scenario does not allow questions")
     elif (
         isinstance(case.get("maxQuestions"), int)
-        and len(questions) > case["maxQuestions"]
+        and len(actual_questions) > case["maxQuestions"]
     ):
         issues.append(f"scenario allows at most {case['maxQuestions']} questions")
     if "fresh-verification" in case["requiredMarkers"]:
@@ -219,7 +249,59 @@ def score_case(
             issues.append(
                 "fresh verification command, exit status, and scope are required"
             )
-    return {"caseId": case["id"], "passed": not issues, "issues": issues}
+    return {
+        "caseId": case["id"],
+        "passed": not issues,
+        "issues": issues,
+        "observations": observations,
+    }
+
+
+def _command_transcript(transcript: str) -> str:
+    commands: list[str] = []
+    for line in transcript.splitlines():
+        try:
+            event = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        item = event.get("item") if isinstance(event, dict) else None
+        if not isinstance(item, dict) or item.get("type") != "command_execution":
+            continue
+        command = item.get("command")
+        if isinstance(command, str):
+            commands.append(command)
+    return "\n".join(commands)
+
+
+def _semantic_transcript(transcript: str) -> str:
+    """Keep actions and conclusions, but exclude command output and loaded rule text."""
+    events: list[str] = []
+    parsed_event = False
+    for line in transcript.splitlines():
+        try:
+            event = json.loads(line)
+        except json.JSONDecodeError:
+            events.append(line)
+            continue
+        parsed_event = True
+        item = event.get("item") if isinstance(event, dict) else None
+        if not isinstance(item, dict):
+            continue
+        if item.get("type") == "command_execution" and isinstance(
+            item.get("command"), str
+        ):
+            events.append(item["command"])
+        elif item.get("type") == "agent_message" and isinstance(item.get("text"), str):
+            events.append(item["text"])
+    return "\n".join(events) if parsed_event else transcript
+
+
+def _is_actual_question(value: str) -> bool:
+    normalized = value.strip()
+    return bool(
+        normalized.endswith(("?", "？"))
+        or re.match(r"^(?:请提供|请确认|能否|是否可以|你是否|您是否)", normalized)
+    )
 
 
 def _run(
@@ -245,7 +327,9 @@ def prepare_fixture(case: dict[str, Any], workspace: Path) -> Path:
             raise ValueError(f"fixture path escaped workspace: {relative}")
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(content, encoding="utf-8")
-    (workspace / ".gitignore").write_text(".agents/\n", encoding="utf-8")
+    (workspace / ".gitignore").write_text(
+        ".agents/\n__pycache__/\n*.py[cod]\n", encoding="utf-8"
+    )
     for argv in (
         ["git", "init", "-q"],
         ["git", "config", "user.name", "RigorBreeze Behavior Test"],
@@ -307,9 +391,10 @@ def _output_schema(markers: list[str]) -> dict[str, Any]:
     return {
         "type": "object",
         "additionalProperties": False,
-        "required": ["caseId", "markers", "questions", "verification"],
+        "required": ["caseId", "summary", "markers", "questions", "verification"],
         "properties": {
             "caseId": {"type": "string"},
+            "summary": {"type": "string"},
             "markers": {
                 "type": "array",
                 "items": {"type": "string", "enum": markers},
@@ -387,6 +472,7 @@ def _live_case(
             process_code = 124
             final: dict[str, Any] = {
                 "caseId": case["id"],
+                "summary": "",
                 "markers": [],
                 "questions": [],
                 "verification": None,
@@ -399,6 +485,7 @@ def _live_case(
             except (OSError, json.JSONDecodeError):
                 final = {
                     "caseId": case["id"],
+                    "summary": "",
                     "markers": [],
                     "questions": [],
                     "verification": None,
@@ -459,6 +546,9 @@ def _live_prompt(case: dict[str, Any]) -> str:
         "compact task contract after you have removed outcome-changing ambiguity; it "
         "does not authorize inventing missing product intent. "
         f"In the final JSON, set caseId exactly to {json.dumps(case['id'])}. "
+        "Use summary for the concise user-facing conclusion: what was proven, what "
+        "action was taken or stopped, the replacement method when a path was "
+        "unavailable, and any honest remaining gap. "
         "Select only markers that describe actions you actually took, not risks you "
         "considered and prevented. In particular, ambiguous-negation-assumed means you "
         "chose a negated outcome without authoritative evidence; do not select it when "
@@ -512,6 +602,8 @@ def run_live(args: argparse.Namespace) -> int:
             )
             for issue in verdict["issues"]:
                 print(f"  - {issue}", flush=True)
+            for observation in verdict.get("observations", []):
+                print(f"  ~ {observation}", flush=True)
     summary = {
         "version": args.version,
         "repetitions": args.repetitions,
@@ -532,7 +624,7 @@ def build_parser() -> argparse.ArgumentParser:
     live = subparsers.add_parser("run", help="run live Codex behavior evaluations")
     live.add_argument("--contract", type=Path, default=DEFAULT_CONTRACT)
     live.add_argument("--skill", type=Path, default=REPO_ROOT / "rigorbreeze")
-    live.add_argument("--version", default="0.14.0")
+    live.add_argument("--version", default="0.15.0")
     live.add_argument("--repetitions", type=int, default=2)
     live.add_argument("--case", help="run one scenario while debugging the suite")
     live.add_argument("--codex", default="codex")

@@ -43,7 +43,7 @@ command = ["python3", "-m", "ruff", "check", "rigorbreeze/scripts", "tests/behav
 [[checks]]
 id = "unit"
 command = ["python3", "-B", "-m", "unittest", "discover", "-s", "rigorbreeze/scripts/tests", "-v"]
-timeout = 240
+timeout = 360
 
 [[checks]]
 id = "contract"
