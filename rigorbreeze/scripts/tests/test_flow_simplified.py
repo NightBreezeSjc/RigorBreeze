@@ -257,6 +257,55 @@ Risk: {risk}
         )
         self.assertTrue(evidence["practice"]["confirmation"]["evolutionCandidate"])
 
+    def test_additional_passing_verification_does_not_repeat_human_retro(self) -> None:
+        self.write_config()
+        self.approve_with_red()
+        self.run_flow("--mode", "enforced", "verify", "--profile", "full")
+        self.add_runtime_acceptance()
+        self.confirm_retro()
+        before = json.loads(self.evidence_file("TASK-001").read_text(encoding="utf-8"))[
+            "practice"
+        ]["confirmation"]
+
+        self.run_flow("--mode", "enforced", "verify", "--profile", "full")
+
+        payload = json.loads(self.run_flow("status", "--json").stdout)
+        after_summary = json.loads(self.run_flow("retro", "--json").stdout)
+        self.assertIn("archive", payload["nextAction"]["command"])
+        self.assertEqual(before["judgmentDigest"], after_summary["judgmentDigest"])
+        self.assertNotEqual(before["summaryDigest"], after_summary["summaryDigest"])
+        self.run_flow("archive")
+
+    def test_new_failure_invalidates_confirmed_human_retro(self) -> None:
+        self.write_config()
+        self.approve_with_red()
+        self.run_flow("--mode", "enforced", "verify", "--profile", "full")
+        self.add_runtime_acceptance()
+        self.confirm_retro()
+        evidence_path = self.evidence_file("TASK-001")
+        evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
+        evidence["checkRuns"].append(
+            {"checkId": "unit", "passed": False, "exitCode": 1, "durationMs": 10}
+        )
+        evidence_path.write_text(json.dumps(evidence), encoding="utf-8")
+
+        payload = json.loads(self.run_flow("status", "--json").stdout)
+        self.assertIn("retro", payload["nextAction"]["command"])
+
+    def test_legacy_human_retro_digest_remains_current_after_upgrade(self) -> None:
+        self.write_config()
+        self.approve_with_red()
+        self.run_flow("--mode", "enforced", "verify", "--profile", "full")
+        self.add_runtime_acceptance()
+        self.confirm_retro()
+        evidence_path = self.evidence_file("TASK-001")
+        evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
+        del evidence["practice"]["confirmation"]["judgmentDigest"]
+        evidence_path.write_text(json.dumps(evidence), encoding="utf-8")
+
+        payload = json.loads(self.run_flow("status", "--json").stdout)
+        self.assertIn("archive", payload["nextAction"]["command"])
+
     def test_redundant_command_surface_is_removed(self) -> None:
         help_text = self.run_flow("--help").stdout
 
