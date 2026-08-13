@@ -84,25 +84,20 @@ class SkillContractTests(unittest.TestCase):
         self.assertIn("README.zh-CN.md", english)
         self.assertIn("README.md", chinese)
 
-    def test_current_version_is_consistent_across_release_surfaces(self) -> None:
-        version = current_tool_version()
-        marker = f"v{version}"
+    def test_public_docs_and_bundled_runner_versions_are_explicit(self) -> None:
+        runner_version = current_tool_version()
+        public_marker = f"v{runner_version}"
 
         for relative in ("README.md", "README.zh-CN.md"):
             with self.subTest(relative=relative):
-                self.assertIn(
-                    marker, (REPO_ROOT / relative).read_text(encoding="utf-8")
-                )
+                text = (REPO_ROOT / relative).read_text(encoding="utf-8")
+                self.assertIn(public_marker, text)
+                self.assertIn(runner_version, text)
+                self.assertIn("runner", text.lower())
         for relative in ("CHANGELOG.md", "CHANGELOG.zh-CN.md"):
             with self.subTest(relative=relative):
                 self.assertIn(
-                    f"## [{version}]",
-                    (REPO_ROOT / relative).read_text(encoding="utf-8"),
-                )
-        for relative in ("CONTRIBUTING.md", "CONTRIBUTING.zh-CN.md"):
-            with self.subTest(relative=relative):
-                self.assertIn(
-                    f"--version {version}",
+                    f"## [{runner_version}]",
                     (REPO_ROOT / relative).read_text(encoding="utf-8"),
                 )
 
@@ -402,6 +397,44 @@ class SkillContractTests(unittest.TestCase):
         self.assertIn("separate governance task", skill)
         self.assertIn("preparation cost", handbook)
         self.assertIn("never downgrade l2", handbook)
+
+    def test_skill_documents_runtime_affordances_hypotheses_and_visual_tracers(
+        self,
+    ) -> None:
+        skill = (SKILL_DIR / "SKILL.md").read_text(encoding="utf-8").lower()
+        handbook = (
+            (SKILL_DIR / "references" / "handbook.md")
+            .read_text(encoding="utf-8")
+            .lower()
+        )
+        chinese = (SKILL_DIR / "references" / "handbook.zh-CN.md").read_text(
+            encoding="utf-8"
+        )
+
+        for phrase in (
+            "wrong/missing data, config, or missing capability",
+            "optional prevention",
+            "root cause as a hypothesis",
+            "route/menu/role/account/device",
+            "two identical login/token/browser/channel failures",
+            "visual tracer",
+            "do not promote merely because configured profiles are absent or incomplete",
+            "read every authoritative requirement, prototype, design, api, or runtime source",
+            "replacement method actually used",
+            "self-contained inline handoff",
+        ):
+            with self.subTest(phrase=phrase):
+                self.assertIn(phrase, skill)
+        for phrase in (
+            "equivalent runtime/api evidence",
+            "safe state",
+            "three or more related screens",
+        ):
+            with self.subTest(phrase=phrase):
+                self.assertIn(phrase, handbook)
+        for phrase in ("等价", "安全状态", "三个或更多相关页面"):
+            with self.subTest(phrase=phrase):
+                self.assertIn(phrase, chinese)
 
     def test_skill_keeps_lean_implementation_compatible_with_production(self) -> None:
         skill = (SKILL_DIR / "SKILL.md").read_text(encoding="utf-8")

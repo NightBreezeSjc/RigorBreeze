@@ -127,6 +127,10 @@ reason, unregistered Git worktrees, and local task branches preserved by policy.
 Candidates include cleanliness, integration proof, expected HEAD, and whether one-time confirmation is required. Unmanaged removal never deletes its branch.
 This is advisory state derived from Git and the registry, not another task or
 evidence source.
+The compatible `tasks` list remains available, while `worktrees` groups those
+records by physical path and reports the executing bundled runner separately
+from each project's installed runner. Cleanup candidates likewise appear once
+per physical path with all related `taskIds`.
 
 Evidence JSON may store:
 
@@ -154,6 +158,13 @@ signals; review candidates from this evidence instead of creating another log.
 Legacy attestations remain readable during schema upgrade but are not part of
 the current command surface. Reading schema v1/v2/v3 upgrades it without deleting
 RED, verification, acceptance, release, or practice history.
+
+When an approved acceptance result is unchanged but its test is strengthened
+after implementation begins, a new RED may contain `baselineReplay`. The runner
+creates a temporary detached worktree at the recorded approval SHA, overlays
+only current Allowed-Scope test files, and reruns the same RED command. The
+field binds the replay SHA, previous RED time, and current test digests. It never
+permits production, dependency, configuration, or migration overlays.
 
 Do not store credentials, production data, full logs containing personal data, or unverifiable claims.
 

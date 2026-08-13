@@ -246,6 +246,25 @@ Risk: L1
         )
         self.assertEqual(state_path.read_bytes(), before)
 
+    def test_interaction_uses_structured_action_owner_not_approved_wording(
+        self,
+    ) -> None:
+        self.run_flow("init")
+        self.run_flow("new", "TASK-001", "--title", "One slice", "--risk", "L0")
+        task = self.complete_task()
+        task.write_text(
+            task.read_text(encoding="utf-8").replace("Risk: L1", "Risk: L0"),
+            encoding="utf-8",
+        )
+        approval = json.loads(self.run_flow("status", "--json").stdout)
+        self.assertEqual(approval["interaction"]["next"]["actor"], "user")
+        self.assertEqual(approval["interaction"]["next"]["kind"], "approval")
+        self.run_flow("approve", "task")
+        implementation = json.loads(self.run_flow("status", "--json").stdout)
+        self.assertIn("approved slice", implementation["nextAction"]["reason"])
+        self.assertEqual(implementation["interaction"]["next"]["actor"], "codex")
+        self.assertEqual(implementation["interaction"]["next"]["kind"], "work")
+
     def test_l1_implementation_requires_observed_red_with_expected_failure(
         self,
     ) -> None:

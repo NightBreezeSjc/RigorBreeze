@@ -27,6 +27,28 @@ The project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). 
 - Reframed the repository for first-time adopters with bilingual onboarding, explicit safety boundaries, and a complete first-task walkthrough.
 - Added concise contribution and security policies plus an MIT license.
 
+## [0.15.0] - Tighten Agent behavior without expanding the workflow surface
+
+### Changed
+
+- Re-observe strengthened tests against the immutable approval baseline when the contract and acceptance result are unchanged, while rejecting production-file overlays and unrelated environment failures.
+- Group `status --all` and cleanup projections by physical worktree, retain compatible representative task IDs, and expose the executing bundled runner separately from installed project runners.
+- Carry explicit `actor` and `kind` in next actions so wording such as "Implement the approved slice" remains Codex work rather than a false user-approval handoff.
+- Require the Agent to prove whether a defect is wrong or missing data, wrong config, or a missing capability before widening scope, and keep the minimal correction separate from optional prevention.
+- Treat unproven root causes as hypotheses until discriminating runtime evidence exists, instead of converting review guesses or repeated failures into confirmed diagnoses.
+- Verify the real route, menu, role, account, and device entry before assigning manual acceptance; where one affordance is unavailable, report honest `N/A` and substitute equivalent runtime/API evidence.
+- After two identical login, token, browser, or channel failures, stop repeating the same path, preserve a safe state, and switch diagnostic methods.
+- Require one visual tracer before fanning out across three or more related screens or a new visual language, unless the change is an exact reuse of an already approved component.
+
+### Validation
+
+- Expand the deterministic Agent-behavior contract from fourteen to sixteen scenarios by extending the existing context/diagnosis cases and adding runtime-affordance-before-handoff plus visual-tracer-before-fanout.
+- Score observable commands, changed paths, fresh verification, and a required user-facing result summary instead of trusting self-declared behavior markers; loaded rule text and command output cannot satisfy an Agent-action assertion.
+
+### Compatibility
+
+- Public CLI, Spec Tree, state/config schema v5, evidence schema v4, automation journal v1, and dependencies remain unchanged. The bundled runner is now v0.15.0; active project tasks keep their installed runner frozen until closure.
+
 ## [0.14.0] - Make rigor proportional to consequence
 
 ### Added

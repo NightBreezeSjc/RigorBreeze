@@ -1544,6 +1544,96 @@ artifacts = ["artifacts/app.bin"]
                 check=True,
             )
 
+    def test_status_groups_historical_tasks_by_physical_worktree(self) -> None:
+        self.init_git()
+        subprocess.run(["git", "branch", "-M", "main"], cwd=self.root, check=True)
+        self.run_flow("init")
+        self.commit_all("install flow")
+        created = self.run_flow(
+            "new",
+            "TASK-415",
+            "--title",
+            "shared initiative",
+            "--risk",
+            "L0",
+            "--worktree",
+            "auto",
+        )
+        worktree = Path(created.stdout.split("worktree: ", 1)[1].splitlines()[0])
+        registry = json.loads(self.registry_path().read_text(encoding="utf-8"))
+        first = registry["tasks"]["TASK-415"]
+        registry["tasks"]["TASK-415-OLD"] = {
+            **first,
+            "taskId": "TASK-415-OLD",
+            "archived": True,
+            "phase": "archived",
+            "owner": None,
+        }
+        self.registry_path().write_text(json.dumps(registry), encoding="utf-8")
+        root_version = self.root / "scripts/flow_state.py"
+        root_version.write_text(
+            root_version.read_text(encoding="utf-8").replace(
+                'TOOL_VERSION = "0.15.0"', 'TOOL_VERSION = "0.13.0"'
+            ),
+            encoding="utf-8",
+        )
+
+        payload = json.loads(self.run_flow("status", "--all", "--json").stdout)
+
+        grouped = [
+            item
+            for item in payload["worktrees"]
+            if item["worktree"] == str(worktree.resolve())
+        ]
+        self.assertEqual(len(grouped), 1)
+        self.assertEqual(grouped[0]["taskIds"], ["TASK-415", "TASK-415-OLD"])
+        self.assertEqual(grouped[0]["activeTaskIds"], ["TASK-415"])
+        self.assertEqual(grouped[0]["runnerVersion"], "0.15.0")
+        self.assertEqual(payload["installation"]["runnerVersion"], "0.13.0")
+        self.assertEqual(payload["executionRunner"]["version"], "0.15.0")
+        self.assertEqual(payload["executionRunner"]["source"], "bundled")
+
+    def test_cleanup_projection_deduplicates_shared_worktree(self) -> None:
+        self.init_git()
+        subprocess.run(["git", "branch", "-M", "main"], cwd=self.root, check=True)
+        self.run_flow("init")
+        self.commit_all("install flow")
+        created = self.run_flow(
+            "new",
+            "TASK-416",
+            "--title",
+            "shared cleanup",
+            "--risk",
+            "L0",
+            "--worktree",
+            "auto",
+        )
+        worktree = Path(created.stdout.split("worktree: ", 1)[1].splitlines()[0])
+        registry = json.loads(self.registry_path().read_text(encoding="utf-8"))
+        first = registry["tasks"]["TASK-416"]
+        for task_id in ("TASK-416", "TASK-416-OLD"):
+            registry["tasks"][task_id] = {
+                **first,
+                "taskId": task_id,
+                "integrated": True,
+                "archived": task_id.endswith("OLD"),
+                "phase": "integrated",
+            }
+        self.registry_path().write_text(json.dumps(registry), encoding="utf-8")
+
+        cleanup = json.loads(self.run_flow("status", "--all", "--json").stdout)[
+            "cleanup"
+        ]
+        candidates = [
+            item
+            for bucket in ("removableWorktrees", "retainedWorktrees")
+            for item in cleanup[bucket]
+            if item.get("worktree") == str(worktree.resolve())
+        ]
+        self.assertEqual(len(candidates), 1)
+        self.assertEqual(candidates[0]["taskIds"], ["TASK-416", "TASK-416-OLD"])
+        self.assertEqual(candidates[0]["taskId"], "TASK-416")
+
     def test_status_does_not_offer_the_current_primary_worktree_for_cleanup(
         self,
     ) -> None:

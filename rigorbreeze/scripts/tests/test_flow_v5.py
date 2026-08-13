@@ -51,6 +51,68 @@ class FlowV5Tests(FlowTestCase):
         ).stdout.strip()
         return (self.root / common / "rigorbreeze" / "records").resolve()
 
+    def prepare_red_replay_task(
+        self, task_id: str
+    ) -> tuple[Path, Path, tuple[str, ...]]:
+        self.initialize_versioned_project()
+        self.run_flow("new", task_id, "--title", "Replay RED", "--risk", "L1")
+        task = self.task_file(task_id)
+        task.write_text(
+            f"""# {task_id}: Replay RED
+
+Risk: L1
+
+Depends-On: none
+Task-Origin: current-request
+Waiting-On: none
+Runtime-Claims: none
+Operational-Modes: N/A - no conditional runtime behavior
+
+## Authoritative inputs
+- Requirement: return a stable value
+
+## Allowed scope
+- app/
+- tests/
+
+## Forbidden scope
+- production configuration
+
+## Acceptance criteria
+- REQ-001: public behavior returns the stable value
+
+## Test seams
+- Seam: public file behavior
+- Independent oracle: literal expected value
+
+## Verification commands
+- configured profile
+""",
+            encoding="utf-8",
+        )
+        tests = self.root / "tests"
+        tests.mkdir()
+        test_file = tests / "test_feature.py"
+        test_file.write_text("raise AssertionError('missing')\n", encoding="utf-8")
+        self.run_flow("approve", "task")
+        command = (
+            "red",
+            "--requirement",
+            "REQ-001",
+            "--test",
+            "tests/test_feature.py",
+            "--expect-pattern",
+            "missing",
+            "--",
+            sys.executable,
+            "tests/test_feature.py",
+        )
+        self.run_flow(*command)
+        source = self.root / "app"
+        source.mkdir()
+        (source / "feature.py").write_text("VALUE = 1\n", encoding="utf-8")
+        return task, test_file, command
+
     def test_contract_detail_tracks_risk_instead_of_loading_every_task(self) -> None:
         l1 = flow_state.task_template("TASK-500", "Compact", "L1")
         l2 = flow_state.task_template("TASK-500A", "Full", "L2")
@@ -402,6 +464,99 @@ Operational-Modes: N/A - no conditional runtime behavior
         self.assertFalse(self.evidence_file("TASK-508").exists())
         state = json.loads(self.state_path().read_text(encoding="utf-8"))
         self.assertIsNone(state["activeTask"])
+
+    def test_changed_test_can_reobserve_red_against_the_approved_baseline(self) -> None:
+        _, test_file, red_command = self.prepare_red_replay_task("TASK-509")
+        test_file.write_text(
+            "raise AssertionError('missing again')\n", encoding="utf-8"
+        )
+
+        replayed = self.run_flow(*red_command)
+
+        self.assertIn("approved baseline", replayed.stdout)
+        self.assertTrue((self.root / "app/feature.py").is_file())
+        evidence = json.loads(self.evidence_file("TASK-509").read_text())
+        latest = evidence["tddChain"][-1]["red"]
+        self.assertEqual(
+            latest["baselineReplay"]["baselineSha"], evidence["baseline"]["head"]
+        )
+        self.assertEqual(
+            latest["baselineReplay"]["previousRedObservedAt"],
+            evidence["tddChain"][-2]["red"]["observedAt"],
+        )
+        status = subprocess.run(
+            ["git", "worktree", "list", "--porcelain"],
+            cwd=self.root,
+            text=True,
+            encoding="utf-8",
+            capture_output=True,
+            check=True,
+        ).stdout
+        self.assertNotIn("rigorbreeze-red-", status)
+
+    def test_baseline_red_replay_rejects_contract_change_and_production_tests(
+        self,
+    ) -> None:
+        task, test_file, command = self.prepare_red_replay_task("TASK-510")
+        test_file.write_text(
+            "raise AssertionError('missing again')\n", encoding="utf-8"
+        )
+        production_overlay = (
+            *command[:-2],
+            sys.executable,
+            str(self.root / "app/feature.py"),
+        )
+        unsafe = self.run_flow(*production_overlay, expected=2)
+        self.assertIn("must execute every declared --test file", unsafe.stderr)
+
+        task.write_text(
+            task.read_text(encoding="utf-8") + "\nChanged outcome.\n", encoding="utf-8"
+        )
+
+        blocked = self.run_flow(*command, expected=2)
+
+        self.assertIn("approval", blocked.stderr.lower())
+
+    def test_baseline_red_replay_cleans_temporary_worktree_after_mismatch(self) -> None:
+        _, test_file, original = self.prepare_red_replay_task("TASK-511")
+        test_file.write_text("raise AssertionError('different')\n", encoding="utf-8")
+
+        self.run_flow(*original, expected=2)
+
+        listed = subprocess.run(
+            ["git", "worktree", "list", "--porcelain"],
+            cwd=self.root,
+            text=True,
+            encoding="utf-8",
+            capture_output=True,
+            check=True,
+        ).stdout
+        self.assertNotIn("rigorbreeze-red-", listed)
+
+    def test_baseline_red_replay_rejects_missing_baseline_and_environment_failure(
+        self,
+    ) -> None:
+        _, test_file, command = self.prepare_red_replay_task("TASK-512")
+        evidence_path = self.evidence_file("TASK-512")
+        evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
+        valid_baseline = evidence["baseline"]["head"]
+        evidence["baseline"]["head"] = "0" * 40
+        evidence_path.write_text(json.dumps(evidence), encoding="utf-8")
+        test_file.write_text(
+            "raise AssertionError('missing again')\n", encoding="utf-8"
+        )
+
+        missing = self.run_flow(*command, expected=2)
+        self.assertIn("baseline replay commit is missing", missing.stderr)
+
+        evidence["baseline"]["head"] = valid_baseline
+        evidence_path.write_text(json.dumps(evidence), encoding="utf-8")
+        test_file.write_text("import package_that_does_not_exist\n", encoding="utf-8")
+        environment = self.run_flow(*command, expected=2)
+        self.assertIn("tooling or environment", environment.stderr)
+
+        listed = self.git_output("worktree", "list", "--porcelain")
+        self.assertNotIn("rigorbreeze-red-", listed)
 
 
 if __name__ == "__main__":

@@ -143,6 +143,8 @@ Do not require a perfect user prompt. Build a compact context intake inside Auth
 
 For a compound request, preserve a short exact user phrase or a resolvable authoritative source and translate the request into observable `ADD`, `REMOVE`, `MOVE`, `RETAIN`, or `REPLACE` atoms. State each atom as a final product condition and map it to one acceptance ID or an explicit out-of-scope reason. This mapping lives in the existing Authoritative inputs and Acceptance criteria; it is not another requirements document.
 
+Before widening the fix, prove whether the defect is wrong/missing data, wrong config, or a missing capability. Keep the minimal correction separate from optional prevention work; if prevention is not already accepted, record it as a follow-up instead of silently expanding the slice.
+
 Negative phrases such as “not shown”, “missing”, “cannot”, or “not changed” can describe either the current defect or the desired result. Resolve that direction from requirements, prototype, current UI, tests and follow-up context. If evidence cannot decide and the two readings produce different results, ask one short binary outcome question. Do not silently choose a direction.
 
 Role prompts such as “act as a CTO” may encourage a perspective but never replace project evidence, acceptance criteria, or human authority. After compaction or a follow-up write request, re-run RigorBreeze status and ownership checks even when a debugging or review skill is also active.
@@ -154,7 +156,7 @@ Before approval, agree on:
 - production paths that may change;
 - the requirement or design version used for acceptance.
 
-Then perform one semantic self-review. Reject unresolved placeholders and internal contradictions, split an oversized outcome, and make source-of-truth, freshness, fallback, and failure behavior unambiguous. For UI changes, acceptance covers four applicable dimensions: what must exist, what must be absent, order/location, and behavior that must remain. Present a compact final-state checklist before approval and confirm that every observable atom is covered. Correct facts recoverable from the repository directly; ask the developer only when different answers produce materially different outcomes.
+Then perform one semantic self-review. Reject unresolved placeholders and internal contradictions, split an oversized outcome, and make source-of-truth, freshness, fallback, and failure behavior unambiguous. Treat any unproven root cause as a hypothesis until runtime evidence distinguishes it. For UI changes, acceptance covers four applicable dimensions: what must exist, what must be absent, order/location, and behavior that must remain. When three or more related screens change together, or a new visual language is introduced, trace one representative screen first unless the work is an exact reuse of an already approved component. Present a compact final-state checklist before approval and confirm that every observable atom is covered. Correct facts recoverable from the repository directly; ask the developer only when different answers produce materially different outcomes.
 
 The Skill first calls its bundled runner and inspects the `installation` projection. It must not begin product-code writes until the task exists, approval is valid, the current window owns the worktree, and the runner/configuration/baseline are usable. An active task freezes project-runner upgrades; finish or safely abandon that task with the bundled runner before `init` replaces managed files.
 
@@ -266,6 +268,8 @@ Accept the capability that actually changed:
 - migration: cloned-data rehearsal, before/after assertions, backup/restore or forward-fix proof;
 - external integration: prefer sanitized real responses or provider-sandbox fixtures; cover enabled, disabled, and unavailable modes plus failure behavior. Verify wire serialization, text-form JSON, URL-encoding count, database-dialect semantics, and order-creation or other business preconditions where applicable. Mock or temporary credentials prove only a local contract/build, never real acceptance.
 
+Before assigning manual acceptance, confirm the actual route, menu, role, account, and device entry that will be used. If one of those affordances is unavailable, say so honestly as `N/A - <reason>` and substitute equivalent runtime/API evidence instead of pretending a human can click a path that does not exist.
+
 Humans approve visual baselines. Never update screenshots only to remove a failure.
 
 Only an explicit production release requires:
@@ -341,6 +345,8 @@ task branch. A high-risk task with one writer uses stricter gates, not an extra
 worktree merely because it is important.
 
 Before one task asks another task or window to act, show a visible handoff: destination task, observable result, allowed scope, forbidden scope, dependency or blocker, and owner. This notice improves user understanding but does not create another authority; the receiving task contract remains controlling.
+
+After two identical login, token, browser, or channel failures, stop repeating the same path. Preserve a safe state, switch to a different diagnostic method or runtime surface, and keep the root cause labeled as a hypothesis until the new evidence discriminates it.
 
 All worktree state is Git-private. `status --json` projects the workflow baseline from the real base branch and distinguishes missing, partial, modified, current, and blocked states. A one-time baseline commit is allowed only on that branch, at the expected HEAD, with no active task or mixed product changes.
 
