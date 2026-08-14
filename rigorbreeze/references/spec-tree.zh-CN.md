@@ -88,7 +88,7 @@ accepted → release-ready → protected release gate
 
 活动合同缺失时，当前与聚合状态会投影 `lifecycle=orphaned-record`、阻断就绪并指出需要恢复的准确合同。已有 evidence 演进候选只按任务 ID 汇总，并给出可复制的 `$rigorbreeze 汇总这个项目的演进候选`；status 展示提醒时不会修改原 evidence。
 
-`status --all --json` 还包含运行资源声明/冲突与 `cleanup` 投影，列出可删除的已集成受管 worktree、带安全原因的保留项、未登记 Git worktree，以及按策略保留的本地任务分支；候选同时显示干净状态、集成证明、expected HEAD 和是否需要一次性确认。未登记清理永不删除分支。该投影只从 Git 和注册表推导，是提示状态，不是第二套任务或证据事实源。
+`status --all --compact --json` 是并行工作的默认机器交接：保留活动任务所有权、依赖、阻断、下一动作和 cleanup 汇总计数，并省略已关闭任务明细。完整 `status --all --json` 还包含运行资源声明/冲突与详细 `cleanup` 投影，列出可删除的已集成受管 worktree、带安全原因的保留项、未登记 Git worktree，以及按策略保留的本地任务分支；候选同时显示干净状态、集成证明、expected HEAD 和是否需要一次性确认。未登记清理永不删除分支。该投影只从 Git 和注册表推导，是提示状态，不是第二套任务或证据事实源。
 
 兼容的 `tasks` 列表继续保留；新增 `worktrees` 按物理路径聚合这些记录，并分别展示实际执行的 bundled Runner 与各项目安装 Runner。cleanup 候选也按物理路径只出现一次，同时列出全部关联 `taskIds`。
 

@@ -136,6 +136,26 @@ command = ["python3", "-c", "print('secret ok')"]
             tasks["TASK-101"]["worktree"], tasks["TASK-102"]["worktree"]
         )
 
+        compact_result = self.run_flow("status", "--all", "--compact", "--json")
+        compact = json.loads(compact_result.stdout)
+        compact_tasks = {item["taskId"]: item for item in compact["tasks"]}
+        self.assertEqual(set(compact_tasks), {"TASK-101", "TASK-102"})
+        self.assertEqual(
+            compact_tasks["TASK-102"]["nextAction"],
+            tasks["TASK-102"]["nextAction"],
+        )
+        self.assertEqual(
+            compact_tasks["TASK-102"]["allowedScope"],
+            tasks["TASK-102"]["allowedScope"],
+        )
+        self.assertEqual(compact["overview"], payload["overview"])
+        self.assertEqual(
+            compact["cleanup"]["removableWorktrees"],
+            len(payload["cleanup"]["removableWorktrees"]),
+        )
+        self.assertNotIn("createdAt", compact_tasks["TASK-101"])
+        self.assertLess(len(compact_result.stdout), len(json.dumps(payload)))
+
         for item in tasks.values():
             worktree = Path(item["worktree"])
             git_path = subprocess.run(
@@ -1573,7 +1593,7 @@ artifacts = ["artifacts/app.bin"]
         root_version = self.root / "scripts/flow_state.py"
         root_version.write_text(
             root_version.read_text(encoding="utf-8").replace(
-                'TOOL_VERSION = "0.15.0"', 'TOOL_VERSION = "0.13.0"'
+                'TOOL_VERSION = "0.15.1"', 'TOOL_VERSION = "0.13.0"'
             ),
             encoding="utf-8",
         )
@@ -1588,9 +1608,9 @@ artifacts = ["artifacts/app.bin"]
         self.assertEqual(len(grouped), 1)
         self.assertEqual(grouped[0]["taskIds"], ["TASK-415", "TASK-415-OLD"])
         self.assertEqual(grouped[0]["activeTaskIds"], ["TASK-415"])
-        self.assertEqual(grouped[0]["runnerVersion"], "0.15.0")
+        self.assertEqual(grouped[0]["runnerVersion"], "0.15.1")
         self.assertEqual(payload["installation"]["runnerVersion"], "0.13.0")
-        self.assertEqual(payload["executionRunner"]["version"], "0.15.0")
+        self.assertEqual(payload["executionRunner"]["version"], "0.15.1")
         self.assertEqual(payload["executionRunner"]["source"], "bundled")
 
     def test_cleanup_projection_deduplicates_shared_worktree(self) -> None:

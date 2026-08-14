@@ -1261,7 +1261,9 @@ def aggregate(root: Path) -> dict[str, Any]:
             item["lifecycle"] = "active"
             item["nextAction"] = {
                 "reason": "One or more Depends-On tasks are not integrated.",
-                "command": "wait for dependencies, then refresh status --all --json",
+                "command": (
+                    "wait for dependencies, then refresh status --all --compact --json"
+                ),
             }
         else:
             item["lifecycle"] = "active"

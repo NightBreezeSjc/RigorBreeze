@@ -1124,9 +1124,80 @@ def worktree_status_projection(
     return projected
 
 
+def compact_all_status(payload: dict[str, Any]) -> dict[str, Any]:
+    """Project the active coordination facts without historical task detail."""
+    task_keys = (
+        "taskId",
+        "title",
+        "risk",
+        "lifecycle",
+        "readiness",
+        "phase",
+        "worktree",
+        "branch",
+        "baseBranch",
+        "worktreeExists",
+        "dependsOn",
+        "waitingOn",
+        "allowedScope",
+        "runtimeClaims",
+        "runtimeConflicts",
+        "baselineStale",
+        "verification",
+        "fullProfile",
+        "head",
+        "nextAction",
+        "workflowBypass",
+        "automation",
+        "issues",
+    )
+    tasks = [
+        {key: item[key] for key in task_keys if key in item}
+        for item in payload.get("tasks", [])
+        if item.get("lifecycle") not in {"closed", "integrated"}
+    ]
+    active_ids = {str(item.get("taskId")) for item in tasks if item.get("taskId")}
+    worktrees = [
+        item
+        for item in payload.get("worktrees", [])
+        if active_ids.intersection(str(value) for value in item.get("taskIds", []))
+    ]
+    cleanup = payload.get("cleanup", {})
+    evolution = payload.get("evolution", {})
+    return {
+        "workflowVersion": payload.get("workflowVersion"),
+        "executionRunner": payload.get("executionRunner"),
+        "installation": payload.get("installation"),
+        "workflowBaseline": payload.get("workflowBaseline"),
+        "overview": payload.get("overview", {}),
+        "issues": payload.get("issues", []),
+        "tasks": tasks,
+        "worktrees": worktrees,
+        "topologicalOrder": [
+            task_id
+            for task_id in payload.get("topologicalOrder", [])
+            if str(task_id) in active_ids
+        ],
+        "cleanup": {
+            "removableWorktrees": len(cleanup.get("removableWorktrees", [])),
+            "retainedWorktrees": len(cleanup.get("retainedWorktrees", [])),
+            "retainedBranches": len(cleanup.get("retainedBranches", [])),
+        },
+        "evolution": {
+            "candidateCount": evolution.get("candidateCount", 0),
+            "command": evolution.get("command"),
+        },
+    }
+
+
 def command_status(
-    root: Path, json_output: bool = False, all_worktrees: bool = False
+    root: Path,
+    json_output: bool = False,
+    all_worktrees: bool = False,
+    compact: bool = False,
 ) -> None:
+    if compact and not (all_worktrees and json_output):
+        raise FlowError("status --compact requires --all --json")
     if all_worktrees:
         if not is_git_repo(root):
             raise FlowError("status --all requires a Git repository")
@@ -1205,6 +1276,8 @@ def command_status(
             "worktrees": len(payload["worktrees"]),
         }
         if json_output:
+            if compact:
+                payload = compact_all_status(payload)
             print(json.dumps(payload, ensure_ascii=False, sort_keys=True))
             return
         overview = payload["overview"]
@@ -3268,6 +3341,7 @@ def build_parser() -> argparse.ArgumentParser:
     status = sub.add_parser("status")
     status.add_argument("--json", action="store_true")
     status.add_argument("--all", action="store_true")
+    status.add_argument("--compact", action="store_true")
     approve = sub.add_parser("approve")
     approve.add_argument("kind", choices=("task", "dependency", "migration", "overlap"))
     approve.add_argument("--name")
@@ -3348,7 +3422,7 @@ def main() -> int:
     root = args.root.resolve()
     try:
         if args.command == "status":
-            command_status(root, args.json, args.all)
+            command_status(root, args.json, args.all, args.compact)
             return 0
         if args.command == "doctor":
             command_doctor(root, args.json, args.all, args.repair, args.migrate_records)
