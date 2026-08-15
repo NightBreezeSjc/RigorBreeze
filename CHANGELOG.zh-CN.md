@@ -79,6 +79,7 @@ RigorBreeze 的重要变更都会记录在本文档中。
 
 - 确定性 Agent 行为合同从十四个扩展为十六个场景：扩展现有 context/diagnosis 场景，并新增 runtime-affordance-before-handoff 与 visual-tracer-before-fanout。
 - 行为评分以真实命令、修改路径、新鲜验证和必填的用户结果摘要为准，不再信任 Agent 自报标签；读取到的规则原文和命令输出不能冒充 Agent 已执行的动作。
+- 已确认复盘在追加全绿验证后继续有效；只有任务/代码事实、失败、验收、绕过或实践事件变化时，才要求用户重新判断。
 
 ### 兼容性
 

@@ -2128,6 +2128,7 @@ def command_retro(
             "exceptions": redact(exceptions or ""),
             "workflowImpact": workflow_impact,
             "evolutionCandidate": evolution_candidate,
+            "judgmentDigest": summary["judgmentDigest"],
             "summaryDigest": summary["summaryDigest"],
             "taskDigest": task_digest(root, state),
             "projectFingerprint": project_fingerprint(root),

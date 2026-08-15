@@ -753,9 +753,29 @@ def practice_summary(root: Path, state: dict[str, Any]) -> dict[str, Any]:
         "practiceEvents": evidence.get("practice", {}).get("events", []),
         "generatedAt": now_iso(),
     }
+    summary["judgmentDigest"] = sha256_bytes(
+        json.dumps(
+            {
+                "taskId": summary["taskId"],
+                "risk": summary["risk"],
+                "failedChecks": summary["failedChecks"],
+                "failureCategories": summary["failureCategories"],
+                "potentialBypasses": summary["potentialBypasses"],
+                "firstAcceptancePassed": summary["firstAcceptancePassed"],
+                "acceptanceRecords": summary["acceptanceRecords"],
+                "practiceEvents": summary["practiceEvents"],
+            },
+            ensure_ascii=False,
+            sort_keys=True,
+        ).encode()
+    )
     summary["summaryDigest"] = sha256_bytes(
         json.dumps(
-            {key: value for key, value in summary.items() if key != "generatedAt"},
+            {
+                key: value
+                for key, value in summary.items()
+                if key not in {"generatedAt", "judgmentDigest"}
+            },
             ensure_ascii=False,
             sort_keys=True,
         ).encode()
@@ -817,11 +837,14 @@ def retro_confirmation_current(root: Path, state: dict[str, Any]) -> bool:
     if not confirmation:
         return False
     summary = practice_summary(root, state)
-    return bool(
-        confirmation.get("taskDigest") == task_digest(root, state)
-        and confirmation.get("projectFingerprint") == project_fingerprint(root)
-        and confirmation.get("summaryDigest") == summary["summaryDigest"]
-    )
+    if confirmation.get("taskDigest") != task_digest(root, state) or confirmation.get(
+        "projectFingerprint"
+    ) != project_fingerprint(root):
+        return False
+    judgment_digest = confirmation.get("judgmentDigest")
+    if judgment_digest:
+        return judgment_digest == summary["judgmentDigest"]
+    return confirmation.get("summaryDigest") == summary["summaryDigest"]
 
 
 def current_structured_records(
@@ -1034,6 +1057,7 @@ def ensure_close(root: Path, state: dict[str, Any]) -> None:
             "exceptions": "none",
             "workflowImpact": "unreviewed",
             "evolutionCandidate": False,
+            "judgmentDigest": summary["judgmentDigest"],
             "summaryDigest": summary["summaryDigest"],
             "taskDigest": task_digest(root, state),
             "projectFingerprint": project_fingerprint(root),

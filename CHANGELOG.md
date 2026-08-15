@@ -78,6 +78,7 @@ The project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). 
 
 - Expand the deterministic Agent-behavior contract from fourteen to sixteen scenarios by extending the existing context/diagnosis cases and adding runtime-affordance-before-handoff plus visual-tracer-before-fanout.
 - Score observable commands, changed paths, fresh verification, and a required user-facing result summary instead of trusting self-declared behavior markers; loaded rule text and command output cannot satisfy an Agent-action assertion.
+- Keep a confirmed retrospective current across additional all-green verification reruns; only changed task/code facts, failures, acceptance, bypasses, or practice events require the human judgment again.
 
 ### Compatibility
 
