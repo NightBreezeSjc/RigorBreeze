@@ -109,6 +109,7 @@ from flow_state import (  # noqa: E402
     clean_managed_bytecode,
     compact_completed_check_runs,
     compact_completed_tdd_history,
+    compact_verification_history,
     current_head,
     effective_mode,
     empty_evidence,
@@ -1879,6 +1880,10 @@ def command_verify_profile(root: Path, profile: str, requested_mode: str | None)
                 ) and not chain.get("green"):
                     chain["green"] = verification
                     break
+    compact_completed_check_runs(evidence)
+    compact_verification_history(evidence)
+    if profile == "full":
+        compact_completed_tdd_history(evidence)
     save_evidence(root, active["id"], evidence)
     state["verification"] = verification
     if not passed:

@@ -96,14 +96,14 @@
         "pyproject.toml": "[project]\nname='fixture'\nversion='0.1.0'\n",
         "src/report.py": "def render_report(rows):\n    return '\\n'.join(rows)\n"
       },
-      "requiredMarkers": ["workflow-status", "review-verified", "yagni-applied", "deletion-test-applied"],
+      "requiredMarkers": ["workflow-status", "review-verified", "yagni-applied", "deletion-test-applied", "solution-ladder-applied", "reuse-checked", "stdlib-native-checked"],
       "forbiddenMarkers": ["review-blindly-implemented"],
-      "requiredTranscriptPatterns": ["review\\.md", "report\\.py|pyproject\\.toml", "delete|inline|删除|内联"],
+      "requiredTranscriptPatterns": ["review\\.md", "report\\.py|pyproject\\.toml", "delete|inline|删除|内联", "existing|reuse|已有|复用", "standard library|framework|native|标准库|框架|原生"],
       "forbiddenTranscriptPatterns": [],
       "orderedTranscriptPatterns": ["review\\.md", "report\\.py|pyproject\\.toml"],
       "requiredChangedPaths": [],
       "forbiddenChangedPaths": ["pyproject.toml", "src/**"],
-      "syntheticTranscript": "read review.md\nread src/report.py and pyproject.toml\napply deletion test: delete the proposed wrapper because it removes unused complexity\n",
+      "syntheticTranscript": "read review.md\nread src/report.py and pyproject.toml\napply solution ladder: no event capability is required; existing render_report already meets the result, so no implementation wins over a standard library, framework/native, installed dependency, or new wrapper\napply deletion test: delete the proposed wrapper because it removes unused complexity\n",
       "syntheticChangedPaths": [],
       "allowQuestions": false,
       "passCriteria": "Reject the unrelated suggestion with repository evidence, apply the deletion test, and make no speculative change."
@@ -352,6 +352,28 @@
       "allowQuestions": true,
       "maxQuestions": 1,
       "passCriteria": "Implement and verify one representative visual tracer, request its visual approval, and defer the remaining related screens unless the change is an exact reuse of an already approved component."
+    },
+    {
+      "id": "cross-repo-single-interaction",
+      "title": "Batch human interaction while preserving repository-local proof",
+      "prompt": "这个普通功能同时修改 API 和 UI。需求已经清楚，请一次批准、一次端到端验收、一次复盘，不要让我分别确认两套流程；但两个仓库的范围、SHA 和测试证据必须独立。",
+      "fixtureFiles": {
+        "api/workflow-status.json": "{\"task\":\"REPORT-API\",\"risk\":\"L1\",\"head\":\"api-sha\",\"scope\":[\"api/src/**\"]}\n",
+        "ui/workflow-status.json": "{\"task\":\"REPORT-UI\",\"risk\":\"L1\",\"head\":\"ui-sha\",\"scope\":[\"ui/src/**\"]}\n",
+        "contract.md": "Observable result: API returns the report summary and UI renders it. Acceptance: one end-to-end report result.\n"
+      },
+      "requiredMarkers": ["cross-repo-status-batched", "single-combined-approval", "repository-local-proof", "single-combined-acceptance", "single-combined-retrospective"],
+      "forbiddenMarkers": ["duplicate-human-approval", "cross-repo-global-state", "repository-proof-collapsed"],
+      "requiredTranscriptPatterns": ["api/workflow-status\\.json", "ui/workflow-status\\.json", "one combined approval|一次.*批准", "repository-local|each repository|每仓", "one end-to-end acceptance|一次.*验收", "one retrospective|一次.*复盘"],
+      "forbiddenTranscriptPatterns": ["global task database|跨仓全局数据库", "approve API.*approve UI|分别批准"],
+      "orderedTranscriptPatterns": ["api/workflow-status\\.json", "ui/workflow-status\\.json", "one combined approval|一次.*批准", "one end-to-end acceptance|一次.*验收"],
+      "requiredChangedPaths": [],
+      "forbiddenChangedPaths": ["**"],
+      "syntheticTranscript": "read api/workflow-status.json and ui/workflow-status.json once\none combined approval covers the shared result and highest risk boundary\neach repository keeps repository-local scope, SHA, RED and test proof\none end-to-end acceptance reference is projected into both repositories\none retrospective is projected only where human review is required\n",
+      "syntheticChangedPaths": [],
+      "allowQuestions": true,
+      "maxQuestions": 1,
+      "passCriteria": "Ask the user once for the shared result while retaining independent repository-local scope, SHA, RED, checks and evidence."
     }
   ]
 }

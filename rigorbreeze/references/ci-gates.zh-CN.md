@@ -33,6 +33,8 @@ enforced profile 包含项目为该 profile 声明的检查，每项都必须配
 
 仅在单次 profile 调用内，argv、解析后 cwd、有效环境和 timeout 完全一致的检查只启动一次。复用进程不等于复用策略：每个检查仍独立校验自己的报告和制品，并记录 `reusedFromCheckId`。
 
+成功 `full` 一旦绑定未变化的任务摘要、项目指纹、配置摘要和 HEAD，archive、commit 与 merge 门禁直接复用。仅仅切换流程阶段不会重跑 `full`；代码、合同、所有权、配置或外部状态变化才使快照失效，并且只重新验证受影响的仓库。
+
 ## GitLab
 
 把 `assets/ci/gitlab-ci.yml` 调整后接入已有 `.gitlab-ci.yml`。真实项目命令配置在 `rigorbreeze.toml`；YAML 直接调用策略执行器，不保留第二套命令表。保存报告、截图、迁移日志、SBOM、制品摘要和配置要求的脱敏高风险审计摘要，不上传 Git 私有 records。
