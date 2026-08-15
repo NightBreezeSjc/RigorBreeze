@@ -78,64 +78,6 @@ After delivery, reconcile from the base worktree. Automatically remove only clea
 
 ## Learn and complete
 
-Clean first-pass L1 may archive with a machine retrospective; L1 with friction and every L2/Emergency needs a prefilled human review. Record interpreted-request corrections without chat transcripts. A reusable workflow defect becomes a **separate Skill task** with a **self-contained inline handoff**, never a business-task expansion. Only judged workflow rework, unreasonable block/action, bypass, or harm becomes an evolution candidate; correct safety stops remain statistics. For evolution review, scan compact/private records for candidates and use `$rigorbreeze 汇总这个项目的演进候选`; do not create another log or silently relax a gate.
+Clean first-pass L1 may archive with a machine retrospective; L1 with friction and every L2/Emergency needs a prefilled human review. Additional all-green verification updates machine statistics without repeating an unchanged human judgment; changed task/code facts, failures, acceptance, bypasses, or practice events invalidate it. Record interpreted-request corrections without chat transcripts. A reusable workflow defect becomes a **separate Skill task** with a **self-contained inline handoff**, never a business-task expansion. Only judged workflow rework, unreasonable block/action, bypass, or harm becomes an evolution candidate; correct safety stops remain statistics. For evolution review, scan compact/private records for candidates and use `$rigorbreeze 汇总这个项目的演进候选`; do not create another log or silently relax a gate.
 
-- UI: real runtime, key states, screenshots, accessibility, and Playwright visual evidence.
-- Mini-app: formal build, developer-tool automation, real AppID/HTTPS environment, and device evidence.
-- Migration: cloned-data rehearsal, assertions, backup/restore or forward-fix proof.
-- Release, only when requested: one SHA/artifact across tests and UAT plus applicable governance. Freeze the approved operation scope before remote writes. A newly discovered critical risk stops the release; unrelated image, OS, database-engine, scanner, or deployment-framework work becomes a separate governance task instead of silently expanding the current release. Show the complete operation-plan stages and the one stage being executed; after pause/failure record the safe state and single resume action.
-
-Before any external Git, deployment, developer-tool, or platform write, reconstruct the **observed current state** from the system itself. Summarize already completed steps, current immutable identifiers, the one remaining action, and stop conditions; never repeat a completed step from an old plan or chat summary.
-
-Temporary or synthetic credentials prove buildability only; they cannot satisfy real-environment acceptance, deployment, or release evidence.
-
-AI cannot approve its own visual baseline, security exception, legal conclusion, or production release.
-
-## Parallel context and optional adapters
-
-Use compact outputs and read only the next needed source. `status --all --json` is the project handoff: worktree, branch, phase, dependencies, readiness, scope, freshness, and deterministic next action. `doctor --all --json` diagnoses drift; use `doctor --all --repair --json` only to explicitly rebuild the disposable Git-common registry and clear stale locks.
-
-For a large repository, an installed code-graph tool may help locate impact radius and affected tests only when its index reports the current Git SHA. Treat graph risk scores as hints, never as correctness gates or sources of truth.
-
-External multi-agent tools may consume `status --all --json`, but they never become a second source of truth. Before cross-task work, show one **visible handoff** naming destination, observable result, allowed scope, forbidden scope, dependency/blocker, and owner; when that is enough to route the work, emit the self-contained handoff inline instead of asking for a non-outcome delivery channel or creating a handoff file/task. The receiving task stays authoritative. The task Markdown, task evidence, Git, and the runner remain authoritative.
-
-`Depends-On` is repository-local. For cross-repository delivery, link the counterpart task and API/data contract under Authoritative inputs; do not complete consumer acceptance before the provider is integrated and verified.
-
-## Optional Git automation
-
-Read `[automation].level` before any Git action:
-
-- `manual`: no unattended Git write; an explicit current-message request may authorize one guarded commit or push.
-- `commit`: after enforced commit gates, stage and commit only allowed task files.
-- `push`: additionally push only `rigorbreeze/<task-id>` without force.
-- `merge`: additionally invoke configured GitHub/GitLab required-check and auto-merge argv adapters; never merge locally around protection.
-- `release`: additionally invoke configured release-check and release argv adapters for one immutable SHA/artifact.
-
-Never raise the configured level during initialization or upgrade. Before an automated action, summarize the exact action and target to the user; their project configuration is standing authorization only for that level. Tokens remain in Git/provider/CI credential stores. Commit/push authority never grants production migration or rollback authority. AI still cannot approve visual, security, legal, or production conclusions.
-
-Use `automate commit --once` or `automate push --once --remote <name> --branch <current> --expected-head <sha>` only when the user explicitly requested that action in the current message. One-time authority never persists or covers merge/release. An ordinary commit requires current configured `affected` or `full` evidence—never targeted—and reuses it without rerunning; archive, merge, and integration-branch delivery still require current full evidence and applicable acceptance/review. Push fetches first, requires a fast-forward target, never rebases or force-pushes, and verifies the remote SHA.
-
-After delivery or protected integration, run `reconcile --cleanup` from the base worktree. It may remove only clean, non-current, RigorBreeze-managed worktrees proven contained in the base and may delete their local branches only with safe `git branch -d` and no remote uncertainty. Retain patch-equivalent, uncontained, unregistered, current, dirty, or remotely uncertain branches/worktrees with a reason. Unregistered worktrees remain report-only unless the current user message explicitly authorizes their exact path, base, HEAD, and `--allow-unmanaged`.
-
-Automation outcomes live in Git-private `.git/rigorbreeze/automation.json`, keyed by immutable inputs. They are projected by JSON status, validated by `doctor`, and never rewrite task evidence after the external action.
-
-## Evolve from real use
-
-At close, let a clean first-pass L1 record an automatic machine retrospective and archive without another questionnaire; if it had failure, bypass, rework, or an unreasonable block, show one prefilled review. Additional all-green verification refreshes machine statistics without repeating an unchanged human judgment; changed task/code facts, failures, acceptance, bypasses, or practice events invalidate it. L2/Emergency always require human retrospective and real acceptance. Runner drift, occupied tasks, resource conflicts, missing operation plans, and gate failures are deduplicated as practice events. When the user corrects an interpretation, classify it as `requirement-interpretation-correction` with `missing-atom`, `reversed-intent`, `wrong-source`, or `scope-change`; never retain chat transcripts. A reusable workflow defect must end with a self-contained inline handoff naming the separate Skill task in the Skill repository, evidence, allowed fix scope, and forbidden business scope—never create or amend a business task to carry it, even when old state cannot be reconstructed. Only judged workflow rework, unreasonable block/next action, bypass, or `hurt` becomes an evolution candidate; correct blocks remain statistics.
-
-When a candidate is emitted:
-
-- tell the user it was recorded in the task evidence;
-- show the copyable instruction `$rigorbreeze 汇总这个项目的演进候选`;
-- observe the first ordinary occurrence; review the Skill after a second similar occurrence;
-- review immediately if a gate incorrectly permits secrets, privilege bypass, destructive migration, stale evidence, or a wrong release;
-- classify the cause as core, project configuration, adapter, environment, usage, or a correctly detected risk;
-- for a confirmed core problem, write a failing regression, make the smallest change in the Skill repository, and validate it in the next real slice.
-
-When asked to review evolution, scan the configured private/tracked evidence and compact history for `evolutionCandidate: true`; do not create another practice log. Project evidence stays local. Never silently rewrite the installed Skill or relax a gate from one ordinary occurrence.
-
-## Completion
-
-Keep human interaction small: ask only for unresolved outcome-changing approval, applicable real acceptance, and the prefilled retrospective when L1 friction exists or the task is L2/Emergency. Clean L1 closes automatically with `workflowImpact=unreviewed`.
-
-Codex runs the CLI and records evidence; do not make the user operate each internal command. Close in this order: verify, accept, review, confirm retrospective, archive, then guarded commit/push/merge and worktree reconciliation. Normal completion compacts repeated check and TDD details while retaining final proof, the latest useful earlier failure, and aggregate counts; it never deletes regression tests, and non-completed histories stay intact. L0 needs only configured affected verification; L1/L2 need full verification, applicable acceptance, review, and retrospective. Use `abandoned` for a clean cancellation. If code was already externally integrated but the task remained open, use `archive --outcome reconciled --reason <reason> --expected-head <sha>` only after integration and external outcomes are proven; never invent GREEN, acceptance, or release success. Production release still requires an active `release-ready` task. Before commit, archive, or any “fixed/passed/complete” claim, cite **fresh verification** run in this turn: the exact command, **exit status**, and covered scope. Historical reports, partial checks, or another Agent's success claim cannot substitute.
+Codex runs internal commands. Close in order: verify, accept, review, retrospective, archive, guarded delivery, reconcile. L0 requires affected verification; L1/L2 require full verification plus applicable acceptance and review. Use `abandoned` for clean cancellation and `reconciled` only for proven externally integrated work; never invent success. Release requires an active release-ready task. Before commit, archive, or any fixed/passed/complete claim, cite **fresh verification** from this turn: exact command, status, and covered scope. Historical or another Agent's claim cannot substitute.
