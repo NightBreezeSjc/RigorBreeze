@@ -477,6 +477,20 @@ class SkillContractTests(unittest.TestCase):
             150,
             "keep procedural entrypoint compact; disclose details through references",
         )
+        self.assertLessEqual(
+            len(skill.split()),
+            2000,
+            "line count alone does not protect the activated context budget",
+        )
+        self.assertIn("status --json", skill)
+        self.assertIn("status --all --compact --json", skill)
+        self.assertIn("one uninterrupted write phase", skill)
+        self.assertIn("bounded failure tail", skill)
+        self.assertNotIn(
+            "Before writing—including after compaction—run the bundled "
+            "`python <skill-dir>/scripts/flow.py --root <project> status --all --json`",
+            skill,
+        )
         canonical_references = sorted(
             reference
             for reference in (SKILL_DIR / "references").glob("*.md")
@@ -494,6 +508,33 @@ class SkillContractTests(unittest.TestCase):
                 skill,
                 "localized references are for human readers and must not double-load context",
             )
+
+    def test_initialized_agents_policy_stays_compact(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            subprocess.run(
+                [
+                    sys.executable,
+                    str(SKILL_DIR / "scripts" / "flow.py"),
+                    "--root",
+                    str(root),
+                    "init",
+                ],
+                text=True,
+                encoding="utf-8",
+                capture_output=True,
+                check=True,
+            )
+            agents = (root / "AGENTS.md").read_text(encoding="utf-8")
+
+        self.assertLessEqual(
+            len(agents.split()),
+            600,
+            "persistent project policy must route to the Skill instead of duplicating it",
+        )
+        self.assertIn("status --json", agents)
+        self.assertIn("status --all --compact --json", agents)
+        self.assertIn("fresh verification", agents)
 
     def test_installable_skill_has_no_project_specific_policy(self) -> None:
         text = "\n".join(
