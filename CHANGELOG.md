@@ -27,6 +27,21 @@ The project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). 
 - Reframed the repository for first-time adopters with bilingual onboarding, explicit safety boundaries, and a complete first-task walkthrough.
 - Added concise contribution and security policies plus an MIT license.
 
+## [0.16.0] - Bound solution and workflow cost without relaxing risk gates
+
+### Changed
+
+- Replace scattered YAGNI and dependency advice with one ordered ladder: no implementation, project reuse, standard/framework/platform-native capability, an installed maintained dependency, then the smallest clear new implementation.
+- Batch one cross-repository user result into one combined approval, one end-to-end acceptance, and at most one retrospective while every repository retains its own scope, SHA, RED/GREEN, checks, and private record.
+- Reuse current status through an unchanged phase and keep successful command output to command, exit code, scope, and digest; raw tails remain available for failures.
+- Compact repeated check and verification results online by profile, task digest, and project fingerprint. Keep current truth, the latest useful failure, counts, and cumulative duration instead of linear duplicate success history.
+- Extend the maintainer behavior harness to seventeen deterministic scenarios and record cached/uncached Token usage, workflow-only runner calls, evidence bytes, and product/test line deltas in Git-private results.
+
+### Boundaries
+
+- Keep schema v5, evidence schema v4, automation journal v1, the public CLI, and all L2 safety gates unchanged.
+- Do not install Ponytail or adopt its modes, hooks, debt comments, or runtime dependency; only its minimum-solution and honest-measurement ideas influence this release.
+
 ## [0.15.1] - Reduce context cost without relaxing proof
 
 ### Changed

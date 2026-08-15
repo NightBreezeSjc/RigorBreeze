@@ -44,6 +44,8 @@ An ordinary task commit is a narrower checkpoint: it requires current configured
 
 Inside one profile invocation only, an identical argv, resolved cwd, effective environment, and timeout executes once. Reusing the process does not reuse policy: each check independently validates its report and artifacts and records `reusedFromCheckId`.
 
+Once a successful `full` result is bound to the unchanged task digest, project fingerprint, configuration digest, and HEAD, archive, commit, and merge gates reuse it. A workflow phase transition alone never reruns `full`; code, contract, ownership, configuration, or external-state change invalidates the snapshot and only the affected repository repeats verification.
+
 ## GitLab
 
 Adapt `assets/ci/gitlab-ci.yml` into the existing `.gitlab-ci.yml`. Configure

@@ -18,7 +18,7 @@ import flow_parallel
 
 VERSION = 5
 EVIDENCE_VERSION = 4
-TOOL_VERSION = "0.15.1"
+TOOL_VERSION = "0.16.0"
 SPEC_DIR = "spec"
 CONFIG_NAME = "rigorbreeze.toml"
 MODES = ("advisory", "enforced")
@@ -268,12 +268,22 @@ def empty_evidence(task_id: str) -> dict[str, Any]:
 
 
 def compact_completed_check_runs(evidence: dict[str, Any]) -> None:
-    """Keep final check truth without retaining every repeated successful run."""
+    """Keep current check truth and one useful failure with cumulative counts."""
     runs = evidence.get("checkRuns")
     if not isinstance(runs, list) or len(runs) < 2:
         return
 
-    grouped: dict[tuple[str, str], list[int]] = {}
+    previous = evidence.get("checkRunSummary")
+    previous = previous if isinstance(previous, dict) else {}
+    previous_retained = int(previous.get("retained") or 0)
+    if previous_retained > len(runs):
+        previous = {}
+        previous_retained = 0
+    new_runs = runs[previous_retained:] if previous else runs
+    if previous and not new_runs:
+        return
+
+    grouped: dict[tuple[str, str, str, str], list[int]] = {}
     retained_indexes: set[int] = set()
     for index, record in enumerate(runs):
         if not isinstance(record, dict):
@@ -282,11 +292,26 @@ def compact_completed_check_runs(evidence: dict[str, Any]) -> None:
         key = (
             str(record.get("profile") or "unknown"),
             str(record.get("checkId") or "unknown"),
+            str(record.get("taskDigest") or "unknown"),
+            str(record.get("projectFingerprint") or "unknown"),
         )
         grouped.setdefault(key, []).append(index)
 
+    previous_groups: dict[tuple[str, str, str, str], dict[str, Any]] = {}
+    for group in previous.get("groups", []):
+        if not isinstance(group, dict):
+            continue
+        key = (
+            str(group.get("profile") or "unknown"),
+            str(group.get("checkId") or "unknown"),
+            str(group.get("taskDigest") or "unknown"),
+            str(group.get("projectFingerprint") or "unknown"),
+        )
+        previous_groups[key] = group
+
     groups: list[dict[str, Any]] = []
-    for (profile, check_id), indexes in sorted(grouped.items()):
+    for key, indexes in sorted(grouped.items()):
+        profile, check_id, task_digest_value, fingerprint = key
         latest = indexes[-1]
         retained = {latest}
         failed_indexes = [
@@ -295,14 +320,27 @@ def compact_completed_check_runs(evidence: dict[str, Any]) -> None:
         if failed_indexes:
             retained.add(failed_indexes[-1])
         retained_indexes.update(retained)
-        passed_count = sum(runs[index].get("passed") is True for index in indexes)
+        prior = previous_groups.get(key, {})
+        fresh_indexes = [index for index in indexes if index >= previous_retained]
+        passed_count = int(prior.get("passed") or 0) + sum(
+            runs[index].get("passed") is True for index in fresh_indexes
+        )
+        failed_count = int(prior.get("failed") or 0) + sum(
+            runs[index].get("passed") is not True for index in fresh_indexes
+        )
+        duration_ms = int(prior.get("durationMs") or 0) + sum(
+            int(runs[index].get("durationMs") or 0) for index in fresh_indexes
+        )
         groups.append(
             {
                 "profile": profile,
                 "checkId": check_id,
-                "total": len(indexes),
+                "taskDigest": task_digest_value,
+                "projectFingerprint": fingerprint,
+                "total": passed_count + failed_count,
                 "passed": passed_count,
-                "failed": len(indexes) - passed_count,
+                "failed": failed_count,
+                "durationMs": duration_ms,
                 "retained": len(retained),
             }
         )
@@ -310,16 +348,79 @@ def compact_completed_check_runs(evidence: dict[str, Any]) -> None:
     retained_runs = [
         record for index, record in enumerate(runs) if index in retained_indexes
     ]
-    omitted = len(runs) - len(retained_runs)
-    if omitted <= 0:
+    total = sum(group["total"] for group in groups)
+    omitted = total - len(retained_runs)
+    if omitted <= 0 and not previous:
         return
     evidence["checkRuns"] = retained_runs
     evidence["checkRunSummary"] = {
-        "policy": "latest-per-profile-check-plus-latest-failure",
-        "total": len(runs),
+        "policy": "current-per-fingerprint-plus-latest-failure",
+        "total": total,
+        "passed": sum(group["passed"] for group in groups),
+        "failed": sum(group["failed"] for group in groups),
+        "durationMs": sum(group["durationMs"] for group in groups),
         "retained": len(retained_runs),
         "omitted": omitted,
         "groups": groups,
+    }
+
+
+def compact_verification_history(evidence: dict[str, Any]) -> None:
+    """Bound repeated profile results while preserving current truth and a failure."""
+    verifications = evidence.get("verifications")
+    if not isinstance(verifications, list) or len(verifications) < 2:
+        return
+    previous = evidence.get("verificationSummary")
+    previous = previous if isinstance(previous, dict) else {}
+    previous_retained = int(previous.get("retained") or 0)
+    if previous_retained > len(verifications):
+        previous = {}
+        previous_retained = 0
+    new_records = verifications[previous_retained:] if previous else verifications
+    if previous and not new_records:
+        return
+
+    grouped: dict[tuple[str, str, str, str], list[int]] = {}
+    retained_indexes: set[int] = set()
+    for index, record in enumerate(verifications):
+        if not isinstance(record, dict):
+            retained_indexes.add(index)
+            continue
+        key = (
+            str(record.get("profile") or "unknown"),
+            str(record.get("taskDigest") or "unknown"),
+            str(record.get("projectFingerprint") or "unknown"),
+            str(record.get("configDigest") or "unknown"),
+        )
+        grouped.setdefault(key, []).append(index)
+    for indexes in grouped.values():
+        latest = indexes[-1]
+        retained_indexes.add(latest)
+        failed = [
+            index for index in indexes if verifications[index].get("passed") is not True
+        ]
+        if failed:
+            retained_indexes.add(failed[-1])
+
+    retained = [
+        record
+        for index, record in enumerate(verifications)
+        if index in retained_indexes
+    ]
+    fresh_passed = sum(record.get("passed") is True for record in new_records)
+    fresh_failed = len(new_records) - fresh_passed
+    total = int(previous.get("total") or 0) + len(new_records)
+    omitted = total - len(retained)
+    if omitted <= 0 and not previous:
+        return
+    evidence["verifications"] = retained
+    evidence["verificationSummary"] = {
+        "policy": "current-per-fingerprint-plus-latest-failure",
+        "total": total,
+        "passed": int(previous.get("passed") or 0) + fresh_passed,
+        "failed": int(previous.get("failed") or 0) + fresh_failed,
+        "retained": len(retained),
+        "omitted": omitted,
     }
 
 
@@ -327,6 +428,16 @@ def compact_completed_tdd_history(evidence: dict[str, Any]) -> None:
     """Keep final TDD proof plus the latest useful failed attempt per requirement."""
     chains = evidence.get("tddChain")
     if not isinstance(chains, list) or len(chains) < 2:
+        return
+
+    previous = evidence.get("tddSummary")
+    previous = previous if isinstance(previous, dict) else {}
+    previous_retained = int(previous.get("retained") or 0)
+    if previous_retained > len(chains):
+        previous = {}
+        previous_retained = 0
+    new_chains = chains[previous_retained:] if previous else chains
+    if previous and not new_chains:
         return
 
     grouped: dict[str, list[int]] = {}
@@ -338,6 +449,11 @@ def compact_completed_tdd_history(evidence: dict[str, Any]) -> None:
         requirement = str(chain.get("requirement") or "unknown")
         grouped.setdefault(requirement, []).append(index)
 
+    previous_groups = {
+        str(group.get("requirement") or "unknown"): group
+        for group in previous.get("groups", [])
+        if isinstance(group, dict)
+    }
     groups: list[dict[str, Any]] = []
     for requirement, indexes in sorted(grouped.items()):
         green_indexes = [index for index in indexes if chains[index].get("green")]
@@ -351,12 +467,20 @@ def compact_completed_tdd_history(evidence: dict[str, Any]) -> None:
         if failed_before_final:
             retained.add(failed_before_final[-1])
         retained_indexes.update(retained)
+        prior = previous_groups.get(requirement, {})
+        fresh_indexes = [index for index in indexes if index >= previous_retained]
+        green_count = int(prior.get("green") or 0) + sum(
+            bool(chains[index].get("green")) for index in fresh_indexes
+        )
+        failed_count = int(prior.get("failedOrInvalidated") or 0) + sum(
+            not chains[index].get("green") for index in fresh_indexes
+        )
         groups.append(
             {
                 "requirement": requirement,
-                "total": len(indexes),
-                "green": len(green_indexes),
-                "failedOrInvalidated": len(indexes) - len(green_indexes),
+                "total": green_count + failed_count,
+                "green": green_count,
+                "failedOrInvalidated": failed_count,
                 "retained": len(retained),
             }
         )
@@ -364,8 +488,9 @@ def compact_completed_tdd_history(evidence: dict[str, Any]) -> None:
     retained_chains = [
         chain for index, chain in enumerate(chains) if index in retained_indexes
     ]
-    omitted = len(chains) - len(retained_chains)
-    if omitted <= 0:
+    total = sum(group["total"] for group in groups)
+    omitted = total - len(retained_chains)
+    if omitted <= 0 and not previous:
         return
 
     compact_red_fields = (
@@ -391,7 +516,9 @@ def compact_completed_tdd_history(evidence: dict[str, Any]) -> None:
     evidence["red"] = compact_red
     evidence["tddSummary"] = {
         "policy": "final-green-plus-latest-prior-failure",
-        "total": len(chains),
+        "total": total,
+        "green": sum(group["green"] for group in groups),
+        "failedOrInvalidated": sum(group["failedOrInvalidated"] for group in groups),
         "retained": len(retained_chains),
         "omitted": omitted,
         "groups": groups,
@@ -533,7 +660,7 @@ Recover facts from requirements, code, tests, Git, and runtime evidence; ask onl
 
 Before approval, run a semantic self-review for placeholders, contradictions, oversized scope, and ambiguous outcome/source/freshness/fallback; show a final-state checklist. Risk determines gates, independent outcomes get short-lived branches, concurrency gets extra worktrees, and dependency gets a DAG. One worktree has one writer. Reuse a checkout only after closure and integration; declare exclusive Runtime-Claims.
 
-L1/L2/Emergency use observed RED, public seams, independent oracles, and configured affected/full profiles. Local mode is advisory; CI, L2, merge, and release are enforced. Verify review feedback against requirements, actual use, compatibility, tests, and YAGNI. After three failed hypotheses, stop patching and reassess architecture. Apply a deletion test before retaining a helper, wrapper, dependency, or abstraction.
+L1/L2/Emergency use observed RED, public seams, independent oracles, and configured affected/full profiles. Local mode is advisory; CI, L2, merge, and release are enforced. Verify review feedback. Use this solution ladder: no implementation, project reuse, standard/framework/native capability, installed dependency, minimal new code. Apply a deletion test before retaining an abstraction. After three failed hypotheses, reassess architecture. Never shrink security, permission, data, migration, rollback, accessibility, or compatibility boundaries.
 
 Validate the real runtime. AI cannot approve its own visual, security, legal, or production conclusion. Migration and release retain rehearsal, immutable artifact, stop, recovery, and rollback evidence. Before external writes, reconstruct completed steps, identifiers, one remaining action, and stop conditions; never repeat stale-plan work.
 
