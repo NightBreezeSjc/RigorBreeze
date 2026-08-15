@@ -27,6 +27,25 @@ The project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). 
 - Reframed the repository for first-time adopters with bilingual onboarding, explicit safety boundaries, and a complete first-task walkthrough.
 - Added concise contribution and security policies plus an MIT license.
 
+## [0.15.1] - Reduce context cost without relaxing proof
+
+### Changed
+
+- Make current-worktree `status --json` the normal write-entry check; reserve all-project status for actual parallel coordination, repair, cleanup, and evolution work.
+- Add the backward-compatible `status --all --compact --json` projection. It preserves active tasks, blockers, dependencies, worktree ownership, and next actions while replacing historical cleanup detail with counts; the original full response is unchanged.
+- Reduce the activated `SKILL.md` entrypoint from 3,436 to 1,811 words through progressive disclosure into the existing handbook, Spec Tree, and CI references.
+- Reduce the RigorBreeze-managed project `AGENTS.md` block from 804 to 438 words while preserving its trigger, risk, ownership, verification, and production-safety boundaries.
+- Reuse an unchanged current-status snapshot within one uninterrupted write phase and summarize successful checks by command, exit, scope, and digest; raw output remains available for bounded failure diagnosis.
+
+### Validation
+
+- Lock the activated entrypoint to 2,000 words or fewer and the managed persistent policy to 600 words or fewer; require both current and compact-all status routes in the Skill contract.
+- Verify compact and full status share the same task next action and overview; full output remains available for exact historical diagnosis.
+
+### Compatibility
+
+- State/config remains schema v5, evidence remains schema v4, automation journal remains v1, and no third-party dependency or public command is added. Existing `status --all --json` consumers keep their complete payload.
+
 ## [0.15.0] - Tighten Agent behavior without expanding the workflow surface
 
 ### Changed

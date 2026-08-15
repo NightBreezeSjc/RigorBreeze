@@ -13,7 +13,7 @@ English · [简体中文](README.zh-CN.md)
 
 RigorBreeze routes work by consequence: tiny safe edits go straight through a verified Direct lane, ordinary changes get compact private records, and production-risk work retains full evidence and public sanitized audit proof. It is deliberately smaller than a project-management system and keeps normal workflow mechanics out of product commits.
 
-> **Public Preview:** v0.15.0 is usable today. This release tightens Agent behavior reliability, safely replays an evolved test against the approved baseline, and deduplicates multi-task worktree status. Active projects keep their installed runner frozen until the task closes.
+> **Public Preview:** v0.15.1 is usable today. It preserves the v0.15 reliability gates while reducing routine context load through a shorter Skill entrypoint, smaller managed project policy, and compact project-status projection. Active projects keep their installed runner frozen until the task closes.
 
 ## Why this exists
 
@@ -148,7 +148,7 @@ Before approval, RigorBreeze checks the task for placeholders, contradictions, a
 
 Allowed Scope entries are repository-relative paths, directory prefixes, or globs; `*` matches one path segment and `**` crosses directories. Acceptance criteria use unique machine-readable IDs. A contract cannot be reapproved over production changes: restore the approved contract and finish, or revert those changes before amending the same outcome. A new user outcome or acceptance condition becomes a dependent slice.
 
-After initialization and project-check configuration, establish a human-controlled Git baseline before creating a new L1/L2 task. `status --json` reports the exact base-branch state under `workflowBaseline`; Direct and L0 remain lightweight. When explicitly authorized, Codex may create the isolated baseline commit without mixing product changes or persisting Git authority. The installed Skill checks through its bundled v0.15.0 runner, reports missing or modified components separately, and does not overwrite it during implementation. A missing high-risk contract must be restored or replaced by an explicit Emergency contract, never an informal bypass.
+After initialization and project-check configuration, establish a human-controlled Git baseline before creating a new L1/L2 task. `status --json` reports the exact base-branch state under `workflowBaseline`; Direct and L0 remain lightweight. When explicitly authorized, Codex may create the isolated baseline commit without mixing product changes or persisting Git authority. The installed Skill checks through its bundled v0.15.1 runner, reports missing or modified components separately, and does not overwrite it during implementation. A missing high-risk contract must be restored or replaced by an explicit Emergency contract, never an informal bypass.
 
 After initialization, the project contains:
 
@@ -235,7 +235,9 @@ The Skill coordinates external security, migration, CI, browser, device, and obs
 
 ## Parallel work and optional automation
 
-One physical worktree may have only one active writing task. Risk chooses the gates, each non-Direct independent outcome gets a short-lived branch, and only a concurrent writer or disposable risky experiment gets another worktree. After one task is closed and integrated, the same window reuses its clean checkout by returning to the current base and starting a fresh task branch; only explicitly related sequential slices reuse a designated integration branch. When another Codex window must write concurrently, the Skill creates an isolated `rigorbreeze/<task-id>` branch and worktree. File isolation does not make ports, watchers, local services, environments, or developer tools independent: tasks declare only the exclusive resources they use through `Runtime-Claims`, and conflicting active claims are blocked. `status --all --json` is the shared read-only project view.
+One physical worktree may have only one active writing task. Risk chooses the gates, each non-Direct independent outcome gets a short-lived branch, and only a concurrent writer or disposable risky experiment gets another worktree. After one task is closed and integrated, the same window reuses its clean checkout by returning to the current base and starting a fresh task branch; only explicitly related sequential slices reuse a designated integration branch. When another Codex window must write concurrently, the Skill creates an isolated `rigorbreeze/<task-id>` branch and worktree. File isolation does not make ports, watchers, local services, environments, or developer tools independent: tasks declare only the exclusive resources they use through `Runtime-Claims`, and conflicting active claims are blocked.
+
+Routine work reads only current-worktree `status --json` and may reuse that snapshot during one uninterrupted write phase while repository and external state stay unchanged. Parallel coordination uses `status --all --compact --json`, which retains active tasks, blockers, dependencies, worktree ownership, and deterministic next actions while replacing historical cleanup detail with counts. Successful checks are summarized by command, exit status, covered scope, and report digest; raw output is loaded only for bounded failure diagnosis. The original `status --all --json` remains unchanged for exact repair, cleanup, and evolution review, so the context optimization does not weaken machine checks or remove evidence.
 
 The same status payload exposes removable, retained, and unregistered worktrees with cleanliness, integration proof, expected HEAD, and confirmation requirements. RigorBreeze recognizes ancestor merges and complete patch-equivalent cherry-picks. For a registered task, extra commits qualify only when they contain a narrow allowlist of workflow metadata and at least one product patch is already equivalent on the base; mixed or unmatched product changes remain active. Cleanup normally removes only clean worktrees with intact creation provenance. A precisely authorized unmanaged cleanup uses the original conservative proof and preserves the local branch.
 
@@ -282,7 +284,7 @@ For a manual install, remove only the `rigorbreeze` directory or symlink from yo
 
 ## Public Preview and v1.0
 
-v0.15.0 keeps the v0.14.0 consequence-based lanes and adds three bounded reliability closures: current tests may re-prove an unchanged acceptance ID against its approved baseline without creating V2/V3 tasks; `status --all` groups historical tasks by physical worktree and distinguishes the executing bundled runner from installed project runners; and Agent rules now prove problem type and runtime affordances before widening scope or handing work to the user. Public CLI command count and third-party dependencies do not change; state/config remains schema v5 while full evidence remains schema v4.
+v0.15.1 keeps every v0.15.0 consequence, TDD, acceptance, and delivery gate. It changes only context routing: the activated Skill entrypoint is shorter, current-task status is the default, and parallel coordination can request a compact backward-compatible projection without changing the full status response. Public CLI command count and third-party dependencies do not change; state/config remains schema v5 while full evidence remains schema v4.
 
 The v0.12.0 decision-frontier, one-question prototype, and abstraction-deletion contracts remain part of this release.
 

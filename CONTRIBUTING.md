@@ -47,10 +47,10 @@ python3 -B -m unittest discover -s tests/behavior -v
 Before a release candidate, run all sixteen synthetic scenarios twice with a locally installed Codex. This is an explicit maintainer action; ordinary commits, configured `full`, and CI never invoke it:
 
 ```bash
-python3 -B tests/behavior/run.py run --version 0.15.0 --repetitions 2
+python3 -B tests/behavior/run.py run --version 0.15.1 --repetitions 2
 ```
 
-Any hard-rule failure blocks the candidate. Inspect only the redacted Git-private results under `.git/rigorbreeze/behavior-evals/0.15.0/`; do not commit them or use real credentials and services in a fixture.
+Any hard-rule failure blocks the candidate. Inspect only the redacted Git-private results under `.git/rigorbreeze/behavior-evals/0.15.1/`; do not commit them or use real credentials and services in a fixture.
 
 The source repository must retain its regression and behavior-contract tests. The distributable Skill ZIP excludes maintainer tests, caches, and bytecode; verify that boundary with the contract suite instead of deleting test assets. Maintainer task contracts, machine evidence, and archives stay local and ignored in this source repository; commits, the changelog, tests, and CI are the public contribution record.
 

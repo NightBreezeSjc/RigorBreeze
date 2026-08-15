@@ -325,7 +325,7 @@ one project entry
 → one rebuildable registry in the Git common directory
 ```
 
-Keep a stable `RIGORBREEZE_SESSION_ID` per Codex window. A second live session cannot claim the same worktree. `status --all --json` is the read-only interface for every window and optional external orchestrator.
+Keep a stable `RIGORBREEZE_SESSION_ID` per Codex window. A second live session cannot claim the same worktree. Routine writes use current-worktree `status --json`; concurrent windows and optional orchestrators use `status --all --compact --json`. Load the full `status --all --json` only when exact historical repair, cleanup, or evolution detail is required.
 
 Sequential initiative work reuses one designated integration worktree per
 repository. Create another worktree only for a genuinely concurrent writer or

@@ -304,7 +304,7 @@ Runner 内部文件加入业务 Allowed Scope，不得修改项目私有 Runner�
 → Git common directory 中一份可重建注册表
 ```
 
-每个 Codex 窗口保持稳定的 `RIGORBREEZE_SESSION_ID`。第二个存活 Session 不能认领同一 worktree。`status --all --json` 是所有窗口和可选外部编排器的只读接口。
+每个 Codex 窗口保持稳定的 `RIGORBREEZE_SESSION_ID`。第二个存活 Session 不能认领同一 worktree。日常写入使用当前 worktree 的 `status --json`；并发窗口和可选外部编排器使用 `status --all --compact --json`。只有精确历史修复、清理或演进审计才加载完整 `status --all --json`。
 
 顺序推进的项目在每个仓库复用一个指定 integration worktree。只有真正并发的写任务
 或明确可丢弃的高风险实验才创建额外 worktree。计划中的未来任务不等于并发；一个
