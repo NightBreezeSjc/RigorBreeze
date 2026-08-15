@@ -7,6 +7,7 @@ import argparse
 import json
 import re
 import shutil
+import statistics
 import subprocess
 import sys
 import tempfile
@@ -41,6 +42,139 @@ SECRET_PATTERNS = (
 )
 
 
+def telemetry_from_jsonl(transcript: str) -> dict[str, int]:
+    """Extract bounded usage and workflow-command counts from Codex JSONL."""
+    usage: dict[str, Any] = {}
+    runner_commands = 0
+    workflow_only_commands = 0
+    for line in transcript.splitlines():
+        try:
+            event = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if not isinstance(event, dict):
+            continue
+        if event.get("type") == "turn.completed" and isinstance(
+            event.get("usage"), dict
+        ):
+            usage = event["usage"]
+        item = event.get("item")
+        if not isinstance(item, dict) or item.get("type") != "command_execution":
+            continue
+        command = str(item.get("command") or "")
+        if not re.search(r"(?:rigorbreeze\.py|scripts/flow\.py)", command):
+            continue
+        runner_commands += 1
+        if not re.search(r"(?:&&|\|\||[;|]\s*\S)", command):
+            workflow_only_commands += 1
+
+    def count(name: str) -> int:
+        value = usage.get(name, 0)
+        return int(value) if isinstance(value, int) and value >= 0 else 0
+
+    input_tokens = count("input_tokens")
+    cached_tokens = count("cached_input_tokens")
+    return {
+        "inputTokens": input_tokens,
+        "cachedInputTokens": cached_tokens,
+        "cacheWriteInputTokens": count("cache_write_input_tokens"),
+        "uncachedInputTokens": max(input_tokens - cached_tokens, 0),
+        "outputTokens": count("output_tokens"),
+        "reasoningOutputTokens": count("reasoning_output_tokens"),
+        "runnerCommandCount": runner_commands,
+        "workflowOnlyCommandCount": workflow_only_commands,
+    }
+
+
+def summarize_telemetry(verdicts: list[dict[str, Any]]) -> dict[str, Any]:
+    """Summarize repeated runs with medians so a lucky run cannot define cost."""
+    records = [
+        verdict["telemetry"]
+        for verdict in verdicts
+        if isinstance(verdict.get("telemetry"), dict)
+    ]
+
+    def medians(items: list[dict[str, Any]]) -> dict[str, int | float]:
+        keys = sorted(
+            {
+                key
+                for item in items
+                for key, value in item.items()
+                if isinstance(value, int) and not isinstance(value, bool)
+            }
+        )
+        result: dict[str, int | float] = {}
+        for key in keys:
+            values = [item[key] for item in items if isinstance(item.get(key), int)]
+            value = statistics.median(values)
+            result[key] = int(value) if float(value).is_integer() else value
+        return result
+
+    case_ids = sorted(
+        {
+            str(verdict.get("caseId"))
+            for verdict in verdicts
+            if isinstance(verdict.get("telemetry"), dict)
+        }
+    )
+    return {
+        "runs": len(records),
+        "medians": medians(records),
+        "byCase": {
+            case_id: medians(
+                [
+                    verdict["telemetry"]
+                    for verdict in verdicts
+                    if str(verdict.get("caseId")) == case_id
+                    and isinstance(verdict.get("telemetry"), dict)
+                ]
+            )
+            for case_id in case_ids
+        },
+    }
+
+
+def _record_bytes(workspace: Path) -> int:
+    result = _run(["git", "rev-parse", "--git-path", "rigorbreeze/records"], workspace)
+    roots: list[Path] = []
+    if result.returncode == 0 and result.stdout.strip():
+        private = Path(result.stdout.strip())
+        roots.append(private if private.is_absolute() else workspace / private)
+    roots.append(workspace / "spec" / "evidence")
+    return sum(
+        path.stat().st_size
+        for root in roots
+        if root.is_dir()
+        for path in root.rglob("*")
+        if path.is_file()
+    )
+
+
+def _changed_line_counts(workspace: Path) -> dict[str, int]:
+    result = _run(["git", "diff", "--numstat", "HEAD"], workspace)
+    counts = {
+        "productAddedLines": 0,
+        "productDeletedLines": 0,
+        "testAddedLines": 0,
+        "testDeletedLines": 0,
+    }
+    if result.returncode != 0:
+        return counts
+    for line in result.stdout.splitlines():
+        parts = line.split("\t", 2)
+        if len(parts) != 3 or not parts[0].isdigit() or not parts[1].isdigit():
+            continue
+        added, deleted, path = int(parts[0]), int(parts[1]), parts[2]
+        kind = (
+            "test"
+            if re.search(r"(?:^|/)(?:tests?|__tests__)(?:/|$)", path)
+            else "product"
+        )
+        counts[f"{kind}AddedLines"] += added
+        counts[f"{kind}DeletedLines"] += deleted
+    return counts
+
+
 def _safe_relative(value: str, *, allow_glob: bool) -> str:
     candidate = value.replace("\\", "/")
     path = PurePosixPath(candidate)
@@ -65,8 +199,8 @@ def load_contract(path: Path = DEFAULT_CONTRACT) -> dict[str, Any]:
     if not isinstance(contract, dict) or contract.get("schemaVersion") != 1:
         raise ValueError("behavior contract schemaVersion must be 1")
     cases = contract.get("cases")
-    if not isinstance(cases, list) or len(cases) != 16:
-        raise ValueError("behavior contract must define exactly sixteen cases")
+    if not isinstance(cases, list) or len(cases) != 17:
+        raise ValueError("behavior contract must define exactly seventeen cases")
 
     seen: set[str] = set()
     for case in cases:
@@ -491,7 +625,11 @@ def _live_case(
                     "verification": None,
                 }
         changed = _changed_paths(workspace)
+        telemetry = telemetry_from_jsonl(transcript)
+        telemetry["evidenceBytes"] = _record_bytes(workspace)
+        telemetry.update(_changed_line_counts(workspace))
         verdict = score_case(case, final, transcript, changed)
+        verdict["telemetry"] = telemetry
         if process_code != 0:
             verdict["issues"].append(f"codex exec returned {process_code}")
             verdict["passed"] = False
@@ -504,6 +642,7 @@ def _live_case(
                         "startedAt": started,
                         "result": final,
                         "changedPaths": changed,
+                        "telemetry": telemetry,
                         "verdict": verdict,
                     },
                     ensure_ascii=False,
@@ -608,6 +747,7 @@ def run_live(args: argparse.Namespace) -> int:
         "version": args.version,
         "repetitions": args.repetitions,
         "passed": all(verdict["passed"] for verdict in verdicts),
+        "telemetry": summarize_telemetry(verdicts),
         "verdicts": verdicts,
     }
     (output_dir / "summary.json").write_text(
@@ -624,7 +764,7 @@ def build_parser() -> argparse.ArgumentParser:
     live = subparsers.add_parser("run", help="run live Codex behavior evaluations")
     live.add_argument("--contract", type=Path, default=DEFAULT_CONTRACT)
     live.add_argument("--skill", type=Path, default=REPO_ROOT / "rigorbreeze")
-    live.add_argument("--version", default="0.15.1")
+    live.add_argument("--version", default="0.16.0")
     live.add_argument("--repetitions", type=int, default=2)
     live.add_argument("--case", help="run one scenario while debugging the suite")
     live.add_argument("--codex", default="codex")

@@ -30,12 +30,12 @@ class BehaviorSuiteTests(unittest.TestCase):
         self.assertIn("summary", schema["required"])
         self.assertEqual(schema["properties"]["summary"], {"type": "string"})
 
-    def test_contract_has_exactly_sixteen_safe_cases(self) -> None:
+    def test_contract_has_exactly_seventeen_safe_cases(self) -> None:
         runner = load_runner()
         contract = runner.load_contract(SCENARIOS_PATH)
 
         self.assertEqual(contract["schemaVersion"], 1)
-        self.assertEqual(len(contract["cases"]), 16)
+        self.assertEqual(len(contract["cases"]), 17)
         self.assertEqual(
             {case["id"] for case in contract["cases"]},
             {
@@ -55,8 +55,74 @@ class BehaviorSuiteTests(unittest.TestCase):
                 "next-independent-task-reuses-checkout",
                 "runtime-affordance-before-handoff",
                 "visual-tracer-before-fanout",
+                "cross-repo-single-interaction",
             },
         )
+
+    def test_jsonl_telemetry_separates_cached_usage_and_workflow_commands(self) -> None:
+        runner = load_runner()
+        transcript = "\n".join(
+            (
+                '{"type":"item.completed","item":{"type":"command_execution",'
+                '"command":"python scripts/rigorbreeze.py status --json"}}',
+                '{"type":"item.completed","item":{"type":"command_execution",'
+                '"command":"python -m unittest tests/test_feature.py"}}',
+                '{"type":"turn.completed","usage":{"input_tokens":1000,'
+                '"cached_input_tokens":700,"output_tokens":80,'
+                '"reasoning_output_tokens":20}}',
+            )
+        )
+
+        metrics = runner.telemetry_from_jsonl(transcript)
+
+        self.assertEqual(metrics["inputTokens"], 1000)
+        self.assertEqual(metrics["cachedInputTokens"], 700)
+        self.assertEqual(metrics["uncachedInputTokens"], 300)
+        self.assertEqual(metrics["outputTokens"], 80)
+        self.assertEqual(metrics["reasoningOutputTokens"], 20)
+        self.assertEqual(metrics["runnerCommandCount"], 1)
+        self.assertEqual(metrics["workflowOnlyCommandCount"], 1)
+
+    def test_jsonl_telemetry_uses_latest_completed_turn_and_tolerates_noise(
+        self,
+    ) -> None:
+        runner = load_runner()
+        transcript = "\n".join(
+            (
+                "not-json",
+                '{"type":"turn.completed","usage":{"input_tokens":5}}',
+                '{"type":"turn.completed","usage":{"input_tokens":9,'
+                '"cached_input_tokens":20,"cache_write_input_tokens":3}}',
+            )
+        )
+
+        metrics = runner.telemetry_from_jsonl(transcript)
+
+        self.assertEqual(metrics["inputTokens"], 9)
+        self.assertEqual(metrics["cachedInputTokens"], 20)
+        self.assertEqual(metrics["uncachedInputTokens"], 0)
+        self.assertEqual(metrics["cacheWriteInputTokens"], 3)
+
+    def test_telemetry_summary_uses_medians_instead_of_best_run(self) -> None:
+        runner = load_runner()
+        verdicts = [
+            {
+                "caseId": "direct",
+                "telemetry": {
+                    "uncachedInputTokens": value,
+                    "workflowOnlyCommandCount": commands,
+                    "evidenceBytes": evidence,
+                },
+            }
+            for value, commands, evidence in ((10, 4, 100), (100, 2, 300))
+        ]
+
+        summary = runner.summarize_telemetry(verdicts)
+
+        self.assertEqual(summary["runs"], 2)
+        self.assertEqual(summary["medians"]["uncachedInputTokens"], 55)
+        self.assertEqual(summary["medians"]["workflowOnlyCommandCount"], 3)
+        self.assertEqual(summary["medians"]["evidenceBytes"], 200)
 
     def test_decision_frontier_rejects_more_than_three_questions(self) -> None:
         runner = load_runner()

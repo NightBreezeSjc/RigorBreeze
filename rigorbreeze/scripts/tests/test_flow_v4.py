@@ -157,7 +157,7 @@ artifacts = ["artifacts/app.bin"]
         runner = self.root / "scripts" / "flow_state.py"
         runner.write_text(
             runner.read_text(encoding="utf-8").replace(
-                'TOOL_VERSION = "0.15.1"', 'TOOL_VERSION = "0.5.1"'
+                'TOOL_VERSION = "0.16.0"', 'TOOL_VERSION = "0.5.1"'
             ),
             encoding="utf-8",
         )
@@ -167,7 +167,7 @@ artifacts = ["artifacts/app.bin"]
             status["installation"],
             {
                 "runnerVersion": "0.5.1",
-                "skillVersion": "0.15.1",
+                "skillVersion": "0.16.0",
                 "status": "outdated",
                 "upgradeSafe": False,
                 "missingComponents": [],
@@ -190,7 +190,7 @@ artifacts = ["artifacts/app.bin"]
         self.run_flow("init")
         self.assertTrue(runner.is_file())
         self.assertIn(
-            'TOOL_VERSION = "0.15.1"',
+            'TOOL_VERSION = "0.16.0"',
             (self.root / "scripts" / "flow_state.py").read_text(encoding="utf-8"),
         )
 
@@ -968,7 +968,8 @@ command = {json.dumps([sys.executable, "-c", "print('unit passed')"])}
         for _ in range(3):
             self.run_flow("verify", "--profile", "affected")
         before = json.loads(self.evidence_file("TASK-713A").read_text())
-        self.assertEqual(len(before["checkRuns"]), 6)
+        self.assertEqual(len(before["checkRuns"]), 2)
+        self.assertEqual(before["checkRunSummary"]["total"], 6)
 
         self.run_flow("archive")
 
@@ -977,35 +978,26 @@ command = {json.dumps([sys.executable, "-c", "print('unit passed')"])}
             [(run["profile"], run["checkId"]) for run in after["checkRuns"]],
             [("affected", "lint"), ("affected", "unit")],
         )
+        summary = after["checkRunSummary"]
         self.assertEqual(
-            after["checkRunSummary"],
-            {
-                "policy": "latest-per-profile-check-plus-latest-failure",
-                "total": 6,
-                "retained": 2,
-                "omitted": 4,
-                "groups": [
-                    {
-                        "profile": "affected",
-                        "checkId": "lint",
-                        "total": 3,
-                        "passed": 3,
-                        "failed": 0,
-                        "retained": 1,
-                    },
-                    {
-                        "profile": "affected",
-                        "checkId": "unit",
-                        "total": 3,
-                        "passed": 3,
-                        "failed": 0,
-                        "retained": 1,
-                    },
-                ],
-            },
+            summary["policy"], "current-per-fingerprint-plus-latest-failure"
+        )
+        self.assertEqual(summary["total"], 6)
+        self.assertEqual(summary["passed"], 6)
+        self.assertEqual(summary["failed"], 0)
+        self.assertEqual(summary["retained"], 2)
+        self.assertEqual(summary["omitted"], 4)
+        self.assertGreaterEqual(summary["durationMs"], 0)
+        self.assertEqual(
+            [
+                (group["checkId"], group["total"], group["passed"])
+                for group in summary["groups"]
+            ],
+            [("lint", 3, 3), ("unit", 3, 3)],
         )
         self.assertEqual(after["closure"]["outcome"], "completed")
-        self.assertEqual(len(after["verifications"]), 3)
+        self.assertEqual(len(after["verifications"]), 1)
+        self.assertEqual(after["verificationSummary"]["total"], 3)
 
     def test_completed_archive_keeps_latest_failure_and_final_check(self) -> None:
         self.init_git()
@@ -1052,15 +1044,106 @@ command = {json.dumps([sys.executable, "-c", check])}
         self.assertEqual(evidence["checkRunSummary"]["total"], 3)
         self.assertEqual(evidence["checkRunSummary"]["retained"], 2)
         self.assertEqual(evidence["checkRunSummary"]["omitted"], 1)
-        self.assertEqual(
-            evidence["checkRunSummary"]["groups"][0],
-            {
-                "profile": "affected",
+        groups = evidence["checkRunSummary"]["groups"]
+        self.assertEqual(sum(group["total"] for group in groups), 3)
+        self.assertEqual(sum(group["passed"] for group in groups), 2)
+        self.assertEqual(sum(group["failed"] for group in groups), 1)
+        self.assertEqual(sum(group["retained"] for group in groups), 2)
+
+    def test_check_run_compaction_is_online_bounded_and_cumulative(self) -> None:
+        def run(*, passed: bool, duration: int, fingerprint: str = "fp") -> dict:
+            return {
+                "profile": "full",
                 "checkId": "unit",
-                "total": 3,
-                "passed": 2,
+                "passed": passed,
+                "durationMs": duration,
+                "taskDigest": "task",
+                "projectFingerprint": fingerprint,
+            }
+
+        evidence = {
+            "checkRuns": [
+                run(passed=False, duration=10),
+                run(passed=True, duration=20),
+                run(passed=True, duration=30),
+            ]
+        }
+        flow_state.compact_completed_check_runs(evidence)
+        evidence["checkRuns"].append(run(passed=True, duration=40))
+        flow_state.compact_completed_check_runs(evidence)
+
+        self.assertEqual(
+            [record["passed"] for record in evidence["checkRuns"]], [False, True]
+        )
+        self.assertEqual(evidence["checkRunSummary"]["total"], 4)
+        self.assertEqual(evidence["checkRunSummary"]["passed"], 3)
+        self.assertEqual(evidence["checkRunSummary"]["failed"], 1)
+        self.assertEqual(evidence["checkRunSummary"]["durationMs"], 100)
+        self.assertEqual(evidence["checkRunSummary"]["retained"], 2)
+
+    def test_check_run_compaction_does_not_merge_changed_fingerprints(self) -> None:
+        evidence = {
+            "checkRuns": [
+                {
+                    "profile": "full",
+                    "checkId": "unit",
+                    "passed": True,
+                    "durationMs": 10,
+                    "taskDigest": "task",
+                    "projectFingerprint": "before",
+                },
+                {
+                    "profile": "full",
+                    "checkId": "unit",
+                    "passed": True,
+                    "durationMs": 20,
+                    "taskDigest": "task",
+                    "projectFingerprint": "after",
+                },
+            ]
+        }
+
+        flow_state.compact_completed_check_runs(evidence)
+
+        self.assertEqual(len(evidence["checkRuns"]), 2)
+        self.assertNotIn("checkRunSummary", evidence)
+
+    def test_verification_history_compacts_online_without_losing_latest_failure(
+        self,
+    ) -> None:
+        def verification(*, passed: bool, fingerprint: str = "fp") -> dict:
+            return {
+                "profile": "full",
+                "passed": passed,
+                "taskDigest": "task",
+                "projectFingerprint": fingerprint,
+                "configDigest": "config",
+            }
+
+        evidence = {
+            "verifications": [
+                verification(passed=False),
+                verification(passed=True),
+                verification(passed=True),
+            ]
+        }
+        flow_state.compact_verification_history(evidence)
+        evidence["verifications"].append(verification(passed=True))
+        flow_state.compact_verification_history(evidence)
+
+        self.assertEqual(
+            [record["passed"] for record in evidence["verifications"]],
+            [False, True],
+        )
+        self.assertEqual(
+            evidence["verificationSummary"],
+            {
+                "policy": "current-per-fingerprint-plus-latest-failure",
+                "total": 4,
+                "passed": 3,
                 "failed": 1,
                 "retained": 2,
+                "omitted": 2,
             },
         )
 
@@ -1144,6 +1227,35 @@ command = {json.dumps([sys.executable, "-c", check])}
         self.assertEqual(empty, {"tddChain": [], "red": []})
         self.assertEqual(single["red"][0]["summary"], "keep")
         self.assertNotIn("tddSummary", single)
+
+    def test_tdd_compaction_accumulates_replaced_chain_counts_online(self) -> None:
+        def chain(label: str, *, green: bool) -> dict:
+            return {
+                "requirement": "REQ-001",
+                "red": {
+                    "requirement": "REQ-001",
+                    "expectedPattern": label,
+                    "taskDigest": "task",
+                },
+                "green": {"passed": True} if green else None,
+            }
+
+        evidence = {
+            "tddChain": [chain("first", green=False), chain("second", green=True)],
+            "red": [],
+        }
+        flow_state.compact_completed_tdd_history(evidence)
+        evidence["tddChain"].append(chain("third", green=True))
+        flow_state.compact_completed_tdd_history(evidence)
+
+        self.assertEqual(evidence["tddSummary"]["total"], 3)
+        self.assertEqual(evidence["tddSummary"]["green"], 2)
+        self.assertEqual(evidence["tddSummary"]["failedOrInvalidated"], 1)
+        self.assertEqual(evidence["tddSummary"]["retained"], 2)
+        self.assertEqual(
+            [item["red"]["expectedPattern"] for item in evidence["tddChain"]],
+            ["first", "third"],
+        )
 
     def test_non_completed_archive_preserves_check_run_history(self) -> None:
         self.init_git()

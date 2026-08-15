@@ -458,6 +458,56 @@ class SkillContractTests(unittest.TestCase):
         self.assertIn("标准库、框架和当前依赖", chinese)
         self.assertIn("公开 API、持久化数据、升级路径和生产迁移", chinese)
 
+    def test_skill_uses_one_bounded_solution_ladder_and_cross_repo_interaction(
+        self,
+    ) -> None:
+        skill = (SKILL_DIR / "SKILL.md").read_text(encoding="utf-8")
+        handbook = (SKILL_DIR / "references" / "handbook.md").read_text(
+            encoding="utf-8"
+        )
+        chinese = (SKILL_DIR / "references" / "handbook.zh-CN.md").read_text(
+            encoding="utf-8"
+        )
+
+        ordered_ladder = (
+            "no implementation",
+            "existing project capability",
+            "standard library, framework, or platform-native capability",
+            "installed and maintained dependency",
+            "smallest clear new implementation",
+        )
+        cursor = 0
+        for phrase in ordered_ladder:
+            position = skill.find(phrase, cursor)
+            self.assertGreaterEqual(position, 0, phrase)
+            cursor = position + len(phrase)
+        for tag in (
+            "`delete`",
+            "`reuse`",
+            "`stdlib`",
+            "`native`",
+            "`yagni`",
+            "`shrink`",
+        ):
+            self.assertIn(tag, skill)
+        self.assertIn("one combined approval", skill)
+        self.assertIn("one end-to-end acceptance", skill)
+        self.assertIn("one retrospective", skill)
+        self.assertIn("repository-local", skill)
+        self.assertIn("single interaction", handbook)
+        self.assertIn("一次交互", chinese)
+
+        for protected in (
+            "permission",
+            "security",
+            "data protection",
+            "migration",
+            "rollback",
+            "accessibility",
+            "compatibility",
+        ):
+            self.assertIn(protected, skill)
+
     def test_documented_first_run_cli_commands_exist(self) -> None:
         result = subprocess.run(
             [sys.executable, str(SKILL_DIR / "scripts" / "flow.py"), "--help"],
@@ -479,7 +529,7 @@ class SkillContractTests(unittest.TestCase):
         )
         self.assertLessEqual(
             len(skill.split()),
-            2000,
+            1800,
             "line count alone does not protect the activated context budget",
         )
         self.assertIn("status --json", skill)
@@ -529,7 +579,7 @@ class SkillContractTests(unittest.TestCase):
 
         self.assertLessEqual(
             len(agents.split()),
-            600,
+            450,
             "persistent project policy must route to the Skill instead of duplicating it",
         )
         self.assertIn("status --json", agents)

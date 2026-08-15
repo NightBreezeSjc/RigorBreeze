@@ -103,7 +103,7 @@ accepted → release-ready → protected release gate
 
 单次 profile 调用内，`checkRuns[*].reusedFromCheckId` 可以标识完全相同的进程结果来自哪个前序检查。它只表示执行来源：后续检查仍保留自己的通过/失败、报告、制品、类别和时间；缺少该字段时继续兼容现有 schema v4 证据。
 
-任务正常完成归档时会压缩重复明细，但不改变门禁事实。检查记录为每个 `(profile, checkId)` 保留最新一次，存在历史失败时再保留最近一次失败，并把汇总次数写入可选 `checkRunSummary`。TDD 为每个验收 ID 保留最终有效 GREEN 链，以及最近一次有价值的失败或失效链，并把汇总次数写入可选 `tddSummary`；顶层重复 RED 只保留证明最终链所需字段。profile 级 `verifications`、验收、制品、实践和关闭事实保持不变；活动、abandoned 与 reconciled 历史永不压缩。没有这些汇总字段的既有证据继续有效。
+每次 profile 结束后即在线压缩重复成功明细，不改变门禁事实。检查记录按 `(profile, checkId, taskDigest, projectFingerprint)` 分组，保留当前结果和最近一次有诊断价值的失败；可选 `checkRunSummary` 保存总次数、通过/失败数和累计耗时。profile 结果通过可选 `verificationSummary` 使用同样的“当前＋最近失败”规则。任务摘要或项目指纹变化会形成独立分组，绝不合并成当前证明。TDD 为每个验收 ID 保留当前 RED/GREEN 与最近一次被替代或失败链；验收、制品、迁移、发布、回滚、实践和演进候选不会被压缩删除。完成的 L1 可再按保留策略缩减；没有汇总字段的旧 evidence 继续有效。
 
 仓库继续版本化保存回归测试、一份精简任务合同及其精简 evidence。原始日志、生成报告、缓存和行为评估 transcript 保存在忽略目录、CI 制品或 Git 私有位置。可分发 Skill 压缩包排除维护者测试与缓存，但源码仓库不会删除它们。当前明确不建立第二套本地 evidence 仓库：在真实重复证据证明值得之前，它只会额外制造权威来源、迁移路径和清理策略。
 
