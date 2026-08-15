@@ -273,7 +273,8 @@ Risk: {risk}
         after_summary = json.loads(self.run_flow("retro", "--json").stdout)
         self.assertIn("archive", payload["nextAction"]["command"])
         self.assertEqual(before["judgmentDigest"], after_summary["judgmentDigest"])
-        self.assertNotEqual(before["summaryDigest"], after_summary["summaryDigest"])
+        self.assertGreaterEqual(after_summary["verificationRuns"], 1)
+        self.assertGreaterEqual(after_summary["checkRuns"], 1)
         self.run_flow("archive")
 
     def test_new_failure_invalidates_confirmed_human_retro(self) -> None:
