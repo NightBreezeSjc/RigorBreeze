@@ -75,7 +75,9 @@ Git and release automation remain `manual` unless the project explicitly selects
 
 Do not lower risk to bypass a gate. Raise it when scope or consequences expand. A second human is required only by project policy or a real consequential decision; an AI reviewer never impersonates human approval.
 
-Risk follows consequence, not diff size, duration, urgency, or ceremony already spent. Read-only diagnosis creates no task. Direct applies only to one repository, one observable result, no outcome ambiguity or competing writer, one targeted proof, and no API/data shape, auth, permission, payment, lock, migration, dependency, production configuration, or release impact. If preparation cost exceeds a genuinely isolated safe edit, choose Direct; if any protected boundary appears, stop and create L1/L2. Never downgrade L2 to recover speed. L0 remains for low-risk work that genuinely needs coordination or audit.
+Preparation cost is a routing signal: if ceremony exceeds a deterministic safe edit and no protected boundary exists, use Direct.
+
+Risk follows consequence, not diff size, file layer, duration, urgency, or ceremony already spent. Read-only diagnosis creates no task. Direct applies to deterministic ordering/presentation corrections and other single-repository, single-result changes when `status --json --path` finds no competing writer and there is no API shape, persisted-data semantic, auth, permission, payment, lock, migration, dependency, production configuration, external-state write, or release impact. Backend code and a new regression test do not raise risk by themselves. Unrelated base dirt may use a short-lived clean worktree without task records; remove it only when clean and contained, otherwise retain it with the exact reason. If any protected boundary appears, stop and create L1/L2. Never downgrade L2 to recover speed. L0 remains for low-risk work that genuinely needs coordination or audit.
 
 If an L2/release task cannot load its contract or authoritative workflow state,
 stop before product, deployment, migration, or production writes. Restore the
@@ -164,11 +166,14 @@ The Skill first calls its bundled runner and inspects the `installation` project
 
 L1, L2, and Emergency tasks require a real failure before production implementation:
 
+- preflight declared test files, command executability, Node/npm or Java/Maven tooling, dependency location, and the optional project `environment` adapter;
 - bind the failure to an acceptance ID;
 - execute the relevant test through a public seam;
 - record the command, exit code, expected failure, baseline SHA, and test digests;
 - reject import errors, missing tools, unrelated historical failures, or a test that already passes;
 - never derive the expected result by calling or copying the implementation under test.
+
+Environment and framework-fixture failures stop before RED and do not count as business rework. Projects may configure `profiles.preflight = ["environment"]` for MyBatis/Spring fixtures or shared dependency layouts; the core never installs dependencies or embeds framework-specific behavior.
 
 L1 and L2 RED must name at least one real test file. Emergency may instead use a deterministic incident reproduction. A source-string search may prove a static contract such as an export or configuration key, but it cannot by itself prove user behavior or business logic.
 
@@ -211,7 +216,7 @@ L0 may archive after configured verification. L1/L2 retain current full verifica
 
 Schema-v5 projects keep contracts and full evidence in Git-common `.git/rigorbreeze/records/` by default. After proven integration, L1 detail becomes a path-free local history summary. L2/Emergency keeps full private evidence and may publish only a sanitized audit summary capped at 32 KiB. Legacy tracked projects move only through an explicit idle, clean migration; Runner upgrades never move records silently.
 
-An ordinary commit requires a current configured `affected` or `full` result; a targeted exploration never satisfies the gate, and a fresh configured result is reused instead of rerun. Archive, merge, and direct integration-branch delivery remain full-quality operations. Live Codex behavior evaluation is a separate maintainer release-candidate action and is never launched by commit, configured full, or CI.
+An ordinary commit requires a current configured `affected` or `full` result; a targeted exploration never satisfies the gate. `verify` reuses an unchanged current profile by default, and `--force` is reserved for an explicit rerun. Run `full` after the final fingerprint stabilizes; archive, commit, and merge reuse it. Archive, merge, and direct integration-branch delivery remain full-quality operations. Live Codex behavior evaluation is a separate maintainer release-candidate action and is never launched by commit, configured full, or CI.
 
 Verification, merge, archive, and optional Git automation evaluate the complete task change set: committed paths from the approved baseline through `HEAD` plus current working-tree changes. A scope violation takes priority in `status` and must be corrected or split before verification continues. Every current RED chain must have an unchanged test digest and GREEN bound to the current full verification before merge or archive.
 
@@ -254,7 +259,7 @@ Always preserve these boundaries:
 - changing source, tests, dependencies, configuration, migrations, or the task invalidates stale proof;
 - tests, UAT, artifacts, and release refer to the same Git SHA and immutable artifact digest when release applies.
 
-Synthetic redaction fixtures may annotate a secret-shaped value with `rigorbreeze: synthetic-secret` on the same physical line, but only under configured test paths. The exemption applies only to the built-in content heuristic for that line: secret-like paths, other lines, and the project's configured secret adapter still block normally, and output reports only file/line metadata.
+Synthetic redaction fixtures may annotate a secret-shaped value with `rigorbreeze: synthetic-secret` on the same physical line, but only under configured test paths. The exemption applies only to the built-in content heuristic for that line: secret-like paths, other lines, and the project's configured secret adapter still block normally, and output reports only file/line metadata. The optional `with_temporary_rsa.py` adapter injects a disposable 2048-bit Base64-DER pair into one child build, prints no key material, and proves buildability only; it can never satisfy runtime acceptance, deployment, or release evidence.
 
 Local advisory mode helps iteration. Remote required checks and protected environments are the non-bypassable merge and release authority.
 
@@ -325,7 +330,9 @@ one project entry
 → one rebuildable registry in the Git common directory
 ```
 
-Keep a stable `RIGORBREEZE_SESSION_ID` per Codex window. A second live session cannot claim the same worktree. Routine writes use current-worktree `status --json`; concurrent windows and optional orchestrators use `status --all --compact --json`. Load the full `status --all --json` only when exact historical repair, cleanup, or evolution detail is required.
+Keep a stable `RIGORBREEZE_SESSION_ID` per Codex window. A second live session cannot claim the same worktree. A possible Direct change uses `status --json --path <relative>` and receives only relevant writers; routine task writes use current-worktree `status --json`. Concurrent windows and optional orchestrators use compact all-project status, while full all-project status is reserved for exact repair, cleanup, or evolution. Missing integrated worktrees are stale-registry cleanup candidates, not crashes or overlap blockers. An integrated HEAD with uncommitted same-path changes remains a writer until clean.
+
+An approved task may record read-only `runtime`, `device`, `wechat-device`, or `authoritative-observation` evidence such as `production-role-permission-matrix` before verification. The record is pending and cannot advance acceptance; matching verification binds it only when task digest, project fingerprint, HEAD, and evidence file remain unchanged. Review, product-review, artifact, release, and every external write still require fresh verification.
 
 Sequential initiative work reuses one designated integration worktree per
 repository. Create another worktree only for a genuinely concurrent writer or

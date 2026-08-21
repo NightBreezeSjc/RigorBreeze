@@ -398,6 +398,26 @@ class SkillContractTests(unittest.TestCase):
         self.assertIn("preparation cost", handbook)
         self.assertIn("never downgrade l2", handbook)
 
+    def test_direct_route_names_every_protected_boundary(self) -> None:
+        skill = (SKILL_DIR / "SKILL.md").read_text(encoding="utf-8").lower()
+        direct = skill.split("- `direct`:", 1)[1].split("- `l0`:", 1)[0]
+        for boundary in (
+            "api",
+            "persisted-data",
+            "auth",
+            "permission",
+            "payment",
+            "lock",
+            "migration",
+            "dependency",
+            "production-config",
+            "external-state",
+            "release",
+        ):
+            with self.subTest(boundary=boundary):
+                self.assertIn(boundary, direct)
+        self.assertIn("ambiguity/writer", direct)
+
     def test_skill_documents_runtime_affordances_hypotheses_and_visual_tracers(
         self,
     ) -> None:

@@ -66,14 +66,18 @@ def parse_porcelain_paths(output: str) -> list[str]:
 
 
 def git(root: Path, *args: str) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(
-        ["git", *args],
-        cwd=root,
-        text=True,
-        encoding="utf-8",
-        errors="replace",
-        capture_output=True,
-    )
+    command = ["git", *args]
+    try:
+        return subprocess.run(
+            command,
+            cwd=root,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            capture_output=True,
+        )
+    except OSError as exc:
+        return subprocess.CompletedProcess(command, 128, "", str(exc))
 
 
 def git_path(root: Path, relative: str) -> Path | None:
@@ -612,11 +616,21 @@ def parse_task_context(content: str) -> dict[str, Any]:
         match = re.search(rf"(?mi)^{re.escape(name)}:\s*(.+?)\s*$", content)
         return match.group(1).strip() if match else fallback
 
-    return {
+    scopes: list[str] = []
+    scope_match = re.search(r"(?ms)^## Allowed scope\s*$\n(.*?)(?=^## |\Z)", content)
+    if scope_match:
+        for line in scope_match.group(1).splitlines():
+            scope = re.sub(r"^\s*[-*]\s+", "", line).strip().strip("`")
+            if scope:
+                scopes.append(scope.replace("\\", "/"))
+    context = {
         "taskOrigin": value("Task-Origin", "legacy-unspecified"),
         "waitingOn": value("Waiting-On", "none"),
         "runtimeClaims": parse_runtime_claims(content),
     }
+    if scope_match:
+        context["allowedScope"] = scopes
+    return context
 
 
 def runtime_claim_conflicts(
@@ -876,6 +890,11 @@ def cleanup_unmanaged_worktree(
         raise ParallelError(
             f"unmanaged worktree expected HEAD {expected_head or '<missing>'}, found {head}"
         )
+    branch = actual.get("branch", "").removeprefix("refs/heads/") or None
+    if branch and branch.startswith("rigorbreeze/direct-"):
+        reason = direct_worktree_retention_reason(root, target, branch, base)
+        if reason:
+            raise ParallelError(f"direct worktree retained: {reason}")
     status = git(target, "status", "--porcelain")
     if status.returncode != 0 or status.stdout.strip():
         raise ParallelError("unmanaged worktree must be clean before removal")
@@ -889,7 +908,6 @@ def cleanup_unmanaged_worktree(
             ) from exc
         if state.get("activeTask"):
             raise ParallelError("unmanaged worktree still has an active private task")
-    branch = actual.get("branch", "").removeprefix("refs/heads/") or None
     try:
         registry = load_registry(root)
     except ParallelError:
@@ -926,6 +944,35 @@ def cleanup_unmanaged_worktree(
     }
 
 
+def direct_worktree_retention_reason(
+    root: Path, worktree: Path, branch: str | None, base: str
+) -> str | None:
+    target = worktree.resolve()
+    if target == root.resolve():
+        return "current-worktree"
+    if not target.is_dir():
+        return "missing"
+    status = git(target, "status", "--porcelain")
+    if status.returncode != 0:
+        return "status-error"
+    if status.stdout.strip():
+        return "dirty"
+    if not branch or not branch.startswith("rigorbreeze/direct-"):
+        return "unmanaged"
+    if integration_status(root, branch, base) != "contained":
+        return "not-contained"
+    upstream = git(
+        target,
+        "rev-parse",
+        "--abbrev-ref",
+        "--symbolic-full-name",
+        "@{upstream}",
+    )
+    if upstream.returncode == 0 and upstream.stdout.strip():
+        return "remote-uncertain"
+    return None
+
+
 def worktree_cleanup_reason(
     root: Path, task: dict[str, Any], current: Path
 ) -> str | None:
@@ -958,6 +1005,7 @@ def cleanup_projection(
     removable: list[dict[str, Any]] = []
     retained: list[dict[str, Any]] = []
     branches: list[dict[str, Any]] = []
+    stale_registry: list[dict[str, Any]] = []
     registered_paths: set[str] = set()
 
     for task_id, task in project_registry["tasks"].items():
@@ -981,6 +1029,23 @@ def cleanup_projection(
             continue
         worktree = Path(str(worktree_value)).resolve()
         if worktree == current:
+            continue
+        if not worktree.is_dir():
+            integration = registered_integration_status(root, task)
+            item = {
+                "taskId": task_id,
+                "worktree": str(worktree),
+                "branch": branch,
+                "clean": False,
+                "integrationStatus": integration,
+                "expectedHead": task.get("head"),
+                "requiresConfirmation": False,
+                "reason": "stale-registry" if is_integrated(root, task) else "missing",
+            }
+            if is_integrated(root, task):
+                stale_registry.append(item)
+            else:
+                retained.append(item)
             continue
         observed_head = git(worktree, "rev-parse", "HEAD")
         expected_head = (
@@ -1017,18 +1082,24 @@ def cleanup_projection(
         base = default_base_branch(root)
         status = git(worktree, "status", "--porcelain")
         clean = status.returncode == 0 and not status.stdout.strip()
-        retained.append(
-            {
-                "taskId": None,
-                "worktree": str(worktree),
-                "branch": branch,
-                "reason": "unregistered",
-                "clean": clean,
-                "integrationStatus": integration_status(root, branch, base),
-                "expectedHead": actual.get("HEAD"),
-                "requiresConfirmation": True,
-            }
-        )
+        integration = integration_status(root, branch, base)
+        item = {
+            "taskId": None,
+            "worktree": str(worktree),
+            "branch": branch,
+            "clean": clean,
+            "integrationStatus": integration,
+            "expectedHead": actual.get("HEAD"),
+            "requiresConfirmation": True,
+        }
+        if branch and branch.startswith("rigorbreeze/direct-"):
+            reason = direct_worktree_retention_reason(root, worktree, branch, base)
+            if reason:
+                retained.append({**item, "reason": reason})
+            else:
+                removable.append({**item, "requiresConfirmation": False})
+        else:
+            retained.append({**item, "reason": "unregistered"})
 
     def group_worktrees(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
         grouped: dict[str, dict[str, Any]] = {}
@@ -1084,6 +1155,7 @@ def cleanup_projection(
         "removableWorktrees": sorted(removable, key=cleanup_key),
         "retainedWorktrees": sorted(retained, key=cleanup_key),
         "retainedBranches": sorted(branches, key=cleanup_key),
+        "staleRegistryEntries": sorted(stale_registry, key=cleanup_key),
     }
 
 
@@ -1144,13 +1216,99 @@ def is_integrated(root: Path, task: dict[str, Any]) -> bool:
         return True
     branch = task.get("branch")
     base = task.get("baseBranch")
-    if not branch or not base:
+    if not base:
         return False
+    if not branch:
+        head = str(task.get("head") or "")
+        base_sha = str(task.get("baseSha") or "")
+        return bool(
+            head
+            and head != base_sha
+            and git(root, "cat-file", "-e", f"{head}^{{commit}}").returncode == 0
+            and git(root, "merge-base", "--is-ancestor", head, base).returncode == 0
+        )
     proof = registered_integration_status(root, task)
     if proof == "contained":
         branch_head = git(root, "rev-parse", branch).stdout.strip()
         return bool(task.get("baseSha") and branch_head != task.get("baseSha"))
     return proof == "patch-equivalent"
+
+
+def worktree_changed_paths(task: dict[str, Any]) -> list[str]:
+    value = task.get("worktree")
+    if not value:
+        return []
+    worktree = Path(str(value)).resolve()
+    if not worktree.is_dir():
+        return []
+    result = git(worktree, "status", "--porcelain=1", "-z", "--untracked-files=all")
+    return parse_porcelain_paths(result.stdout) if result.returncode == 0 else []
+
+
+def dirty_scope_overlaps(task: dict[str, Any], scopes: Iterable[str]) -> list[str]:
+    queries = list(scopes)
+    return sorted(
+        relative
+        for relative in worktree_changed_paths(task)
+        if any(patterns_overlap(relative, scope) for scope in queries)
+    )
+
+
+def path_writer_status(root: Path, scopes: Iterable[str]) -> dict[str, Any]:
+    queries = sorted(set(scopes))
+    registry = load_registry(root)
+    writers: list[dict[str, Any]] = []
+    ignored = 0
+    stale = 0
+    for task_id, stored in sorted(registry["tasks"].items()):
+        task = dict(stored)
+        contract = task_record_path(root, task_id)
+        if contract.is_file():
+            task.update(
+                parse_task_context(
+                    contract.read_text(encoding="utf-8", errors="replace")
+                )
+            )
+        declared = list(task.get("allowedScope", []))
+        matched = sorted(
+            {
+                query
+                for query in queries
+                if any(patterns_overlap(query, scope) for scope in declared)
+            }
+        )
+        if not matched:
+            continue
+        dirty = dirty_scope_overlaps(task, queries)
+        worktree_value = task.get("worktree")
+        worktree_exists = bool(
+            worktree_value and Path(str(worktree_value)).resolve().is_dir()
+        )
+        integrated = is_integrated(root, task)
+        if dirty:
+            reason = "dirty-overlap"
+        elif integrated or task.get("archived"):
+            ignored += 1
+            if not worktree_exists:
+                stale += 1
+            continue
+        else:
+            reason = "active-overlap" if worktree_exists else "missing-active"
+        writers.append(
+            {
+                "taskId": task_id,
+                "worktree": str(worktree_value or ""),
+                "branch": task.get("branch"),
+                "reason": reason,
+                "paths": dirty or matched,
+            }
+        )
+    return {
+        "paths": queries,
+        "activeWriters": writers,
+        "ignoredHistorical": ignored,
+        "staleRegistryEntries": stale,
+    }
 
 
 def task_readiness(
@@ -1205,13 +1363,30 @@ def aggregate(root: Path) -> dict[str, Any]:
             and item.get("baseSha")
             and base_head.stdout.strip() != item.get("baseSha")
         )
+        missing_active = bool(
+            not item["worktreeExists"]
+            and not item.get("worktreeRemoved")
+            and not item.get("archived")
+            and item["readiness"] != "integrated"
+        )
         orphaned = bool(
             item["worktreeExists"]
             and not item.get("archived")
             and not task_file.is_file()
         )
         waiting_on = str(item.get("waitingOn", "none")).strip()
-        if orphaned:
+        if missing_active:
+            item["lifecycle"] = "missing-worktree"
+            item["readiness"] = "blocked"
+            item["baselineStale"] = False
+            item["verification"] = "missing/stale"
+            item["fullProfile"] = "missing/stale"
+            item["nextAction"] = {
+                "reason": "The active task worktree is missing and integration is unproven.",
+                "command": "restore the worktree or run doctor --all --repair --json",
+            }
+            errors.append(f"{task_id} worktree is missing: {worktree}")
+        elif orphaned:
             item["lifecycle"] = "orphaned-record"
             item["readiness"] = "blocked"
             item["baselineStale"] = False
@@ -1311,10 +1486,21 @@ def overlapping_task(
 ) -> tuple[str, str, str] | None:
     registry = load_registry(root)
     ignored = set(approved_overlaps)
-    for other_id, other in registry["tasks"].items():
+    for other_id, stored in registry["tasks"].items():
         if other_id == task_id or other_id in ignored:
             continue
-        if other.get("archived") or is_integrated(root, other):
+        other = dict(stored)
+        contract = task_record_path(root, other_id)
+        if contract.is_file():
+            other.update(
+                parse_task_context(
+                    contract.read_text(encoding="utf-8", errors="replace")
+                )
+            )
+        dirty = dirty_scope_overlaps(other, scopes)
+        if other.get("approval") != "valid" and not dirty:
+            continue
+        if (other.get("archived") or is_integrated(root, other)) and not dirty:
             continue
         for left in scopes:
             for right in other.get("allowedScope", []):

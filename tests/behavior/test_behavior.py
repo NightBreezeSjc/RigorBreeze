@@ -30,12 +30,12 @@ class BehaviorSuiteTests(unittest.TestCase):
         self.assertIn("summary", schema["required"])
         self.assertEqual(schema["properties"]["summary"], {"type": "string"})
 
-    def test_contract_has_exactly_seventeen_safe_cases(self) -> None:
+    def test_contract_has_exactly_eighteen_safe_cases(self) -> None:
         runner = load_runner()
         contract = runner.load_contract(SCENARIOS_PATH)
 
         self.assertEqual(contract["schemaVersion"], 1)
-        self.assertEqual(len(contract["cases"]), 17)
+        self.assertEqual(len(contract["cases"]), 18)
         self.assertEqual(
             {case["id"] for case in contract["cases"]},
             {
@@ -45,6 +45,7 @@ class BehaviorSuiteTests(unittest.TestCase):
                 "three-failed-fixes",
                 "review-skepticism",
                 "lightweight-l0",
+                "deterministic-ordering-direct",
                 "broken-workflow-high-risk",
                 "read-only-diagnosis",
                 "release-scope-freeze",

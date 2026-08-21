@@ -629,6 +629,8 @@ def record_artifacts(
 
 
 def check_category(check_id: str) -> str:
+    if check_id == "environment":
+        return "environment"
     if check_id in {"format", "lint", "typecheck"}:
         return "static-quality"
     if check_id in {"unit", "integration", "e2e", "contract"}:
@@ -859,6 +861,9 @@ def current_structured_records(
         for record in evidence.get(section, [])
         if record.get("taskDigest") == digest
         and record.get("projectFingerprint") == fingerprint
+        and not (
+            section == "acceptance" and record.get("verificationBinding") == "pending"
+        )
     ]
     if section == "artifacts" and is_git_repo(root):
         head = current_head(root)

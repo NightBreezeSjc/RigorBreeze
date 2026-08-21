@@ -71,7 +71,7 @@ Git 和发布自动化保持 `manual`，除非项目显式选择更高的长期�
 
 不要为了绕过门禁降低风险等级。范围或后果扩大时应升级。只有项目策略或真实重要决策要求时才强制第二位人类；AI 审查者不能冒充人工批准。
 
-风险由后果决定，不由 diff、耗时、紧急程度或既有流程成本决定。只读诊断不建任务。Direct 只适用于单仓、一个可观察结果、没有结果歧义或竞争写任务、可由一项定向检查证明，且不触及 API/数据结构、认证、权限、支付、门锁、迁移、依赖、生产配置或发布；一旦越界立即停止并建立 L1/L2。L0 保留给确实需要协调或审计的低风险工作。
+风险由后果决定，不由 diff、文件层级、耗时、紧急程度或既有流程成本决定。只读诊断不建任务。确定性排序/展示修正等单仓单结果工作，只要 `status --json --path` 证明没有竞争写者，且不触及 API 形状、持久化数据语义、认证、权限、支付、门锁、迁移、依赖、生产配置、外部状态写入或发布，就走 Direct；后端代码和新增回归测试本身不会升级风险。基础工作区只有无关脏文件时可使用不建任务记录的短期干净 worktree；仅 clean 且 contained 时移除，其他情况保留并报告原因。一旦越界立即停止并建立 L1/L2。L0 保留给确实需要协调或审计的低风险工作。
 
 如果 L2/发布任务无法加载合同或权威工作流状态，必须在产品代码、部署、迁移或生产写入前停止。应从 Git/原始 worktree 恢复记录，或者明确建立现有 Emergency 路径；非正式手工任务卡不能替代已经失效的安全门禁。
 
@@ -145,11 +145,14 @@ Skill 会先调用自身 bundled runner 并检查 `installation` 投影。任务
 
 L1、L2 和 Emergency 必须在修改生产实现前观察真实失败：
 
+- 先检查测试文件、命令、Node/npm 或 Java/Maven、依赖目录及可选项目 `environment` 适配器；
 - 把失败绑定到验收 ID；
 - 通过公共接缝执行相关测试；
 - 记录命令、退出码、预期失败、基线 SHA 和测试摘要；
 - 拒绝导入错误、工具缺失、无关历史失败或已经通过的测试；
 - 不允许通过调用或复制被测实现来计算预期结果。
+
+环境和框架夹具失败必须在 RED 前停止，不计入业务返工。项目可通过 `profiles.preflight = ["environment"]` 适配 MyBatis/Spring 夹具或共享依赖目录；核心不自动安装依赖，也不内置框架专用逻辑。
 
 L1 和 L2 的 RED 至少引用一个真实测试文件；Emergency 可以改用确定性的事故复现。源码字符串搜索可以证明导出项或配置键等静态合同，但不能单独证明用户行为或业务逻辑。
 
@@ -192,7 +195,7 @@ L0 可在配置验证后归档。L1/L2 仍须具备当前 full、适用验收和
 
 schema v5 项目默认把合同和完整证据保存在 Git 公共私有 `.git/rigorbreeze/records/`。证明集成后，L1 详细过程压缩成无路径本地摘要；L2/Emergency 保留完整私有证据，并只按配置发布不超过 32 KiB 的脱敏审计摘要。旧 tracked 项目只能在空闲、干净时显式迁移，Runner 升级不会静默移动记录。
 
-普通提交要求当前配置化 `affected` 或 `full` 结果；targeted 探索不能满足门禁，已有新鲜配置化结果会直接复用而不重跑。archive、merge 和直推集成分支仍属于 full 质量操作。真实 Codex 行为评估是维护者单独执行的发布候选动作，commit、配置化 full 和 CI 都不会触发。
+普通提交要求当前配置化 `affected` 或 `full` 结果；targeted 探索不能满足门禁。`verify` 默认复用同一指纹的当前结果，只有明确 `--force` 才重跑；代码、测试和合同稳定后只跑一次 full，archive、commit 和 merge 继续复用。直推集成分支仍属于 full 质量操作。真实 Codex 行为评估是维护者单独执行的发布候选动作，commit、配置化 full 和 CI 都不会触发。
 
 verify、merge、archive 和可选 Git 自动化都检查完整任务变化集：从批准基线到 `HEAD` 的已提交路径，加上当前工作树变化。出现范围漂移时，`status` 优先提示修正范围或拆分任务。merge 或 archive 前，每条当前 RED 链都必须保持测试摘要未变化，并由当前 full 验证对应的 GREEN 闭合。
 
@@ -271,7 +274,7 @@ L2 发布还要求绑定当前 Git SHA 和制品摘要的机器 JSON `operation-
 
 AI 可以整理证据，但不能自行给出安全例外、法律判断或生产批准。
 
-临时或合成凭证只能证明项目可以构建，不能证明真实环境、授权部署或满足验收与发布证据。
+临时或合成凭证只能证明项目可以构建，不能证明真实环境、授权部署或满足验收与发布证据。可选 `with_temporary_rsa.py` 只向一个子构建注入一次性 2048 位 Base64-DER 密钥对，不输出密钥，并在成功、失败或超时后清理。
 
 ## 6. 人工判断
 
@@ -304,7 +307,9 @@ Runner 内部文件加入业务 Allowed Scope，不得修改项目私有 Runner�
 → Git common directory 中一份可重建注册表
 ```
 
-每个 Codex 窗口保持稳定的 `RIGORBREEZE_SESSION_ID`。第二个存活 Session 不能认领同一 worktree。日常写入使用当前 worktree 的 `status --json`；并发窗口和可选外部编排器使用 `status --all --compact --json`。只有精确历史修复、清理或演进审计才加载完整 `status --all --json`。
+每个 Codex 窗口保持稳定的 `RIGORBREEZE_SESSION_ID`。第二个存活 Session 不能认领同一 worktree。可能的 Direct 只用 `status --json --path <相对路径>` 查询相关写者；普通任务读取当前 worktree 状态，并发/依赖/交接才读取 compact 全局状态，精确修复、清理或演进才加载完整全局状态。已集成但路径已不存在的历史 worktree 是 stale-registry 清理候选，不得让聚合状态崩溃或触发 overlap；已集成 HEAD 的 worktree 若仍有同路径未提交改动，则继续视为活动写者。
+
+有效批准后，可在 verification 前登记只读 `runtime`、`device`、`wechat-device` 或 `authoritative-observation`（例如 `production-role-permission-matrix`）。记录保持 pending，不能提前形成 accepted；只有 task digest、project fingerprint、HEAD 和证据文件均未变化时，后续验证才自动绑定。review、product-review、artifact、release 和所有外部写操作仍要求新鲜 verification。
 
 顺序推进的项目在每个仓库复用一个指定 integration worktree。只有真正并发的写任务
 或明确可丢弃的高风险实验才创建额外 worktree。计划中的未来任务不等于并发；一个
