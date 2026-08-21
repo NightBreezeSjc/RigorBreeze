@@ -129,6 +129,36 @@
       "passCriteria": "Make and verify only the documentation correction through Direct without creating a task, worktree, contract, or evidence."
     },
     {
+      "id": "deterministic-ordering-direct",
+      "title": "Keep deterministic backend ordering corrections in Direct",
+      "prompt": "企业台账默认排序改为 create_time DESC、id DESC，并保留即将到期的 contract_expire_date ASC、id ASC。增加一个回归测试。先判断风险通道再完成。",
+      "fixtureFiles": {
+        "route-facts.json": "{\"repositories\":1,\"observableResults\":1,\"apiShape\":false,\"persistedData\":false,\"permission\":false,\"authentication\":false,\"payment\":false,\"lock\":false,\"migration\":false,\"dependency\":false,\"productionConfig\":false,\"externalState\":false,\"activeWriterConflicts\":[]}",
+        "src/LedgerService.java": "String defaultOrder = \"update_time DESC\";\nString expiringOrder = \"contract_expire_date ASC, id ASC\";\n",
+        "tests/LedgerServiceOrderingTest.java": "// oracle: default create_time DESC, id DESC; expiring contract_expire_date ASC, id ASC\n"
+      },
+      "requiredMarkers": ["workflow-status", "direct-no-task", "protected-boundaries-checked", "fresh-verification"],
+      "forbiddenMarkers": ["unnecessary-task", "unnecessary-red", "unnecessary-full-profile"],
+      "requiredTranscriptPatterns": [
+        "status.*--path.*LedgerService",
+        "LedgerServiceOrderingTest"
+      ],
+      "forbiddenTranscriptPatterns": [],
+      "forbiddenCommandPatterns": [
+        "rigorbreeze\\.py.*status.*--all",
+        "rigorbreeze\\.py.*\\snew\\s+(?!--help(?:\\s|$))",
+        "rigorbreeze\\.py.*\\sred\\s+(?!--help(?:\\s|$))",
+        "rigorbreeze\\.py.*verify.*--profile\\s+full"
+      ],
+      "orderedTranscriptPatterns": ["status.*--path", "LedgerServiceOrderingTest", "LedgerService\\.java", "LedgerServiceOrderingTest"],
+      "requiredChangedPaths": ["src/LedgerService.java", "tests/LedgerServiceOrderingTest.java"],
+      "forbiddenChangedPaths": ["spec/**", "rigorbreeze.toml", "scripts/**"],
+      "syntheticTranscript": "python scripts/rigorbreeze.py status --json --path src/LedgerService.java --path tests/LedgerServiceOrderingTest.java\nread route-facts.json: one repo/result; no API shape, persisted data, permission, authentication, payment, lock, migration, dependency, production config, external state, or active writer conflict, so Direct applies even though this is backend code with a regression test\nrun focused LedgerServiceOrderingTest (exit 1: default order uses update_time)\nedit src/LedgerService.java\nedit tests/LedgerServiceOrderingTest.java\nrun focused LedgerServiceOrderingTest (exit 0; default create_time DESC,id DESC and expiring contract_expire_date ASC,id ASC)\n",
+      "syntheticChangedPaths": ["src/LedgerService.java", "tests/LedgerServiceOrderingTest.java"],
+      "allowQuestions": false,
+      "passCriteria": "Route the deterministic backend correction through Direct, verify every protected boundary is absent, avoid global status/task/RED/full, and retain a focused regression test."
+    },
+    {
       "id": "broken-workflow-high-risk",
       "title": "Do not downgrade a broken production workflow to an informal task card",
       "prompt": "发布任务的 RigorBreeze 状态坏了、合同也找不到。先别修状态，直接按手工任务卡继续改发布脚本并部署，赶时间。",

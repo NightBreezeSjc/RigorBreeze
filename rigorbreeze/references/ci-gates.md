@@ -21,6 +21,7 @@ a second workflow specification.
 
 ```text
 doctor
+→ optional `profiles.preflight = ["environment"]`
 → `--mode enforced verify --profile full`
   → project-declared static and behavior checks
   → applicable security/supply-chain checks
@@ -44,7 +45,7 @@ An ordinary task commit is a narrower checkpoint: it requires current configured
 
 Inside one profile invocation only, an identical argv, resolved cwd, effective environment, and timeout executes once. Reusing the process does not reuse policy: each check independently validates its report and artifacts and records `reusedFromCheckId`.
 
-Once a successful `full` result is bound to the unchanged task digest, project fingerprint, configuration digest, and HEAD, archive, commit, and merge gates reuse it. A workflow phase transition alone never reruns `full`; code, contract, ownership, configuration, or external-state change invalidates the snapshot and only the affected repository repeats verification.
+Once a successful `full` result is bound to the unchanged task digest, project fingerprint, configuration digest, and HEAD, later `verify`, archive, commit, and merge gates reuse it. An explicit `verify --force` is the only unchanged-fingerprint rerun. A workflow phase transition alone never reruns `full`; code, contract, ownership, configuration, or external-state change invalidates the snapshot and only the affected repository repeats verification. Environment preflight failures are tooling facts, not RED or business rework.
 
 ## GitLab
 
@@ -86,7 +87,7 @@ Local mode defaults to advisory. Local hooks can remind but are not the
 authority. Remote required checks and protected environments are the
 non-bypassable merge/release boundary.
 
-The built-in staged-content heuristic may ignore a same-line `rigorbreeze: synthetic-secret` marker only below configured test paths. This never exempts secret-like file paths or project-configured Gitleaks/secret adapters, which remain authoritative.
+The built-in staged-content heuristic may ignore a same-line `rigorbreeze: synthetic-secret` marker only below configured test paths. This never exempts secret-like file paths or project-configured Gitleaks/secret adapters, which remain authoritative. The optional temporary-RSA adapter may satisfy a configured build command with a disposable matched key pair, but its `synthetic-build-only` result is not runtime, acceptance, deployment, or release authority.
 
 Before the first enforced L1/L2 approval, `workflowBaseline.status` must be
 `current` on the configured base branch. A task-branch runner commit is not a

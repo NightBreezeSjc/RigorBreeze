@@ -7,6 +7,7 @@ import argparse
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -87,6 +88,7 @@ from flow_policy import (  # noqa: E402
 )
 from flow_state import (  # noqa: E402
     CONFIG_NAME,
+    DEPENDENCY_NAMES,
     LOCK_NAME,
     MIGRATION_EVIDENCE_FIELDS,
     MODES,
@@ -149,6 +151,183 @@ from flow_state import (  # noqa: E402
     working_tree_paths,
     write_json,
 )
+
+
+def command_executable(root: Path, value: str) -> str | None:
+    candidate = Path(value)
+    if candidate.is_absolute():
+        return (
+            str(candidate)
+            if candidate.is_file()
+            and (os.name == "nt" or os.access(candidate, os.X_OK))
+            else None
+        )
+    if "/" in value or "\\" in value:
+        resolved = (root / candidate).resolve()
+        return (
+            str(resolved)
+            if resolved.is_file() and (os.name == "nt" or os.access(resolved, os.X_OK))
+            else None
+        )
+    return shutil.which(value)
+
+
+def builtin_environment_issues(
+    root: Path, command: list[str], tests: list[str]
+) -> list[str]:
+    issues = [relative for relative in tests if not (root / relative).is_file()]
+    normalized = command[1:] if command and command[0] == "--" else command
+    if not normalized:
+        return [*issues, "RED command is empty"]
+    executable = normalized[0]
+    if command_executable(root, executable) is None:
+        issues.append(f"command executable is unavailable: {executable}")
+        return issues
+    name = Path(executable).name.lower().removesuffix(".cmd")
+    if name in {"npm", "pnpm", "yarn", "npx"}:
+        manifest = root / "package.json"
+        package: dict[str, Any] = {}
+        if not manifest.is_file():
+            issues.append("package.json is missing for the Node test command")
+        elif name != "npx":
+            try:
+                package = json.loads(manifest.read_text(encoding="utf-8"))
+            except (OSError, json.JSONDecodeError):
+                issues.append("package.json is unreadable")
+            else:
+                script = None
+                if name == "npm" and len(normalized) > 1:
+                    script = (
+                        normalized[2]
+                        if normalized[1] == "run" and len(normalized) > 2
+                        else "test"
+                        if normalized[1] in {"test", "t"}
+                        else None
+                    )
+                elif len(normalized) > 1:
+                    script = normalized[1]
+                if script and script not in package.get("scripts", {}):
+                    issues.append(f"package.json script is missing: {script}")
+        dependencies = root / "node_modules"
+        requires_dependencies = bool(
+            manifest.is_file()
+            and (
+                package.get("dependencies")
+                or package.get("devDependencies")
+                or package.get("optionalDependencies")
+            )
+        )
+        if requires_dependencies and not dependencies.is_dir():
+            issues.append(
+                "node_modules is unavailable; configure the project environment "
+                "adapter for a shared dependency directory or install dependencies"
+            )
+    if name in {"mvn", "mvnw", "mvnw.cmd"}:
+        if name.startswith("mvnw") and command_executable(root, executable) is None:
+            issues.append(f"Maven wrapper is unavailable: {executable}")
+        if shutil.which("java") is None:
+            issues.append("Java is unavailable for the Maven test command")
+    return issues
+
+
+def environment_fingerprint(
+    root: Path, config: dict[str, Any], extra_command: list[str] | None = None
+) -> str:
+    commands = [
+        check["command"]
+        for check_id in config.get("profiles", {}).get("preflight", [])
+        if (check := config.get("_checks", {}).get(check_id))
+    ]
+    if extra_command:
+        commands.append(extra_command)
+    dependency_digests = {}
+    for name in sorted(DEPENDENCY_NAMES):
+        path = root / name
+        if path.is_file():
+            dependency_digests[name] = sha256_bytes(path.read_bytes())
+    executables = {
+        command[0]: command_executable(root, command[0])
+        for command in commands
+        if command
+    }
+    node_modules = root / "node_modules"
+    payload = {
+        "configDigest": config_digest(root),
+        "dependencies": dependency_digests,
+        "executables": executables,
+        "nodeModules": str(node_modules.resolve()) if node_modules.is_dir() else None,
+    }
+    return sha256_bytes(json.dumps(payload, sort_keys=True).encode())
+
+
+def ensure_configured_environment_preflight(
+    root: Path,
+    state: dict[str, Any],
+    config: dict[str, Any],
+    *,
+    extra_command: list[str] | None = None,
+    force: bool = False,
+) -> None:
+    ids = list(config.get("profiles", {}).get("preflight", []))
+    if not ids:
+        return
+    fingerprint = environment_fingerprint(root, config, extra_command)
+    previous = state.get("environmentPreflight") or {}
+    if (
+        not force
+        and previous.get("passed") is True
+        and previous.get("fingerprint") == fingerprint
+    ):
+        return
+    check = config.get("_checks", {}).get("environment")
+    if not check:
+        raise FlowError("environment preflight is declared but not configured")
+    cwd = resolve_project_path(root, check.get("cwd", "."), "environment cwd")
+    timeout = check.get("timeout", 120)
+    environment = {**os.environ, **check.get("env", {})}
+    started = time.monotonic()
+    try:
+        result = subprocess.run(
+            check["command"],
+            cwd=cwd,
+            env=environment,
+            text=True,
+            encoding="utf-8",
+            capture_output=True,
+            timeout=timeout,
+        )
+    except FileNotFoundError as exc:
+        result = subprocess.CompletedProcess(check["command"], 127, "", str(exc))
+    except subprocess.TimeoutExpired as exc:
+        result = subprocess.CompletedProcess(
+            check["command"],
+            124,
+            subprocess_text(exc.stdout),
+            "\n".join(
+                part
+                for part in (
+                    subprocess_text(exc.stderr),
+                    f"timed out after {timeout} seconds",
+                )
+                if part
+            ),
+        )
+    output = ((result.stdout or "") + (result.stderr or "")).strip()
+    state["environmentPreflight"] = {
+        "passed": result.returncode == 0,
+        "fingerprint": fingerprint,
+        "command": [redact(part) for part in check["command"]],
+        "exitCode": result.returncode,
+        "durationMs": round((time.monotonic() - started) * 1000),
+        "summary": redact(output[-1000:]),
+        "checkedAt": now_iso(),
+    }
+    save_state(root, state)
+    if result.returncode != 0:
+        raise FlowError(
+            "environment preflight failed before business evidence: "
+            + (redact(output[-1000:]) or f"exit {result.returncode}")
+        )
 
 
 def command_init(root: Path) -> None:
@@ -1066,6 +1245,7 @@ def worktree_status_projection(
     for bucket, label in (
         ("removableWorktrees", "removable"),
         ("retainedWorktrees", "retained"),
+        ("staleRegistryEntries", "stale-registry"),
     ):
         for item in cleanup.get(bucket, []):
             value = item.get("worktree")
@@ -1183,6 +1363,7 @@ def compact_all_status(payload: dict[str, Any]) -> dict[str, Any]:
             "removableWorktrees": len(cleanup.get("removableWorktrees", [])),
             "retainedWorktrees": len(cleanup.get("retainedWorktrees", [])),
             "retainedBranches": len(cleanup.get("retainedBranches", [])),
+            "staleRegistryEntries": len(cleanup.get("staleRegistryEntries", [])),
         },
         "evolution": {
             "candidateCount": evolution.get("candidateCount", 0),
@@ -1196,7 +1377,30 @@ def command_status(
     json_output: bool = False,
     all_worktrees: bool = False,
     compact: bool = False,
+    paths: list[str] | None = None,
 ) -> None:
+    path_queries = paths or []
+    if path_queries:
+        if all_worktrees or compact or not json_output:
+            raise FlowError(
+                "status --path requires --json and cannot use --all/--compact"
+            )
+        validate_scope_entries(root, path_queries)
+        payload = flow_parallel.path_writer_status(root, path_queries)
+        if payload["activeWriters"]:
+            payload["nextAction"] = {
+                "actor": "codex",
+                "kind": "safety-stop",
+                "summary": "Use L1 isolation or wait for the listed writer to finish.",
+            }
+        else:
+            payload["nextAction"] = {
+                "actor": "codex",
+                "kind": "work",
+                "summary": "No active writer overlaps the requested paths.",
+            }
+        print(json.dumps(payload, ensure_ascii=False, sort_keys=True))
+        return
     if compact and not (all_worktrees and json_output):
         raise FlowError("status --compact requires --all --json")
     if all_worktrees:
@@ -1253,7 +1457,7 @@ def command_status(
         roots.extend(
             Path(str(item["worktree"]))
             for item in payload["tasks"]
-            if item.get("worktree")
+            if item.get("worktree") and Path(str(item["worktree"])).is_dir()
         )
         payload["evolution"] = evolution_projection(roots)
         payload["worktrees"] = worktree_status_projection(
@@ -1458,6 +1662,12 @@ def command_red(
         for relative in tests
     ):
         raise FlowError("RED command must execute every declared --test file")
+    environment_issues = builtin_environment_issues(root, normalized_command, tests)
+    if environment_issues:
+        raise FlowError(
+            "environment preflight failed before RED: " + "; ".join(environment_issues)
+        )
+    ensure_configured_environment_preflight(root, state, config)
     test_digests = {relative: test_file_digest(root, relative) for relative in tests}
     current_digest = task_digest(root, state)
     prior_reds = [
@@ -1597,9 +1807,17 @@ def command_red(
 
 
 def command_verify_stateless(root: Path, config: dict[str, Any]) -> int:
-    check_ids = list(config.get("profiles", {}).get("full", []))
-    if not check_ids:
+    full_ids = list(config.get("profiles", {}).get("full", []))
+    if not full_ids:
         raise FlowError("enforced full profile must declare at least one check")
+    check_ids = list(
+        dict.fromkeys(
+            [
+                *config.get("profiles", {}).get("preflight", []),
+                *full_ids,
+            ]
+        )
+    )
     executions: dict[
         tuple[tuple[str, ...], str, tuple[tuple[str, str], ...], int],
         subprocess.CompletedProcess[str],
@@ -1673,7 +1891,9 @@ def command_verify_stateless(root: Path, config: dict[str, Any]) -> int:
     return 0
 
 
-def command_verify_profile(root: Path, profile: str, requested_mode: str | None) -> int:
+def command_verify_profile(
+    root: Path, profile: str, requested_mode: str | None, force: bool = False
+) -> int:
     state = (
         load_state(root)
         if state_path(root).is_file() or legacy_state_path(root).is_file()
@@ -1696,6 +1916,24 @@ def command_verify_profile(root: Path, profile: str, requested_mode: str | None)
     if profile not in {"affected", "full"}:
         raise FlowError("configured verification profile must be affected or full")
     ensure_scope_current(root, state)
+    if not force:
+        current = state.get("verification") or {}
+        reusable = (
+            full_profile_current(root, state)
+            if profile == "full"
+            else verification_current(root, state)
+            and current.get("profile") in {"affected", "full"}
+        )
+        reusable = bool(
+            reusable and not (mode == "enforced" and current.get("mode") != "enforced")
+        )
+        if reusable:
+            print(
+                f"{profile} profile reused ({mode}); project fingerprint is unchanged"
+            )
+            return 0
+    if profile == "full":
+        ensure_configured_environment_preflight(root, state, config)
     if active["risk"] in {"L1", "L2", "Emergency"}:
         if not state.get("red"):
             raise FlowError("current RED or incident reproduction evidence is required")
@@ -1862,6 +2100,21 @@ def command_verify_profile(root: Path, profile: str, requested_mode: str | None)
         "head": current_head(root) if is_git_repo(root) else None,
         "verifiedAt": now_iso(),
     }
+    if passed:
+        for record in evidence.get("acceptance", []):
+            if (
+                record.get("verificationBinding") == "pending"
+                and record.get("taskDigest") == verification["taskDigest"]
+                and record.get("projectFingerprint")
+                == verification["projectFingerprint"]
+                and record.get("head") == verification["head"]
+            ):
+                record["verificationBinding"] = "current"
+                record["verification"] = {
+                    "profile": profile,
+                    "configDigest": verification["configDigest"],
+                    "verifiedAt": verification["verifiedAt"],
+                }
     evidence["verification"] = verification
     evidence["verifications"].append(verification)
     if passed and state.get("red"):
@@ -1916,7 +2169,11 @@ def command_evidence_add(
     field_values: list[str],
 ) -> None:
     state = load_state(root)
-    if not approval_valid(root, state) or not verification_current(root, state):
+    approval_now = approval_valid(root, state)
+    verification_now = verification_current(root, state)
+    pending_kinds = {"runtime", "device", "wechat-device", "authoritative-observation"}
+    pending_allowed = section == "acceptance" and kind in pending_kinds
+    if not approval_now or (not verification_now and not pending_allowed):
         save_state(root, state)
         raise FlowError("fresh verification is required before structured evidence")
     active = active_task(state)
@@ -1937,6 +2194,7 @@ def command_evidence_add(
         "head": current_head(root) if is_git_repo(root) else None,
         "artifactDigests": [artifact["sha256"] for artifact in current_artifacts],
         "recordedAt": now_iso(),
+        "verificationBinding": "current" if verification_now else "pending",
     }
     evidence_content: Any = None
     if file:
@@ -1990,12 +2248,19 @@ def command_evidence_add(
             "review": {"status", "reviewer"},
             "device": {"status", "environment", "device", "appVersion"},
             "wechat-device": {"status", "environment", "device", "appVersion"},
+            "authoritative-observation": {
+                "status",
+                "environment",
+                "requirement",
+                "source",
+            },
         }
         required = required_by_kind.get(kind)
         if required is None:
             raise FlowError(
                 "acceptance evidence kind must be playwright, runtime, design, "
-                "product-review, review, device, or wechat-device"
+                "product-review, review, device, wechat-device, or "
+                "authoritative-observation"
             )
         missing = sorted(required - fields.keys())
         fileless_review = kind in {"review", "product-review"} and not file
@@ -2022,7 +2287,7 @@ def command_evidence_add(
             raise FlowError(
                 f"fileless {kind} evidence must pass standards/spec and describe findings"
             )
-        if state.get("phase") != "release-ready":
+        if verification_now and state.get("phase") != "release-ready":
             state["phase"] = "accepted"
     elif section == "release":
         required_by_kind = {
@@ -3348,6 +3613,7 @@ def build_parser() -> argparse.ArgumentParser:
     status.add_argument("--json", action="store_true")
     status.add_argument("--all", action="store_true")
     status.add_argument("--compact", action="store_true")
+    status.add_argument("--path", action="append", default=[])
     approve = sub.add_parser("approve")
     approve.add_argument("kind", choices=("task", "dependency", "migration", "overlap"))
     approve.add_argument("--name")
@@ -3359,6 +3625,7 @@ def build_parser() -> argparse.ArgumentParser:
     red.add_argument("run", nargs=argparse.REMAINDER)
     verify = sub.add_parser("verify")
     verify.add_argument("--profile", choices=("affected", "full"), required=True)
+    verify.add_argument("--force", action="store_true")
     evidence = sub.add_parser("evidence")
     evidence_sub = evidence.add_subparsers(dest="evidence_command", required=True)
     evidence_add = evidence_sub.add_parser("add")
@@ -3428,7 +3695,7 @@ def main() -> int:
     root = args.root.resolve()
     try:
         if args.command == "status":
-            command_status(root, args.json, args.all, args.compact)
+            command_status(root, args.json, args.all, args.compact, args.path)
             return 0
         if args.command == "doctor":
             command_doctor(root, args.json, args.all, args.repair, args.migrate_records)
@@ -3465,7 +3732,7 @@ def main() -> int:
                     root, args.requirement, args.expect_pattern, args.test, args.run
                 )
             elif args.command == "verify":
-                return command_verify_profile(root, args.profile, args.mode)
+                return command_verify_profile(root, args.profile, args.mode, args.force)
             elif args.command == "evidence":
                 command_evidence_add(
                     root,

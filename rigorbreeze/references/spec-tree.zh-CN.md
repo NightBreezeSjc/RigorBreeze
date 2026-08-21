@@ -86,6 +86,8 @@ accepted → release-ready → protected release gate
 
 `status --json` 包含 `installation`、`workflowBaseline`、`workflowBypass`、生命周期、`scope`、`evolution` 和 `interaction`。文本只显示已完成、当前和唯一真实用户动作；`actor=codex` 的内部动作继续由 Codex 完成。其余状态继续证明安装、基线、范围与绕过，不能生成虚假批准、RED、GREEN、验收或替代基线。
 
+`status --json --path <相对路径>` 是 Direct/并发的有界查询，只返回相关活动写者、同路径脏 worktree、被忽略的已集成历史数量、stale-registry 数量和唯一下一动作。缺失历史 worktree 不会再作为子进程工作目录；已证明集成的缺失项进入清理候选，无法证明集成的活动缺失项仍保留一条阻断诊断。
+
 活动合同缺失时，当前与聚合状态会投影 `lifecycle=orphaned-record`、阻断就绪并指出需要恢复的准确合同。已有 evidence 演进候选只按任务 ID 汇总，并给出可复制的 `$rigorbreeze 汇总这个项目的演进候选`；status 展示提醒时不会修改原 evidence。
 
 `status --all --compact --json` 是并行工作的默认机器交接：保留活动任务所有权、依赖、阻断、下一动作和 cleanup 汇总计数，并省略已关闭任务明细。完整 `status --all --json` 还包含运行资源声明/冲突与详细 `cleanup` 投影，列出可删除的已集成受管 worktree、带安全原因的保留项、未登记 Git worktree，以及按策略保留的本地任务分支；候选同时显示干净状态、集成证明、expected HEAD 和是否需要一次性确认。未登记清理永不删除分支。该投影只从 Git 和注册表推导，是提示状态，不是第二套任务或证据事实源。
@@ -100,6 +102,8 @@ accepted → release-ready → protected release gate
 - 任务摘要和项目指纹；
 - Git HEAD 和时间；
 - 运行、审查、安全、迁移、第二人和事故证据引用。
+
+有效批准后的只读 `runtime`、`device`、`wechat-device` 和 `authoritative-observation` 可先保存 `verificationBinding=pending`。在成功验证绑定完全相同的任务摘要、项目指纹、HEAD 和证据文件前，它们不会成为当前验收。旧记录没有该字段时继续兼容。
 
 单次 profile 调用内，`checkRuns[*].reusedFromCheckId` 可以标识完全相同的进程结果来自哪个前序检查。它只表示执行来源：后续检查仍保留自己的通过/失败、报告、制品、类别和时间；缺少该字段时继续兼容现有 schema v4 证据。
 

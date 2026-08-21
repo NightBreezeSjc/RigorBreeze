@@ -115,6 +115,8 @@ non-workflow delivery changes. That observation records one deduplicated
 practice event as an immediate evolution candidate; it never creates approval,
 RED, GREEN, acceptance, or a replacement baseline.
 
+`status --json --path <relative>` is the bounded Direct/concurrency probe. It returns only matching active writers, dirty same-path worktrees, ignored integrated-history counts, stale-registry counts, and one next action. Missing historical worktrees never become a subprocess working directory. Proven integrated missing entries are cleanup candidates; unproven active missing entries remain one blocking diagnostic.
+
 If an active contract is missing, current and aggregate status project
 `lifecycle=orphaned-record`, block readiness, and identify the exact contract to
 restore. Existing evidence candidates are summarized by task ID with the
@@ -140,6 +142,8 @@ Evidence JSON may store:
 - task digest and project fingerprint;
 - Git HEAD and timestamp;
 - runtime, review, security, migration, second-human, and incident evidence references.
+
+Read-only `runtime`, `device`, `wechat-device`, and `authoritative-observation` records may carry `verificationBinding=pending` after approval. They are excluded from current acceptance until successful verification binds the unchanged task digest, project fingerprint, HEAD, and evidence file. Existing records without this field remain compatible.
 
 Within one profile invocation, `checkRuns[*].reusedFromCheckId` may identify the earlier check whose identical process result was reused. It is execution provenance only: the later check retains its own pass/fail, report, artifacts, category, and timestamp. Its absence preserves compatibility with existing schema-v4 evidence.
 

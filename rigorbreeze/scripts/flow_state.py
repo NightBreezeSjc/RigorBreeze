@@ -18,12 +18,13 @@ import flow_parallel
 
 VERSION = 5
 EVIDENCE_VERSION = 4
-TOOL_VERSION = "0.16.0"
+TOOL_VERSION = "0.17.0"
 SPEC_DIR = "spec"
 CONFIG_NAME = "rigorbreeze.toml"
 MODES = ("advisory", "enforced")
 AUTOMATION_LEVELS = ("manual", "commit", "push", "merge", "release")
 STANDARD_CHECK_IDS = (
+    "environment",
     "format",
     "lint",
     "typecheck",
@@ -535,6 +536,7 @@ source_paths = ["src", "app", "lib"]
 migration_paths = ["migration", "migrations", "alembic", "flyway", "liquibase", "versions"]
 
 [profiles]
+# Optional: preflight = ["environment"]
 affected = ["lint", "unit", "secret"]
 full = ["lint", "unit", "secret", "build"]
 
@@ -565,6 +567,11 @@ publish_high_risk_summary = true
 # typecheck, integration, e2e, dependency, migration, or playwright when they
 # protect a real project capability. Every ID listed in a profile must have a
 # command; missing profile checks warn locally and fail in enforced mode.
+#
+# [[checks]]
+# id = "environment"
+# command = ["bash", "scripts/check-test-environment.sh"]
+# timeout = 120
 #
 # [[checks]]
 # id = "unit"
@@ -652,19 +659,19 @@ def agents_block() -> str:
     return f"""{AGENTS_START}
 ## RigorBreeze
 
-Before non-trivial product writes, including after compaction or another workflow Skill, invoke `$rigorbreeze`. Run bundled `status --json` for the current worktree; use `status --all --compact --json` only for concurrency, dependencies, or handoff. Require the real base `workflowBaseline`, an approved task, and a successful window claim. Read the configuration, index, active contract, and affected authoritative sources.
+Before writes, including after compaction, invoke `$rigorbreeze`. Resolve target paths, then Direct MUST run exactly `python3 scripts/rigorbreeze.py status --json --path <target>` for each target before opening or writing it; never substitute `.`, Git status, prior help, or global status. Tasks use `status --json`; `status --all --compact --json` is for concurrency/dependencies/handoff. Require the real base, approved task, and window claim.
 
-Direct is taskless only for one unambiguous, low-consequence result in one repository with no API/data shape, auth, permission, payment, lock, migration, dependency, production config, or release impact. Make the smallest edit and one targeted check. Crossing a boundary creates L1/L2. A missing high-risk contract must be restored or replaced by an explicit Emergency contract; never use an informal task card.
+Direct is taskless for one deterministic low-consequence result with no writer or API, data, auth, permission, payment, lock, migration, dependency, production-config, external-state, or release boundary. Extend the existing test seam unless unusable. Run focused proof, never full. Unrelated base dirt may use a short-lived clean worktree; only clean+contained is removable. Crossing a boundary creates L1/L2. Restore missing high-risk contracts or use explicit Emergency.
 
 Recover facts from requirements, code, tests, Git, and runtime evidence; ask only for outcome-changing intent. For initiative shaping or branching L2 ambiguity, use a decision frontier with at most three questions per round, each carrying a recommendation and impact. A prototype answers one decision question and never proves production acceptance. Translate requests into observable atoms and acceptance IDs; distinguish the current defect from the desired result.
 
-Before approval, run a semantic self-review for placeholders, contradictions, oversized scope, and ambiguous outcome/source/freshness/fallback; show a final-state checklist. Risk determines gates, independent outcomes get short-lived branches, concurrency gets extra worktrees, and dependency gets a DAG. One worktree has one writer. Reuse a checkout only after closure and integration; declare exclusive Runtime-Claims.
+Before approval, run a semantic self-review for placeholders, contradictions, oversized scope, and ambiguous outcome/source/freshness/fallback; map observable atoms, distinguish current defect from desired result, and show a final-state checklist. Risk determines gates, independent outcomes get short-lived branches, concurrency gets extra worktrees, and dependency gets a DAG. One worktree has one writer.
 
-L1/L2/Emergency use observed RED, public seams, independent oracles, and configured affected/full profiles. Local mode is advisory; CI, L2, merge, and release are enforced. Verify review feedback. Use this solution ladder: no implementation, project reuse, standard/framework/native capability, installed dependency, minimal new code. Apply a deletion test before retaining an abstraction. After three failed hypotheses, reassess architecture. Never shrink security, permission, data, migration, rollback, accessibility, or compatibility boundaries.
+L1/L2/Emergency preflight tools, dependencies, and project fixtures before observed RED. Use public seams, independent oracles, affected during development, and one final full; unchanged verification is reused. Approved read-only evidence may remain pending, but review/release/writes stay gated. Verify review feedback. Use the solution ladder and deletion test; after three failed hypotheses make an architecture stop. Never shrink security, permission, data, migration, rollback, accessibility, or compatibility boundaries.
 
 Validate the real runtime. AI cannot approve its own visual, security, legal, or production conclusion. Migration and release retain rehearsal, immutable artifact, stop, recovery, and rollback evidence. Before external writes, reconstruct completed steps, identifiers, one remaining action, and stop conditions; never repeat stale-plan work.
 
-Records default to Git-common private storage; never silently move legacy tracked records. L1 may compact after integration; L2/Emergency retains full private proof and only sanitized configured audit summaries. Git automation stays manual unless configured or explicitly authorized for one guarded commit/push. Reconcile only proven, clean, managed worktrees and safe local branches; never delete remote or uncertain state.
+Records default to Git-private storage; never silently move legacy records. Missing integrated worktrees are cleanup candidates; same-path dirty writers still block. Git automation stays manual unless configured or explicitly authorized. Reconcile only proven clean+contained worktrees and safe local branches; never delete remote or uncertain state.
 
 Completion requires fresh verification from this turn with command, exit status, and scope. Clean L1 may close automatically; friction and all L2/Emergency retain human review. A reusable workflow defect becomes a separate RigorBreeze Skill task and evolution candidate, never expanded business scope.
 {AGENTS_END}"""
@@ -935,7 +942,7 @@ def load_config(root: Path) -> dict[str, Any]:
             )
         checks[check_id] = item
     config["_checks"] = checks
-    for profile in ("affected", "full"):
+    for profile in ("preflight", "affected", "full"):
         ids = profiles.get(profile, [])
         if not isinstance(ids, list) or not all(isinstance(item, str) for item in ids):
             raise FlowError(f"profiles.{profile} must be an array of check IDs")
@@ -944,6 +951,8 @@ def load_config(root: Path) -> dict[str, Any]:
             raise FlowError(
                 f"profiles.{profile} contains unknown checks: {', '.join(unknown)}"
             )
+        if profile == "preflight" and any(item != "environment" for item in ids):
+            raise FlowError("profiles.preflight may contain only the environment check")
     return config
 
 

@@ -157,7 +157,7 @@ artifacts = ["artifacts/app.bin"]
         runner = self.root / "scripts" / "flow_state.py"
         runner.write_text(
             runner.read_text(encoding="utf-8").replace(
-                'TOOL_VERSION = "0.16.0"', 'TOOL_VERSION = "0.5.1"'
+                'TOOL_VERSION = "0.17.0"', 'TOOL_VERSION = "0.5.1"'
             ),
             encoding="utf-8",
         )
@@ -167,7 +167,7 @@ artifacts = ["artifacts/app.bin"]
             status["installation"],
             {
                 "runnerVersion": "0.5.1",
-                "skillVersion": "0.16.0",
+                "skillVersion": "0.17.0",
                 "status": "outdated",
                 "upgradeSafe": False,
                 "missingComponents": [],
@@ -190,7 +190,7 @@ artifacts = ["artifacts/app.bin"]
         self.run_flow("init")
         self.assertTrue(runner.is_file())
         self.assertIn(
-            'TOOL_VERSION = "0.16.0"',
+            'TOOL_VERSION = "0.17.0"',
             (self.root / "scripts" / "flow_state.py").read_text(encoding="utf-8"),
         )
 
@@ -966,7 +966,7 @@ command = {json.dumps([sys.executable, "-c", "print('unit passed')"])}
         self.run_flow("approve", "task")
 
         for _ in range(3):
-            self.run_flow("verify", "--profile", "affected")
+            self.run_flow("verify", "--profile", "affected", "--force")
         before = json.loads(self.evidence_file("TASK-713A").read_text())
         self.assertEqual(len(before["checkRuns"]), 2)
         self.assertEqual(before["checkRunSummary"]["total"], 6)
@@ -1034,7 +1034,7 @@ command = {json.dumps([sys.executable, "-c", check])}
         marker.parent.mkdir()
         marker.write_text("passed\n", encoding="utf-8")
         self.run_flow("verify", "--profile", "affected")
-        self.run_flow("verify", "--profile", "affected")
+        self.run_flow("verify", "--profile", "affected", "--force")
         self.run_flow("archive")
 
         evidence = json.loads(self.evidence_file("TASK-713B").read_text())

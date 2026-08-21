@@ -19,6 +19,7 @@
 
 ```text
 doctor
+→ 可选 `profiles.preflight = ["environment"]`
 → `--mode enforced verify --profile full`
   → 项目声明的静态与行为检查
   → 适用的安全与供应链检查
@@ -33,7 +34,7 @@ enforced profile 包含项目为该 profile 声明的检查，每项都必须配
 
 仅在单次 profile 调用内，argv、解析后 cwd、有效环境和 timeout 完全一致的检查只启动一次。复用进程不等于复用策略：每个检查仍独立校验自己的报告和制品，并记录 `reusedFromCheckId`。
 
-成功 `full` 一旦绑定未变化的任务摘要、项目指纹、配置摘要和 HEAD，archive、commit 与 merge 门禁直接复用。仅仅切换流程阶段不会重跑 `full`；代码、合同、所有权、配置或外部状态变化才使快照失效，并且只重新验证受影响的仓库。
+成功 `full` 一旦绑定未变化的任务摘要、项目指纹、配置摘要和 HEAD，后续 `verify`、archive、commit 与 merge 门禁直接复用；只有明确 `verify --force` 才在同一指纹重跑。仅仅切换流程阶段不会重跑 `full`；代码、合同、所有权、配置或外部状态变化才使快照失效，并且只重新验证受影响的仓库。环境预检失败属于工具事实，不形成 RED 或业务返工。
 
 ## GitLab
 
@@ -57,7 +58,7 @@ L2 远程交付的 `check release` 还要求当前机器 JSON `operation-plan`�
 
 本地默认 advisory。本地 Hook 可以提醒但不是权威；远程 Required Checks 和受保护环境才是不可绕过的合并/发布边界。
 
-内置暂存内容启发式只允许在配置测试路径下忽略同一行的 `rigorbreeze: synthetic-secret` 标记。秘密形状文件路径以及项目配置的 Gitleaks/secret 适配器不会被豁免，仍是强制事实源。
+内置暂存内容启发式只允许在配置测试路径下忽略同一行的 `rigorbreeze: synthetic-secret` 标记。秘密形状文件路径以及项目配置的 Gitleaks/secret 适配器不会被豁免，仍是强制事实源。可选临时 RSA 适配器可以用一次性匹配密钥对满足配置化构建命令，但其 `synthetic-build-only` 结果不具备运行、验收、部署或发布权限。
 
 首个 enforced L1/L2 批准前，配置的真正基准分支必须满足 `workflowBaseline.status=current`；任务分支中的 runner 提交不能替代项目基线。用户一次性明确授权后，`automate commit --once --workflow-baseline --expected-head <sha>` 只能在基准 worktree 无活动任务、无无关改动、无缓存和秘密材料时建立或更新该基线。
 

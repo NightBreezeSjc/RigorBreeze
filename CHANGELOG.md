@@ -27,6 +27,21 @@ The project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). 
 - Reframed the repository for first-time adopters with bilingual onboarding, explicit safety boundaries, and a complete first-task walkthrough.
 - Added concise contribution and security policies plus an MIT license.
 
+## [0.17.0] - Close real workflow friction without weakening proof
+
+### Changed
+
+- Route deterministic single-repository ordering/presentation corrections through Direct even when they touch backend code and add a regression test; path-bounded writer queries replace global status enumeration.
+- Keep aggregate status alive when historical worktrees disappear, ignore proven integrated history during overlap checks, and retain integrated worktrees with uncommitted same-path changes as active writers.
+- Preflight RED/build environments through built-in Node/Maven checks plus an optional project `environment` adapter; tooling and fixture failures no longer become business RED.
+- Allow approved read-only authoritative observations to remain pending until matching verification, while review, artifacts, release, and writes stay gated.
+- Reuse unchanged affected/full results unless `--force` is explicit, and provide a build-only temporary RSA adapter that never exposes or persists keys.
+
+### Compatibility
+
+- State/config remains schema v5, evidence remains schema v4, and automation journal remains v1. Existing projects need no new preflight configuration.
+- Direct still excludes API/data/auth/permission/payment/lock/migration/dependency/production/external-state boundaries; every L2 gate remains unchanged.
+
 ## [0.16.0] - Bound solution and workflow cost without relaxing risk gates
 
 ### Changed

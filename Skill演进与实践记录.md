@@ -526,3 +526,11 @@ $rigorbreeze 汇总这个项目的演进候选
 v0.16.0 保留各仓 SHA、范围、RED、测试和门禁事实，只把人机交互合并成一次批准、一次端到端验收和最多一次复盘。检查和 profile 结果改为在线有界压缩；解决方案在实现前按“无需实现→项目复用→标准/框架/平台原生→已有依赖→最小新代码”选择，Standards Review 使用 delete/reuse/stdlib/native/yagni/shrink 标签删除无价值复杂度。该规则不得缩短业务理解、根因定位或支付、权限、数据、迁移、回滚等安全边界。
 
 维护者评估器现在从 Codex JSONL 读取缓存/非缓存输入、输出与推理 Token、Runner 命令、纯流程调用、evidence 大小和产品/测试行数。目标值仍属于候选标准，不是已证明成绩：Direct ≤5%、单仓 L1 ≤10%、跨仓 L1 ≤12%、跨仓 L2 缓存后 ≤15% 且原始 ≤20%，跨仓纯流程往返相对 v0.15.1 减少至少 40%。必须固定模型、同一临时仓库、相同验收，分别重复运行无 RigorBreeze、v0.15.1 和 v0.16.0 后比较中位数；未完成 A/B 前不得宣传这些比例。
+
+### 第二十一次真实摩擦：风险误路由、历史状态和环境失败吞噬小任务成本（v0.17.0）
+
+后续真实任务证明 v0.16 的上下文压缩仍可能被错误路由抵消：企业台账只需把默认排序改为 `create_time DESC, id DESC` 并保留到期排序，却因后端位置、新回归测试和基础工作区脏而升级成 L1，加载大量历史 worktree、合同、RED、evidence 与 full。与此同时，删除的历史 worktree 让 UI `status --all` 在把缺失路径作为 subprocess cwd 时直接崩溃；已合并历史任务继续触发 overlap；Node/npm、MyBatis 夹具和 RSA 构建环境直到 RED 或最终 build 才失败；只读生产权限矩阵又无法在 verification 前登记。
+
+v0.17.0 将确定性单仓修正稳定路由到 Direct，使用 `status --json --path` 只查目标写者；后端和新增测试不再自动升级。缺失且已集成的 worktree 成为 stale-registry 清理候选，真实活动/同路径脏写者仍阻断。RED/full 增加内置和可配置环境预检；只读权威观测可以 pending，匹配验证后才绑定；相同指纹的 verification 默认复用；临时 RSA 只证明构建。Direct 临时 worktree 仅 clean、contained 且无远端不确定性时清理，其他状态保留并报告。
+
+本版没有把 MyBatis、npm 安装或业务仓路径塞进核心，也没有削弱权限、支付、门锁、迁移、发布和真实验收门禁。Token 改善必须通过固定模型 A/B 验证；在真实结果产生前只能报告流程调用和状态载荷已减少，不能宣传最终节省比例。
