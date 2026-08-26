@@ -16,6 +16,7 @@ SKILL_DIR = Path(__file__).resolve().parents[2]
 REPO_ROOT = SKILL_DIR.parent
 TRANSLATED_DOCS = {
     REPO_ROOT / "README.md": REPO_ROOT / "README.zh-CN.md",
+    REPO_ROOT / "ARCHITECTURE.md": REPO_ROOT / "ARCHITECTURE.zh-CN.md",
     REPO_ROOT / "CHANGELOG.md": REPO_ROOT / "CHANGELOG.zh-CN.md",
     REPO_ROOT / "CONTRIBUTING.md": REPO_ROOT / "CONTRIBUTING.zh-CN.md",
     REPO_ROOT / "SECURITY.md": REPO_ROOT / "SECURITY.zh-CN.md",
@@ -30,6 +31,21 @@ TRANSLATED_DOCS = {
     / "references"
     / "ci-gates.zh-CN.md",
 }
+ARCHITECTURE_DOCS = (
+    REPO_ROOT / "ARCHITECTURE.md",
+    REPO_ROOT / "ARCHITECTURE.zh-CN.md",
+)
+ARCHITECTURE_AUTHORITY_SOURCES = {
+    SKILL_DIR / "SKILL.md",
+    SKILL_DIR / "references" / "handbook.md",
+    SKILL_DIR / "references" / "handbook.zh-CN.md",
+    SKILL_DIR / "references" / "spec-tree.md",
+    SKILL_DIR / "references" / "spec-tree.zh-CN.md",
+    SKILL_DIR / "references" / "ci-gates.md",
+    SKILL_DIR / "references" / "ci-gates.zh-CN.md",
+}
+MARKDOWN_LINK_PATTERN = re.compile(r"(?<!!)\[[^]]+\]\(([^)]+)\)")
+MERMAID_BLOCK_PATTERN = re.compile(r"(?ms)^```mermaid\s*\n(.*?)^```\s*$")
 
 
 def current_tool_version() -> str:
@@ -105,6 +121,7 @@ class SkillContractTests(unittest.TestCase):
         public_docs = [
             REPO_ROOT / "README.md",
             REPO_ROOT / "README.zh-CN.md",
+            *ARCHITECTURE_DOCS,
             REPO_ROOT / "CHANGELOG.md",
             REPO_ROOT / "CONTRIBUTING.md",
             REPO_ROOT / "SECURITY.md",
@@ -116,12 +133,10 @@ class SkillContractTests(unittest.TestCase):
             SKILL_DIR / "SKILL.md",
             *(SKILL_DIR / "references").glob("*.md"),
         ]
-        link_pattern = re.compile(r"(?<!!)\[[^]]+\]\(([^)]+)\)")
-
         for document in public_docs:
             self.assertTrue(document.is_file(), f"missing public document: {document}")
             text = document.read_text(encoding="utf-8")
-            for raw_target in link_pattern.findall(text):
+            for raw_target in MARKDOWN_LINK_PATTERN.findall(text):
                 target = raw_target.split("#", 1)[0].strip()
                 if not target or re.match(r"^[a-z][a-z0-9+.-]*:", target, re.I):
                     continue
@@ -130,6 +145,64 @@ class SkillContractTests(unittest.TestCase):
                     resolved.exists(),
                     f"broken relative link in {document}: {raw_target}",
                 )
+
+    def test_readmes_link_to_their_architecture_guides(self) -> None:
+        for readme, architecture in (
+            (REPO_ROOT / "README.md", "ARCHITECTURE.md"),
+            (REPO_ROOT / "README.zh-CN.md", "ARCHITECTURE.zh-CN.md"),
+        ):
+            with self.subTest(readme=readme.name):
+                targets = {
+                    raw_target.split("#", 1)[0].strip()
+                    for raw_target in MARKDOWN_LINK_PATTERN.findall(
+                        readme.read_text(encoding="utf-8")
+                    )
+                }
+                self.assertIn(architecture, targets)
+
+    def test_architecture_guides_keep_the_same_system_map_contract(self) -> None:
+        diagram_markers = {
+            "system architecture": ("rigorbreeze", "runner"),
+            "risk-adaptive flow": ("direct", "emergency"),
+            "parallel worktree DAG": ("worktree", "depends-on"),
+        }
+        expected_authority = {
+            "SKILL.md",
+            "handbook.md",
+            "spec-tree.md",
+            "ci-gates.md",
+        }
+
+        for document in ARCHITECTURE_DOCS:
+            with self.subTest(document=document.name):
+                self.assertTrue(
+                    document.is_file(), f"missing architecture guide: {document}"
+                )
+                text = document.read_text(encoding="utf-8")
+                diagrams = MERMAID_BLOCK_PATTERN.findall(text)
+                self.assertGreaterEqual(
+                    len(diagrams),
+                    3,
+                    "architecture guide must include system, risk, and parallel diagrams",
+                )
+                for diagram, markers in diagram_markers.items():
+                    self.assertTrue(
+                        any(
+                            all(marker in block.lower() for marker in markers)
+                            for block in diagrams
+                        ),
+                        f"missing {diagram} Mermaid diagram",
+                    )
+
+                linked_authority = set()
+                for raw_target in MARKDOWN_LINK_PATTERN.findall(text):
+                    target = raw_target.split("#", 1)[0].strip()
+                    if not target or re.match(r"^[a-z][a-z0-9+.-]*:", target, re.I):
+                        continue
+                    resolved = (document.parent / unquote(target)).resolve()
+                    if resolved in ARCHITECTURE_AUTHORITY_SOURCES:
+                        linked_authority.add(resolved.name.replace(".zh-CN.md", ".md"))
+                self.assertSetEqual(linked_authority, expected_authority)
 
     def test_every_user_facing_english_document_has_chinese(self) -> None:
         for english, chinese in TRANSLATED_DOCS.items():
@@ -157,6 +230,8 @@ class SkillContractTests(unittest.TestCase):
         forbidden = {
             "README.md",
             "README.zh-CN.md",
+            "ARCHITECTURE.md",
+            "ARCHITECTURE.zh-CN.md",
             "CHANGELOG.md",
             "CONTRIBUTING.md",
             "SECURITY.md",
@@ -190,6 +265,9 @@ class SkillContractTests(unittest.TestCase):
         self.assertFalse(any(".ruff_cache" in name for name in names))
         self.assertFalse(any("__pycache__" in name for name in names))
         self.assertFalse(any(name.endswith((".pyc", ".pyo")) for name in names))
+        self.assertFalse(
+            any(Path(name).name.startswith("ARCHITECTURE") for name in names)
+        )
 
     def test_skill_metadata_matches_public_name(self) -> None:
         skill = (SKILL_DIR / "SKILL.md").read_text(encoding="utf-8")

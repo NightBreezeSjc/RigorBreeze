@@ -29,6 +29,23 @@ agree on the outcome and acceptance boundary
 
 It adds auditable SDD, observed RED–GREEN–REFACTOR, project-declared checks, real acceptance, safe parallel worktrees, and optional protected Git automation without requiring a large Spec Tree.
 
+## Architecture at a glance
+
+```mermaid
+flowchart LR
+    Developer["Developer intent and acceptance"] --> Skill["RigorBreeze Skill"]
+    Skill --> Codex["Codex implementation"]
+    Codex --> Runner["Deterministic Runner"]
+    Runner --> Project["Project checks, Git state and evidence"]
+    Project --> Delivery["Required CI and protected delivery"]
+```
+
+RigorBreeze sits between developer intent, Codex execution, and the non-bypassable
+delivery boundary. The Skill governs agent behavior; the Runner proves scope,
+freshness, risk, and readiness through project-owned tools and Git-private records.
+See [Architecture](ARCHITECTURE.md) for the complete system, risk-lane, evidence,
+parallel-worktree, and release-recovery diagrams.
+
 ## Is it for you?
 
 Use it when you are:

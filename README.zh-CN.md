@@ -29,6 +29,22 @@ RigorBreeze 把人的注意力放到最关键的开头和结尾：
 
 它补充可审计 SDD、真实 RED–GREEN–REFACTOR、项目声明式检查、真实验收、安全并行 worktree 和可选的受保护 Git 自动化，同时保持最小 Spec Tree。
 
+## 架构一览
+
+```mermaid
+flowchart LR
+    Developer["开发者意图与真实验收"] --> Skill["RigorBreeze Skill"]
+    Skill --> Codex["Codex 实现"]
+    Codex --> Runner["确定性 Runner"]
+    Runner --> Project["项目检查、Git 状态与证据"]
+    Project --> Delivery["Required CI 与受保护交付"]
+```
+
+RigorBreeze 位于开发者意图、Codex 执行和不可绕过的交付边界之间。Skill
+约束 Agent 行为，Runner 使用项目自己的工具和 Git 私有记录证明范围、新鲜度、风险与
+交付条件。完整的系统、风险通道、证据、并行 worktree 和发布恢复模型见
+[总体架构](ARCHITECTURE.zh-CN.md)。
+
 ## 它适合谁
 
 适合：
