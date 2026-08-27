@@ -13,7 +13,7 @@ English · [简体中文](README.zh-CN.md)
 
 RigorBreeze routes work by consequence: tiny safe edits go straight through a verified Direct lane, ordinary changes get compact private records, and production-risk work retains full evidence and public sanitized audit proof. It is deliberately smaller than a project-management system and keeps normal workflow mechanics out of product commits.
 
-> **Public Preview:** v0.18.0 is usable today. It preserves every production gate while requiring clean L1/L2 approval, separating feature/PR boundaries from independently verified task slices, and forcing UAT or follow-up writes back through current status and scope. Active projects keep their installed runner frozen until the task closes.
+> **Public Preview:** v0.19.0 is usable today. It preserves the v0.18 public workflow while separating record lifecycle, verification execution, and diagnostics from the CLI entrypoint. Active projects keep their installed runner frozen until the task closes.
 
 ## Why this exists
 
@@ -167,7 +167,7 @@ Before approval, RigorBreeze checks the task for placeholders, contradictions, a
 
 Allowed Scope entries are repository-relative paths, directory prefixes, or globs; `*` matches one path segment and `**` crosses directories. Acceptance criteria use unique machine-readable IDs. A contract cannot be reapproved over production changes: restore the approved contract and finish, or revert those changes before amending the same outcome. A new user outcome or acceptance condition becomes a dependent slice.
 
-After initialization and project-check configuration, establish a human-controlled Git baseline before creating a new L1/L2 task. `status --json` reports the exact base-branch state under `workflowBaseline`; Direct and L0 remain lightweight. When explicitly authorized, Codex may create the isolated baseline commit without mixing product changes or persisting Git authority. The installed Skill checks through its bundled v0.18.0 runner, reports missing or modified components separately, and does not overwrite it during implementation. A missing high-risk contract must be restored or replaced by an explicit Emergency contract, never an informal bypass.
+After initialization and project-check configuration, establish a human-controlled Git baseline before creating a new L1/L2 task. `status --json` reports the exact base-branch state under `workflowBaseline`; Direct and L0 remain lightweight. When explicitly authorized, Codex may create the isolated baseline commit without mixing product changes or persisting Git authority. The installed Skill checks through its bundled v0.19.0 runner, reports missing or modified components separately, and does not overwrite it during implementation. A missing high-risk contract must be restored or replaced by an explicit Emergency contract, never an informal bypass.
 
 After initialization, the project contains:
 
@@ -303,7 +303,7 @@ For a manual install, remove only the `rigorbreeze` directory or symlink from yo
 
 ## Public Preview and v1.0
 
-v0.18.0 keeps every v0.17 consequence, TDD, acceptance, and delivery gate. It blocks dirty L1/L2 approval before baseline creation, explains whether dirt is foreign work, cache hygiene, or new scope drift, separates independently verified tasks from the final feature PR, and requires acceptance/follow-up writes to re-enter current status and scope. Direct and L0 stay lightweight; Emergency remains unchanged. State/config remains schema v5; full evidence remains schema v4.
+v0.19.0 keeps every v0.18 command, risk lane, TDD, acceptance, and delivery gate while reducing the CLI entrypoint to orchestration. Records, verification, and diagnostics now have explicit acyclic module boundaries and one installed-helper manifest. State/config remains schema v5; full evidence remains schema v4; Automation Journal remains v1.
 
 The v0.12.0 decision-frontier, one-question prototype, and abstraction-deletion contracts remain part of this release.
 

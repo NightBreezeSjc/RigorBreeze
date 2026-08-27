@@ -30,7 +30,7 @@ flowchart LR
     Codex <--> Skill["RigorBreeze Skill\nagent protocol"]
     Skill --> Runner["Project Runner\ndeterministic policy and evidence"]
 
-    Runner --> Core["State, policy, parallel, and\nautomation modules"]
+    Runner --> Core["State, policy, records, verification,\ndiagnostics, parallel, and automation"]
     Core <--> Private["Git-private state, contracts,\nevidence, and action journal"]
     Runner --> Checks["Project tests, build, runtime,\nsecurity, and migration checks"]
 
@@ -154,11 +154,14 @@ and record model:
 
 | Module | Role in the flow |
 |---|---|
-| `rigorbreeze.py` | Stable command entry point used by Codex and CI; loads configuration and dispatches policy actions. |
-| `flow_state.py` | Reads and writes schema-aware state, contracts, evidence, digests, archive/history data, and atomic private records. |
+| `rigorbreeze.py` | Stable thin command entry point used by Codex and CI; parses commands, owns locking, and dispatches kernel actions. |
+| `flow_state.py` | Provides schema-aware state, configuration, digests, atomic I/O, and the single installed-helper manifest. |
 | `flow_policy.py` | Applies lane, contract, scope, TDD, freshness, verification, and delivery-gate policy. |
 | `flow_parallel.py` | Projects task ownership, worktrees, dependencies, and runtime-claim conflicts. |
 | `flow_automation.py` | Records idempotent external Git/provider actions and their recovery state without mutating task proof. |
+| `flow_records.py` | Owns evidence entry, retrospective, archive closure, private retention, migration, and sanitized audit summaries. |
+| `flow_verification.py` | Runs environment preflight, RED observation, affected/full profiles, result reuse, and delivery checks. |
+| `flow_diagnostics.py` | Projects installation, baseline, lifecycle, interaction, aggregate status, and doctor results. |
 | `rigorbreeze.toml` | Project declaration of profiles, commands, reports, artifacts, timeouts, risk applicability, and standing automation level. |
 
 In the normal data flow, the Skill recovers context and asks the runner for

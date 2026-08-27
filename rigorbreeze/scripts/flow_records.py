@@ -7,53 +7,10 @@ from pathlib import Path
 from typing import Any
 import flow_automation
 import flow_parallel
-from flow_policy import (  # noqa: E402
-    allowed_scope,
-    approval_valid,
-    current_structured_records,
-    ensure_close,
-    path_allowed,
-    practice_summary,
-    project_fingerprint,
-    save_state,
-    validate_operation_plan,
-    validate_operation_result,
-    verification_current,
-)
-from flow_state import (  # noqa: E402
-    LOCK_NAME,
-    MIGRATION_EVIDENCE_FIELDS,
-    RELEASE_GOVERNANCE_FIELDS,
-    SECURITY_EVIDENCE_FIELDS,
-    FlowError,
-    active_task,
-    archive_path,
-    atomic_write,
-    audit_path,
-    config_path,
-    compact_completed_check_runs,
-    compact_completed_tdd_history,
-    current_head,
-    evidence_path,
-    history_path,
-    is_git_repo,
-    load_evidence,
-    load_state,
-    managed_workflow_paths,
-    now_iso,
-    parse_fields,
-    read_json,
-    record_settings,
-    redact,
-    save_evidence,
-    sha256_bytes,
-    spec_root,
-    task_digest,
-    task_path,
-    upgrade_evidence,
-    working_tree_paths,
-    write_json,
-)
+import flow_policy
+import flow_state
+
+FlowError = flow_state.FlowError
 
 
 def last_closed_task(
@@ -72,7 +29,7 @@ def completed_closure_paths(root: Path, state: dict[str, Any]) -> list[str]:
     task_id = last.get("id")
     if not task_id:
         return []
-    if record_settings(root)["storage"] == "private":
+    if flow_state.record_settings(root)["storage"] == "private":
         audit = f"spec/evidence/{task_id}.audit.json"
         return [audit] if (root / audit).is_file() else []
     return [
@@ -88,7 +45,9 @@ def closure_pending_paths(root: Path, state: dict[str, Any]) -> list[str]:
         return []
     return sorted(
         path
-        for path in flow_automation.working_tree_paths(root, {f"spec/{LOCK_NAME}"})
+        for path in flow_automation.working_tree_paths(
+            root, {f"spec/{flow_state.LOCK_NAME}"}
+        )
         if path in expected
     )
 
@@ -96,17 +55,19 @@ def closure_pending_paths(root: Path, state: dict[str, Any]) -> list[str]:
 def closed_context_current(root: Path, state: dict[str, Any]) -> bool:
     last = last_closed_task(state, completed_only=True)
     if last.get("recordStorage") == "private":
-        archive = archive_path(root, str(last.get("id", "")))
-        evidence_file = evidence_path(root, str(last.get("id", "")))
+        archive = flow_state.archive_path(root, str(last.get("id", "")))
+        evidence_file = flow_state.evidence_path(root, str(last.get("id", "")))
     else:
         archive = root / str(last.get("archivePath", ""))
         evidence_file = root / str(last.get("evidencePath", ""))
     if not archive.is_file() or not evidence_file.is_file():
         return False
-    digest = sha256_bytes(archive.read_bytes() + b"\0" + evidence_file.read_bytes())
+    digest = flow_state.sha256_bytes(
+        archive.read_bytes() + b"\0" + evidence_file.read_bytes()
+    )
     return bool(
         digest == last.get("closureDigest")
-        and project_fingerprint(root) == last.get("projectFingerprint")
+        and flow_policy.project_fingerprint(root) == last.get("projectFingerprint")
     )
 
 
@@ -117,32 +78,32 @@ def command_evidence_add(
     file: str | None,
     field_values: list[str],
 ) -> None:
-    state = load_state(root)
-    approval_now = approval_valid(root, state)
-    verification_now = verification_current(root, state)
+    state = flow_state.load_state(root)
+    approval_now = flow_policy.approval_valid(root, state)
+    verification_now = flow_policy.verification_current(root, state)
     pending_kinds = {"runtime", "device", "wechat-device", "authoritative-observation"}
     pending_allowed = section == "acceptance" and kind in pending_kinds
     if not approval_now or (not verification_now and not pending_allowed):
-        save_state(root, state)
+        flow_policy.save_state(root, state)
         raise FlowError("fresh verification is required before structured evidence")
-    active = active_task(state)
-    evidence = load_evidence(root, active["id"])
-    fingerprint = project_fingerprint(root)
+    active = flow_state.active_task(state)
+    evidence = flow_state.load_evidence(root, active["id"])
+    fingerprint = flow_policy.project_fingerprint(root)
     current_artifacts = [
         artifact
         for artifact in evidence.get("artifacts", [])
-        if artifact.get("taskDigest") == task_digest(root, state)
+        if artifact.get("taskDigest") == flow_state.task_digest(root, state)
         and artifact.get("projectFingerprint") == fingerprint
     ]
-    fields = parse_fields(field_values)
+    fields = flow_state.parse_fields(field_values)
     record: dict[str, Any] = {
         "kind": kind,
         "fields": fields,
-        "taskDigest": task_digest(root, state),
+        "taskDigest": flow_state.task_digest(root, state),
         "projectFingerprint": fingerprint,
-        "head": current_head(root) if is_git_repo(root) else None,
+        "head": flow_state.current_head(root) if flow_state.is_git_repo(root) else None,
         "artifactDigests": [artifact["sha256"] for artifact in current_artifacts],
-        "recordedAt": now_iso(),
+        "recordedAt": flow_state.now_iso(),
         "verificationBinding": "current" if verification_now else "pending",
     }
     evidence_content: Any = None
@@ -157,7 +118,7 @@ def command_evidence_add(
         record.update(
             {
                 "path": Path(file).as_posix(),
-                "sha256": sha256_bytes(path.read_bytes()),
+                "sha256": flow_state.sha256_bytes(path.read_bytes()),
                 "size": path.stat().st_size,
             }
         )
@@ -240,9 +201,9 @@ def command_evidence_add(
             state["phase"] = "accepted"
     elif section == "release":
         required_by_kind = {
-            "governance": RELEASE_GOVERNANCE_FIELDS,
-            "migration": MIGRATION_EVIDENCE_FIELDS,
-            "security": SECURITY_EVIDENCE_FIELDS,
+            "governance": flow_state.RELEASE_GOVERNANCE_FIELDS,
+            "migration": flow_state.MIGRATION_EVIDENCE_FIELDS,
+            "security": flow_state.SECURITY_EVIDENCE_FIELDS,
             "operation-plan": set(),
             "operation-result": set(),
         }
@@ -270,7 +231,7 @@ def command_evidence_add(
             raise FlowError(f"release {kind} evidence requires a real report file")
         artifact_digests = {artifact["sha256"] for artifact in current_artifacts}
         if kind == "operation-plan":
-            record["operation"] = validate_operation_plan(
+            record["operation"] = flow_policy.validate_operation_plan(
                 evidence_content,
                 head=record["head"],
                 artifact_digests=artifact_digests,
@@ -278,10 +239,12 @@ def command_evidence_add(
         elif kind == "operation-result":
             if not any(
                 existing.get("kind") == "operation-plan"
-                for existing in current_structured_records(root, state, "release")
+                for existing in flow_policy.current_structured_records(
+                    root, state, "release"
+                )
             ):
                 raise FlowError("operation-result requires a current operation-plan")
-            record["operation"] = validate_operation_result(
+            record["operation"] = flow_policy.validate_operation_result(
                 evidence_content,
                 head=record["head"],
                 artifact_digests=artifact_digests,
@@ -291,8 +254,8 @@ def command_evidence_add(
     elif section != "artifacts":
         raise FlowError(f"unknown evidence section: {section}")
     evidence[section].append(record)
-    save_evidence(root, active["id"], evidence)
-    save_state(root, state)
+    flow_state.save_evidence(root, active["id"], evidence)
+    flow_policy.save_state(root, state)
     print(f"recorded {section}/{kind}")
     if kind == "operation-result" and record["operation"]["status"] in {
         "paused",
@@ -310,10 +273,12 @@ def command_retro(
     exceptions: str | None,
     workflow_impact: str | None,
 ) -> None:
-    state = load_state(root)
-    if not approval_valid(root, state) or not verification_current(root, state):
+    state = flow_state.load_state(root)
+    if not flow_policy.approval_valid(
+        root, state
+    ) or not flow_policy.verification_current(root, state):
         raise FlowError("fresh verification is required before retrospective")
-    summary = practice_summary(root, state)
+    summary = flow_policy.practice_summary(root, state)
     if confirm:
         missing = [
             name
@@ -326,8 +291,8 @@ def command_retro(
         ]
         if missing:
             raise FlowError("retro confirmation is missing: " + ", ".join(missing))
-        active = active_task(state)
-        evidence = load_evidence(root, active["id"])
+        active = flow_state.active_task(state)
+        evidence = flow_state.load_evidence(root, active["id"])
         practice = evidence.setdefault("practice", {})
         practice["summary"] = summary
         normalized_exceptions = (exceptions or "").strip().casefold()
@@ -339,16 +304,16 @@ def command_retro(
         )
         practice["confirmation"] = {
             "reworkReason": rework_reason,
-            "exceptions": redact(exceptions or ""),
+            "exceptions": flow_state.redact(exceptions or ""),
             "workflowImpact": workflow_impact,
             "evolutionCandidate": evolution_candidate,
             "judgmentDigest": summary["judgmentDigest"],
             "summaryDigest": summary["summaryDigest"],
-            "taskDigest": task_digest(root, state),
-            "projectFingerprint": project_fingerprint(root),
-            "confirmedAt": now_iso(),
+            "taskDigest": flow_state.task_digest(root, state),
+            "projectFingerprint": flow_policy.project_fingerprint(root),
+            "confirmedAt": flow_state.now_iso(),
         }
-        save_evidence(root, active["id"], evidence)
+        flow_state.save_evidence(root, active["id"], evidence)
         if evolution_candidate:
             print(
                 "retrospective confirmed; evolution candidate recorded. "
@@ -384,8 +349,8 @@ def command_archive(
     reason: str | None = None,
     expected_head: str | None = None,
 ) -> None:
-    state = load_state(root)
-    active = active_task(state)
+    state = flow_state.load_state(root)
+    active = flow_state.active_task(state)
     original_phase = str(state.get("phase"))
     integration_proof: str | None = None
     if outcome == "completed":
@@ -393,7 +358,7 @@ def command_archive(
             raise FlowError(
                 "archive --reason and --expected-head are only valid for abandoned or reconciled tasks"
             )
-        ensure_close(root, state)
+        flow_policy.ensure_close(root, state)
     elif outcome == "abandoned":
         if expected_head:
             raise FlowError("abandoned archive does not use --expected-head")
@@ -405,10 +370,12 @@ def command_archive(
             raise FlowError(str(exc)) from exc
         if action and action.get("status") == "running":
             raise FlowError("running automation must finish before abandoning a task")
-        scopes = allowed_scope(root, state)
-        changes = working_tree_paths(root)
+        scopes = flow_policy.allowed_scope(root, state)
+        changes = flow_state.working_tree_paths(root)
         task_code_changes = [
-            relative for relative in changes if path_allowed(relative, scopes)
+            relative
+            for relative in changes
+            if flow_policy.path_allowed(relative, scopes)
         ]
         if task_code_changes:
             raise FlowError(
@@ -418,7 +385,7 @@ def command_archive(
     elif outcome == "reconciled":
         if not reason or not reason.strip():
             raise FlowError("reconciled archive requires --reason")
-        head = current_head(root) or ""
+        head = flow_state.current_head(root) or ""
         if not expected_head or expected_head != head:
             raise FlowError(
                 f"reconciled archive expected HEAD {expected_head or '<missing>'}, found {head}"
@@ -429,7 +396,7 @@ def command_archive(
             raise FlowError(str(exc)) from exc
         if action and action.get("status") == "running":
             raise FlowError("running automation must finish before reconciliation")
-        release_records_for_reconcile = current_structured_records(
+        release_records_for_reconcile = flow_policy.current_structured_records(
             root, state, "release"
         )
         operation_plans = [
@@ -455,9 +422,9 @@ def command_archive(
         if branch == base:
             non_workflow_changes = [
                 path
-                for path in working_tree_paths(root)
+                for path in flow_state.working_tree_paths(root)
                 if not path.startswith("spec/")
-                and path not in set(managed_workflow_paths(root))
+                and path not in set(flow_state.managed_workflow_paths(root))
             ]
             if non_workflow_changes:
                 raise FlowError(
@@ -475,16 +442,18 @@ def command_archive(
                 )
     else:
         raise FlowError(f"unknown archive outcome: {outcome}")
-    source = task_path(root, active["id"])
-    destination = archive_path(root, active["id"])
+    source = flow_state.task_path(root, active["id"])
+    destination = flow_state.archive_path(root, active["id"])
     if destination.exists():
         raise FlowError(f"archive already exists: {destination}")
-    release_records = current_structured_records(root, state, "release")
-    artifact_records = current_structured_records(root, state, "artifacts")
-    acceptance_records = current_structured_records(root, state, "acceptance")
-    evidence = load_evidence(root, active["id"])
-    changes = working_tree_paths(root)
-    scopes = allowed_scope(root, state)
+    release_records = flow_policy.current_structured_records(root, state, "release")
+    artifact_records = flow_policy.current_structured_records(root, state, "artifacts")
+    acceptance_records = flow_policy.current_structured_records(
+        root, state, "acceptance"
+    )
+    evidence = flow_state.load_evidence(root, active["id"])
+    changes = flow_state.working_tree_paths(root)
+    scopes = flow_policy.allowed_scope(root, state)
     workflow_paths = {
         f"spec/changes/{active['id']}.md",
         f"spec/evidence/{active['id']}.json",
@@ -492,14 +461,18 @@ def command_archive(
     }
     closure = {
         "outcome": outcome,
-        "reason": redact(reason) if reason else None,
-        "closedAt": now_iso(),
-        "head": current_head(root) if is_git_repo(root) else None,
-        "branch": flow_parallel.branch_name(root) if is_git_repo(root) else None,
+        "reason": flow_state.redact(reason) if reason else None,
+        "closedAt": flow_state.now_iso(),
+        "head": flow_state.current_head(root) if flow_state.is_git_repo(root) else None,
+        "branch": flow_parallel.branch_name(root)
+        if flow_state.is_git_repo(root)
+        else None,
         "originalPhase": original_phase,
         "integrationProof": integration_proof,
         "verificationStatus": (
-            "current" if verification_current(root, state) else "missing/stale"
+            "current"
+            if flow_policy.verification_current(root, state)
+            else "missing/stale"
         ),
         "practiceEvents": (
             ["closure-pending-commit"]
@@ -511,15 +484,16 @@ def command_archive(
         "unrelatedChanges": sorted(
             relative
             for relative in changes
-            if relative not in workflow_paths and not path_allowed(relative, scopes)
+            if relative not in workflow_paths
+            and not flow_policy.path_allowed(relative, scopes)
         ),
     }
     evidence["closure"] = closure
     if outcome == "completed":
-        compact_completed_check_runs(evidence)
-        compact_completed_tdd_history(evidence)
-    save_evidence(root, active["id"], evidence)
-    settings = record_settings(root)
+        flow_state.compact_completed_check_runs(evidence)
+        flow_state.compact_completed_tdd_history(evidence)
+    flow_state.save_evidence(root, active["id"], evidence)
+    settings = flow_state.record_settings(root)
     if (
         settings["storage"] == "private"
         and settings["publish_high_risk_summary"]
@@ -532,10 +506,10 @@ def command_archive(
     evidence_relative = (
         None if private_records else f"spec/evidence/{active['id']}.json"
     )
-    closure_digest = sha256_bytes(
+    closure_digest = flow_state.sha256_bytes(
         destination.read_bytes()
         + b"\0"
-        + evidence_path(root, active["id"]).read_bytes()
+        + flow_state.evidence_path(root, active["id"]).read_bytes()
     )
     state["lastClosed"] = {
         "id": active["id"],
@@ -567,7 +541,7 @@ def command_archive(
             "migrations": list(state["approvals"].get("migrations", [])),
         },
         "integrationProof": integration_proof,
-        "projectFingerprint": project_fingerprint(root),
+        "projectFingerprint": flow_policy.project_fingerprint(root),
     }
     state["activeTask"] = None
     state["phase"] = "archived"
@@ -576,7 +550,7 @@ def command_archive(
     state["approvals"]["migrations"] = []
     state["red"] = None
     state["verification"] = None
-    save_state(root, state)
+    flow_policy.save_state(root, state)
     print(
         f"archived {active['id']}"
         if outcome == "completed"
@@ -632,7 +606,7 @@ def private_history_summary(
                 for item in practice.get("events", [])
             )
         ),
-        "evidenceDigest": sha256_bytes(
+        "evidenceDigest": flow_state.sha256_bytes(
             json.dumps(evidence, ensure_ascii=False, sort_keys=True).encode()
         ),
     }
@@ -714,18 +688,18 @@ def write_public_audit(
         encoded = json.dumps(payload, ensure_ascii=False, indent=2).encode() + b"\n"
     if len(encoded) > 32 * 1024:
         raise FlowError("sanitized audit summary exceeds 32 KiB")
-    path = audit_path(root, task_id)
-    atomic_write(path, encoded.decode())
+    path = flow_state.audit_path(root, task_id)
+    flow_state.atomic_write(path, encoded.decode())
     return path
 
 
 def update_record_configuration(root: Path) -> None:
-    path = config_path(root)
+    path = flow_state.config_path(root)
     content = path.read_text(encoding="utf-8")
     content = re.sub(r"(?m)^version\s*=\s*\d+\s*$", "version = 5", content, count=1)
     content = re.sub(r"(?ms)^\[records\]\n.*?(?=^\[|\Z)", "", content).rstrip()
     content += '\n\n[records]\nstorage = "private"\npublish_high_risk_summary = true\n'
-    atomic_write(path, content)
+    flow_state.atomic_write(path, content)
     ignore = root / ".gitignore"
     existing = (
         ignore.read_text(encoding="utf-8", errors="replace") if ignore.exists() else ""
@@ -739,26 +713,26 @@ def update_record_configuration(root: Path) -> None:
         if pattern.search(existing)
         else existing.rstrip() + ("\n\n" if existing.strip() else "") + block + "\n"
     )
-    atomic_write(ignore, updated)
+    flow_state.atomic_write(ignore, updated)
 
 
 def migrate_records_to_private(root: Path) -> dict[str, list[str]]:
-    state = load_state(root)
+    state = flow_state.load_state(root)
     if state.get("activeTask"):
         raise FlowError("record migration requires no active task")
     journal = flow_automation.load_journal(root)
     if any(item.get("status") == "running" for item in journal["actions"].values()):
         raise FlowError("record migration requires all external actions to be settled")
-    settings = record_settings(root)
+    settings = flow_state.record_settings(root)
     if settings["storage"] == "private":
         raise FlowError("record storage is already private")
-    changed = working_tree_paths(root)
+    changed = flow_state.working_tree_paths(root)
     if changed:
         raise FlowError(
             "record migration requires a clean working tree; found: "
             + ", ".join(changed)
         )
-    source = spec_root(root)
+    source = flow_state.spec_root(root)
     private = flow_parallel.git_common_dir(root)
     if private is None:
         raise FlowError("record migration requires a Git repository")
@@ -775,25 +749,29 @@ def migrate_records_to_private(root: Path) -> dict[str, list[str]]:
     }
     for task_id in sorted(task_ids):
         evidence_file = source / "evidence" / f"{task_id}.json"
-        evidence = upgrade_evidence(read_json(evidence_file), task_id)
+        evidence = flow_state.upgrade_evidence(
+            flow_state.read_json(evidence_file), task_id
+        )
         contract = source / "archive" / f"{task_id}.md"
         if not contract.exists():
             contract = source / "changes" / f"{task_id}.md"
         risk = record_risk(contract, evidence)
         if risk in {"L2", "Emergency"}:
-            write_json(private / "evidence" / evidence_file.name, evidence)
+            flow_state.write_json(private / "evidence" / evidence_file.name, evidence)
             if contract.is_file():
                 destination = (
                     private
                     / ("archive" if "archive" in contract.parts else "changes")
                     / contract.name
                 )
-                atomic_write(destination, contract.read_text(encoding="utf-8"))
+                flow_state.atomic_write(
+                    destination, contract.read_text(encoding="utf-8")
+                )
             audit = write_public_audit(root, task_id, risk, evidence)
             audits.append(str(audit.relative_to(root)))
             moved.append(task_id)
         else:
-            write_json(
+            flow_state.write_json(
                 private / "history" / f"{task_id}.json",
                 private_history_summary(task_id, risk, evidence),
             )
@@ -810,26 +788,26 @@ def migrate_records_to_private(root: Path) -> dict[str, list[str]]:
 
 
 def compact_integrated_private_records(root: Path, task_ids: list[str]) -> list[str]:
-    if record_settings(root)["storage"] != "private":
+    if flow_state.record_settings(root)["storage"] != "private":
         return []
     registry = flow_parallel.load_registry(root)
     compacted: list[str] = []
     for task_id in task_ids:
         task = registry["tasks"].get(task_id, {})
         risk = str(task.get("risk") or "")
-        evidence_file = evidence_path(root, task_id)
+        evidence_file = flow_state.evidence_path(root, task_id)
         if risk not in {"L0", "L1"} or not evidence_file.is_file():
             continue
-        evidence = load_evidence(root, task_id)
+        evidence = flow_state.load_evidence(root, task_id)
         if not evidence.get("closure"):
             continue
-        write_json(
-            history_path(root, task_id),
+        flow_state.write_json(
+            flow_state.history_path(root, task_id),
             private_history_summary(task_id, risk, evidence),
         )
         for detail in (
-            task_path(root, task_id),
-            archive_path(root, task_id),
+            flow_state.task_path(root, task_id),
+            flow_state.archive_path(root, task_id),
             evidence_file,
         ):
             if detail.is_file():

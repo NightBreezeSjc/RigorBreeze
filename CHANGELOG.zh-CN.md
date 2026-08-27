@@ -28,6 +28,19 @@ RigorBreeze 的重要变更都会记录在本文档中。
 - 使用双语引导、明确的安全边界和完整首次任务示例，重新组织面向首次使用者的仓库文档。
 - 增加精简的贡献指南、安全策略和 MIT 许可证。
 
+## [0.19.0] - 在行为不变的前提下拆分内核职责
+
+### 变更
+
+- 将`flow.py`从3,875行收敛为1,200～1,500行的薄编排入口。
+- 将evidence/复盘/归档生命周期移入`flow_records.py`，环境/TDD/profile执行移入`flow_verification.py`，安装/状态/doctor投影移入`flow_diagnostics.py`。
+- 初始化、安装完整性、工作流基线和项目Runner升级共用一份helper清单。
+- CI编译全部内核模块；公共CLI、状态schema v5、evidence schema v4、automation journal v1及全部风险/交付门禁保持不变。
+
+### 兼容性
+
+- 现有活动任务继续冻结已安装Runner；空闲项目可运行`init`安装三个新helper，无需迁移任务、evidence、配置或命令。
+
 ## [0.18.0] - 在批准前阻止混杂工作，并保持大型功能可切片
 
 ### 变更

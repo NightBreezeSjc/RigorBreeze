@@ -17,6 +17,7 @@ HELPER_MODULES = (
     "flow_policy",
     "flow_records",
     "flow_verification",
+    "flow_diagnostics",
 )
 
 
@@ -60,6 +61,17 @@ class FlowV19KernelBoundaryTests(FlowTestCase):
 
         for module in HELPER_MODULES:
             visit(module)
+
+    def test_cli_entrypoint_and_total_production_size_stay_bounded(self) -> None:
+        flow_lines = len(FLOW.read_text(encoding="utf-8").splitlines())
+        production_lines = sum(
+            len(path.read_text(encoding="utf-8").splitlines())
+            for path in SCRIPT_ROOT.glob("flow*.py")
+        )
+
+        self.assertGreaterEqual(flow_lines, 1200)
+        self.assertLessEqual(flow_lines, 1500)
+        self.assertLessEqual(production_lines, 8759)
 
     def test_init_installs_every_kernel_helper_without_bytecode(self) -> None:
         self.init_git()

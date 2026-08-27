@@ -24,7 +24,7 @@ jobs:
       - name: Run workflow tests
         run: python -m unittest discover -s rigorbreeze/scripts/tests -v
       - name: Compile runner
-        run: python -m py_compile rigorbreeze/scripts/flow.py
+        run: python -m py_compile rigorbreeze/scripts/flow.py rigorbreeze/scripts/flow_state.py rigorbreeze/scripts/flow_parallel.py rigorbreeze/scripts/flow_automation.py rigorbreeze/scripts/flow_policy.py rigorbreeze/scripts/flow_records.py rigorbreeze/scripts/flow_verification.py rigorbreeze/scripts/flow_diagnostics.py
 
   skill-contract:
     runs-on: ubuntu-latest

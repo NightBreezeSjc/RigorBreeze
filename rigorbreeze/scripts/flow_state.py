@@ -18,7 +18,16 @@ import flow_parallel
 
 VERSION = 5
 EVIDENCE_VERSION = 4
-TOOL_VERSION = "0.18.0"
+TOOL_VERSION = "0.19.0"
+KERNEL_HELPER_NAMES = (
+    "flow_state",
+    "flow_parallel",
+    "flow_automation",
+    "flow_policy",
+    "flow_records",
+    "flow_verification",
+    "flow_diagnostics",
+)
 SPEC_DIR = "spec"
 CONFIG_NAME = "rigorbreeze.toml"
 MODES = ("advisory", "enforced")
@@ -1189,22 +1198,12 @@ def managed_workflow_paths(root: Path) -> tuple[str, ...]:
         (
             "scripts/rigorbreeze.py",
             "rigorbreeze/scripts/flow.py",
-            "rigorbreeze/scripts/flow_state.py",
-            "rigorbreeze/scripts/flow_policy.py",
-            "rigorbreeze/scripts/flow_parallel.py",
-            "rigorbreeze/scripts/flow_automation.py",
-            "rigorbreeze/scripts/flow_records.py",
-            "rigorbreeze/scripts/flow_verification.py",
+            *(f"rigorbreeze/scripts/{name}.py" for name in KERNEL_HELPER_NAMES),
         )
         if wrapper
         else (
             "scripts/rigorbreeze.py",
-            "scripts/flow_state.py",
-            "scripts/flow_policy.py",
-            "scripts/flow_parallel.py",
-            "scripts/flow_automation.py",
-            "scripts/flow_records.py",
-            "scripts/flow_verification.py",
+            *(f"scripts/{name}.py" for name in KERNEL_HELPER_NAMES),
         )
     )
     return (
