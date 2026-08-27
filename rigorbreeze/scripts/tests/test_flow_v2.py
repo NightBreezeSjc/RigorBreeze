@@ -188,12 +188,12 @@ Risk: {risk}
 
     def approve_with_red(self, *, risk: str = "L1") -> None:
         self.create_task(risk=risk)
+        self.run_flow("approve", "task")
         (self.root / "tests").mkdir()
         test_file = self.root / "tests" / "test_feature.py"
         test_file.write_text(
             "def test_missing_behavior():\n    assert False, 'behavior missing'\n"
         )
-        self.run_flow("approve", "task")
         self.run_flow(
             "red",
             "--requirement",
@@ -507,10 +507,10 @@ Risk: {risk}
         self.run_flow("init")
         self.write_config(full=("unit",), affected=("unit",))
         self.create_task()
+        self.run_flow("approve", "task")
         (self.root / "tests").mkdir()
         test_file = self.root / "tests" / "test_feature.py"
         test_file.write_text("raise AssertionError('behavior missing')\n")
-        self.run_flow("approve", "task")
         (self.root / "app.py").write_text("VALUE = 'implemented too early'\n")
 
         blocked = self.run_flow(
@@ -568,12 +568,12 @@ Risk: {risk}
         migration.write_text("DROP TABLE legacy_tenant;\n", encoding="utf-8")
         self.commit_all("record historical migration")
         self.create_task(risk="L1", commit_baseline=False)
+        self.run_flow("approve", "task")
         test_file = self.root / "tests" / "test_feature.py"
         test_file.parent.mkdir()
         test_file.write_text(
             "raise AssertionError('behavior missing')\n", encoding="utf-8"
         )
-        self.run_flow("approve", "task")
         self.run_flow(
             "red",
             "--requirement",
@@ -602,6 +602,7 @@ Risk: {risk}
             ),
             encoding="utf-8",
         )
+        self.run_flow("approve", "task")
         migration = self.root / "db" / "migrations" / "001_drop.sql"
         migration.parent.mkdir(parents=True)
         migration.write_text("DROP TABLE tenant;\n", encoding="utf-8")
@@ -610,7 +611,6 @@ Risk: {risk}
         test_file.write_text(
             "raise AssertionError('behavior missing')\n", encoding="utf-8"
         )
-        self.run_flow("approve", "task")
         self.run_flow(
             "red",
             "--requirement",
@@ -689,6 +689,7 @@ Risk: {risk}
             ),
             encoding="utf-8",
         )
+        self.run_flow("approve", "task")
         migration = self.root / "db" / "migrations" / "001_add.sql"
         migration.parent.mkdir(parents=True)
         migration.write_text(
@@ -699,7 +700,6 @@ Risk: {risk}
         test_file.write_text(
             "raise AssertionError('behavior missing')\n", encoding="utf-8"
         )
-        self.run_flow("approve", "task")
         self.run_flow(
             "red",
             "--requirement",
@@ -889,16 +889,16 @@ Risk: {risk}
         (self.root / "app.py").write_text("VALUE = 1\n", encoding="utf-8")
 
         first = self.run_flow("approve", "task", expected=2)
-        self.assertIn("production", first.stderr.lower())
+        self.assertIn("clean task worktree", first.stderr.lower())
 
         (self.root / "app.py").unlink()
+        self.run_flow("approve", "task")
         tests = self.root / "tests"
         tests.mkdir()
         test_file = tests / "test_feature.py"
         test_file.write_text(
             "raise AssertionError('behavior missing')\n", encoding="utf-8"
         )
-        self.run_flow("approve", "task")
         self.run_flow(
             "red",
             "--requirement",
@@ -918,9 +918,10 @@ Risk: {risk}
         )
 
         reapproval = self.run_flow("approve", "task", expected=2)
-        self.assertIn("revert production changes", reapproval.stderr.lower())
+        self.assertIn("clean task worktree", reapproval.stderr.lower())
 
         (self.root / "app.py").unlink()
+        test_file.unlink()
         self.run_flow("approve", "task")
 
     def test_single_segment_scope_glob_does_not_cross_directories(self) -> None:
@@ -1065,13 +1066,12 @@ Risk: {risk}
             encoding="utf-8",
         )
         self.create_task(risk="L1")
+        self.run_flow("approve", "task")
         test_file = self.root / "tests" / "unit" / "test_feature.py"
         test_file.parent.mkdir(parents=True)
         test_file.write_text(
             "raise AssertionError('behavior missing')\n", encoding="utf-8"
         )
-        self.run_flow("approve", "task")
-
         unknown = self.run_flow(
             "red",
             "--requirement",
@@ -1150,13 +1150,13 @@ Risk: {risk}
             ),
             encoding="utf-8",
         )
+        self.run_flow("approve", "task")
         tests = self.root / "tests"
         tests.mkdir()
         for number in (1, 2):
             (tests / f"test_{number}.py").write_text(
                 f"raise AssertionError('missing {number}')\n", encoding="utf-8"
             )
-        self.run_flow("approve", "task")
         for number in (1, 2):
             self.run_flow(
                 "red",
@@ -1182,11 +1182,11 @@ Risk: {risk}
         self.run_flow("init")
         self.write_config(full=("unit", "secret"), affected=("unit",))
         self.create_task(risk="L1")
+        self.run_flow("approve", "task")
         tests = self.root / "tests"
         tests.mkdir()
         test_file = tests / "test_feature.py"
         test_file.write_text("raise AssertionError('first failure')\n")
-        self.run_flow("approve", "task")
         self.run_flow(
             "red",
             "--requirement",
@@ -1241,6 +1241,7 @@ Risk: {risk}
             ),
             encoding="utf-8",
         )
+        self.run_flow("approve", "task")
         (self.root / "pom.xml").write_text("<project/>\n", encoding="utf-8")
         migration = self.root / "migrations" / "001_add.sql"
         migration.parent.mkdir()
@@ -1250,7 +1251,6 @@ Risk: {risk}
         test_file.write_text(
             "raise AssertionError('behavior missing')\n", encoding="utf-8"
         )
-        self.run_flow("approve", "task")
         self.run_flow(
             "red",
             "--requirement",
@@ -1339,13 +1339,13 @@ Risk: {risk}
             ),
             encoding="utf-8",
         )
+        self.run_flow("approve", "task")
         tests = self.root / "tests"
         tests.mkdir()
         for number in (1, 2):
             (tests / f"test_{number}.py").write_text(
                 f"raise AssertionError('missing {number}')\n", encoding="utf-8"
             )
-        self.run_flow("approve", "task")
         for number in (1, 2):
             self.run_flow(
                 "red",

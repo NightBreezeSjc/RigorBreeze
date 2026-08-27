@@ -96,6 +96,11 @@ substitute. With explicit one-time user authorization,
 or update that baseline only when the base worktree contains no active task,
 unrelated changes, cache, or secret material.
 
+Every L1/L2 approval, advisory or enforced, also requires a clean task
+worktree. Only task-owned records and Git-private state are exempt. Unignored
+caches and foreign product changes block before baseline creation; CI cannot
+repair or reinterpret a mixed local task after the fact.
+
 `[automation].level` is an explicit project authorization boundary:
 
 - `manual` grants no unattended Git write; an explicit current-message request may authorize one guarded commit or push without changing the level;

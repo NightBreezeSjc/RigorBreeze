@@ -62,6 +62,8 @@ L2 远程交付的 `check release` 还要求当前机器 JSON `operation-plan`�
 
 首个 enforced L1/L2 批准前，配置的真正基准分支必须满足 `workflowBaseline.status=current`；任务分支中的 runner 提交不能替代项目基线。用户一次性明确授权后，`automate commit --once --workflow-baseline --expected-head <sha>` 只能在基准 worktree 无活动任务、无无关改动、无缓存和秘密材料时建立或更新该基线。
 
+每次 L1/L2 批准（无论 advisory 或 enforced）都要求干净任务 worktree；只有任务自有记录和 Git 私有状态例外。未忽略缓存和外来产品改动会在基线创建前阻断，CI 不能在事后修复或重新解释已经混杂的本地任务。
+
 `[automation].level` 是显式项目授权边界：
 
 - `manual`：不授予无人值守 Git 写权限；用户当前消息明确要求时可单次授权受保护的 commit 或 push，且不修改长期等级；

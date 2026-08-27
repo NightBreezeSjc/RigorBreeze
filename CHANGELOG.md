@@ -28,6 +28,20 @@ The project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). 
 - Reframed the repository for first-time adopters with bilingual onboarding, explicit safety boundaries, and a complete first-task walkthrough.
 - Added concise contribution and security policies plus an MIT license.
 
+## [0.18.0] - Stop mixed work before approval and keep large features sliced
+
+### Changed
+
+- Require a clean task worktree before every L1/L2 approval; task-owned records and Git-private state remain valid, while foreign delivery changes and unignored caches block before baseline creation.
+- Extend scope status with compatible `preexisting-dirt`, `cause`, and `dirtyPaths` details so cache hygiene, foreign work, and new out-of-scope writes produce one specific repair action.
+- Separate product feature, RigorBreeze task, integration worktree/branch, and final pull request: one feature may close several independently verified sequential tasks and still ship through one PR.
+- Require UAT, visual/runtime review, and follow-up feedback to re-enter current status and scope before another product write; forbidden paths, active owners, and new outcomes become successor tasks or visible handoffs.
+- Expand deterministic Agent behavior coverage to nineteen scenarios, including invalid-approval re-entry and one-PR/multiple-slice delivery.
+
+### Compatibility
+
+- Public CLI, config/state schema v5, evidence schema v4, and automation journal v1 remain unchanged. Direct, L0, Emergency, and all existing L2 security/migration/release gates retain their behavior.
+
 ## [0.17.0] - Close real workflow friction without weakening proof
 
 ### Changed

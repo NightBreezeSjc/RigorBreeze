@@ -1593,7 +1593,7 @@ artifacts = ["artifacts/app.bin"]
         root_version = self.root / "scripts/flow_state.py"
         root_version.write_text(
             root_version.read_text(encoding="utf-8").replace(
-                'TOOL_VERSION = "0.17.0"', 'TOOL_VERSION = "0.13.0"'
+                'TOOL_VERSION = "0.18.0"', 'TOOL_VERSION = "0.13.0"'
             ),
             encoding="utf-8",
         )
@@ -1608,9 +1608,9 @@ artifacts = ["artifacts/app.bin"]
         self.assertEqual(len(grouped), 1)
         self.assertEqual(grouped[0]["taskIds"], ["TASK-415", "TASK-415-OLD"])
         self.assertEqual(grouped[0]["activeTaskIds"], ["TASK-415"])
-        self.assertEqual(grouped[0]["runnerVersion"], "0.17.0")
+        self.assertEqual(grouped[0]["runnerVersion"], "0.18.0")
         self.assertEqual(payload["installation"]["runnerVersion"], "0.13.0")
-        self.assertEqual(payload["executionRunner"]["version"], "0.17.0")
+        self.assertEqual(payload["executionRunner"]["version"], "0.18.0")
         self.assertEqual(payload["executionRunner"]["source"], "bundled")
 
     def test_cleanup_projection_deduplicates_shared_worktree(self) -> None:

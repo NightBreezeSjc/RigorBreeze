@@ -86,6 +86,8 @@ accepted → release-ready → protected release gate
 
 `status --json` 包含 `installation`、`workflowBaseline`、`workflowBypass`、生命周期、`scope`、`evolution` 和 `interaction`。文本只显示已完成、当前和唯一真实用户动作；`actor=codex` 的内部动作继续由 Codex 完成。其余状态继续证明安装、基线、范围与绕过，不能生成虚假批准、RED、GREEN、验收或替代基线。
 
+`scope.status` 可以是 `preexisting-dirt`、`current`、`violated` 或 `not-applicable`。首次 L1/L2 批准前，`preexisting-dirt` 列出全部非任务记录的工作树路径，并用 `foreign-work` 或 `cache-hygiene` 说明原因；批准后，从基线到 `HEAD` 的提交与当前工作树共同形成 `new-out-of-scope`。兼容的 `outOfScope` 继续保留，可选 `cause` 与 `dirtyPaths` 只用于给出唯一修复动作。
+
 `status --json --path <相对路径>` 是 Direct/并发的有界查询，只返回相关活动写者、同路径脏 worktree、被忽略的已集成历史数量、stale-registry 数量和唯一下一动作。缺失历史 worktree 不会再作为子进程工作目录；已证明集成的缺失项进入清理候选，无法证明集成的活动缺失项仍保留一条阻断诊断。
 
 活动合同缺失时，当前与聚合状态会投影 `lifecycle=orphaned-record`、阻断就绪并指出需要恢复的准确合同。已有 evidence 演进候选只按任务 ID 汇总，并给出可复制的 `$rigorbreeze 汇总这个项目的演进候选`；status 展示提醒时不会修改原 evidence。

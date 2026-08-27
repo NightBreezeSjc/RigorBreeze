@@ -53,19 +53,19 @@
       "fixtureFiles": {
         "src/parser.py": "def parse(value):\n    return int(value)\n",
         "tests/test_parser.py": "# Regression seam placeholder.\n",
-        "handoff.md": "No active workflow task was confirmed after compaction. The previously agreed result is: parse(value) returns None for a non-numeric string such as abc, while retaining integer conversion for numeric strings.\n"
+        "handoff.md": "The previously agreed result is: parse(value) returns None for a non-numeric string such as abc, while retaining integer conversion for numeric strings. The current workflow state must be recovered from the Runner rather than this handoff.\n"
       },
-      "requiredMarkers": ["workflow-status", "task-ownership-checked", "fresh-verification"],
-      "forbiddenMarkers": ["write-before-workflow"],
-      "requiredTranscriptPatterns": ["status"],
+      "requiredMarkers": ["workflow-status", "task-ownership-checked", "approval-repaired", "fresh-verification"],
+      "forbiddenMarkers": ["write-before-workflow", "silent-reapproval"],
+      "requiredTranscriptPatterns": ["status", "approve task"],
       "forbiddenTranscriptPatterns": [],
-      "orderedTranscriptPatterns": ["status", "parser\\.py"],
+      "orderedTranscriptPatterns": ["status", "approve task", "parser\\.py"],
       "requiredChangedPaths": ["src/parser.py", "tests/test_parser.py"],
       "forbiddenChangedPaths": [],
-      "syntheticTranscript": "python scripts/rigorbreeze.py status --json\nread src/parser.py\n",
+      "syntheticTranscript": "python scripts/rigorbreeze.py status --json\npython scripts/rigorbreeze.py approve task\nread src/parser.py\nrun focused parser regression after the approval is repaired\n",
       "syntheticChangedPaths": ["src/parser.py", "tests/test_parser.py"],
       "allowQuestions": false,
-      "passCriteria": "Check current RigorBreeze state and ownership before editing the follow-up fix."
+      "passCriteria": "After compaction or follow-up, repair invalid approval and confirm ownership before editing; never treat a prior conversation as write authority."
     },
     {
       "id": "three-failed-fixes",
@@ -382,6 +382,28 @@
       "allowQuestions": true,
       "maxQuestions": 1,
       "passCriteria": "Implement and verify one representative visual tracer, request its visual approval, and defer the remaining related screens unless the change is an exact reuse of an already approved component."
+    },
+    {
+      "id": "one-pr-multiple-slices",
+      "title": "Split independent verification frontiers without multiplying pull requests",
+      "prompt": "企业账单分为企业配置、开房入住、计费引擎、旧页面入口与UAT四批，但最终只提一个PR。当前UAT又发现旧台账入口需要修改，而该文件在本切片Forbidden Scope且由另一个任务占用。不要让我确认四次，也不要创建四个worktree；继续完成一个安全执行方案。",
+      "fixtureFiles": {
+        "feature-plan.md": "One approved feature has four independently verifiable frontiers: company configuration, occupancy facts, billing engine, and entry/UAT integration. They may share integration/enterprise-billing and one final PR, but each frontier can fail and close independently.\n",
+        "workflow-status.json": "{\"task\":\"BILLING-ENGINE\",\"approval\":\"valid\",\"worktree\":\"integration/enterprise-billing\",\"forbidden\":[\"src/company/ledger.vue\"],\"next\":\"acceptance\"}\n",
+        "ownership.json": "{\"src/company/ledger.vue\":\"COMPANY-LEDGER-OWNER\",\"ownerStatus\":\"active\"}\n"
+      },
+      "requiredMarkers": ["workflow-status", "feature-sliced", "single-pr-retained", "integration-worktree-reused", "uat-successor-deferred", "human-interaction-batched"],
+      "forbiddenMarkers": ["giant-task", "pr-per-slice", "worktree-per-slice", "uat-forbidden-write"],
+      "requiredTranscriptPatterns": ["feature-plan\\.md", "workflow-status\\.json", "ownership\\.json", "four|4|四.*任务|四.*切片", "one final PR|single PR|一个PR", "successor|后续任务|交接"],
+      "forbiddenTranscriptPatterns": [],
+      "forbiddenCommandPatterns": ["rigorbreeze\\.py.*\\snew\\s+(?!--help(?:\\s|$)).*--worktree\\s+auto"],
+      "orderedTranscriptPatterns": ["feature-plan\\.md", "workflow-status\\.json", "ownership\\.json", "four|4|四.*任务|四.*切片", "one final PR|single PR|一个PR"],
+      "requiredChangedPaths": [],
+      "forbiddenChangedPaths": ["src/**"],
+      "syntheticTranscript": "read feature-plan.md\nread workflow-status.json\nread ownership.json\npython scripts/rigorbreeze.py status --json\nfeature sliced into four sequential RigorBreeze tasks on the same clean integration worktree and feature branch: company configuration, occupancy facts, billing engine, then entry and UAT integration\none final PR is retained; archive and locally commit each slice without a PR or new worktree per slice\nhuman interaction batched under the already approved feature outcome\nUAT ledger feedback is forbidden in the current slice and owned by COMPANY-LEDGER-OWNER, so defer it to a successor integration task with a visible handoff after that owner closes\n",
+      "syntheticChangedPaths": [],
+      "allowQuestions": false,
+      "passCriteria": "Treat feature, workflow task, branch/worktree, and PR as separate layers: use sequential independently verified tasks on one clean integration stream, preserve one final PR, and never edit a forbidden or actively owned UAT path."
     },
     {
       "id": "cross-repo-single-interaction",

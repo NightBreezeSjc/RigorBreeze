@@ -93,13 +93,13 @@ Risk: {risk}
 
     def approve_with_red(self) -> None:
         self.create_task(risk="L1")
+        self.run_flow("approve", "task")
         tests = self.root / "tests"
         tests.mkdir()
         test_file = tests / "test_feature.py"
         test_file.write_text(
             "raise AssertionError('behavior missing')\n", encoding="utf-8"
         )
-        self.run_flow("approve", "task")
         self.run_flow(
             "red",
             "--requirement",
