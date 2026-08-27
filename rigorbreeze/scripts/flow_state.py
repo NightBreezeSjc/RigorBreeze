@@ -1177,6 +1177,56 @@ def current_head(root: Path) -> str | None:
     return result.stdout.strip() if result.returncode == 0 else None
 
 
+def managed_workflow_paths(root: Path) -> tuple[str, ...]:
+    runner = root / "scripts" / "rigorbreeze.py"
+    wrapper = (
+        runner.is_file()
+        and REPOSITORY_WRAPPER_MARKER
+        in runner.read_text(encoding="utf-8", errors="replace")
+        and (root / "rigorbreeze" / "scripts" / "flow.py").is_file()
+    )
+    runner_paths = (
+        (
+            "scripts/rigorbreeze.py",
+            "rigorbreeze/scripts/flow.py",
+            "rigorbreeze/scripts/flow_state.py",
+            "rigorbreeze/scripts/flow_policy.py",
+            "rigorbreeze/scripts/flow_parallel.py",
+            "rigorbreeze/scripts/flow_automation.py",
+            "rigorbreeze/scripts/flow_records.py",
+        )
+        if wrapper
+        else (
+            "scripts/rigorbreeze.py",
+            "scripts/flow_state.py",
+            "scripts/flow_policy.py",
+            "scripts/flow_parallel.py",
+            "scripts/flow_automation.py",
+            "scripts/flow_records.py",
+        )
+    )
+    return (
+        "AGENTS.md",
+        CONFIG_NAME,
+        *runner_paths,
+        "spec/index.md",
+    )
+
+
+def workflow_metadata_paths(root: Path, task_id: str) -> set[str]:
+    paths = set(managed_workflow_paths(root))
+    if record_settings(root)["storage"] == "tracked":
+        paths.update(
+            {
+                f"spec/changes/{task_id}.md",
+                f"spec/evidence/{task_id}.json",
+                f"spec/archive/{task_id}.md",
+            }
+        )
+    paths.add(f"spec/evidence/{task_id}.audit.json")
+    return paths
+
+
 def working_tree_paths(root: Path) -> list[str]:
     if not is_git_repo(root):
         return []
