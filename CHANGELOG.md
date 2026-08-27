@@ -28,6 +28,19 @@ The project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). 
 - Reframed the repository for first-time adopters with bilingual onboarding, explicit safety boundaries, and a complete first-task walkthrough.
 - Added concise contribution and security policies plus an MIT license.
 
+## [0.19.0] - Separate kernel responsibilities without changing behavior
+
+### Changed
+
+- Reduce `flow.py` from 3,875 lines to a thin 1,200-1,500 line orchestration entrypoint.
+- Move evidence/retrospective/archive lifecycle into `flow_records.py`, environment/TDD/profile execution into `flow_verification.py`, and installation/status/doctor projections into `flow_diagnostics.py`.
+- Use one helper manifest for initialization, installation integrity, workflow baseline tracking, and installed-runner upgrades.
+- Compile every kernel module in CI while keeping the public CLI, state schema v5, evidence schema v4, automation journal v1, and all risk/delivery gates unchanged.
+
+### Compatibility
+
+- Existing active tasks keep their installed runner frozen. Idle projects may run `init` to install the three new helpers; no task, evidence, config, or command migration is required.
+
 ## [0.18.0] - Stop mixed work before approval and keep large features sliced
 
 ### Changed

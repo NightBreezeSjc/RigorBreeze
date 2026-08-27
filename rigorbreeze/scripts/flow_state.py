@@ -18,7 +18,16 @@ import flow_parallel
 
 VERSION = 5
 EVIDENCE_VERSION = 4
-TOOL_VERSION = "0.18.0"
+TOOL_VERSION = "0.19.0"
+KERNEL_HELPER_NAMES = (
+    "flow_state",
+    "flow_parallel",
+    "flow_automation",
+    "flow_policy",
+    "flow_records",
+    "flow_verification",
+    "flow_diagnostics",
+)
 SPEC_DIR = "spec"
 CONFIG_NAME = "rigorbreeze.toml"
 MODES = ("advisory", "enforced")
@@ -1175,6 +1184,48 @@ def is_git_repo(root: Path) -> bool:
 def current_head(root: Path) -> str | None:
     result = git(root, "rev-parse", "HEAD")
     return result.stdout.strip() if result.returncode == 0 else None
+
+
+def managed_workflow_paths(root: Path) -> tuple[str, ...]:
+    runner = root / "scripts" / "rigorbreeze.py"
+    wrapper = (
+        runner.is_file()
+        and REPOSITORY_WRAPPER_MARKER
+        in runner.read_text(encoding="utf-8", errors="replace")
+        and (root / "rigorbreeze" / "scripts" / "flow.py").is_file()
+    )
+    runner_paths = (
+        (
+            "scripts/rigorbreeze.py",
+            "rigorbreeze/scripts/flow.py",
+            *(f"rigorbreeze/scripts/{name}.py" for name in KERNEL_HELPER_NAMES),
+        )
+        if wrapper
+        else (
+            "scripts/rigorbreeze.py",
+            *(f"scripts/{name}.py" for name in KERNEL_HELPER_NAMES),
+        )
+    )
+    return (
+        "AGENTS.md",
+        CONFIG_NAME,
+        *runner_paths,
+        "spec/index.md",
+    )
+
+
+def workflow_metadata_paths(root: Path, task_id: str) -> set[str]:
+    paths = set(managed_workflow_paths(root))
+    if record_settings(root)["storage"] == "tracked":
+        paths.update(
+            {
+                f"spec/changes/{task_id}.md",
+                f"spec/evidence/{task_id}.json",
+                f"spec/archive/{task_id}.md",
+            }
+        )
+    paths.add(f"spec/evidence/{task_id}.audit.json")
+    return paths
 
 
 def working_tree_paths(root: Path) -> list[str]:

@@ -24,7 +24,7 @@ flowchart LR
     Codex <--> Skill["RigorBreeze Skill\nAgent 协议"]
     Skill --> Runner["项目 Runner\n确定性策略与证据"]
 
-    Runner --> Core["状态、策略、并行与\n自动化模块"]
+    Runner --> Core["状态、策略、记录、验证、诊断、\n并行与自动化模块"]
     Core <--> Private["Git 私有状态、合同、\n证据与操作日志"]
     Runner --> Checks["项目测试、构建、运行时、\n安全与迁移检查"]
 
@@ -36,7 +36,7 @@ flowchart LR
 ```
 
 仓库拥有可执行策略：`rigorbreeze.toml` 声明检查，随附的
-`scripts/rigorbreeze.py` 执行它们。Runner 内部的状态、策略、并行和自动化模块，
+`scripts/rigorbreeze.py` 执行它们。Runner 内部的状态、策略、记录、验证、诊断、并行和自动化模块，
 让不同 Codex 窗口中的策略保持可检查，而不会把聊天记录变成控制平面。
 
 ### 边界与职责
@@ -132,11 +132,14 @@ Runner 从任务合同和 Git 状态推导就绪性、循环依赖、缺失依�
 
 | 模块 | 在流程中的作用 |
 |---|---|
-| `rigorbreeze.py` | Codex 与 CI 使用的稳定命令入口；加载配置并分发策略动作。 |
-| `flow_state.py` | 读取和写入有 Schema 意识的状态、合同、证据、摘要、归档/历史数据及原子私有记录。 |
+| `rigorbreeze.py` | Codex与CI使用的稳定薄命令入口；解析命令、持有锁并分发内核动作。 |
+| `flow_state.py` | 提供有Schema意识的状态、配置、摘要、原子I/O和唯一安装helper清单。 |
 | `flow_policy.py` | 应用通道、合同、范围、TDD、新鲜度、验证与交付门禁策略。 |
 | `flow_parallel.py` | 投影任务所有权、worktree、依赖与 Runtime-Claims 冲突。 |
 | `flow_automation.py` | 记录幂等的外部 Git/Provider 动作及其恢复状态，不篡改任务证明。 |
+| `flow_records.py` | 负责evidence录入、复盘、归档关闭、私有保留、迁移和脱敏审计摘要。 |
+| `flow_verification.py` | 执行环境预检、RED观察、affected/full、结果复用和交付检查。 |
+| `flow_diagnostics.py` | 投影安装、基线、生命周期、交互、聚合状态和doctor结果。 |
 | `rigorbreeze.toml` | 项目对 profiles、命令、报告、制品、超时、风险适用性和常设自动化等级的声明。 |
 
 在通常的数据流中，Skill 恢复上下文并向 Runner 请求当前状态。Runner 结合已批准合同、
