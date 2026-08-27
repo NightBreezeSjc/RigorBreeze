@@ -1194,6 +1194,7 @@ def managed_workflow_paths(root: Path) -> tuple[str, ...]:
             "rigorbreeze/scripts/flow_parallel.py",
             "rigorbreeze/scripts/flow_automation.py",
             "rigorbreeze/scripts/flow_records.py",
+            "rigorbreeze/scripts/flow_verification.py",
         )
         if wrapper
         else (
@@ -1203,6 +1204,7 @@ def managed_workflow_paths(root: Path) -> tuple[str, ...]:
             "scripts/flow_parallel.py",
             "scripts/flow_automation.py",
             "scripts/flow_records.py",
+            "scripts/flow_verification.py",
         )
     )
     return (

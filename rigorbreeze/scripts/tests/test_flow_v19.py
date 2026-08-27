@@ -16,6 +16,7 @@ HELPER_MODULES = (
     "flow_automation",
     "flow_policy",
     "flow_records",
+    "flow_verification",
 )
 
 
