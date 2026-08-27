@@ -82,6 +82,9 @@ flowchart TD
 ```
 
 The diagram is an orientation aid, not a shortcut around the lane criteria.
+Before an L1/L2 contract freezes its baseline, the task worktree must be clean
+apart from task-owned records and private state. Foreign delivery changes or
+unignored caches stop approval; Direct and L0 keep their lighter contracts.
 For exact task creation, approval, closure, and escalation rules, use the
 [handbook](rigorbreeze/references/handbook.md) and the [Skill](rigorbreeze/SKILL.md).
 
@@ -112,6 +115,12 @@ services, processes, applications, or environments; `Runtime-Claims` exposes
 those real shared resources before work begins. A DAG is used only when tasks
 have a real ordering constraint, and `Depends-On` in the contracts remains the
 only authoritative dependency representation.
+
+A feature, task, branch/worktree, and pull request are separate layers. One
+feature and final PR may contain several independently verified sequential
+tasks on the same clean integration stream. Each slice archives and commits
+locally before the next begins; another verification frontier does not require
+another PR or worktree.
 
 <!-- parallel-worktrees-dag -->
 ```mermaid
@@ -174,6 +183,11 @@ contract, implementation, test, configuration, dependency, migration, scope,
 or applicable external state invalidates stale proof. An unchanged successful
 full profile can be reused; `--force` is reserved for an explicit rerun. This
 keeps iteration fast without treating an old green result as current evidence.
+
+After UAT, visual/runtime review, or a follow-up request, a new product write
+re-enters current status and scope. Same-result in-scope feedback invalidates
+old proof and resumes implementation; a forbidden path, another active owner,
+or a new outcome becomes a successor task or visible handoff.
 
 Privacy is part of the architecture:
 

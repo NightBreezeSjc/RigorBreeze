@@ -90,11 +90,11 @@ Operational-Modes: N/A - no conditional runtime behavior
 """,
             encoding="utf-8",
         )
+        self.run_flow("approve", "task")
         tests = self.root / "tests"
         tests.mkdir()
         test_file = tests / "test_feature.py"
         test_file.write_text("raise AssertionError('missing')\n", encoding="utf-8")
-        self.run_flow("approve", "task")
         command = (
             "red",
             "--requirement",
@@ -207,7 +207,7 @@ Operational-Modes: N/A - no conditional runtime behavior
                             "checkId": "unit",
                             "exitCode": 0,
                             "command": ["python", "secret.py"],
-                            "summary": "raw output password=not-for-public",
+                            "summary": "raw output password=not-for-public rigorbreeze: synthetic-secret",
                         }
                     ],
                     "artifacts": [
@@ -319,6 +319,7 @@ Operational-Modes: N/A - no conditional runtime behavior
 """,
             encoding="utf-8",
         )
+        self.run_flow("approve", "task")
         (self.root / "tests").mkdir()
         test_file = self.root / "tests/test_feature.py"
         test_file.write_text(
@@ -326,7 +327,6 @@ Operational-Modes: N/A - no conditional runtime behavior
             "assert Path('src/feature.py').exists(), 'missing'\n",
             encoding="utf-8",
         )
-        self.run_flow("approve", "task")
         self.run_flow(
             "red",
             "--requirement",

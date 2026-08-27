@@ -63,6 +63,8 @@ from flow_policy import (  # noqa: E402
     operational_modes,
     path_allowed,
     path_under,
+    preapproval_delivery_paths,
+    preapproval_dirt_cause,
     practice_summary,
     project_fingerprint,
     record_practice_event,
@@ -1087,6 +1089,14 @@ def command_approve(
         scopes = allowed_scope(root, state)
         validate_scope_entries(root, scopes)
         acceptance_ids(root, state)
+        if active.get("risk") in {"L1", "L2"}:
+            dirty = preapproval_delivery_paths(root, state)
+            if dirty:
+                cause = preapproval_dirt_cause(dirty)
+                raise FlowError(
+                    "clean task worktree is required before "
+                    f"{active['risk']} approval ({cause}): " + ", ".join(dirty)
+                )
         scope = task_scope_status(root, state)
         if scope["status"] == "violated":
             raise FlowError(
@@ -3821,6 +3831,8 @@ def main() -> int:
                     event_type = "runtime-resource-conflict"
                 elif "workflow baseline branch is not current" in message.lower():
                     event_type = "workflow-baseline-pending"
+                elif "clean task worktree is required" in message.lower():
+                    event_type = "preapproval-dirt"
                 elif "integrated-unclosed" in message.lower():
                     event_type = "integrated-unclosed"
                 elif "closure-pending" in message.lower():

@@ -271,12 +271,12 @@ Risk: L1
         self.run_flow("init")
         self.run_flow("new", "TASK-001", "--title", "One slice", "--risk", "L1")
         self.complete_task()
+        self.run_flow("approve", "task")
         test_file = self.root / "tests" / "test_feature.py"
         test_file.parent.mkdir()
         test_file.write_text(
             "raise AssertionError('behavior missing')\n", encoding="utf-8"
         )
-        self.run_flow("approve", "task")
         self.run_flow(
             "--mode", "enforced", "verify", "--profile", "affected", expected=2
         )
@@ -529,12 +529,12 @@ Risk: L1
         self.write_full_config()
         self.run_flow("new", "TASK-001", "--title", "One slice", "--risk", "L1")
         self.complete_task()
+        self.run_flow("approve", "task")
         test_file = self.root / "tests" / "test_feature.py"
         test_file.parent.mkdir()
         test_file.write_text(
             "raise AssertionError('behavior missing')\n", encoding="utf-8"
         )
-        self.run_flow("approve", "task")
         self.run_flow(
             "red",
             "--requirement",

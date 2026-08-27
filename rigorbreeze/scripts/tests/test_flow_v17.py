@@ -114,6 +114,7 @@ command = ["python3", "-c", "print('unit ok')"]
             "src/value.txt\n- tests/feature_test.py\n- reports/permission-matrix.json",
             risk="L1",
         )
+        self.run_flow("approve", "task")
         (self.root / "tests").mkdir()
         (self.root / "tests/feature_test.py").write_text(
             "import pathlib,sys\n"
@@ -122,7 +123,6 @@ command = ["python3", "-c", "print('unit ok')"]
             "sys.exit(0 if ok else 1)\n",
             encoding="utf-8",
         )
-        self.run_flow("approve", "task")
         self.run_flow(
             "red",
             "--requirement",
@@ -292,12 +292,12 @@ command = ["python3", "-c", "print('unit ok')"]
             "src/value.txt\n- tests/feature_test.py",
             risk="L1",
         )
+        self.run_flow("approve", "task")
         (self.root / "tests").mkdir()
         test_file = self.root / "tests/feature_test.py"
         test_file.write_text(
             "raise AssertionError('missing behavior')\n", encoding="utf-8"
         )
-        self.run_flow("approve", "task")
 
         blocked = self.run_flow(
             "red",
@@ -328,6 +328,7 @@ command = ["python3", "-c", "print('unit ok')"]
             "src/value.ts\n- tests/order.test.js\n- package.json",
             risk="L1",
         )
+        self.run_flow("approve", "task")
         (self.root / "tests").mkdir()
         (self.root / "tests/order.test.js").write_text(
             "throw new Error('wrong order')\n", encoding="utf-8"
@@ -341,7 +342,6 @@ command = ["python3", "-c", "print('unit ok')"]
             ),
             encoding="utf-8",
         )
-        self.run_flow("approve", "task")
 
         blocked = self.run_flow(
             "red",
@@ -402,6 +402,7 @@ command = ["python3", "-c", "print('unit ok')"]
             "src/value.txt\n- tests/feature_test.py",
             risk="L1",
         )
+        self.run_flow("approve", "task")
         (self.root / "tests").mkdir()
         (self.root / "tests/feature_test.py").write_text(
             "import pathlib,sys\n"
@@ -410,7 +411,6 @@ command = ["python3", "-c", "print('unit ok')"]
             "sys.exit(0 if ok else 1)\n",
             encoding="utf-8",
         )
-        self.run_flow("approve", "task")
         self.run_flow(
             "red",
             "--requirement",
@@ -558,6 +558,7 @@ command = ["python3", "-c", "import pathlib; p=pathlib.Path('reports/unit-count'
             "src/value.txt\n- tests/feature_test.py",
             risk="L1",
         )
+        self.run_flow("approve", "task")
         (self.root / "tests").mkdir()
         (self.root / "tests/feature_test.py").write_text(
             "import pathlib,sys\n"
@@ -566,7 +567,6 @@ command = ["python3", "-c", "import pathlib; p=pathlib.Path('reports/unit-count'
             "sys.exit(0 if ok else 1)\n",
             encoding="utf-8",
         )
-        self.run_flow("approve", "task")
         self.run_flow(
             "red",
             "--requirement",

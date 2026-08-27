@@ -18,7 +18,7 @@ import flow_parallel
 
 VERSION = 5
 EVIDENCE_VERSION = 4
-TOOL_VERSION = "0.17.0"
+TOOL_VERSION = "0.18.0"
 SPEC_DIR = "spec"
 CONFIG_NAME = "rigorbreeze.toml"
 MODES = ("advisory", "enforced")
@@ -659,21 +659,23 @@ def agents_block() -> str:
     return f"""{AGENTS_START}
 ## RigorBreeze
 
-Before writes, including after compaction, invoke `$rigorbreeze`. Resolve target paths, then Direct MUST run exactly `python3 scripts/rigorbreeze.py status --json --path <target>` for each target before opening or writing it; never substitute `.`, Git status, prior help, or global status. Tasks use `status --json`; `status --all --compact --json` is for concurrency/dependencies/handoff. Require the real base, approved task, and window claim.
+Before writes, including after compaction, invoke `$rigorbreeze`. Direct resolves targets and runs `python3 scripts/rigorbreeze.py status --json --path <target>` before each read/write; tasks run `status --json`. Use `status --all --compact --json` only for concurrency, dependencies, or handoff. Require the real base, valid approval, and window claim.
 
-Direct is taskless for one deterministic low-consequence result with no writer or API, data, auth, permission, payment, lock, migration, dependency, production-config, external-state, or release boundary. Extend the existing test seam unless unusable. Run focused proof, never full. Unrelated base dirt may use a short-lived clean worktree; only clean+contained is removable. Crossing a boundary creates L1/L2. Restore missing high-risk contracts or use explicit Emergency.
+Direct is taskless for one deterministic low-consequence result with no writer or API, data, auth, permission, payment, lock, migration, dependency, production-config, external-state, or release boundary. Run focused proof, never full. Crossing a boundary creates L1/L2; restore missing high-risk records or use explicit Emergency.
 
-Recover facts from requirements, code, tests, Git, and runtime evidence; ask only for outcome-changing intent. For initiative shaping or branching L2 ambiguity, use a decision frontier with at most three questions per round, each carrying a recommendation and impact. A prototype answers one decision question and never proves production acceptance. Translate requests into observable atoms and acceptance IDs; distinguish the current defect from the desired result.
+Recover facts from requirements, code, tests, Git, and runtime. Ask only for outcome-changing intent. Shaping uses a decision frontier of at most three questions with recommendation and impact; a prototype answers one decision question, never acceptance. Map observable atoms and acceptance IDs; distinguish current defect from desired result.
 
-Before approval, run a semantic self-review for placeholders, contradictions, oversized scope, and ambiguous outcome/source/freshness/fallback; map observable atoms, distinguish current defect from desired result, and show a final-state checklist. Risk determines gates, independent outcomes get short-lived branches, concurrency gets extra worktrees, and dependency gets a DAG. One worktree has one writer.
+Before approval, perform semantic self-review for placeholders, contradictions, oversized scope, and ambiguous outcome/source/fallback; show a final-state checklist. L1/L2 require a clean task worktree: foreign changes and unignored caches block. Consequence sets gates, independent outcomes get task branches, concurrent writers get worktrees, and real dependencies get a DAG. One worktree has one writer.
 
-L1/L2/Emergency preflight tools, dependencies, and project fixtures before observed RED. Use public seams, independent oracles, affected during development, and one final full; unchanged verification is reused. Approved read-only evidence may remain pending, but review/release/writes stay gated. Verify review feedback. Use the solution ladder and deletion test; after three failed hypotheses make an architecture stop. Never shrink security, permission, data, migration, rollback, accessibility, or compatibility boundaries.
+Feature, task, branch/worktree, and PR are separate. One feature/PR may contain multiple independently verified sequential tasks on one clean integration stream; archive and locally commit each while batching human interaction. Never compress verification frontiers or create a PR/worktree per slice.
 
-Validate the real runtime. AI cannot approve its own visual, security, legal, or production conclusion. Migration and release retain rehearsal, immutable artifact, stop, recovery, and rollback evidence. Before external writes, reconstruct completed steps, identifiers, one remaining action, and stop conditions; never repeat stale-plan work.
+Preflight tools, dependencies, and fixtures before observed RED. Use public seams, independent oracles, affected during development, and one final full; reuse unchanged verification. Pending read-only evidence grants no acceptance. Verify review feedback. Use the solution ladder and deletion test; after three failed hypotheses make an architecture stop. Never shrink security, permission, data, migration, rollback, accessibility, or compatibility.
 
-Records default to Git-private storage; never silently move legacy records. Missing integrated worktrees are cleanup candidates; same-path dirty writers still block. Git automation stays manual unless configured or explicitly authorized. Reconcile only proven clean+contained worktrees and safe local branches; never delete remote or uncertain state.
+After UAT, runtime/visual review, or follow-up, product writes rerun status and scope. In-scope same-result feedback resumes implementation and invalidates proof; forbidden/new-result work becomes a successor or visible handoff. AI cannot approve visual, security, legal, or production conclusions. External writes reconstruct completed steps, identifiers, one action, and stop conditions; never replay stale plans.
 
-Completion requires fresh verification from this turn with command, exit status, and scope. Clean L1 may close automatically; friction and all L2/Emergency retain human review. A reusable workflow defect becomes a separate RigorBreeze Skill task and evolution candidate, never expanded business scope.
+Records default Git-private; never silently move legacy records. Git automation stays manual unless configured or explicitly authorized. Reconcile only proven clean+contained worktrees and safe local branches; never delete remote or uncertain state.
+
+Completion requires fresh verification from this turn with command, exit status, and scope. Clean L1 may auto-close; friction and L2/Emergency retain human review. A reusable workflow defect becomes a separate Skill task and evolution candidate, never expanded business scope.
 {AGENTS_END}"""
 
 

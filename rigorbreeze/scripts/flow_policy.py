@@ -44,6 +44,21 @@ from flow_state import (
 )
 
 
+CACHE_HYGIENE_PARTS = {
+    ".cache",
+    ".pytest_cache",
+    ".ruff_cache",
+    ".venv",
+    "__pycache__",
+    "build",
+    "dist",
+    "node_modules",
+    "node_modules.worktree-cache",
+    "target",
+    "venv",
+}
+
+
 def allowed_scope(root: Path, state: dict[str, Any]) -> list[str]:
     active = active_task(state)
     content = task_path(root, active["id"]).read_text(encoding="utf-8")
@@ -341,9 +356,66 @@ def task_change_paths(root: Path, state: dict[str, Any]) -> list[str]:
     )
 
 
+def task_record_worktree_paths(root: Path, state: dict[str, Any]) -> set[str]:
+    active = active_task(state)
+    candidates = (
+        task_path(root, active["id"]),
+        evidence_path(root, active["id"]),
+        root / "spec" / "state.json",
+    )
+    records: set[str] = set()
+    for path in candidates:
+        try:
+            records.add(path.resolve().relative_to(root.resolve()).as_posix())
+        except ValueError:
+            continue
+    return records
+
+
+def preapproval_delivery_paths(root: Path, state: dict[str, Any]) -> list[str]:
+    records = task_record_worktree_paths(root, state)
+    return sorted(
+        relative for relative in working_tree_paths(root) if relative not in records
+    )
+
+
+def preapproval_dirt_cause(paths: Iterable[str]) -> str:
+    values = list(paths)
+    if values and all(
+        any(part in CACHE_HYGIENE_PARTS for part in Path(relative).parts)
+        for relative in values
+    ):
+        return "cache-hygiene"
+    return "foreign-work"
+
+
 def task_scope_status(root: Path, state: dict[str, Any]) -> dict[str, Any]:
     if not state.get("activeTask"):
-        return {"status": "not-applicable", "outOfScope": []}
+        return {
+            "status": "not-applicable",
+            "cause": "none",
+            "outOfScope": [],
+            "dirtyPaths": [],
+        }
+    active = active_task(state)
+    approval = state.get("approvals", {}).get("task", {})
+    initial_l1_l2 = bool(
+        active.get("risk") in {"L1", "L2"} and not approval.get("approvedAt")
+    )
+    if initial_l1_l2:
+        dirty = preapproval_delivery_paths(root, state)
+        if dirty:
+            scopes = allowed_scope(root, state)
+            return {
+                "status": "preexisting-dirt",
+                "cause": preapproval_dirt_cause(dirty),
+                "outOfScope": [
+                    relative
+                    for relative in dirty
+                    if not task_owned_path(relative, state, scopes)
+                ],
+                "dirtyPaths": dirty,
+            }
     scopes = allowed_scope(root, state)
     out_of_scope = [
         relative
@@ -352,12 +424,19 @@ def task_scope_status(root: Path, state: dict[str, Any]) -> dict[str, Any]:
     ]
     return {
         "status": "violated" if out_of_scope else "current",
+        "cause": "new-out-of-scope" if out_of_scope else "none",
         "outOfScope": out_of_scope,
+        "dirtyPaths": [],
     }
 
 
 def ensure_scope_current(root: Path, state: dict[str, Any]) -> None:
     scope = task_scope_status(root, state)
+    if scope["status"] == "preexisting-dirt":
+        raise FlowError(
+            "task worktree was not clean before approval: "
+            + ", ".join(scope["dirtyPaths"])
+        )
     if scope["status"] == "violated":
         raise FlowError(
             "task changes are outside the approved scope: "
@@ -1266,9 +1345,23 @@ def next_action(
             "kind": "work",
         }
     scope = task_scope_status(root, state)
+    if scope["status"] == "preexisting-dirt":
+        cache = scope.get("cause") == "cache-hygiene"
+        return {
+            "reason": (
+                "Unignored cache or dependency output must be fixed before task "
+                "approval."
+                if cache
+                else "The task worktree already contains delivery changes; finish "
+                "their owner or move this task to a clean worktree."
+            ),
+            "command": "python scripts/rigorbreeze.py status --json",
+            "actor": "codex",
+            "kind": "repair",
+        }
     if scope["status"] == "violated":
         return {
-            "reason": "Task changes violate the approved scope; restore them or split a dependent task.",
+            "reason": "New task changes violate the approved scope; restore them or split a dependent task.",
             "command": "python scripts/rigorbreeze.py status --json",
             "actor": "codex",
             "kind": "repair",

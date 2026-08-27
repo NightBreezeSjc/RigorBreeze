@@ -77,6 +77,12 @@ Do not lower risk to bypass a gate. Raise it when scope or consequences expand. 
 
 Preparation cost is a routing signal: if ceremony exceeds a deterministic safe edit and no protected boundary exists, use Direct.
 
+L1/L2 approval requires a clean task worktree. Task-owned records and Git-private
+state are not delivery dirt; every other modified or untracked path must be
+resolved first. Unignored dependency/build caches are project hygiene, not a
+reason for the core to hide files. Use a clean worktree rather than absorbing
+another task's changes into a new baseline.
+
 Risk follows consequence, not diff size, file layer, duration, urgency, or ceremony already spent. Read-only diagnosis creates no task. Direct applies to deterministic ordering/presentation corrections and other single-repository, single-result changes when `status --json --path` finds no competing writer and there is no API shape, persisted-data semantic, auth, permission, payment, lock, migration, dependency, production configuration, external-state write, or release impact. Backend code and a new regression test do not raise risk by themselves. Unrelated base dirt may use a short-lived clean worktree without task records; remove it only when clean and contained, otherwise retain it with the exact reason. If any protected boundary appears, stop and create L1/L2. Never downgrade L2 to recover speed. L0 remains for low-risk work that genuinely needs coordination or audit.
 
 If an L2/release task cannot load its contract or authoritative workflow state,
@@ -212,6 +218,12 @@ Compatibility is a product property, not a universal yes/no rule. Code with no d
 
 The normal delivery order is verify/full → acceptance → two-pass review → retrospective → archive → guarded commit/push/merge → reconcile → cleanup. A clear L1 request is sufficient approval once its compact contract is complete. A clean first-pass L1 records a machine retrospective and closes automatically; failures, bypass, rework, unreasonable blocks, and every L2/Emergency retain human review. Release authority is never inherited from ordinary archive.
 
+UAT and review are not hidden implementation phases. If their feedback requires
+another product write, re-read current status, ownership, approval, and scope.
+Same-result feedback inside Allowed Scope resumes implementation and invalidates
+old verification/acceptance. A forbidden path, active owner, or new user result
+becomes a successor task or visible handoff before any edit.
+
 L0 may archive after configured verification. L1/L2 retain current full verification, applicable acceptance, and two review passes; only the retrospective interaction is conditional for a clean L1.
 
 Schema-v5 projects keep contracts and full evidence in Git-common `.git/rigorbreeze/records/` by default. After proven integration, L1 detail becomes a path-free local history summary. L2/Emergency keeps full private evidence and may publish only a sanitized audit summary capped at 32 KiB. Legacy tracked projects move only through an explicit idle, clean migration; Runner upgrades never move records silently.
@@ -329,6 +341,13 @@ one project entry
 → one active task per worktree
 → one rebuildable registry in the Git common directory
 ```
+
+Feature, task, branch/worktree, and pull request are separate decisions. One
+approved feature and final PR may contain multiple independently verified
+sequential tasks on one clean integration stream. Archive and locally commit
+each slice before the next; batch human interaction and open the PR only after
+the combined feature is ready. Do not convert verification frontiers into one
+giant contract or multiply PRs/worktrees merely to mirror task records.
 
 Keep a stable `RIGORBREEZE_SESSION_ID` per Codex window. A second live session cannot claim the same worktree. A possible Direct change uses `status --json --path <relative>` and receives only relevant writers; routine task writes use current-worktree `status --json`. Concurrent windows and optional orchestrators use compact all-project status, while full all-project status is reserved for exact repair, cleanup, or evolution. Missing integrated worktrees are stale-registry cleanup candidates, not crashes or overlap blockers. An integrated HEAD with uncommitted same-path changes remains a writer until clean.
 

@@ -107,9 +107,7 @@ to bypass a gate. `doctor --all --repair` may rebuild the registry explicitly.
 
 `status --json` includes `installation`, `workflowBaseline`, `workflowBypass`, lifecycle, `scope`, compact `evolution`, and `interaction` projections. The text view is limited to completed, current, and the one genuine user action; `actor=codex` work stays internal. Installation
 compares the bundled Skill with the project runner and reports `current`,
-`outdated`, `missing`, or `unmanaged`, missing/modified components, and upgrade safety. `workflowBaseline` proves managed files on the real base branch and reports `current`, `missing`, `partial`, `modified`, or `blocked`. Lifecycle prioritizes `integrated-unclosed` and `closure-pending` over stale-baseline advice. Scope is `current`,
-`violated`, or `not-applicable`, and evaluates committed changes from the
-approval baseline through `HEAD` together with current working-tree changes.
+`outdated`, `missing`, or `unmanaged`, missing/modified components, and upgrade safety. `workflowBaseline` proves managed files on the real base branch and reports `current`, `missing`, `partial`, `modified`, or `blocked`. Lifecycle prioritizes `integrated-unclosed` and `closure-pending` over stale-baseline advice. Scope is `preexisting-dirt`, `current`, `violated`, or `not-applicable`. Before first L1/L2 approval, `preexisting-dirt` reports every non-record worktree path and classifies it as `foreign-work` or `cache-hygiene`. After approval, committed changes from the baseline through `HEAD` plus current worktree changes produce `new-out-of-scope` when they escape Allowed Scope. Existing `outOfScope` remains compatible; optional `cause` and `dirtyPaths` explain the unique repair action.
 `workflowBypass` is `detected` only when an active unapproved task already has
 non-workflow delivery changes. That observation records one deduplicated
 practice event as an immediate evolution candidate; it never creates approval,
