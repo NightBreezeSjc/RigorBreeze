@@ -24,6 +24,7 @@ The project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). 
 
 ### Documentation
 
+- Added a bilingual architecture guide with GitHub-native diagrams for the system layers, risk-adaptive workflow, evidence boundaries, parallel worktrees, DAGs, and protected delivery; the README now links to a compact architecture overview without duplicating the handbook.
 - Reframed the repository for first-time adopters with bilingual onboarding, explicit safety boundaries, and a complete first-task walkthrough.
 - Added concise contribution and security policies plus an MIT license.
 
