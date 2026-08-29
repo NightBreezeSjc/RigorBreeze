@@ -291,6 +291,12 @@ Accept the capability that actually changed:
 
 Before assigning manual acceptance, confirm the actual route, menu, role, account, and device entry that will be used. If one of those affordances is unavailable, say so honestly as `N/A - <reason>` and substitute equivalent runtime/API evidence instead of pretending a human can click a path that does not exist.
 
+### Migration phase compatibility
+
+Every migration uses three distinct phases: **from-schema preflight → migrate once → to-schema assertions**. The preflight runs against the schema currently deployed in production. It may reference a new table, column, index, or constraint only behind explicit catalog/object detection; otherwise that rule belongs after migration. Do not solve the problem by moving all safety checks after migration: retain old-schema health, backup, capacity, secret, and release-identity checks before the first write.
+
+Rehearsal starts from a clone of the real from-schema and representative data, applies the migration once, then runs the full new-schema and data invariants. Record the phase reached in the existing operation result. If migration succeeds but candidate startup or a later assertion fails, resume at the first incomplete post-migration phase; never replay a completed migration merely because an old plan still lists it. Preserve backup/restore or forward-fix proof and the existing production authority boundary.
+
 ### Optional project verification pack
 
 When real-runtime validation repeatedly becomes the bottleneck, create a tracked `verification/` pack through a separate, explicitly approved task. Its README defines Launch, Doctor, Drive, Evidence, and Cleanup; its first map covers only three to five high-risk or frequent features. Project scripts must work before the pack is accepted. Reports, screenshots, traces, and temporary data remain ignored runtime artifacts.

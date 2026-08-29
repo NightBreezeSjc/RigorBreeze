@@ -18,7 +18,7 @@ import flow_parallel
 
 VERSION = 5
 EVIDENCE_VERSION = 4
-TOOL_VERSION = "0.20.1"
+TOOL_VERSION = "0.21.0"
 KERNEL_HELPER_NAMES = (
     "flow_state",
     "flow_parallel",
@@ -678,6 +678,8 @@ Recover facts from authoritative requirements, code, tests, Git, and runtime. La
 Before approval, perform semantic self-review for placeholders, contradictions, oversized scope, and source/fallback ambiguity. Consequence selects gates; outcomes get task branches, `--worktree auto` requires a concurrent writer, and ordering gets a DAG. One worktree has one writer.
 
 Preflight tools/fixtures before observed RED. Use public seams, independent oracles, affected, one final full, and current evidence. A configured `verification/` pack requires Doctor, mapped drive, evidence, Cleanup, and current SHA; unit tests cannot replace it. Verify review feedback with the deletion test; after three failed hypotheses make an architecture stop. Never weaken security/permission/data/migration/rollback/accessibility/compatibility.
+
+Migration: from-schema preflight → migrate once → to-schema assertions; detect new objects and never replay completed migration.
 
 After UAT/runtime/follow-up, rerun status and scope before product writes; invalidate old proof or create a successor/handoff. AI cannot approve visual, security, legal, or production conclusions. External writes reconstruct current state and one safe action. Git automation stays manual unless authorized; never delete remote or uncertain state.
 
