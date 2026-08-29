@@ -28,6 +28,28 @@ RigorBreeze 的重要变更都会记录在本文档中。
 - 使用双语引导、明确的安全边界和完整首次任务示例，重新组织面向首次使用者的仓库文档。
 - 增加精简的贡献指南、安全策略和 MIT 许可证。
 
+## [0.20.0] - 让真实产品验证由项目维护并可机器校验
+
+### 新增
+
+- 增加按需启用的 tracked 验证包模板，覆盖 Launch、Doctor、Feature Map、Drive、Evidence 和 Cleanup；`init`、Direct 与普通 L1 不会自动创建。
+- 通过现有 `acceptance` 检查校验可选 Verification Report v1，把验证等级、已映射 Feature、当前 Git SHA、Feature Map 摘要、证据摘要、Doctor 与 Cleanup 写入现有任务证据。
+- 在状态中投影当前 `verificationLevel` 与 `verifiedFeatures`，同时保持旧检查和未启用项目行为不变。
+
+### 变更
+
+- 区分用户明确结果和 Agent 推导选项，防止单仓请求被静默扩张到后端、数据库、支付、权限、供应商、部署或第二仓库。
+- Direct 必须先只读定位目标并查询具体路径，禁止使用 `--path .`；优先复用已有可执行测试接缝，只有真实并发写者才增加worktree。
+- 修复工作流状态或建立Emergency只恢复执行权威，不授予AI推导缺失高风险产品意图的权限。
+- 跨仓结果即使因缺少实现输入而安全停止，也必须保留一次联合批准、一次端到端验收和一次复盘的交互合同。
+- 在不删除行为规则的前提下降低常驻上下文：`SKILL.md`从1,799词降至1,636词，项目受管策略从449词降至302词，并合并只存在于分发ZIP之外的行为测试查找重复。
+- 只有判断型、昂贵、高影响或多页面验收才使用独立只读 Verifier；便宜确定的检查仍由写入 Agent 执行。
+- 新的常驻 Skill 规则进入核心前，必须以可重复的脱敏失败 fixture 对旧版和候选版执行 A/B 评估。
+
+### 兼容性
+
+- 公共 CLI、状态/配置 schema v5、evidence schema v4、automation journal v1 和默认 manual 交付保持不变。Verification Report schema v1 独立且完全按需启用。
+
 ## [0.19.0] - 在行为不变的前提下拆分内核职责
 
 ### 变更

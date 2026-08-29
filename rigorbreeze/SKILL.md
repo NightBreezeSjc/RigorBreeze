@@ -1,74 +1,76 @@
 ---
 name: rigorbreeze
-description: Operate and evolve RigorBreeze, an evidence-backed and risk-adaptive idea-to-delivery workflow for a solo developer using Codex. Use when shaping an unbounded initiative; initializing or resuming a project; implementing a non-trivial feature or fix; coordinating worktrees or a dependency DAG; collecting SDD/TDD and real-runtime evidence; enforcing quality gates; proving delivery readiness; or reviewing workflow friction.
+description: Run RigorBreeze, a risk-adaptive idea-to-delivery workflow for solo Codex development. Use for initiative shaping, non-trivial implementation, worktree/DAG coordination, SDD/TDD/runtime evidence, delivery gates, or workflow evolution.
 ---
 
 # RigorBreeze
 
-Deliver one observable outcome per task. Match interaction to risk; machine-generate state/evidence. One worktree has one writer. Git automation defaults to `manual`.
+Deliver one observable outcome per task. Match interaction to risk and machine-generate evidence. One worktree has one writer; Git automation defaults to `manual`.
 
 ## Enter with the smallest sufficient context
 
-1. Resolve the root. Route status, logs, screenshot analysis, and recommendations through the **no-task path**; give the read-only answer despite stale workflow state.
-2. Before writing—including **after compaction**—run bundled status. Initialized Direct resolves targets and runs exactly `python3 scripts/rigorbreeze.py status --json --path <target>` before each read/write; never substitute `.` or global status. Reuse status for **one uninterrupted write phase** until HEAD, worktree, contract, ownership, external state, or runner changes. Use `status --all --compact --json` only for concurrency/dependencies/handoff; detailed global status only for repair/cleanup/evolution.
-3. If uninitialized, run `init`, configure `rigorbreeze.toml`, then `doctor --json`. Never replace a runner during an active task. State belongs under Git; migrate it only through the runner.
-4. Read configuration, index, contract, and affected authoritative sources. Product writes require approval and a worktree claim. For missing/unreadable L2/Emergency records, **restore the authoritative record** or create an **explicit Emergency** contract; never use an **informal task card**.
+1. Resolve root. Use the **no-task path** for status/logs/screenshots/recommendations; give the read-only answer despite stale state.
+2. Before writing—including **after compaction**—run bundled status. Direct locates targets read-only, then runs `python3 scripts/rigorbreeze.py status --json --path <target>`; never `--path .` or global status. Reuse for one write phase until HEAD, contract, ownership, external state, or runner changes. Reserve `status --all --compact --json` for concurrency/dependencies/handoff and full global detail for repair/cleanup/evolution.
+3. If uninitialized, `init`, configure `rigorbreeze.toml`, then `doctor --json`. Never replace a runner mid-task; migrate Git state only through it.
+4. Read configuration, contract, index, and affected sources. Writes need approval and a worktree claim. For missing L2/Emergency records, restore the authoritative record or create an explicit Emergency contract; never use an informal task card. Neither supplies missing product intent; stop product writes and ask.
 
-Read [handbook.md](references/handbook.md) for shaping, L2/Emergency, parallel/DAG, automation, release, or evolution; [spec-tree.md](references/spec-tree.md) for records/digests/retention; [ci-gates.md](references/ci-gates.md) for enforced CI/release. Use `--help` only for command forms not explicitly shown here.
+Read [handbook.md](references/handbook.md) for advanced flows, [spec-tree.md](references/spec-tree.md) for record contracts, and [ci-gates.md](references/ci-gates.md) for enforced delivery. Use `--help` for omitted command forms.
 
 ## Recover intent before creating work
 
-Recover **recoverable project facts** from requirements, code, tests, Git, interfaces, data, permissions, and runtime. **Read every authoritative requirement, prototype, design, API, or runtime source** for the slice; ask only for unprovable **outcome-changing intent**. A “CTO” persona is perspective, not evidence. Trace the slice, not the repository.
+Recover **recoverable project facts** from code, tests, Git, interfaces, data, permissions, and runtime. **Read every authoritative requirement, prototype, design, API, or runtime source** for the slice; ask only unprovable **outcome-changing intent**. Personas are not evidence; trace the slice, not the repository.
 
-Use initiative shaping only for a **new product, new business domain, broad legacy migration**, or unshaped initiative; ordinary bounded work skips it. **Do not create a delivery task** while shaping. Keep a decision frontier of at most three questions with recommendation and impact. One brief compares **two or three viable approaches** across outcome, evidence, **value, usability, feasibility, and viability**, no-gos, and first vertical slice. A prototype answers one decision question and never proves production acceptance.
+Use initiative shaping only for a new product, new business domain, broad legacy migration, or unshaped initiative; ordinary bounded work skips it. Do not create a delivery task while shaping. Keep a decision frontier of at most three questions, each with recommendation/impact. Compare two or three viable approaches by evidence, value, usability, feasibility, and viability, no-gos, then choose the first vertical slice. A prototype answers one decision question, never acceptance.
 
-For ordinary work, record outcome, evidence/source freshness, fallback, version, and ambiguity. Classify defects as **wrong/missing data, config, or missing capability**; map compound observable atoms to acceptance/exclusion and separate correction from **optional prevention**.
+For ordinary work, preserve the exact user-stated outcome/source and label Agent-inferred options. Inference cannot add a repository, backend, database, payment, permission, or external boundary without outcome approval. Record freshness/fallback/version/ambiguity; classify wrong/missing data, config, or missing capability; map observable atoms to acceptance/exclusion and separate correction from optional prevention.
 
 ## Choose the risk lane and isolation
 
 **Risk follows consequence**, not diff size:
 
-- `Direct`: one deterministic low-consequence result in one repository; no ambiguity/writer or API, persisted-data, auth, permission, payment, lock, migration, dependency, production-config, external-state, or release boundary. Backend location and a regression test do not raise risk. Extend the existing test seam unless unusable. Use focused proof/compile; create no task/evidence/full. **Do not promote merely because configured profiles are absent or incomplete.** Unrelated dirt may use a short-lived clean worktree; remove only clean+contained.
+- `Direct`: one deterministic low-consequence result in one repository; no ambiguity/writer or API/persisted-data/auth/permission/payment/lock/migration/dependency/production-config/external-state/release boundary. Backend location and a regression test do not raise risk. Extend the existing test seam unless unusable. Use focused proof/compile; no task/evidence/full. **Do not promote merely because configured profiles are absent or incomplete.** Unrelated dirt may use a short-lived clean worktree; remove only clean+contained.
 - `L0`: coordinated documentation or isolated non-behavioral/visual change.
 - `L1`: normal feature, fix, or user flow.
 - `L2`: sensitive data, permissions, migration, payment, external integration, architecture, or production release.
 - `Emergency`: smallest safe hotfix, followed by evidence repair and incident review.
 
-Except Direct, one independently verifiable outcome is one task. **Consequence sets gates; each independent outcome gets one short-lived task branch; concurrent writers—not importance—get extra worktrees.** One feature/PR may contain several tasks: **sequential initiative work** reuses one clean integration worktree/branch, archives and locally commits each, batches human interaction, then opens one PR. Never compress verification frontiers, create a worktree/PR per slice, stack unrelated work, or share a writer worktree.
+Except Direct, one independently verifiable outcome is one task. **Consequence sets gates; each independent outcome gets one short-lived task branch. Only a genuinely concurrent writer may use `new --worktree auto`; sequential work stays in the current clean worktree.** One feature/PR may contain several tasks: **sequential initiative work** reuses a clean integration stream, closes/commits each task, batches human interaction, then opens one PR. Never compress verification frontiers, multiply worktree/PRs, stack unrelated work, or share writers.
 
-Ordinary tasks have no DAG. For real ordering constraints, show one compact proposal of outcomes, `Depends-On`, scope, acceptance, and parallel-ready nodes; create tasks after one approval. Contracts remain the DAG. Cross-repository dependencies are authoritative-input references, not global state.
+Ordinary tasks have no DAG. For real ordering, propose outcomes, `Depends-On`, scope, acceptance, and parallel-ready nodes; create tasks after one approval. Contracts remain the DAG. Cross-repository dependencies are authoritative-input references, not global state.
 
-For one cross-repository result, keep repository-local scope, SHA, RED, and checks while batching one combined approval, one end-to-end acceptance, and one retrospective. Read each status once; only a changed repository repeats work. Never duplicate background, screenshots, logs, or raw reports.
+For one cross-repository result, keep repository-local scope/SHA/RED/checks; promise one combined approval, one end-to-end acceptance, and one retrospective even when blocked. Read each status once; only changed repositories repeat work. Do not duplicate background/raw evidence.
 
-Contracts declare scope, unique acceptance IDs, public seam, independent oracle, commands, and risks using relative paths/globs. Declare exclusive runtime resources or `none`; conflicts block. Conditional L2 integrations map enabled/disabled/unavailable modes to acceptance.
+Contracts declare relative scope, unique acceptance IDs, public seam, independent oracle, commands, and risks. Declare exclusive runtime resources or `none`; conflicts block. Conditional L2 modes map enabled/disabled/unavailable to acceptance.
 
-Before approval, perform one **semantic self-review** for placeholders, contradictions, oversized scope, ambiguous outcome/source/fallback, and any **root cause as a hypothesis** until evidence distinguishes it. Separate current defect from desired result; UI covers presence, absence, order/location, and retained behavior. Show a final-state checklist. Approval freezes the contract; never rebaseline over implementation.
+Before approval, perform one **semantic self-review**: reject placeholders/contradictions/oversized scope/ambiguous outcome-source-fallback and keep each **root cause as a hypothesis** until distinguished. Separate current defect from desired result; UI covers presence/absence/order/retained behavior. Show a final-state checklist. Approval freezes the contract; never rebaseline implementation.
 
-L1/L2 approval requires a clean task worktree: only task-owned records/private state may differ; foreign work or unignored cache blocks. Enforced mode also requires a current workflow baseline on the real base branch. An authorized baseline commit contains managed workflow files only.
+L1/L2 approval requires a clean task worktree: only task records/private state may differ; foreign work/cache blocks. Enforced mode also requires the real base's current workflow baseline. A baseline commit contains managed files only.
 
 ## Implement and prove
 
-Follow configured record storage. Private v5 records stay in `.git/rigorbreeze/records`; explicit tracked mode remains compatible. Never silently move legacy records. L1 detail compacts after integration; L2/Emergency retains full private proof and publishes only a bounded sanitized audit summary when configured.
+Use configured storage. Private v5 records stay in `.git/rigorbreeze/records`; tracked mode remains compatible. Never silently move legacy records. Integrated L1 compacts; L2/Emergency retains private proof and configured sanitized audit.
 
-For L1/L2/Emergency, preflight tests, command, runtime, dependencies, and optional `environment` adapter before RED; tooling or unrelated failures are not RED. Bind a real acceptance ID, independent expected failure, command, **exit status**, baseline, and test digest. Source searches prove static contracts only. Iterate one behavior: failing test, minimum GREEN through a public seam, green refactor, affected. Run full once after the final fingerprint; reuse unchanged profiles unless `--force` is explicit.
+For L1/L2/Emergency, preflight tests/command/runtime/dependencies and optional `environment` adapter; tooling failures are not RED. Bind a real acceptance ID, independent failure, command, **exit status**, baseline, and test digest. Source searches prove static contracts only. Iterate failing test → minimum public-seam GREEN → refactor → affected. Run full once at the final fingerprint; reuse unless `--force` is explicit.
 
-Keep output proportional: success retains command, code, scope, and report digest; read raw output or a bounded failure tail only for diagnosis. Batch machine phases; return only for failure, safety-stop, or judgment.
+Keep output proportional: success retains command/code/scope/report digest; read raw output or a bounded failure tail only for diagnosis. Batch machine phases; return only for failure, safety-stop, or judgment.
 
-If only test implementation evolves while contract and acceptance stay unchanged, use the runner's approved-baseline replay; it may overlay test paths only and must clean its temporary worktree. A changed outcome, production file, dependency, config, migration, or failure mode requires a contract change or successor task.
+Create a tracked `verification/` pack only through a separate task when live acceptance repeatedly bottlenecks work. Seed three to five critical features defining Launch, Doctor, Drive, Evidence, and Cleanup; ignore reports. Verification Report v1 cannot be replaced by compilation, source search, unit tests, cached screenshots, or Agent claims; require its live level, current SHA, mapped features, evidence, Doctor, and Cleanup. Direct/no-pack projects gain no step.
 
-For debugging, build a deterministic tight loop, minimize reproduction, rank falsifiable hypotheses, instrument only to distinguish them, remove probes, and keep a regression test. After **three failed hypotheses**, make an **architecture stop** and re-examine boundaries, shared state, and assumptions.
+If only tests evolve while contract/acceptance stay unchanged, use approved-baseline replay: overlay test paths only and clean the temporary worktree. Changed outcome, production, dependency, config, migration, or failure mode requires contract change or successor.
 
-After inspecting the **standard library, framework, and current dependencies**, use one solution ladder: **no implementation** → **existing project capability** → **standard library, framework, or platform-native capability** → **installed and maintained dependency** → **smallest clear new implementation**. It shortens solutions, not understanding. Standards Review tags removable complexity `delete`, `reuse`, `stdlib`, `native`, `yagni`, or `shrink`; a **deletion test** retains an abstraction only for **current acceptance or a durable invariant**. Put intentional limits and re-evaluation triggers in Lore `Directive`. Never shrink **permission**, **security**, **data protection**, **migration**, **rollback**, **accessibility**, or explicit **compatibility**. **public APIs, persisted data, upgrade paths, and production migrations** need transition and rollback.
+For debugging, minimize reproduction, test hypotheses, remove probes, and keep a regression. After **three failed hypotheses**, make an **architecture stop** and re-examine boundaries/shared state/assumptions.
+
+After inspecting the **standard library, framework, and current dependencies**, follow: **no implementation** → **existing project capability** → **standard library, framework, or platform-native capability** → **installed and maintained dependency** → **smallest clear new implementation**. Standards Review tags `delete`, `reuse`, `stdlib`, `native`, `yagni`, or `shrink`; a **deletion test** retains abstraction only for **current acceptance or a durable invariant**. Put limits/re-evaluation triggers in Lore `Directive`. Never shrink **permission**, **security**, **data protection**, **migration**, **rollback**, **accessibility**, or explicit **compatibility**. **public APIs, persisted data, upgrade paths, and production migrations** need transition/rollback.
 
 ## Review, accept, and deliver
 
 Run separate standards and spec passes. Standards checks correctness, simplicity, conventions, security, maintainability, tests, and scope. Spec checks each acceptance result, interface/data/permission contract, and exclusions. Treat **review feedback** as a hypothesis; verify it against actual use, compatibility, tests, and YAGNI.
 
-Validate the real product. After UAT, visual/runtime review, or follow-up, product writes rerun status and scope: in-scope same-result feedback resumes implementation and invalidates proof; forbidden/new-result feedback becomes a successor or handoff. Pending read-only observations grant no acceptance; review/release/writes stay gated. Before handoff prove **route/menu/role/account/device** or record N/A, the **replacement method actually used**, and equivalent proof. After **two identical login/token/browser/channel failures**, preserve safety and switch methods. New visual language or three-plus screens needs one **visual tracer** unless reusing an approved component.
+Validate the real product. After UAT/runtime/follow-up, writes rerun status and scope: same-result feedback invalidates proof; forbidden/new results become a successor or handoff. Pending observations grant no acceptance. Prove route/menu/role/account/device or record N/A plus the replacement method actually used. After two identical login/token/browser/channel failures, preserve safety and switch methods. New visual language or three-plus screens needs one visual tracer unless reusing an approved component. The writer runs a cheap check; use a read-only independent Verifier only for judgment-heavy, expensive, high-impact, or multi-page proof against current HEAD.
 
-For migration, require rehearsal, assertions, backup/recovery or forward-fix proof. For release, use one SHA/artifact across tests and UAT, **freeze the approved operation scope**, show all stages and the current stage, and record one resume action after pause/failure. Unrelated infrastructure work becomes a **separate governance task**. AI cannot approve its own visual baseline, security exception, legal conclusion, or production release.
+Migration requires rehearsal, assertions, and recovery/forward-fix proof. Release uses one SHA/artifact, must **freeze the approved operation scope**, show the current stage, and record one resume action. Unrelated infrastructure becomes a **separate governance task**. AI cannot approve visual, security, legal, or production conclusions.
 
-Before external Git, deployment, developer-tool, or platform writes, reconstruct the **observed current state** from the system: completed steps, immutable identifiers, one remaining action, and stop conditions. Never repeat an already completed action from an old plan. Synthetic credentials prove buildability only.
+Before external writes, reconstruct the **observed current state**: completed steps, immutable identifiers, one action, and stop conditions. Never repeat completed work from an old plan. Synthetic credentials prove buildability only.
 
 ## Parallel handoff and Git authority
 
@@ -80,6 +82,6 @@ After delivery, reconcile from the base worktree. Missing historical worktrees a
 
 ## Learn and complete
 
-Clean first-pass L1 may machine-retrospect; friction and every L2/Emergency need prefilled human review. Extra green verification never repeats unchanged judgment; changed facts/failures/acceptance/bypasses invalidate it. A reusable defect becomes a separate Skill task with a **self-contained inline handoff**, never business expansion. Only judged workflow rework, unreasonable action, bypass, or harm becomes an evolution candidate. Review compact/private candidates with `$rigorbreeze 汇总这个项目的演进候选`; create no second log or relaxed gate.
+Clean first-pass L1 may machine-retrospect; friction and every L2/Emergency need prefilled human review. Extra green runs do not repeat unchanged judgment; changed facts invalidate it. A reusable defect becomes a separate Skill task, never business expansion. Ordinary failures need two comparable occurrences; a high-risk escape needs one. Promote a rule only when the same fixture shows the candidate beats the prior Skill without regression. Review private candidates with `$rigorbreeze 汇总这个项目的演进候选`; create no second log or relaxed gate.
 
 Codex runs internal commands. Close in order: verify, accept, review, retrospective, archive, guarded delivery, reconcile. L0 requires affected; L1/L2 require full plus applicable acceptance/review. Use `abandoned` for clean cancellation and `reconciled` only for proven external integration; never invent success. Release requires an active release-ready task. Before commit, archive, or fixed/passed/complete claims, cite **fresh verification**: command, status, scope. History or another Agent cannot substitute. After L2, cross-repository work, or context compaction, give one short handoff prompt recommending a new Codex task for the next independent feature; never block continuation.

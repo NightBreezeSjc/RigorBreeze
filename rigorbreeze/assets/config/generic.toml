@@ -34,3 +34,15 @@ commit_message = "{task_id}: {title}"
 # timeout = 900
 # report = "reports/unit.json"
 #
+# A project may explicitly validate a tracked verification pack through its
+# existing acceptance check. This remains disabled unless all fields are set:
+#
+# [[checks]]
+# id = "acceptance"
+# command = ["python3", "verification/scripts/verify.py"]
+# timeout = 900
+# report = "reports/rigorbreeze-verification.json"
+# verification_report = true
+# verification_root = "verification"
+# minimum_level = "live-runtime"
+#

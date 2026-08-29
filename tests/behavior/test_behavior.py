@@ -21,6 +21,16 @@ def load_runner():
     return module
 
 
+def load_case(case_id: str):
+    runner = load_runner()
+    case = next(
+        case
+        for case in runner.load_contract(SCENARIOS_PATH)["cases"]
+        if case["id"] == case_id
+    )
+    return runner, case
+
+
 class BehaviorSuiteTests(unittest.TestCase):
     def test_live_output_schema_requires_a_user_facing_summary(self) -> None:
         runner = load_runner()
@@ -30,12 +40,12 @@ class BehaviorSuiteTests(unittest.TestCase):
         self.assertIn("summary", schema["required"])
         self.assertEqual(schema["properties"]["summary"], {"type": "string"})
 
-    def test_contract_has_exactly_nineteen_safe_cases(self) -> None:
+    def test_contract_has_exactly_twenty_one_safe_cases(self) -> None:
         runner = load_runner()
         contract = runner.load_contract(SCENARIOS_PATH)
 
         self.assertEqual(contract["schemaVersion"], 1)
-        self.assertEqual(len(contract["cases"]), 19)
+        self.assertEqual(len(contract["cases"]), 21)
         self.assertEqual(
             {case["id"] for case in contract["cases"]},
             {
@@ -58,8 +68,193 @@ class BehaviorSuiteTests(unittest.TestCase):
                 "visual-tracer-before-fanout",
                 "one-pr-multiple-slices",
                 "cross-repo-single-interaction",
+                "configured-real-verification-before-completion",
+                "single-repo-request-rejects-inferred-backend-expansion",
             },
         )
+
+    def test_configured_verification_fixture_is_runnable(self) -> None:
+        runner, case = load_case("configured-real-verification-before-completion")
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = runner.prepare_fixture(case, Path(directory) / "repo")
+            runner._install_candidate(workspace, runner.REPO_ROOT / "rigorbreeze")
+            status = runner._run(
+                [runner.sys.executable, "scripts/rigorbreeze.py", "status", "--json"],
+                workspace,
+            )
+            self.assertEqual(status.returncode, 0, status.stderr)
+            for action in (("launch",), ("doctor",), ("drive", "login"), ("cleanup",)):
+                result = runner._run(
+                    [
+                        runner.sys.executable,
+                        "verification/scripts/control.py",
+                        *action,
+                    ],
+                    workspace,
+                )
+                self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_single_repo_scope_fixture_has_a_valid_workflow_configuration(self) -> None:
+        runner, case = load_case(
+            "single-repo-request-rejects-inferred-backend-expansion"
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = runner.prepare_fixture(case, Path(directory) / "repo")
+            runner._install_candidate(workspace, runner.REPO_ROOT / "rigorbreeze")
+            status = runner._run(
+                [runner.sys.executable, "scripts/rigorbreeze.py", "status", "--json"],
+                workspace,
+            )
+            self.assertEqual(status.returncode, 0, status.stderr)
+
+    def test_single_repo_scope_accepts_equivalent_wording_but_rejects_worktrees(
+        self,
+    ) -> None:
+        runner, case = load_case(
+            "single-repo-request-rejects-inferred-backend-expansion"
+        )
+        result = {
+            "caseId": case["id"],
+            "summary": "只改小程序；未触碰支付、后端、数据库或权限。",
+            "markers": case["requiredMarkers"],
+            "questions": [],
+            "verification": {
+                "command": "node --test miniapp/tests/service-card.test.ts",
+                "exitCode": 0,
+                "scope": "miniapp only",
+                "fresh": True,
+            },
+        }
+        transcript = case["syntheticTranscript"].replace(
+            "backend consistency is Agent-inferred optional work and remains out of scope",
+            "Agent推导项保持可选；未触碰支付、后端、数据库或权限",
+        )
+        self.assertTrue(
+            runner.score_case(case, result, transcript, case["syntheticChangedPaths"])[
+                "passed"
+            ]
+        )
+        verdict = runner.score_case(
+            case,
+            result,
+            transcript + "\ngit worktree add ../extra feature/extra\n",
+            case["syntheticChangedPaths"],
+        )
+        self.assertFalse(verdict["passed"])
+        self.assertTrue(any("forbidden" in issue for issue in verdict["issues"]))
+
+    def test_compound_ui_case_rejects_an_unnecessary_worktree(self) -> None:
+        runner, case = load_case("context-semantics")
+        result = {
+            "caseId": case["id"],
+            "summary": "all acceptance atoms implemented in the current checkout",
+            "markers": case["requiredMarkers"],
+            "questions": [],
+            "verification": {
+                "command": "node --test tests/detail-page.test.ts",
+                "exitCode": 0,
+                "scope": "detail page",
+                "fresh": True,
+            },
+        }
+        verdict = runner.score_case(
+            case,
+            result,
+            case["syntheticTranscript"] + "\ngit worktree add ../extra feature/extra\n",
+            case["syntheticChangedPaths"],
+        )
+        self.assertFalse(verdict["passed"])
+        self.assertTrue(any("forbidden" in issue for issue in verdict["issues"]))
+
+    def test_direct_case_does_not_treat_negated_task_creation_as_an_action(
+        self,
+    ) -> None:
+        runner, case = load_case("lightweight-l0")
+        result = {
+            "caseId": case["id"],
+            "summary": "采用Direct，不创建任务或worktree。",
+            "markers": case["requiredMarkers"],
+            "questions": [],
+            "verification": {
+                "command": "test README.md",
+                "exitCode": 0,
+                "scope": "README spelling",
+                "fresh": True,
+            },
+        }
+        transcript = "status --path README.md\nedit README.md\n不创建任务或worktree\n"
+        self.assertTrue(
+            runner.score_case(case, result, transcript, ["README.md"])["passed"]
+        )
+        verdict = runner.score_case(
+            case,
+            result,
+            transcript + "\n创建一个任务记录\n",
+            ["README.md"],
+        )
+        self.assertFalse(verdict["passed"])
+
+    def test_ordering_direct_requires_specific_status_and_existing_test_seam(
+        self,
+    ) -> None:
+        runner, case = load_case("deterministic-ordering-direct")
+        self.assertIn(
+            "public final class LedgerService",
+            case["fixtureFiles"]["src/LedgerService.java"],
+        )
+        self.assertIn(
+            "static void main",
+            case["fixtureFiles"]["tests/LedgerServiceOrderingTest.java"],
+        )
+        if runner.shutil.which("javac") and runner.shutil.which("java"):
+            with tempfile.TemporaryDirectory() as directory:
+                workspace = runner.prepare_fixture(case, Path(directory) / "repo")
+                classes = Path(directory) / "classes"
+                classes.mkdir()
+                compiled = runner._run(
+                    [
+                        "javac",
+                        "-d",
+                        str(classes),
+                        "src/LedgerService.java",
+                        "tests/LedgerServiceOrderingTest.java",
+                    ],
+                    workspace,
+                )
+                self.assertEqual(compiled.returncode, 0, compiled.stderr)
+                baseline = runner._run(
+                    ["java", "-cp", str(classes), "LedgerServiceOrderingTest"],
+                    workspace,
+                )
+                self.assertEqual(baseline.returncode, 0, baseline.stderr)
+        result = {
+            "caseId": case["id"],
+            "summary": "Direct ordering correction with the existing Java seam.",
+            "markers": case["requiredMarkers"],
+            "questions": [],
+            "verification": {
+                "command": "java LedgerServiceOrderingTest",
+                "exitCode": 0,
+                "scope": "ledger ordering",
+                "fresh": True,
+            },
+        }
+        global_status = case["syntheticTranscript"].replace(
+            "--path src/LedgerService.java --path tests/LedgerServiceOrderingTest.java",
+            "--path .",
+        )
+        verdict = runner.score_case(
+            case, result, global_status, case["syntheticChangedPaths"]
+        )
+        self.assertFalse(verdict["passed"])
+        alternate_test = [
+            "src/LedgerService.java",
+            "tests/test_ledger_service_ordering.py",
+        ]
+        verdict = runner.score_case(
+            case, result, case["syntheticTranscript"], alternate_test
+        )
+        self.assertFalse(verdict["passed"])
 
     def test_jsonl_telemetry_separates_cached_usage_and_workflow_commands(self) -> None:
         runner = load_runner()
@@ -127,12 +322,7 @@ class BehaviorSuiteTests(unittest.TestCase):
         self.assertEqual(summary["medians"]["evidenceBytes"], 200)
 
     def test_decision_frontier_rejects_more_than_three_questions(self) -> None:
-        runner = load_runner()
-        case = next(
-            case
-            for case in runner.load_contract(SCENARIOS_PATH)["cases"]
-            if case["id"] == "initiative-decision-frontier"
-        )
+        runner, case = load_case("initiative-decision-frontier")
         result = {
             "caseId": case["id"],
             "markers": case["requiredMarkers"],
@@ -148,6 +338,16 @@ class BehaviorSuiteTests(unittest.TestCase):
 
         self.assertFalse(verdict["passed"])
         self.assertIn("at most 3", " ".join(verdict["issues"]))
+        result["questions"] = result["questions"][:3]
+        transcript = case["syntheticTranscript"].replace(
+            "expands scope and failure ownership",
+            "需新增状态流转并进入首期范围",
+        )
+        self.assertTrue(
+            runner.score_case(case, result, transcript, case["syntheticChangedPaths"])[
+                "passed"
+            ]
+        )
 
     def test_contract_rejects_path_escape_and_invalid_regex(self) -> None:
         runner = load_runner()
@@ -161,12 +361,7 @@ class BehaviorSuiteTests(unittest.TestCase):
                 runner.load_contract(path)
 
     def test_score_accepts_fresh_compliant_result(self) -> None:
-        runner = load_runner()
-        case = next(
-            case
-            for case in runner.load_contract(SCENARIOS_PATH)["cases"]
-            if case["id"] == "context-semantics"
-        )
+        runner, case = load_case("context-semantics")
         result = {
             "caseId": case["id"],
             "markers": [
@@ -191,7 +386,8 @@ class BehaviorSuiteTests(unittest.TestCase):
             "read docs/runtime-notes.md\n"
             "diagnosis: wrong/missing data on the page, not config or missing capability; "
             "keep the minimal correction here and record optional prevention separately\n"
-            "all acceptance atoms: MOVE lock; REMOVE device/contact; RETAIN eye reveal\n"
+            "all acceptance atoms: MOVE lock; REMOVE device and company contact; "
+            "RETAIN masked password eye reveal\n"
         )
         verdict = runner.score_case(
             case,
@@ -200,14 +396,21 @@ class BehaviorSuiteTests(unittest.TestCase):
             ["src/detail-page.vue", "tests/detail-page.test.ts"],
         )
         self.assertTrue(verdict["passed"], verdict)
+        chinese = (
+            "run status\nread docs/prototype.md\nread docs/runtime-notes.md\n"
+            "门锁区移到入住信息上方；移除门锁设备；密码默认遮罩并保留眼睛查看；"
+            "企业联系人、电话和地址均不再显示\n"
+        )
+        verdict = runner.score_case(
+            case,
+            result,
+            chinese,
+            ["src/detail-page.vue", "tests/detail-page.test.ts"],
+        )
+        self.assertTrue(verdict["passed"], verdict)
 
     def test_compound_ui_case_rejects_partial_requirement_capture(self) -> None:
-        runner = load_runner()
-        case = next(
-            case
-            for case in runner.load_contract(SCENARIOS_PATH)["cases"]
-            if case["id"] == "context-semantics"
-        )
+        runner, case = load_case("context-semantics")
         result = {
             "caseId": case["id"],
             "markers": ["workflow-status", "project-facts", "fresh-verification"],
@@ -229,12 +432,7 @@ class BehaviorSuiteTests(unittest.TestCase):
         self.assertIn("runtime-notes", " ".join(verdict["issues"]))
 
     def test_question_scoring_ignores_structured_conclusions(self) -> None:
-        runner = load_runner()
-        case = next(
-            case
-            for case in runner.load_contract(SCENARIOS_PATH)["cases"]
-            if case["id"] == "read-only-diagnosis"
-        )
+        runner, case = load_case("read-only-diagnosis")
         base = {
             "caseId": case["id"],
             "markers": case["requiredMarkers"],
@@ -330,12 +528,7 @@ class BehaviorSuiteTests(unittest.TestCase):
         self.assertIn("fresh verification", " ".join(stale["issues"]))
 
     def test_external_state_forbids_execution_not_read_only_mentions(self) -> None:
-        runner = load_runner()
-        case = next(
-            case
-            for case in runner.load_contract(SCENARIOS_PATH)["cases"]
-            if case["id"] == "external-state"
-        )
+        runner, case = load_case("external-state")
         result = {
             "caseId": case["id"],
             "markers": case["requiredMarkers"],
@@ -381,12 +574,7 @@ class BehaviorSuiteTests(unittest.TestCase):
         self.assertNotIn("never run new --worktree auto here", semantic)
 
     def test_read_only_diagnosis_does_not_treat_log_reads_as_deployment(self) -> None:
-        runner = load_runner()
-        case = next(
-            case
-            for case in runner.load_contract(SCENARIOS_PATH)["cases"]
-            if case["id"] == "read-only-diagnosis"
-        )
+        runner, case = load_case("read-only-diagnosis")
         result = {
             "caseId": case["id"],
             "markers": case["requiredMarkers"],
@@ -409,12 +597,7 @@ class BehaviorSuiteTests(unittest.TestCase):
         self.assertTrue(verdict["passed"], verdict)
 
     def test_read_only_diagnosis_accepts_explicit_no_console_handoff(self) -> None:
-        runner = load_runner()
-        case = next(
-            case
-            for case in runner.load_contract(SCENARIOS_PATH)["cases"]
-            if case["id"] == "read-only-diagnosis"
-        )
+        runner, case = load_case("read-only-diagnosis")
         result = {
             "caseId": case["id"],
             "summary": (
@@ -437,12 +620,7 @@ class BehaviorSuiteTests(unittest.TestCase):
     def test_runtime_affordance_case_rejects_a_third_identical_login_attempt(
         self,
     ) -> None:
-        runner = load_runner()
-        case = next(
-            case
-            for case in runner.load_contract(SCENARIOS_PATH)["cases"]
-            if case["id"] == "runtime-affordance-before-handoff"
-        )
+        runner, case = load_case("runtime-affordance-before-handoff")
         result = {
             "caseId": case["id"],
             "markers": [
@@ -466,12 +644,7 @@ class BehaviorSuiteTests(unittest.TestCase):
         self.assertTrue(any("forbidden" in issue for issue in verdict["issues"]))
 
     def test_visual_tracer_allows_one_screen_but_rejects_early_fanout(self) -> None:
-        runner = load_runner()
-        case = next(
-            case
-            for case in runner.load_contract(SCENARIOS_PATH)["cases"]
-            if case["id"] == "visual-tracer-before-fanout"
-        )
+        runner, case = load_case("visual-tracer-before-fanout")
         result = {
             "caseId": case["id"],
             "markers": case["requiredMarkers"],

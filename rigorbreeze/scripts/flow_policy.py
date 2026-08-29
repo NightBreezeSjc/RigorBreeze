@@ -21,6 +21,7 @@ from flow_state import (
     RELEASE_GOVERNANCE_FIELDS,
     SECURITY_EVIDENCE_FIELDS,
     TOOL_VERSION,
+    VERIFICATION_LEVELS,
     FlowError,
     active_task,
     config_digest,
@@ -33,6 +34,7 @@ from flow_state import (
     load_evidence,
     now_iso,
     redact,
+    resolve_project_path,
     safe_files,
     save_evidence,
     sha256_bytes,
@@ -57,6 +59,11 @@ CACHE_HYGIENE_PARTS = {
     "target",
     "venv",
 }
+
+
+def require_verification(condition: bool, message: str) -> None:
+    if not condition:
+        raise FlowError(message)
 
 
 def allowed_scope(root: Path, state: dict[str, Any]) -> list[str]:
@@ -649,10 +656,122 @@ def full_profile_current(root: Path, state: dict[str, Any]) -> bool:
     )
 
 
-def report_record(root: Path, relative: str | None) -> dict[str, Any] | None:
+def verification_map(root: Path, relative: str) -> tuple[str, set[str]]:
+    root_resolved = root.resolve()
+    verification_root = resolve_project_path(root, relative, "verification_root")
+    readme = verification_root / "README.md"
+    features_root = verification_root / "features"
+    feature_files = sorted(features_root.glob("*.md")) if features_root.is_dir() else []
+    require_verification(
+        readme.is_file() and bool(feature_files),
+        "verification pack requires README.md and features/*.md",
+    )
+    feature_ids = {path.stem for path in feature_files}
+    require_verification(
+        all(re.fullmatch(r"[a-z0-9][a-z0-9-]*", item) for item in feature_ids),
+        "invalid Feature Map ID",
+    )
+    digest = hashlib.sha256()
+    for path in (readme, *feature_files):
+        path_relative = path.relative_to(root_resolved).as_posix()
+        digest.update(path_relative.encode() + b"\0" + path.read_bytes() + b"\0")
+    return digest.hexdigest(), feature_ids
+
+
+def validate_verification_report(
+    root: Path, content: Any, check: dict[str, Any]
+) -> dict[str, Any]:
+    require_verification(
+        isinstance(content, dict) and content.get("schemaVersion") == 1,
+        "Verification Report must declare schemaVersion = 1",
+    )
+    require_verification(content.get("status") == "passed", "report must pass")
+    require_verification(
+        content.get("gitSha") == current_head(root), "report must use current HEAD"
+    )
+    level, minimum = content.get("level"), check.get("minimum_level")
+    require_verification(
+        level in VERIFICATION_LEVELS and minimum in VERIFICATION_LEVELS,
+        "report verification level is invalid",
+    )
+    require_verification(
+        VERIFICATION_LEVELS.index(level) >= VERIFICATION_LEVELS.index(minimum),
+        f"report does not meet minimum level {minimum}",
+    )
+    require_verification(
+        isinstance(content.get("environment"), str) and bool(content["environment"]),
+        "environment is required",
+    )
+    try:
+        datetime.fromisoformat(str(content.get("verifiedAt") or ""))
+    except ValueError as exc:
+        raise FlowError("verifiedAt must be ISO-8601") from exc
+    for key in ("doctor", "cleanup"):
+        value = content.get(key)
+        require_verification(
+            isinstance(value, dict) and value.get("status") == "passed",
+            f"{key} status must be passed",
+        )
+    map_digest, known = verification_map(root, check["verification_root"])
+    require_verification(
+        content.get("featureMapDigest") == map_digest, "Feature Map digest is stale"
+    )
+    features = content.get("features")
+    require_verification(
+        isinstance(features, list) and bool(features),
+        "at least one feature is required",
+    )
+    seen: set[str] = set()
+    evidence_records: list[dict[str, Any]] = []
+    for feature in features:
+        require_verification(isinstance(feature, dict), "feature must be an object")
+        feature_id = feature.get("id")
+        require_verification(
+            isinstance(feature_id, str) and feature_id not in seen,
+            f"invalid or duplicate feature: {feature_id}",
+        )
+        require_verification(feature_id in known, f"unknown feature: {feature_id}")
+        require_verification(feature.get("status") == "passed", "feature must pass")
+        seen.add(feature_id)
+        evidence = feature.get("evidence")
+        require_verification(
+            isinstance(evidence, list) and bool(evidence),
+            f"at least one evidence file is required: {feature_id}",
+        )
+        for relative in evidence:
+            require_verification(
+                isinstance(relative, str) and relative, "invalid evidence path"
+            )
+            path = resolve_project_path(root, relative, "verification evidence")
+            data = path.read_bytes() if path.is_file() else b""
+            require_verification(bool(data), f"evidence file is missing: {relative}")
+            evidence_records.append(
+                {
+                    "featureId": feature_id,
+                    "path": Path(relative).as_posix(),
+                    "sha256": sha256_bytes(data),
+                    "size": len(data),
+                }
+            )
+    return {
+        "schemaVersion": 1,
+        "level": level,
+        "environment": content["environment"],
+        "featureMapDigest": map_digest,
+        "verifiedFeatures": sorted(seen),
+        "evidence": evidence_records,
+        "verifiedAt": content["verifiedAt"],
+    }
+
+
+def report_record(
+    root: Path, relative: str | None, check: dict[str, Any] | None = None
+) -> dict[str, Any] | None:
     if not relative:
         return None
     path = root / relative
+    if check and check.get("verification_report") is True:
+        path = resolve_project_path(root, relative, "verification report")
     if not path.is_file():
         raise FlowError(f"configured report is missing: {relative}")
     content = path.read_bytes()
@@ -676,6 +795,10 @@ def report_record(root: Path, relative: str | None) -> dict[str, Any] | None:
         }:
             raise FlowError(f"report does not declare a passed status: {relative}")
         record["status"] = status
+        if check and check.get("verification_report") is True:
+            record["verificationReport"] = validate_verification_report(
+                root, content, check
+            )
     return record
 
 

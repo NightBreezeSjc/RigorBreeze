@@ -152,8 +152,8 @@ Risk: L1
         self.assertIn("## Test seams", task_text)
         self.assertIn("## Conditional risks", task_text)
         for context_field in (
-            "- Result: TODO",
-            "- Basis: TODO",
+            "- User-stated result and basis: TODO",
+            "- Agent-inferred options: none",
             "- Unresolved outcome-changing ambiguity: none",
         ):
             self.assertIn(context_field, task_text)

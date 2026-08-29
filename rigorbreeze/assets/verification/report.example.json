@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "status": "passed",
+  "gitSha": "<current-head-sha>",
+  "level": "live-runtime",
+  "environment": "<environment-name>",
+  "featureMapDigest": "<sha256>",
+  "features": [
+    {
+      "id": "login",
+      "status": "passed",
+      "evidence": ["reports/login.png"]
+    }
+  ],
+  "doctor": {"status": "passed"},
+  "cleanup": {"status": "passed"},
+  "verifiedAt": "2026-08-29T10:00:00Z"
+}

@@ -127,3 +127,7 @@ id = "acceptance"
 command = ["node", "scripts/govkit-check.mjs", "--group", "acceptance"]
 timeout = 1800
 report = "reports/acceptance.json"
+# When the project has an explicitly created verification/ pack, enable:
+# verification_report = true
+# verification_root = "verification"
+# minimum_level = "live-runtime"

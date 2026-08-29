@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import re
 import shutil
 import subprocess
@@ -240,6 +241,38 @@ class SkillContractTests(unittest.TestCase):
         packaged_names = {path.name for path in SKILL_DIR.rglob("*") if path.is_file()}
         self.assertTrue(forbidden.isdisjoint(packaged_names))
 
+    def test_verification_pack_assets_are_bundled_but_never_auto_installed(
+        self,
+    ) -> None:
+        assets = SKILL_DIR / "assets" / "verification"
+        readme = (assets / "README.template.md").read_text(encoding="utf-8")
+        feature = (assets / "feature.template.md").read_text(encoding="utf-8")
+        report = json.loads((assets / "report.example.json").read_text())
+
+        for section in ("Launch", "Doctor", "Drive", "Evidence", "Cleanup"):
+            self.assertIn(f"## {section}", readme)
+        self.assertIn("three to five", readme)
+        for section in ("Sub-features", "How to get to it", "Observable proof"):
+            self.assertIn(section, feature)
+        self.assertEqual(report["schemaVersion"], 1)
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            subprocess.run(
+                [
+                    sys.executable,
+                    str(SKILL_DIR / "scripts" / "flow.py"),
+                    "--root",
+                    str(root),
+                    "init",
+                ],
+                text=True,
+                encoding="utf-8",
+                capture_output=True,
+                check=True,
+            )
+            self.assertFalse((root / "verification").exists())
+
     def test_distribution_archive_excludes_maintainer_tests_and_caches(self) -> None:
         config = tomllib.loads(
             (REPO_ROOT / "rigorbreeze.toml").read_text(encoding="utf-8")
@@ -261,6 +294,9 @@ class SkillContractTests(unittest.TestCase):
                 names = archive.namelist()
         self.assertIn("rigorbreeze/SKILL.md", names)
         self.assertIn("rigorbreeze/scripts/flow.py", names)
+        self.assertIn("rigorbreeze/assets/verification/README.template.md", names)
+        self.assertIn("rigorbreeze/assets/verification/feature.template.md", names)
+        self.assertIn("rigorbreeze/assets/verification/report.example.json", names)
         self.assertFalse(any("/scripts/tests/" in name for name in names))
         self.assertFalse(any(".ruff_cache" in name for name in names))
         self.assertFalse(any("__pycache__" in name for name in names))
@@ -379,7 +415,7 @@ class SkillContractTests(unittest.TestCase):
         for phrase in (
             "consequence sets gates",
             "independent outcome gets one short-lived task branch",
-            "concurrent writers—not importance—get extra worktrees",
+            "only a genuinely concurrent writer may use `new --worktree auto`",
         ):
             with self.subTest(phrase=phrase):
                 self.assertIn(phrase, skill)
@@ -450,10 +486,17 @@ class SkillContractTests(unittest.TestCase):
         self,
     ) -> None:
         skill = (SKILL_DIR / "SKILL.md").read_text(encoding="utf-8").lower()
+        generated = (
+            (SKILL_DIR / "scripts" / "flow_state.py")
+            .read_text(encoding="utf-8")
+            .lower()
+        )
 
         self.assertIn("informal task card", skill)
         self.assertIn("restore the authoritative record", skill)
         self.assertIn("explicit emergency", skill)
+        self.assertIn("neither supplies missing product intent", skill)
+        self.assertIn("neither supplies product intent", generated)
 
     def test_skill_routes_read_only_work_and_freezes_release_scope(self) -> None:
         skill = (SKILL_DIR / "SKILL.md").read_text(encoding="utf-8").lower()
@@ -627,12 +670,12 @@ class SkillContractTests(unittest.TestCase):
         )
         self.assertLessEqual(
             len(skill.split()),
-            1800,
+            1650,
             "line count alone does not protect the activated context budget",
         )
         self.assertIn("status --json", skill)
         self.assertIn("status --all --compact --json", skill)
-        self.assertIn("one uninterrupted write phase", skill)
+        self.assertIn("one write phase", skill)
         self.assertIn("bounded failure tail", skill)
         self.assertNotIn(
             "Before writing—including after compaction—run the bundled "
@@ -677,7 +720,7 @@ class SkillContractTests(unittest.TestCase):
 
         self.assertLessEqual(
             len(agents.split()),
-            450,
+            320,
             "persistent project policy must route to the Skill instead of duplicating it",
         )
         self.assertIn("status --json", agents)
