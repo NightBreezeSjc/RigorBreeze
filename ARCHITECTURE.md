@@ -172,6 +172,13 @@ results. CI re-runs the same project-declared full profile in an enforced
 environment, while protected branches and environments remain the final
 non-bypassable boundary.
 
+Projects may explicitly add a tracked `verification/` pack when Agent-operated
+runtime validation is worth maintaining. Project adapters launch and doctor the
+system, drive mapped features, collect ignored runtime artifacts, and clean up.
+The runner validates an opt-in Verification Report v1 against the current HEAD,
+Feature Map digest, required verification level, evidence digests, and cleanup
+result. It does not become a browser, simulator, device controller, or scheduler.
+
 ## 6. Evidence, freshness, and privacy
 
 Version-5 projects keep active contracts and detailed evidence in the Git
@@ -203,6 +210,12 @@ Privacy is part of the architecture:
   production data; and
 - the Skill has no telemetry and must not use task evidence to store secrets or
   sensitive full logs.
+
+Tracked Feature Maps and verification scripts describe how to prove product
+behavior; generated reports, screenshots, traces, and temporary data remain
+ignored. Their hashes enter the existing evidence record only when the project
+enables machine validation on its `acceptance` check. Projects without a pack
+retain the manual runtime/device route with no additional runner calls.
 
 The exact retention, legacy compatibility, record authority, and invalidation
 rules are defined by the [Spec Tree contract](rigorbreeze/references/spec-tree.md).

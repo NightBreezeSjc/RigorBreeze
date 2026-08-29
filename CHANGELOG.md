@@ -28,6 +28,28 @@ The project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). 
 - Reframed the repository for first-time adopters with bilingual onboarding, explicit safety boundaries, and a complete first-task walkthrough.
 - Added concise contribution and security policies plus an MIT license.
 
+## [0.20.0] - Make real product verification project-owned and machine-checkable
+
+### Added
+
+- Add opt-in tracked verification-pack templates for Launch, Doctor, Feature Map, Drive, Evidence, and Cleanup without creating them during `init`, Direct, or ordinary L1 work.
+- Validate optional Verification Report v1 through the existing `acceptance` check, binding level, mapped features, current Git SHA, Feature Map digest, evidence digests, Doctor, and Cleanup to existing task evidence.
+- Project the current `verificationLevel` and `verifiedFeatures` in status while preserving legacy checks and projects that do not opt in.
+
+### Changed
+
+- Separate user-stated outcomes from Agent-inferred options so a single-repository request cannot silently expand into backend, database, payment, permission, provider, deployment, or second-repository work.
+- Require Direct to locate targets read-only and query concrete paths rather than `--path .`; reuse an existing executable test seam and add an extra worktree only for a real concurrent writer.
+- Treat workflow repair or Emergency creation as restoration of authority, never as permission to infer missing high-risk product intent.
+- Preserve one combined approval, end-to-end acceptance, and retrospective for a cross-repository result even when missing implementation inputs cause a safe stop.
+- Reduce always-loaded instructions without removing behavior: `SKILL.md` drops from 1,799 to 1,636 words, the managed project policy from 449 to 302 words, and duplicated behavior-test lookup code is consolidated outside the distributable ZIP.
+- Use independent read-only verification only for judgment-heavy, expensive, high-impact, or multi-page acceptance; cheap deterministic checks remain the writing Agent's responsibility.
+- Require a repeatable sanitized failure fixture and prior/candidate A/B evaluation before a new persistent Skill rule enters the core.
+
+### Compatibility
+
+- Public CLI, state/config schema v5, evidence schema v4, automation journal v1, and manual-by-default delivery remain unchanged. Verification Report schema v1 is independent and entirely opt-in.
+
 ## [0.19.0] - Separate kernel responsibilities without changing behavior
 
 ### Changed

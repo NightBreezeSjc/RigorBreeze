@@ -32,6 +32,8 @@ enforced profile 包含项目为该 profile 声明的检查，每项都必须配
 
 普通任务提交是更窄的检查点：要求当前配置化 `affected` 或 `full` 证据，targeted 探索不能满足。干净 CI checkout 没有 Git 私有任务记录时，enforced `verify --profile full` 无状态执行配置检查；它只形成 Required Check，不能满足本地任务验收、归档、合并证据或发布治理。维护者真实 Agent 行为测试只属于发布候选，commit、配置化 `full` 和 CI 都不会调用。
 
+`acceptance` 检查可以按需启用 Verification Report v1。CI 随后校验当前 Git SHA、最低验证等级、tracked Feature Map 摘要、已映射 Feature ID、非空仓库相对证据以及通过的 Doctor/Cleanup。报告和运行产物保持忽略或成为限时 CI Artifact，只有摘要进入现有任务 evidence。未启用时本地与 CI 行为不变；报告通过可以加强验收，但不能自行授予合并或生产权限。
+
 仅在单次 profile 调用内，argv、解析后 cwd、有效环境和 timeout 完全一致的检查只启动一次。复用进程不等于复用策略：每个检查仍独立校验自己的报告和制品，并记录 `reusedFromCheckId`。
 
 成功 `full` 一旦绑定未变化的任务摘要、项目指纹、配置摘要和 HEAD，后续 `verify`、archive、commit 与 merge 门禁直接复用；只有明确 `verify --force` 才在同一指纹重跑。仅仅切换流程阶段不会重跑 `full`；代码、合同、所有权、配置或外部状态变化才使快照失效，并且只重新验证受影响的仓库。环境预检失败属于工具事实，不形成 RED 或业务返工。

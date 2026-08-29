@@ -83,13 +83,15 @@ resolved first. Unignored dependency/build caches are project hygiene, not a
 reason for the core to hide files. Use a clean worktree rather than absorbing
 another task's changes into a new baseline.
 
-Risk follows consequence, not diff size, file layer, duration, urgency, or ceremony already spent. Read-only diagnosis creates no task. Direct applies to deterministic ordering/presentation corrections and other single-repository, single-result changes when `status --json --path` finds no competing writer and there is no API shape, persisted-data semantic, auth, permission, payment, lock, migration, dependency, production configuration, external-state write, or release impact. Backend code and a new regression test do not raise risk by themselves. Unrelated base dirt may use a short-lived clean worktree without task records; remove it only when clean and contained, otherwise retain it with the exact reason. If any protected boundary appears, stop and create L1/L2. Never downgrade L2 to recover speed. L0 remains for low-risk work that genuinely needs coordination or audit.
+Risk follows consequence, not diff size, file layer, duration, urgency, or ceremony already spent. Read-only diagnosis creates no task. Direct applies to deterministic ordering/presentation corrections and other single-repository, single-result changes when `status --json --path` finds no competing writer and there is no API shape, persisted-data semantic, auth, permission, payment, lock, migration, dependency, production configuration, external-state write, or release impact. Locate concrete targets with read-only search first; `--path .` is not a bounded Direct probe. Backend code and a new regression test do not raise risk by themselves, and the existing test seam is extended unless it is genuinely unusable. Unrelated base dirt may use a short-lived clean worktree without task records; remove it only when clean and contained, otherwise retain it with the exact reason. If any protected boundary appears, stop and create L1/L2. Never downgrade L2 to recover speed. L0 remains for low-risk work that genuinely needs coordination or audit.
 
 If an L2/release task cannot load its contract or authoritative workflow state,
 stop before product, deployment, migration, or production writes. Restore the
 record from Git/the originating worktree, or deliberately establish the
 existing Emergency path. An informal task card is not a substitute for a
-failed safety gate.
+failed safety gate. Repair and Emergency restore workflow authority; they do
+not supply missing product intent. Without an approved observable outcome,
+stop before product writes and ask one result question.
 
 ## 3. Run one vertical slice
 
@@ -150,6 +152,8 @@ Do not require a perfect user prompt. Build a compact context intake inside Auth
 - ask only for outcome-changing intent that evidence cannot determine, and state any safe default explicitly.
 
 For a compound request, preserve a short exact user phrase or a resolvable authoritative source and translate the request into observable `ADD`, `REMOVE`, `MOVE`, `RETAIN`, or `REPLACE` atoms. State each atom as a final product condition and map it to one acceptance ID or an explicit out-of-scope reason. This mapping lives in the existing Authoritative inputs and Acceptance criteria; it is not another requirements document.
+
+Separate user-stated outcomes from Agent-inferred options. An inference may clarify the proposed solution, but it cannot silently add another repository, backend, database, payment, permission, provider, or deployment change. Even approval of an overall plan does not promote an unlabeled inference into accepted scope; present it as an option and obtain outcome-level confirmation first.
 
 Before widening the fix, prove whether the defect is wrong/missing data, wrong config, or a missing capability. Keep the minimal correction separate from optional prevention work; if prevention is not already accepted, record it as a follow-up instead of silently expanding the slice.
 
@@ -287,6 +291,14 @@ Accept the capability that actually changed:
 
 Before assigning manual acceptance, confirm the actual route, menu, role, account, and device entry that will be used. If one of those affordances is unavailable, say so honestly as `N/A - <reason>` and substitute equivalent runtime/API evidence instead of pretending a human can click a path that does not exist.
 
+### Optional project verification pack
+
+When real-runtime validation repeatedly becomes the bottleneck, create a tracked `verification/` pack through a separate, explicitly approved task. Its README defines Launch, Doctor, Drive, Evidence, and Cleanup; its first map covers only three to five high-risk or frequent features. Project scripts must work before the pack is accepted. Reports, screenshots, traces, and temporary data remain ignored runtime artifacts.
+
+An `acceptance` check may opt into `verification_report = true`, name `verification_root`, and require one of `typecheck`, `unit`, `integration`, `live-runtime`, or `device`. The report must bind to the current HEAD and current Feature Map digest, name only mapped features, point to non-empty repository-relative evidence, and show passed Doctor and Cleanup. The runner stores report and evidence digests in existing task evidence; it does not create another evidence system. Projects without this configuration retain the existing manual runtime/device path and no extra calls.
+
+The writing Agent runs cheap deterministic checks itself. Use an independent read-only verifier only for judgment-heavy, expensive, high-impact, or multi-page acceptance, and bind its conclusion to the current SHA. A changed SHA invalidates the conclusion. This is a trust ladder, not permission for default auto-merge: Git automation remains manual unless separately configured, and L2 production writes still require human authority.
+
 Humans approve visual baselines. Never update screenshots only to remove a failure.
 
 Only an explicit production release requires:
@@ -323,6 +335,8 @@ The confirmation binds to the current task and project fingerprint. Additional a
 
 Ordinary candidates are observed once and reviewed after the second comparable occurrence. Review immediately when the workflow incorrectly permits a secret, privilege bypass, destructive migration, stale evidence, unauthorized external action, or wrong release.
 
+Before a new persistent Skill rule enters the core, replay the same sanitized failure fixture against the prior and candidate versions. Keep the rule only when the candidate fixes the escape or friction without regressing existing hard boundaries. Multiple models or a separate judge are optional for genuinely judgment-heavy cases, not a mandatory tax on deterministic checks.
+
 If an active business task reveals a reusable RigorBreeze defect, preserve the
 approved business contract and evidence. Record the failed gate as a blocker or
 evolution candidate, then create a separate Skill task in the RigorBreeze
@@ -354,7 +368,7 @@ Keep a stable `RIGORBREEZE_SESSION_ID` per Codex window. A second live session c
 An approved task may record read-only `runtime`, `device`, `wechat-device`, or `authoritative-observation` evidence such as `production-role-permission-matrix` before verification. The record is pending and cannot advance acceptance; matching verification binds it only when task digest, project fingerprint, HEAD, and evidence file remain unchanged. Review, product-review, artifact, release, and every external write still require fresh verification.
 
 Sequential initiative work reuses one designated integration worktree per
-repository. Create another worktree only for a genuinely concurrent writer or
+repository. Pass `new --worktree auto` only for a genuinely concurrent writer or
 an explicitly disposable risky experiment. A planned future task is not
 concurrency, and closing one slice does not require replacing the initiative's
 worktree before the next sequential slice.

@@ -147,6 +147,11 @@ Git/worktree 状态与项目配置，选择或验证通道。项目工具产出�
 生成指纹并记录精简结果。CI 在受强制约束的环境中重新运行同一份项目声明的 full
 profile，而受保护分支与环境仍是最终不可绕过的边界。
 
+项目可以在值得长期维护 Agent 真实运行验收时，明确建立 tracked `verification/` 验证包。
+项目适配器负责 Launch、Doctor、驱动已映射 Feature、收集被忽略的运行产物并 Cleanup；
+Runner 只校验按需启用的 Verification Report v1 是否绑定当前 HEAD、Feature Map 摘要、
+最低验证等级、证据摘要和清理结果。它不会变成浏览器、模拟器、真机控制器或调度平台。
+
 ## 6. 证据、新鲜度与隐私
 
 版本 5 项目将活动合同和详细证据保存在 Git 公共目录的
@@ -170,6 +175,10 @@ UAT、视觉/运行验收或后续请求之后如需再次写产品代码，必�
 - 项目若配置，L2 与 Emergency 仅可发布受限、脱敏的审计摘要；
 - 审计摘要排除绝对路径、原始输出、凭据和生产数据；以及
 - Skill 没有遥测功能，且不得用任务证据存储密钥或敏感完整日志。
+
+tracked Feature Map 和验证脚本描述如何证明产品行为；生成的报告、截图、trace 与临时数据
+保持忽略。只有项目在 `acceptance` 检查中启用机器校验时，它们的摘要才进入现有 evidence。
+没有验证包的项目继续使用人工 runtime/device 路径，不增加 Runner 调用。
 
 准确的保留、遗留兼容、记录权威性和失效规则由
 [Spec Tree 合同](rigorbreeze/references/spec-tree.zh-CN.md) 定义。
