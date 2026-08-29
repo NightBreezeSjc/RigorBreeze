@@ -517,6 +517,32 @@ class SkillContractTests(unittest.TestCase):
         self.assertIn("neither supplies missing product intent", skill)
         self.assertIn("neither supplies product intent", generated)
 
+    def test_skill_separates_migration_schema_phases(self) -> None:
+        skill = (SKILL_DIR / "SKILL.md").read_text(encoding="utf-8")
+        generated = (SKILL_DIR / "scripts" / "flow_state.py").read_text(
+            encoding="utf-8"
+        )
+        handbook = (SKILL_DIR / "references" / "handbook.md").read_text(
+            encoding="utf-8"
+        )
+        chinese = (SKILL_DIR / "references" / "handbook.zh-CN.md").read_text(
+            encoding="utf-8"
+        )
+        ci = (SKILL_DIR / "references" / "ci-gates.md").read_text(encoding="utf-8")
+        spec_tree = (SKILL_DIR / "references" / "spec-tree.md").read_text(
+            encoding="utf-8"
+        )
+
+        for phrase in ("from-schema preflight", "migrate once", "to-schema assertions"):
+            self.assertIn(phrase, skill)
+            self.assertIn(phrase, generated)
+            self.assertIn(phrase, handbook)
+        self.assertIn("旧Schema预检", chinese)
+        self.assertIn("迁移只执行一次", chinese)
+        self.assertIn("新Schema断言", chinese)
+        self.assertIn("from-schema preflight", ci)
+        self.assertIn("from-schema preflight", spec_tree)
+
     def test_skill_routes_read_only_work_and_freezes_release_scope(self) -> None:
         skill = (SKILL_DIR / "SKILL.md").read_text(encoding="utf-8").lower()
         handbook = (

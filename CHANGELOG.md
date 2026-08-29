@@ -28,6 +28,19 @@ The project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). 
 - Reframed the repository for first-time adopters with bilingual onboarding, explicit safety boundaries, and a complete first-task walkthrough.
 - Added concise contribution and security policies plus an MIT license.
 
+## [0.21.0] - Keep migration checks compatible with both schema phases
+
+### Changed
+
+- Require migration work to separate deployed from-schema preflight, one migration execution, and to-schema assertions.
+- Guard every pending table/column/index/constraint reference before migration through explicit object detection, while retaining old-schema safety checks before the first write.
+- Treat a successful migration as a completed operation phase; candidate or postcheck recovery resumes afterward instead of replaying it.
+- Expand deterministic Agent behavior coverage to twenty-two scenarios with a migration-ordering safe-stop case.
+
+### Compatibility
+
+- Public CLI, state/config schema v5, evidence schema v4, automation journal v1, database tooling, and production authority remain unchanged. Projects own their migration adapters and reports.
+
 ## [0.20.1] - Isolate sequential task changes on a shared feature branch
 
 ### Fixed

@@ -225,6 +225,8 @@ invalidates evidence; the changed Git baseline does.
 
 Dependency and migration approvals are explicit because they change supply-chain and data risk. They do not replace vulnerability scanning, license checks, migration rehearsal, backup, restore, or rollback evidence.
 
+Migration evidence preserves phase truth rather than another schema: **from-schema preflight → migrate once → to-schema assertions**. Preflight uses the deployed schema or explicit object detection. Operation results record a completed migration so recovery resumes at the first incomplete post-migration phase instead of replaying it.
+
 ## Extension rules
 
 Add a field or file only when real vertical slices demonstrate a repeated need. Prefer generated JSON or CI artifacts over another human document. Never add a new source of truth merely to make the tree look comprehensive. Checks absent from a project profile need no N/A record.
