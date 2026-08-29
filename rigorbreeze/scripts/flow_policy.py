@@ -333,7 +333,8 @@ def path_under(relative: str, roots: Iterable[str]) -> bool:
 def committed_task_paths(root: Path, state: dict[str, Any]) -> list[str]:
     if not is_git_repo(root):
         return []
-    base_sha = active_task(state).get("baseSha")
+    active = active_task(state)
+    base_sha = active.get("startSha") or active.get("baseSha")
     if not base_sha:
         return []
     result = git(

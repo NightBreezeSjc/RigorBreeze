@@ -721,6 +721,7 @@ def upgrade_state(state: dict[str, Any]) -> dict[str, Any]:
         active.setdefault("dependsOn", [])
         active.setdefault("baseBranch", None)
         active.setdefault("baseSha", None)
+        active.setdefault("startSha", active.get("baseSha"))
         active.setdefault("runtimeClaims", [])
         active.setdefault("operationalModes", {})
     state["workflowVersion"] = VERSION

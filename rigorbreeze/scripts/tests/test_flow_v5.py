@@ -426,6 +426,84 @@ Operational-Modes: N/A - no conditional runtime behavior
         self.assertEqual(state["activeTask"]["baseBranch"], "integration/initiative")
         self.assertEqual(state["activeTask"]["baseSha"], expected_sha)
 
+    def test_sequential_task_scope_starts_at_its_creation_head(self) -> None:
+        self.initialize_versioned_project()
+        base_sha = self.git_output("rev-parse", "main")
+        self.git_output("switch", "-c", "feature/multiple-slices")
+        (self.root / "prior.txt").write_text("closed slice\n", encoding="utf-8")
+        self.git_output("add", "prior.txt")
+        self.git_output("commit", "-m", "close prior slice")
+        start_sha = self.git_output("rev-parse", "HEAD")
+
+        self.run_flow("new", "TASK-509", "--title", "Next slice", "--risk", "L0")
+        state = json.loads(self.state_path().read_text(encoding="utf-8"))
+        self.assertEqual(state["activeTask"]["baseSha"], base_sha)
+        self.assertEqual(state["activeTask"]["startSha"], start_sha)
+        task = self.task_file("TASK-509")
+        task.write_text(
+            """# TASK-509: Next slice
+
+Risk: L0
+Depends-On: none
+Task-Origin: current-request
+Waiting-On: none
+Runtime-Claims: none
+Operational-Modes: N/A - no conditional runtime behavior
+
+## Authoritative inputs
+- User-stated result and basis: add the next isolated file
+- Agent-inferred options: none
+- Unresolved outcome-changing ambiguity: none
+
+## Allowed scope
+- next.txt
+
+## Forbidden scope
+- prior.txt
+
+## Acceptance criteria
+- REQ-001: next file is isolated from the prior slice
+
+## Test seams
+- Seam: Git change set
+- Independent oracle: task creation HEAD
+
+## Verification commands
+- focused fixture check
+
+## Conditional risks
+- Runtime/UI: N/A
+- Security/migration/release: N/A
+- Stop conditions: scope changes
+""",
+            encoding="utf-8",
+        )
+        self.run_flow("approve", "task")
+        self.assertEqual(
+            json.loads(self.run_flow("status", "--json").stdout)["scope"]["status"],
+            "current",
+        )
+
+        (self.root / "next.txt").write_text("current slice\n", encoding="utf-8")
+        self.git_output("add", "next.txt")
+        self.git_output("commit", "-m", "implement next slice")
+        self.assertEqual(
+            json.loads(self.run_flow("status", "--json").stdout)["scope"]["status"],
+            "current",
+        )
+        (self.root / "outside.txt").write_text("escape\n", encoding="utf-8")
+        scope = json.loads(self.run_flow("status", "--json").stdout)["scope"]
+        self.assertEqual(scope["status"], "violated")
+        self.assertEqual(scope["outOfScope"], ["outside.txt"])
+
+    def test_historical_active_task_uses_base_sha_as_start_fallback(self) -> None:
+        state = flow_state.initial_state()
+        state["activeTask"] = {"id": "LEGACY", "baseSha": "legacy-base"}
+
+        upgraded = flow_state.upgrade_state(state)
+
+        self.assertEqual(upgraded["activeTask"]["startSha"], "legacy-base")
+
     def test_empty_base_configuration_keeps_default_branch_and_sha(self) -> None:
         self.initialize_versioned_project()
         expected_sha = self.git_output("rev-parse", "main")

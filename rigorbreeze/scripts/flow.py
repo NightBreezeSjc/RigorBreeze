@@ -302,6 +302,7 @@ def command_new(
         raise FlowError(f"task ID already exists: {task_id}")
     task_base_branch: str | None = None
     task_base_sha: str | None = None
+    task_start_sha: str | None = None
     if is_git_repo(root):
         task_base_branch = flow_diagnostics.baseline_branch(root, state)
         if not task_base_branch:
@@ -310,6 +311,7 @@ def command_new(
         if base_head.returncode != 0:
             raise FlowError(f"baseline branch is missing: {task_base_branch}")
         task_base_sha = base_head.stdout.strip()
+        task_start_sha = current_head(root) or task_base_sha
     content = task_template(task_id, title, risk).replace(
         "Depends-On: none",
         "Depends-On: " + (", ".join(dependencies) if dependencies else "none"),
@@ -328,6 +330,7 @@ def command_new(
                 "dependsOn": dependencies,
                 "baseBranch": task_base_branch,
                 "baseSha": task_base_sha,
+                "startSha": task_start_sha,
                 "worktree": str(root.resolve()),
                 "branch": (
                     flow_parallel.branch_name(root) if is_git_repo(root) else None
