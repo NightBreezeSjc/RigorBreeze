@@ -28,6 +28,21 @@ The project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). 
 - Reframed the repository for first-time adopters with bilingual onboarding, explicit safety boundaries, and a complete first-task walkthrough.
 - Added concise contribution and security policies plus an MIT license.
 
+## [0.20.1] - Isolate sequential task changes on a shared feature branch
+
+### Fixed
+
+- Record a compatible task `startSha` so committed scope begins at task creation instead of re-owning already closed slices since the integration base.
+- Keep `baseSha` unchanged as the integration/freshness anchor and fall back to it for historical active state without `startSha`.
+
+### Documentation
+
+- Align the bilingual Spec Tree with the v0.19+ kernel modules, concurrent-only extra worktrees, sequential branch ownership, and Verification Report v1.
+
+### Compatibility
+
+- Public CLI, state/config schema v5, evidence schema v4, automation journal v1, risk lanes, and Git authority remain unchanged.
+
 ## [0.20.0] - Make real product verification project-owned and machine-checkable
 
 ### Added

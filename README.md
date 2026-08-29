@@ -13,7 +13,7 @@ English · [简体中文](README.zh-CN.md)
 
 RigorBreeze routes work by consequence: tiny safe edits go straight through a verified Direct lane, ordinary changes get compact private records, and production-risk work retains full evidence and public sanitized audit proof. It is deliberately smaller than a project-management system and keeps normal workflow mechanics out of product commits.
 
-> **Public Preview:** v0.20.0 is usable today. It adds an opt-in, project-owned real-runtime verification contract while leaving Direct and projects without a verification pack unchanged. Active projects keep their installed runner frozen until the task closes.
+> **Public Preview:** v0.20.1 is usable today. It retains the opt-in v0.20 real-runtime verification contract and fixes sequential task ownership on a shared feature branch. Active projects keep their installed runner frozen until the task closes.
 
 ## Why this exists
 
@@ -167,7 +167,7 @@ Before approval, RigorBreeze checks the task for placeholders, contradictions, a
 
 Allowed Scope entries are repository-relative paths, directory prefixes, or globs; `*` matches one path segment and `**` crosses directories. Acceptance criteria use unique machine-readable IDs. A contract cannot be reapproved over production changes: restore the approved contract and finish, or revert those changes before amending the same outcome. A new user outcome or acceptance condition becomes a dependent slice.
 
-After initialization and project-check configuration, establish a human-controlled Git baseline before creating a new L1/L2 task. `status --json` reports the exact base-branch state under `workflowBaseline`; Direct and L0 remain lightweight. When explicitly authorized, Codex may create the isolated baseline commit without mixing product changes or persisting Git authority. The installed Skill checks through its bundled v0.20.0 runner, reports missing or modified components separately, and does not overwrite it during implementation. A missing high-risk contract must be restored or replaced by an explicit Emergency contract, never an informal bypass.
+After initialization and project-check configuration, establish a human-controlled Git baseline before creating a new L1/L2 task. `status --json` reports the exact base-branch state under `workflowBaseline`; Direct and L0 remain lightweight. When explicitly authorized, Codex may create the isolated baseline commit without mixing product changes or persisting Git authority. The installed Skill checks through its bundled v0.20.1 runner, reports missing or modified components separately, and does not overwrite it during implementation. A missing high-risk contract must be restored or replaced by an explicit Emergency contract, never an informal bypass.
 
 After initialization, the project contains:
 
@@ -307,7 +307,7 @@ For a manual install, remove only the `rigorbreeze` directory or symlink from yo
 
 ## Public Preview and v1.0
 
-v0.20.0 preserves every v0.19 command and gate while adding optional Verification Report schema v1. A configured report proves a mapped feature at `typecheck`, `unit`, `integration`, `live-runtime`, or `device` level and becomes stale when its HEAD, Feature Map, or evidence changes. RigorBreeze remains the quality controller—not a browser, simulator, or long-running scheduler. State/config remains schema v5; full evidence remains schema v4; Automation Journal remains v1.
+v0.20.1 preserves every v0.20 command and gate, retains optional Verification Report schema v1, and separates task-creation `startSha` from the configured integration `baseSha`. A configured report proves a mapped feature at `typecheck`, `unit`, `integration`, `live-runtime`, or `device` level and becomes stale when its HEAD, Feature Map, or evidence changes. RigorBreeze remains the quality controller—not a browser, simulator, or long-running scheduler. State/config remains schema v5; full evidence remains schema v4; Automation Journal remains v1.
 
 The v0.12.0 decision-frontier, one-question prototype, and abstraction-deletion contracts remain part of this release.
 

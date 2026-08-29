@@ -30,6 +30,9 @@ scripts/flow_state.py
 scripts/flow_policy.py
 scripts/flow_parallel.py
 scripts/flow_automation.py
+scripts/flow_records.py
+scripts/flow_verification.py
+scripts/flow_diagnostics.py
 
 .git/rigorbreeze/registry.json                 # Git 公共私有状态，不提交
 .git/rigorbreeze/automation.json               # 外部动作日志
@@ -49,6 +52,9 @@ scripts/flow_automation.py
 - `scripts/rigorbreeze.py`：本地和 CI 使用的稳定项目入口。
 - `scripts/flow_state.py`：配置、模板、Schema 升级、state/evidence、摘要和原子读写。
 - `scripts/flow_policy.py`：任务合同、范围、TDD、新鲜度、风险和交付门禁。
+- `scripts/flow_records.py`：evidence录入、复盘、归档、保留与脱敏审计摘要。
+- `scripts/flow_verification.py`：预检、RED、profile执行、报告校验与结果复用。
+- `scripts/flow_diagnostics.py`：安装、基线、生命周期、交互、status和doctor投影。
 - Git common `registry.json`：可丢弃的跨 worktree 索引，可以从 worktree 和私有状态重建，不是需求或证据事实源。
 - Git common `automation.json`：以不可变输入为键的私有动作日志，支持恢复和幂等，且不会在外部动作后改写 evidence。v2-v4 项目保持 tracked 路径，只有空闲、干净并显式执行 `doctor --all --repair --migrate-records private` 才迁移。
 
@@ -76,7 +82,9 @@ accepted → release-ready → protected release gate
 
 完成、废弃和 reconciled 历史任务都会把同一合同移动到 `archive/`，由 `closure.outcome` 区分成功、取消和代码已由外部 Git 操作集成但流程未关闭，不伪造验证结果。正常关闭保存只读 `lastClosed` 快照，供 archive 后受保护的 commit/push/merge 使用。`release-ready` 是可选生产发布分支，不是关闭所有任务的前提。
 
-一个 worktree 只能有一个活动任务，一个项目可以有多个活动 worktree。每个并行写任务使用自己的 `rigorbreeze/<task-id>` 分支和 linked worktree；两个写窗口不能共享同一物理 worktree。
+一个 worktree 只能有一个活动任务。Direct之外的每个独立任务使用短期 `rigorbreeze/<task-id>` 分支；只有真正并发的写任务或明确可丢弃的高风险实验才能使用 `new --worktree auto`，顺序任务复用当前干净checkout。两个写窗口不能共享同一物理worktree。
+
+`baseSha`保存用于新鲜度和集成证明的配置基线分支HEAD；`startSha`只保存当前任务创建时HEAD，用于计算本任务已提交变化。旧状态没有`startSha`时回退到`baseSha`，持久化schema仍为v5。
 
 每个任务合同中的 `Depends-On` 是唯一 DAG 表示。独立任务使用 `Depends-On: none`。执行器推导拓扑顺序、环、缺失依赖、ready 和范围冲突，不增加第二份 DAG 文档或任务数据库。
 
@@ -89,6 +97,8 @@ accepted → release-ready → protected release gate
 `scope.status` 可以是 `preexisting-dirt`、`current`、`violated` 或 `not-applicable`。首次 L1/L2 批准前，`preexisting-dirt` 列出全部非任务记录的工作树路径，并用 `foreign-work` 或 `cache-hygiene` 说明原因；批准后，从基线到 `HEAD` 的提交与当前工作树共同形成 `new-out-of-scope`。兼容的 `outOfScope` 继续保留，可选 `cause` 与 `dirtyPaths` 只用于给出唯一修复动作。
 
 `status --json --path <相对路径>` 是 Direct/并发的有界查询，只返回相关活动写者、同路径脏 worktree、被忽略的已集成历史数量、stale-registry 数量和唯一下一动作。缺失历史 worktree 不会再作为子进程工作目录；已证明集成的缺失项进入清理候选，无法证明集成的活动缺失项仍保留一条阻断诊断。
+
+`acceptance`检查启用Verification Report v1后，当前状态还会投影`verificationLevel`与`verifiedFeatures`。独立报告绑定passed状态、当前Git SHA、验证等级、环境、Feature Map摘要、映射ID、证据路径/摘要、Doctor、Cleanup与时间。tracked Feature Map和脚本属于项目资产；生成的报告、截图、trace及临时数据保持忽略。报告并入现有任务evidence，不建立第二套权威。
 
 活动合同缺失时，当前与聚合状态会投影 `lifecycle=orphaned-record`、阻断就绪并指出需要恢复的准确合同。已有 evidence 演进候选只按任务 ID 汇总，并给出可复制的 `$rigorbreeze 汇总这个项目的演进候选`；status 展示提醒时不会修改原 evidence。
 
@@ -122,6 +132,8 @@ schema v4 的稳定区段包括 `baseline`、`checkRuns`、`tddChain`、`artifac
 ## 证据失效
 
 修改已批准任务会让批准和全部下游证据失效。修改源码、测试、依赖文件、配置、迁移或 `rigorbreeze.toml` 会让验证、验收、制品和发布证据失效。生成状态、证据、配置报告和制品从源码指纹中排除，避免证明自我失效。证据只有在适用的任务摘要、项目指纹和配置摘要均匹配时才有效。
+
+启用的Verification Report还必须保持Git SHA、Feature Map摘要、映射ID与非空仓库相对证据一致；即使旧报告仍存在，只要SHA或地图变化，状态投影立即失效。
 
 生产实现变化后，不能通过重新批准合同创建新基线。应恢复已批准合同并完成，或先回退生产变化，再修订并重新批准同一可观察结果；新增用户结果或验收条件才建立依赖任务。merge 或 archive 前，每条当前 RED 链都必须保持测试摘要未变化，并将 GREEN 绑定到当前 full 验证。
 

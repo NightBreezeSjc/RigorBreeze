@@ -18,7 +18,7 @@ import flow_parallel
 
 VERSION = 5
 EVIDENCE_VERSION = 4
-TOOL_VERSION = "0.20.0"
+TOOL_VERSION = "0.20.1"
 KERNEL_HELPER_NAMES = (
     "flow_state",
     "flow_parallel",
