@@ -18,7 +18,7 @@ import flow_parallel
 
 VERSION = 5
 EVIDENCE_VERSION = 4
-TOOL_VERSION = "0.19.0"
+TOOL_VERSION = "0.20.0"
 KERNEL_HELPER_NAMES = (
     "flow_state",
     "flow_parallel",
@@ -50,6 +50,7 @@ STANDARD_CHECK_IDS = (
     "playwright",
     "acceptance",
 )
+VERIFICATION_LEVELS = ("typecheck", "unit", "integration", "live-runtime", "device")
 PLACEHOLDERS = ("TODO", "TBD", "待填写", "待定义")
 REQUIRED_TASK_SECTIONS = (
     "## Authoritative inputs",
@@ -601,8 +602,8 @@ def task_template(task_id: str, title: str, risk: str) -> str:
 - Requirement/design/API version: TODO
 - Unresolved outcome-changing ambiguity: TODO"""
         if risk in {"L2", "Emergency"}
-        else """- Result: TODO
-- Basis: TODO
+        else """- User-stated result and basis: TODO
+- Agent-inferred options: none
 - Unresolved outcome-changing ambiguity: none"""
     )
     return f"""# {task_id}: {title}
@@ -668,23 +669,19 @@ def agents_block() -> str:
     return f"""{AGENTS_START}
 ## RigorBreeze
 
-Before writes, including after compaction, invoke `$rigorbreeze`. Direct resolves targets and runs `python3 scripts/rigorbreeze.py status --json --path <target>` before each read/write; tasks run `status --json`. Use `status --all --compact --json` only for concurrency, dependencies, or handoff. Require the real base, valid approval, and window claim.
+Before writes/after compaction invoke `$rigorbreeze`. Locate Direct targets read-only, then run `python3 scripts/rigorbreeze.py status --json --path <target>`; never `--path .`. Tasks use `status --json`; use `status --all --compact --json` only for concurrency/dependencies/handoff. Require real base, approval, and window claim.
 
-Direct is taskless for one deterministic low-consequence result with no writer or API, data, auth, permission, payment, lock, migration, dependency, production-config, external-state, or release boundary. Run focused proof, never full. Crossing a boundary creates L1/L2; restore missing high-risk records or use explicit Emergency.
+Direct is taskless only for a deterministic low-consequence result without writer/API/data/auth/permission/payment/lock/migration/dependency/production-config/external-state/release impact. Use focused proof, no full; otherwise L1/L2. Missing high-risk state needs restoration/Emergency; neither supplies product intent, so stop product writes and ask.
 
-Recover facts from requirements, code, tests, Git, and runtime. Ask only for outcome-changing intent. Shaping uses a decision frontier of at most three questions with recommendation and impact; a prototype answers one decision question, never acceptance. Map observable atoms and acceptance IDs; distinguish current defect from desired result.
+Recover facts from authoritative requirements, code, tests, Git, and runtime. Label Agent-inferred options; they cannot add repositories or protected boundaries without outcome approval. Ask only outcome-changing intent. Shaping uses a decision frontier of at most three questions; a prototype answers one decision question, never acceptance. Distinguish current defect from desired result and map observable atoms to acceptance.
 
-Before approval, perform semantic self-review for placeholders, contradictions, oversized scope, and ambiguous outcome/source/fallback; show a final-state checklist. L1/L2 require a clean task worktree: foreign changes and unignored caches block. Consequence sets gates, independent outcomes get task branches, concurrent writers get worktrees, and real dependencies get a DAG. One worktree has one writer.
+Before approval, perform semantic self-review for placeholders, contradictions, oversized scope, and source/fallback ambiguity. Consequence selects gates; outcomes get task branches, `--worktree auto` requires a concurrent writer, and ordering gets a DAG. One worktree has one writer.
 
-Feature, task, branch/worktree, and PR are separate. One feature/PR may contain multiple independently verified sequential tasks on one clean integration stream; archive and locally commit each while batching human interaction. Never compress verification frontiers or create a PR/worktree per slice.
+Preflight tools/fixtures before observed RED. Use public seams, independent oracles, affected, one final full, and current evidence. A configured `verification/` pack requires Doctor, mapped drive, evidence, Cleanup, and current SHA; unit tests cannot replace it. Verify review feedback with the deletion test; after three failed hypotheses make an architecture stop. Never weaken security/permission/data/migration/rollback/accessibility/compatibility.
 
-Preflight tools, dependencies, and fixtures before observed RED. Use public seams, independent oracles, affected during development, and one final full; reuse unchanged verification. Pending read-only evidence grants no acceptance. Verify review feedback. Use the solution ladder and deletion test; after three failed hypotheses make an architecture stop. Never shrink security, permission, data, migration, rollback, accessibility, or compatibility.
+After UAT/runtime/follow-up, rerun status and scope before product writes; invalidate old proof or create a successor/handoff. AI cannot approve visual, security, legal, or production conclusions. External writes reconstruct current state and one safe action. Git automation stays manual unless authorized; never delete remote or uncertain state.
 
-After UAT, runtime/visual review, or follow-up, product writes rerun status and scope. In-scope same-result feedback resumes implementation and invalidates proof; forbidden/new-result work becomes a successor or visible handoff. AI cannot approve visual, security, legal, or production conclusions. External writes reconstruct completed steps, identifiers, one action, and stop conditions; never replay stale plans.
-
-Records default Git-private; never silently move legacy records. Git automation stays manual unless configured or explicitly authorized. Reconcile only proven clean+contained worktrees and safe local branches; never delete remote or uncertain state.
-
-Completion requires fresh verification from this turn with command, exit status, and scope. Clean L1 may auto-close; friction and L2/Emergency retain human review. A reusable workflow defect becomes a separate Skill task and evolution candidate, never expanded business scope.
+Completion requires fresh verification from this turn with command, exit status, scope, and honest gaps. Keep records Git-private by default. Workflow defects become separate Skill tasks, never business-scope expansion.
 {AGENTS_END}"""
 
 
@@ -855,6 +852,11 @@ def config_path(root: Path) -> Path:
     return root / CONFIG_NAME
 
 
+def require_config(condition: bool, message: str) -> None:
+    if not condition:
+        raise FlowError(message)
+
+
 def load_config(root: Path) -> dict[str, Any]:
     path = config_path(root)
     try:
@@ -950,6 +952,35 @@ def load_config(root: Path) -> dict[str, Any]:
             raise FlowError(
                 f"check {check_id} must not store secret environment values in TOML: "
                 + ", ".join(secret_env_keys)
+            )
+        verification_report = item.get("verification_report", False)
+        require_config(
+            isinstance(verification_report, bool),
+            f"check {check_id} verification_report must be boolean",
+        )
+        if verification_report:
+            report = item.get("report")
+            verification_root = item.get("verification_root")
+            require_config(
+                check_id == "acceptance",
+                "verification_report requires acceptance check",
+            )
+            require_config(
+                isinstance(report, str) and report.endswith(".json"),
+                "verification_report requires JSON report",
+            )
+            require_config(
+                isinstance(verification_root, str) and bool(verification_root),
+                "verification_report requires verification_root",
+            )
+            require_config(
+                item.get("minimum_level") in VERIFICATION_LEVELS,
+                "verification_report minimum_level is invalid",
+            )
+            pack = resolve_project_path(root, verification_root, "verification_root")
+            require_config(
+                pack.is_dir(),
+                f"verification_root directory is missing: {verification_root}",
             )
         checks[check_id] = item
     config["_checks"] = checks

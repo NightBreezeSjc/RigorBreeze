@@ -741,6 +741,9 @@ def command_status(
     workflow_bypass = workflow_bypass_status(root, state)
     if workflow_bypass["status"] == "detected":
         action = workflow_bypass_action()
+    verification_record = (
+        state.get("verification") or {} if verification == "current" else {}
+    )
     payload = {
         "phase": state.get("phase"),
         "localMode": mode,
@@ -748,6 +751,8 @@ def command_status(
         "approval": "valid" if approval_valid_now else "invalid",
         "verification": verification,
         "fullProfile": full_profile,
+        "verificationLevel": verification_record.get("verificationLevel"),
+        "verifiedFeatures": verification_record.get("verifiedFeatures", []),
         "scope": scope,
         "lifecycle": lifecycle,
         "nextAction": action,

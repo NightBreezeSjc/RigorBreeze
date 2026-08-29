@@ -488,7 +488,7 @@ def command_verify_stateless(root: Path, config: dict[str, Any]) -> int:
             failures.append(f"{check_id}: exit {result.returncode}")
             continue
         try:
-            flow_policy.report_record(root, check.get("report"))
+            flow_policy.report_record(root, check.get("report"), check)
             for relative in check.get("artifacts", []):
                 artifact = flow_state.resolve_project_path(
                     root, relative, f"check {check_id} artifact"
@@ -669,7 +669,7 @@ def command_verify_profile(
         report: dict[str, Any] | None = None
         if check_passed:
             try:
-                report = flow_policy.report_record(root, check.get("report"))
+                report = flow_policy.report_record(root, check.get("report"), check)
             except FlowError as exc:
                 check_passed = False
                 output = f"{output}\n{exc}".strip()
@@ -712,6 +712,24 @@ def command_verify_profile(
         records.append(record)
         evidence["checkRuns"].append(record)
         passed = passed and check_passed
+    verification_reports = [
+        record["report"]["verificationReport"]
+        for record in records
+        if isinstance(record.get("report"), dict)
+        and isinstance(record["report"].get("verificationReport"), dict)
+    ]
+    verification_level = max(
+        (record["level"] for record in verification_reports),
+        key=flow_state.VERIFICATION_LEVELS.index,
+        default=None,
+    )
+    verified_features = sorted(
+        {
+            feature
+            for record in verification_reports
+            for feature in record.get("verifiedFeatures", [])
+        }
+    )
     fingerprint = flow_policy.project_fingerprint(root)
     verification = {
         "toolVersion": flow_state.TOOL_VERSION,
@@ -725,6 +743,8 @@ def command_verify_profile(
         "configDigest": flow_state.config_digest(root),
         "head": flow_state.current_head(root) if flow_state.is_git_repo(root) else None,
         "verifiedAt": flow_state.now_iso(),
+        "verificationLevel": verification_level,
+        "verifiedFeatures": verified_features,
     }
     if passed:
         for record in evidence.get("acceptance", []):

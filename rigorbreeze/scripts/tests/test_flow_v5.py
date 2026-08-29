@@ -117,8 +117,8 @@ Operational-Modes: N/A - no conditional runtime behavior
         l1 = flow_state.task_template("TASK-500", "Compact", "L1")
         l2 = flow_state.task_template("TASK-500A", "Full", "L2")
 
-        self.assertIn("- Result: TODO", l1)
-        self.assertIn("- Basis: TODO", l1)
+        self.assertIn("- User-stated result and basis: TODO", l1)
+        self.assertIn("- Agent-inferred options: none", l1)
         self.assertNotIn("Business and architecture path", l1)
         self.assertIn("Business and architecture path", l2)
         self.assertIn("Invariants and source of truth", l2)
