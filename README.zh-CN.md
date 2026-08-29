@@ -13,7 +13,7 @@
 
 RigorBreeze 按后果分流工作：安全小改走经过验证的 Direct 通道，普通变更使用精简私有记录，生产高风险任务保留完整证据和公开的脱敏审计摘要。它刻意小于项目管理系统，让日常流程记录不再混入产品提交。
 
-> **Public Preview：** v0.20.0 当前可以使用。它增加了按需启用、由项目维护的真实运行验证合同，同时保持 Direct 和未配置验证包的项目行为不变。活动项目仍冻结其已安装 Runner，任务关闭后再升级。
+> **Public Preview：** v0.20.1 当前可以使用。它保留v0.20按需启用的真实运行验证合同，并修复同一功能分支上顺序任务的变更归属。活动项目仍冻结其已安装 Runner，任务关闭后再升级。
 
 ## 为什么需要它
 
@@ -162,7 +162,7 @@ RigorBreeze 不会把每次对话都变成任务。查询状态、解释日志�
 
 Allowed Scope 只能填写仓库相对路径、目录前缀或 glob；`*` 只匹配一层路径，`**` 才跨目录。验收条件必须使用唯一且机器可读的 ID。不能在生产代码变化之上重新批准：应恢复已批准合同并完成，或先回退生产变化，再修订同一用户结果。新增用户结果或验收条件才建立依赖切片。
 
-初始化并配置检查后，应在创建 L1/L2 前建立 Git 工作流基线；Direct 和 L0 保持轻量。`status --json` 报告真实基准分支状态，明确授权后 Codex 可建立不混入产品代码的一次性基线提交。安装后的 Skill 使用自身 v0.20.0 bundled runner，分别报告缺失或被修改的组件，实施中不会静默升级。高风险合同丢失时必须恢复记录或建立明确 Emergency 合同，不能用手工任务卡绕过。
+初始化并配置检查后，应在创建 L1/L2 前建立 Git 工作流基线；Direct 和 L0 保持轻量。`status --json` 报告真实基准分支状态，明确授权后 Codex 可建立不混入产品代码的一次性基线提交。安装后的 Skill 使用自身 v0.20.1 bundled runner，分别报告缺失或被修改的组件，实施中不会静默升级。高风险合同丢失时必须恢复记录或建立明确 Emergency 合同，不能用手工任务卡绕过。
 
 初始化后，项目会包含：
 
@@ -302,7 +302,7 @@ npx skills@latest remove rigorbreeze -g -a codex -y
 
 ## Public Preview 与 v1.0
 
-v0.20.0 保留v0.19的全部命令和门禁，并新增可选 Verification Report schema v1。配置后的报告可证明 Feature 达到 `typecheck`、`unit`、`integration`、`live-runtime` 或 `device` 等级；HEAD、Feature Map 或证据变化后结论失效。RigorBreeze 仍是质量控制器，不是浏览器、模拟器或长期调度平台。状态/配置继续为schema v5，完整evidence继续为schema v4，Automation Journal继续为v1。
+v0.20.1 保留v0.20的全部命令和门禁、可选 Verification Report schema v1，并把任务创建`startSha`与配置的集成`baseSha`分开。配置后的报告可证明 Feature 达到 `typecheck`、`unit`、`integration`、`live-runtime` 或 `device` 等级；HEAD、Feature Map 或证据变化后结论失效。RigorBreeze 仍是质量控制器，不是浏览器、模拟器或长期调度平台。状态/配置继续为schema v5，完整evidence继续为schema v4，Automation Journal继续为v1。
 
 v0.12.0 的决策前沿、单问题原型和抽象删除测试合同在本版继续保留。
 

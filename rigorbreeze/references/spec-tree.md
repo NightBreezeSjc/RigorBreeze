@@ -30,6 +30,9 @@ scripts/flow_state.py
 scripts/flow_policy.py
 scripts/flow_parallel.py
 scripts/flow_automation.py
+scripts/flow_records.py
+scripts/flow_verification.py
+scripts/flow_diagnostics.py
 
 .git/rigorbreeze/registry.json                 # primary/common, not committed
 .git/rigorbreeze/automation.json               # external-action journal
@@ -57,6 +60,9 @@ scripts/flow_automation.py
 - `scripts/rigorbreeze.py`: the stable project entry used locally and in CI.
 - `scripts/flow_state.py`: configuration, templates, schema upgrades, state/evidence, digests, and atomic I/O.
 - `scripts/flow_policy.py`: task contract, scope, TDD, freshness, risk, and delivery gates.
+- `scripts/flow_records.py`: evidence entry, retrospective, archive, retention, and sanitized audit summaries.
+- `scripts/flow_verification.py`: preflight, RED, profile execution, report validation, and result reuse.
+- `scripts/flow_diagnostics.py`: installation, baseline, lifecycle, interaction, status, and doctor projections.
 - Git-common `registry.json`: disposable cross-worktree index. It is rebuilt
   from worktrees and private state, never a requirement or evidence source.
 - Git-common `automation.json`: private commit/push/provider action journal,
@@ -90,9 +96,16 @@ accepted → release-ready → protected release gate
 Completed, abandoned, and reconciled tasks move the same contract to `archive/`; `closure.outcome` distinguishes success, cancellation, and an externally integrated historical close without inventing verification. A normal close preserves a read-only `lastClosed` snapshot for guarded commit/push/merge after archive. `release-ready` is an optional production-release branch, not a prerequisite
 for closing every task.
 
-Only one task may be active in one worktree. One project may have many active
-worktrees. Every writing task uses its own `rigorbreeze/<task-id>` branch and linked
-worktree; two writing windows never share one physical worktree.
+Only one task may be active in one worktree. Every non-Direct independent task
+uses a short-lived `rigorbreeze/<task-id>` branch. Use `new --worktree auto`
+only for a genuinely concurrent writer or an explicitly disposable risky
+experiment; sequential tasks reuse the current clean checkout. Two writing
+windows never share one physical worktree.
+
+`baseSha` records the configured integration-branch head used for freshness and
+integration proof. `startSha` records the task-creation HEAD used only for its
+committed change set. Historical state without `startSha` falls back to
+`baseSha`; the persisted schema version remains v5.
 
 `Depends-On` in each task contract is the only DAG representation. Independent
 tasks have `Depends-On: none`. The runner derives topological order, cycles,
@@ -114,6 +127,14 @@ practice event as an immediate evolution candidate; it never creates approval,
 RED, GREEN, acceptance, or a replacement baseline.
 
 `status --json --path <relative>` is the bounded Direct/concurrency probe. It returns only matching active writers, dirty same-path worktrees, ignored integrated-history counts, stale-registry counts, and one next action. Missing historical worktrees never become a subprocess working directory. Proven integrated missing entries are cleanup candidates; unproven active missing entries remain one blocking diagnostic.
+
+When an `acceptance` check enables Verification Report v1, current status also
+projects `verificationLevel` and `verifiedFeatures`. The independent report
+binds passed status, current Git SHA, verification level, environment, Feature
+Map digest, mapped IDs, evidence paths/digests, Doctor, Cleanup, and timestamp.
+Tracked Feature Maps/scripts are project assets; generated reports, screenshots,
+traces, and temporary data stay ignored. The report folds into existing task
+evidence and never becomes another authority.
 
 If an active contract is missing, current and aggregate status project
 `lifecycle=orphaned-record`, block readiness, and identify the exact contract to
@@ -179,6 +200,11 @@ release evidence. Generated state, evidence, configured reports, and configured
 artifacts are excluded from the source fingerprint so proof does not invalidate
 itself. Evidence is current only when task digest, project fingerprint, and
 configuration digest match as applicable.
+
+An enabled Verification Report is additionally current only while its Git SHA,
+Feature Map digest, mapped IDs, and non-empty repository-relative evidence
+match. A changed SHA or map invalidates its projection even if the old report
+still exists.
 
 After production implementation changes, the contract cannot be reapproved to
 create a new baseline. Restore the approved contract and finish, or revert the

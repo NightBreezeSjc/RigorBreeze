@@ -205,6 +205,25 @@ class SkillContractTests(unittest.TestCase):
                         linked_authority.add(resolved.name.replace(".zh-CN.md", ".md"))
                 self.assertSetEqual(linked_authority, expected_authority)
 
+    def test_spec_tree_matches_current_kernel_and_isolation_contract(self) -> None:
+        english = (SKILL_DIR / "references" / "spec-tree.md").read_text(
+            encoding="utf-8"
+        )
+        chinese = (SKILL_DIR / "references" / "spec-tree.zh-CN.md").read_text(
+            encoding="utf-8"
+        )
+
+        for module in (
+            "flow_records.py",
+            "flow_verification.py",
+            "flow_diagnostics.py",
+        ):
+            self.assertIn(module, english)
+            self.assertIn(module, chinese)
+        for phrase in ("startSha", "Verification Report v1", "new --worktree auto"):
+            self.assertIn(phrase, english)
+            self.assertIn(phrase, chinese)
+
     def test_every_user_facing_english_document_has_chinese(self) -> None:
         for english, chinese in TRANSLATED_DOCS.items():
             with self.subTest(english=english.name):

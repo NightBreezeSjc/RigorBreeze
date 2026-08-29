@@ -18,7 +18,7 @@ import flow_parallel
 
 VERSION = 5
 EVIDENCE_VERSION = 4
-TOOL_VERSION = "0.20.0"
+TOOL_VERSION = "0.20.1"
 KERNEL_HELPER_NAMES = (
     "flow_state",
     "flow_parallel",
@@ -721,6 +721,7 @@ def upgrade_state(state: dict[str, Any]) -> dict[str, Any]:
         active.setdefault("dependsOn", [])
         active.setdefault("baseBranch", None)
         active.setdefault("baseSha", None)
+        active.setdefault("startSha", active.get("baseSha"))
         active.setdefault("runtimeClaims", [])
         active.setdefault("operationalModes", {})
     state["workflowVersion"] = VERSION
