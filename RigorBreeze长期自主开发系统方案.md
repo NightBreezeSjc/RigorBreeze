@@ -1,9 +1,12 @@
 # RigorBreeze 长期自主开发系统方案
 
-> 状态：战略方案 v0.1  
-> 适用对象：使用 Codex 独立维护长期生产级项目的个人开发者  
-> 研究日期：2026-08-06  
-> 当前基线：RigorBreeze v0.9.2 Public Preview
+> 状态：战略方案 v0.2
+>
+> 适用对象：使用 Codex 独立维护长期生产级项目的个人开发者
+>
+> 首次研究：2026-08-06；本次复核：2026-09-02
+>
+> 发布版本以 [README](README.zh-CN.md) 和 [CHANGELOG](CHANGELOG.zh-CN.md) 为准；本文能力盘点截至 v0.21.0
 
 ## 一、执行摘要
 
@@ -41,6 +44,19 @@
 - 不用一个无限循环 Prompt 代替任务图、停止条件和独立验证。
 - 不因购买 Mac mini 就默认开放全磁盘、全网络或生产权限。
 - 不在真实项目证明单任务“跑一夜”之前建设多项目、多模型和大规模并行平台。
+
+### 3. 2026 Q3 Agentic Engineering 实践复核
+
+一手实践来源是 David Ondrej 于 2026-08-30 发布的 [My Agentic Engineering setup](https://www.vectallabs.com/articles/0005-my-agentic-engineering-setup.html)；其中提到的可复用 Skill 可在 [davidondrej/skills](https://github.com/davidondrej/skills) 交叉核对。下表不把作者的个人工具选择当成通用事实，而是保留“来源主张→本项目决策→设计理由”链路。
+
+| 分类 | 来源主张 | RigorBreeze 决策 | 设计理由 |
+|---|---|---|---|
+| 已吸收 | 文章的 Agent 状态跟踪、worktree、guardrails/push lock 和“重复流程变成 Skill” | 继续使用持久状态、按需 worktree、风险分级、新鲜证据、fixture A/B 和受保护 Git 权限 | 这些机制已经过 RigorBreeze 真实任务和回归证明，重复实现只会增加第二套事实源 |
+| 现在补入路线图 | 文章的持久会话、Manager/Worker、真实验证、ADR 和 commits+sessions+prompts 长期趋势 | 先补齐验证能力与单节点隔夜 Runner；用结果、返工、人工介入、Token 和交付时间评估 | 当前瓶颈是可证明性和恢复，不是 Agent 数量；单一 PR、Session 或 Prompt 指标都容易被优化游戏化 |
+| 未来外部系统 | 文章的 Manager Agent、优先级队列、云端/自托管 Worker 和按任务选模型 | 由独立编排器负责队列、租约、心跳、预算、模型路由和跨主机 Worker | 这些是运行时调度职责；进入 Skill 会扩大权限面、上下文和状态冲突 |
+| 明确不采用 | 文章的 YOLO/绕过权限、VPS root、默认大量 Agent，以及时效性很强的模型/订阅推荐 | 不默认开放 root、全磁盘/全网络、生产库写权限或无门禁合并；不把价格与模型排名写入稳定协议 | 个人生产项目的不可恢复风险高于短期吞吐收益，而且价格、配额和模型能力会快速变化 |
+
+两个值得保留但暂不进入核心的候选：普通评审禁止在未变代码上递归寻找问题；模型路由必须由真实质量/成本数据驱动。它们在出现可比较的项目证据前，不增加长期激活文本。
 
 ## 二、目标重新定义：从连续 Prompt 到目标驱动开发
 
@@ -281,12 +297,14 @@ RigorBreeze 是系统中最重要的“不可欺骗合同层”：
 
 - 一个节点一个任务合同和证据；
 - 需求、范围和验收摘要改变后旧证据失效；
-- 每个写任务独立 worktree；
+- 只有真实并发写者或必要隔离才创建独立 worktree，顺序任务复用干净工作区；
 - 风险决定验证深度和人工门禁；
 - `Depends-On` 是项目内 DAG 事实；
 - `Runtime-Claims` 防止端口、watcher 和开发者工具冲突；
 - `nextAction` 是外部编排器的只读调度接口；
 - commit、push、merge 和 release 权限继续分级。
+
+截至 v0.21.0，可选项目 `verification/` 包已能用 Feature Map 与 Verification Report v1 绑定 Launch、Doctor、Drive、Evidence、Cleanup、当前 Git SHA 和真实运行级别；迁移合同也已分离 from-schema 预检、单次迁移和 to-schema 断言，避免在候选实例失败后重放已完成迁移。这些是编排器可以消费的质量事实，不代表 RigorBreeze 自己已成为浏览器、模拟器或部署平台。
 
 RigorBreeze 不负责保持进程存活，也不保存模型聊天全文。
 
@@ -358,6 +376,8 @@ Mac mini 是常开执行主机和控制节点，不是生产服务器，也不�
 - 通过 Codex Remote、SSH 或安全远程桌面接收人工批准。
 
 Codex 官方 Remote 支持从移动设备或另一台桌面设备访问连接主机上的项目、聊天、文件、权限和工具，但远程访问是接管表面，不是耐久编排器。[Codex Remote connections](https://learn.chatgpt.com/docs/remote-connections)
+
+Mac mini 优先承担必须使用 macOS、本地设备或开发者工具的控制与验证节点。未来 VPS 可作为可替换、可重建的隔离 Worker，但不因“运行在云端”自动获得个人文件、内网、生产数据或发布凭证。任务、检查、权限和凭证必须分别按节点最小化授予。
 
 ### 2. 最小主机组件
 
@@ -482,7 +502,14 @@ OpenAI Agents SDK
 - 并行带来的净节省与冲突成本；
 - 相比人工分段 Prompt，是否真正降低返工和等待。
 
-### 3. Harness 自身演进
+提交数、PR 数、Session 数和 Prompt 数都只是辅助信号，不得单独成为优化目标。它们可以与上述质量和成本结果做长期趋势对照，但“更多 PR”不等于“更高交付能力”。
+
+### 3. 可选的项目事实资产
+
+- 长期影响且无法从代码、测试和 Git 恢复理由的架构决策，可由项目选择记录精简 ADR；RigorBreeze 不默认创建 ADR 目录。
+- 生产数据只读观察只能作为明确授权的项目适配器实验：使用专用只读身份、最小表/查询范围、查询超时和行数限制，输出必须脱敏。只读不等于低风险，也不能替代业务验收。
+
+### 4. Harness 自身演进
 
 每次运行产生两类循环：
 
@@ -495,11 +522,11 @@ Harness循环：运行轨迹 → 失败分类 → 回归场景 → 最小规则�
 
 ## 十二、分阶段建设路线
 
-### Phase 0：稳定当前 RigorBreeze
+### Phase 0：RigorBreeze 质量控制平面（核心能力基本完成）
 
-目标：继续用 v0.9.2 完成真实 L1/L2 切片，不新增长期编排代码。
+当前状态：风险分流、持久任务状态、SDD/TDD、并发 worktree/DAG、证据新鲜度、受保护 Git 动作、可选真实验证包和迁移阶段合同已在 v0.21.0 形成。该阶段不再以增加能力为目标，只修复真实项目反复证明的误放行、误阻断、错误下一动作和明显摩擦。
 
-完成条件：
+继续验证：
 
 - `status --all --json` 能准确支持跨 Session 接续；
 - 任务合同、worktree、证据、归档和清理能够完整收口；
@@ -507,7 +534,7 @@ Harness循环：运行轨迹 → 失败分类 → 回归场景 → 最小规则�
 
 ### Phase 1：单节点隔夜 Runner
 
-目标：在现有电脑上证明“一项已批准 L1 任务可以安全跑数小时”。
+目标：作为与 RigorBreeze 分离的下一个可执行实验，在现有电脑上证明“一项已批准 L1 任务可以安全跑数小时”。
 
 范围：
 
@@ -613,12 +640,12 @@ RigorBreeze 的职责不是让进程运行更久，而是确保运行越久也�
 
 ### 4. 现在最正确的下一步
 
-不是继续修改 RigorBreeze，也不是立即购买硬件后开放无人值守权限。
+不是继续向 RigorBreeze Skill 填入队列、模型路由和守护进程，也不是立即购买硬件后开放无人值守权限。
 
 最正确的顺序是：
 
-1. 继续用当前 RigorBreeze 完成真实项目；
-2. 在现有设备上做一个“单任务、单 worktree、有限预算、不碰生产”的隔夜 Runner 原型；
+1. 继续用当前 RigorBreeze 验证真实 L1/L2、并行 DAG 和受保护交付；
+2. 在独立仓库或分包中，用现有设备建立“单任务、单写者、有限预算、不碰生产”的隔夜 Runner 原型；
 3. 用十个真实任务验证恢复、成本、质量和人工介入；
 4. 证明有效后再将 Mac mini 作为常驻主机；
 5. 稳定 A2 后再建设 DAG、并行和低风险自动交付。
@@ -646,6 +673,8 @@ RigorBreeze 的职责不是让进程运行更久，而是确保运行越久也�
 
 ### 实践者信号
 
+- [David Ondrej: My Agentic Engineering setup](https://www.vectallabs.com/articles/0005-my-agentic-engineering-setup.html) — 2026-08-30 的个人工具链与工作方法总结；用于发现候选，不作为独立效果证明。
+- [davidondrej/skills](https://github.com/davidondrej/skills) — 文章所述部分多步工作流的公开实现，用于交叉核对，不整仓复制。
 - [Reddit: Most people are running Ralph wrong](https://www.reddit.com/r/ClaudeCode/comments/1qc4vg0/trust_me_bro_most_people_are_running_ralph_wiggum/)
 - [Reddit: The Ralph-Wiggum Loop](https://www.reddit.com/r/ClaudeCode/comments/1q9qjk4/the_ralphwiggum_loop/)
 - [Reddit: Long-running Codex workflow](https://www.reddit.com/r/codex/comments/1ti1bdj/how_do_codex_users_make_longrunning_coding_work/)

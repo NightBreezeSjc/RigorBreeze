@@ -36,6 +36,7 @@ ARCHITECTURE_DOCS = (
     REPO_ROOT / "ARCHITECTURE.md",
     REPO_ROOT / "ARCHITECTURE.zh-CN.md",
 )
+AUTONOMY_ROADMAP = REPO_ROOT / "RigorBreeze长期自主开发系统方案.md"
 ARCHITECTURE_AUTHORITY_SOURCES = {
     SKILL_DIR / "SKILL.md",
     SKILL_DIR / "references" / "handbook.md",
@@ -131,6 +132,7 @@ class SkillContractTests(unittest.TestCase):
             REPO_ROOT / "SECURITY.zh-CN.md",
             REPO_ROOT / "LICENSE.zh-CN.md",
             REPO_ROOT / "Skill演进与实践记录.md",
+            AUTONOMY_ROADMAP,
             SKILL_DIR / "SKILL.md",
             *(SKILL_DIR / "references").glob("*.md"),
         ]
@@ -323,6 +325,32 @@ class SkillContractTests(unittest.TestCase):
         self.assertFalse(
             any(Path(name).name.startswith("ARCHITECTURE") for name in names)
         )
+        self.assertFalse(
+            any(Path(name).name == AUTONOMY_ROADMAP.name for name in names)
+        )
+
+    def test_autonomy_roadmap_is_current_and_linked_without_expanding_the_skill(
+        self,
+    ) -> None:
+        roadmap = AUTONOMY_ROADMAP.read_text(encoding="utf-8")
+        readme_zh = (REPO_ROOT / "README.zh-CN.md").read_text(encoding="utf-8")
+        architecture = (REPO_ROOT / "ARCHITECTURE.md").read_text(encoding="utf-8")
+
+        self.assertNotIn("当前基线：RigorBreeze v0.9.2", roadmap)
+        self.assertNotIn("每个写任务独立 worktree", roadmap)
+        self.assertIn("Verification Report v1", roadmap)
+        self.assertIn("from-schema", roadmap)
+        self.assertIn("Manager Agent", roadmap)
+        self.assertIn(
+            "https://www.vectallabs.com/articles/0005-my-agentic-engineering-setup.html",
+            roadmap,
+        )
+        self.assertIn("https://github.com/davidondrej/skills", roadmap)
+        self.assertIn("来源主张", roadmap)
+        self.assertIn("设计理由", roadmap)
+        self.assertIn("实践者信号", roadmap)
+        self.assertIn(AUTONOMY_ROADMAP.name, readme_zh)
+        self.assertIn("stay outside this quality-control plane", architecture)
 
     def test_skill_metadata_matches_public_name(self) -> None:
         skill = (SKILL_DIR / "SKILL.md").read_text(encoding="utf-8")

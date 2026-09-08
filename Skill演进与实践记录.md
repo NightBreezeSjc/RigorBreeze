@@ -578,3 +578,9 @@ PR #20归档并提交后，在同一功能分支继续建立Spec Tree任务时�
 v0.20.1合并后，独立L1任务把上述候选转为通用阶段合同：旧Schema预检只使用当前部署对象，或在引用待迁移表/列/索引/约束前进行显式存在性探测；旧Schema健康、备份、容量、秘密和版本身份检查仍在第一次写入前执行。预检通过后迁移只执行一次，再运行新Schema和数据不变量。迁移成功但候选实例或后置断言失败时，operation result保留已完成迁移并从第一个未完成的迁移后阶段继续，不因旧计划重放迁移。
 
 本版不在通用核心解析SQL、不绑定PostgreSQL/MySQL、不自动执行迁移，也不新增Evidence Schema。项目自己的迁移适配器、operation plan和报告负责提供阶段事实；RigorBreeze只约束Agent顺序、停止条件和恢复语义。新增一个合成安全停止场景并执行两次live前向验证，现有二十二个确定性行为合同继续作为CI门禁。
+
+### 第二十七次外部实践复核：长期自主系统的边界（路线图 v0.2）
+
+David Ondrej 于 2026-08-30 发布的 [My Agentic Engineering setup](https://www.vectallabs.com/articles/0005-my-agentic-engineering-setup.html) 将高吞吐开发归纳为 Manager Agent、状态跟踪、持久执行主机、可执行验证、重复流程 Skill 化、worktree、权限护栏和跨周期效率度量；其公开实现可在 [davidondrej/skills](https://github.com/davidondrej/skills) 交叉核对。对照当前实现后，未发现需要立即加入 RigorBreeze 核心的通用能力缺口：状态、风险分流、并发隔离、失败 fixture A/B、验证报告和受保护 Git 权限都已有对应机制。该文属于实践者信号，不是 RigorBreeze 效果或安全性的独立证明。
+
+本次只刷新长期方案：持久 Manager、队列、租约、心跳、预算、模型路由和跨主机 Worker 归属未来独立编排器；RigorBreeze 继续是惟一质量控制平面。递归评审、生产只读数据适配器、ADR 和细粒度模型路由仅作为可选或待验证候选，不因单篇文章增加长期激活文本。默认 YOLO/root、生产库写权限、无门禁自动合并、PR 数量目标和普通任务默认大量子 Agent 明确不采用。
