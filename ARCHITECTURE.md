@@ -15,6 +15,10 @@ playbook, the [Spec Tree contract](rigorbreeze/references/spec-tree.md) defines
 records and retention, and [CI gates](rigorbreeze/references/ci-gates.md)
 defines the enforced delivery boundary.
 
+A future durable manager may schedule workers by consuming RigorBreeze state,
+but queues, leases, heartbeats, model routing, host management, and process
+supervision stay outside this quality-control plane.
+
 ## 1. System architecture
 
 RigorBreeze sits between a developer's stated outcome, Codex's implementation

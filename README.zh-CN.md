@@ -317,6 +317,8 @@ v0.12.0 的决策前沿、单问题原型和抽象删除测试合同在本版继
 
 证据还必须证明 `nextAction`、affected/full 选择、证据失效、门禁和复盘减少了返工与逃逸风险，而不是把开发变成填表。完整方法见 [Skill 演进与实践记录](Skill演进与实践记录.md)。
 
+如果你的目标是让 Mac mini 或可替换 Worker 在人批准目标后持续执行，请阅读 [RigorBreeze 长期自主开发系统方案](RigorBreeze长期自主开发系统方案.md)。该方案将外部持久编排器与 RigorBreeze 质量控制平面分开，不会把无人值守循环塞入 Skill 核心。
+
 ## 仓库协作方式
 
 RigorBreeze 采用 [GitHub Flow](https://docs.github.com/zh/get-started/using-github/github-flow)，不维护永久性的 Git Flow 分支层级：
