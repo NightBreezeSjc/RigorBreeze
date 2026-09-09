@@ -28,6 +28,24 @@ The project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). 
 - Reframed the repository for first-time adopters with bilingual onboarding, explicit safety boundaries, and a complete first-task walkthrough.
 - Added concise contribution and security policies plus an MIT license.
 
+## [0.22.0] - Preserve normal completion while shrinking coordination context
+
+### Fixed
+
+- Keep checkpoint commits on their own live integration stream in the normal verification, acceptance, retrospective, and completed-archive lifecycle instead of prematurely suggesting historical reconciliation.
+- Continue to detect tasks integrated into a distinct base branch or through complete patch equivalence as `integrated-unclosed`.
+
+### Changed
+
+- Make `status --all --compact --json` omit complete Allowed Scope arrays and project a deterministic count, SHA-256 digest, and three-entry preview; full status remains unchanged.
+- Add one safe `closeout` action for clean machine-proven integrated tasks, while dirty or uncertain work remains non-actionable.
+- Require Agents to inspect reference contents and load only relevant headings once; deterministic behavior coverage increases to twenty-three scenarios.
+- Treat a migration safe-stop as incomplete while an approved local preflight, operation plan, or recovery test remains unsafe; repair it with a regression while remote writes stay stopped.
+
+### Compatibility
+
+- Compact JSON consumers that require complete Allowed Scope must use `status --all --json`. Public commands, state/config schema v5, evidence schema v4, automation journal v1, quality gates, and Git authority remain unchanged.
+
 ## [0.21.0] - Keep migration checks compatible with both schema phases
 
 ### Changed

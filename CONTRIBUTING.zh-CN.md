@@ -44,13 +44,13 @@ python3 -B tests/behavior/run.py validate
 python3 -B -m unittest discover -s tests/behavior -v
 ```
 
-发布候选版本前，维护者先把本版新增高风险场景运行两次，再在准备候选版本时使用本机 Codex 将全部二十二个合成场景各运行两次；这一步需要明确手动触发，普通提交、配置化 `full` 和 CI 都不会运行：
+发布候选版本前，维护者先把本版新增高风险场景运行两次，再在准备候选版本时使用本机 Codex 将全部二十三个合成场景各运行两次；这一步需要明确手动触发，普通提交、配置化 `full` 和 CI 都不会运行：
 
 ```bash
-python3 -B tests/behavior/run.py run --version 0.21.0 --repetitions 2
+python3 -B tests/behavior/run.py run --version 0.22.0 --repetitions 2
 ```
 
-任一次违反硬规则都阻断候选版本。只检查 `.git/rigorbreeze/behavior-evals/0.21.0/` 下的脱敏 Git 私有结果；不得提交这些结果，也不得在 fixture 中使用真实凭证或服务。每次结果还记录缓存/非缓存输入、输出与推理 Token、纯流程 Runner 调用数、evidence 字节数及产品/测试行数变化。固定模型的不同 arm 必须比较中位数，不能用一次运行宣传节省比例，也不能为了 Token 目标放宽安全规则。
+任一次违反硬规则都阻断候选版本。只检查 `.git/rigorbreeze/behavior-evals/0.22.0/` 下的脱敏 Git 私有结果；不得提交这些结果，也不得在 fixture 中使用真实凭证或服务。每次结果还记录缓存/非缓存输入、输出与推理 Token、纯流程 Runner 调用数、evidence 字节数及产品/测试行数变化。固定模型的不同 arm 必须比较中位数，不能用一次运行宣传节省比例，也不能为了 Token 目标放宽安全规则。
 
 源码仓库必须保留回归测试和行为合同测试。可分发 Skill ZIP 排除维护者测试、缓存和字节码；应通过合同测试验证该边界，而不是删除测试资产。维护者任务合同、机器 evidence 和 archive 在本源码仓库中只保存在本地并被忽略；提交、变更记录、测试和 CI 才是公开贡献记录。
 

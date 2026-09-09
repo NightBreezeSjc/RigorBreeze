@@ -584,3 +584,13 @@ v0.20.1合并后，独立L1任务把上述候选转为通用阶段合同：旧Sc
 David Ondrej 于 2026-08-30 发布的 [My Agentic Engineering setup](https://www.vectallabs.com/articles/0005-my-agentic-engineering-setup.html) 将高吞吐开发归纳为 Manager Agent、状态跟踪、持久执行主机、可执行验证、重复流程 Skill 化、worktree、权限护栏和跨周期效率度量；其公开实现可在 [davidondrej/skills](https://github.com/davidondrej/skills) 交叉核对。对照当前实现后，未发现需要立即加入 RigorBreeze 核心的通用能力缺口：状态、风险分流、并发隔离、失败 fixture A/B、验证报告和受保护 Git 权限都已有对应机制。该文属于实践者信号，不是 RigorBreeze 效果或安全性的独立证明。
 
 本次只刷新长期方案：持久 Manager、队列、租约、心跳、预算、模型路由和跨主机 Worker 归属未来独立编排器；RigorBreeze 继续是惟一质量控制平面。递归评审、生产只读数据适配器、ADR 和细粒度模型路由仅作为可选或待验证候选，不因单篇文章增加长期激活文本。默认 YOLO/root、生产库写权限、无门禁自动合并、PR 数量目标和普通任务默认大量子 Agent 明确不采用。
+
+### 第二十八次真实摩擦：checkpoint跳过关闭与compact仍然过重（v0.22.0）
+
+新元阶段6在同一integration流中完成三仓full并按用户要求本地提交后，Runner因为提交已被同一base branch包含，立即把活动任务标为`integrated-unclosed`并建议`reconciled`。这会把仍应完成的验收、复盘和completed归档错当成历史补录。同时，三仓compact状态仍输出数十条Allowed Scope，L2规划又完整读取三份Reference后重复读取局部，使Token节流机制被执行方式抵消。
+
+v0.22.0只修复这条链：任务在自己的integration分支上checkpoint后继续正常状态机，只有进入不同基准或完整patch-equivalence才建议历史收口；compact用Scope数量、SHA-256和三项预览取代完整列表，只给出一个干净且已证明的Codex收口动作；Agent先查Reference目录，只读当前门禁需要的章节一次。安全、迁移、发布、TDD、真实验收和Git权限都不改变。
+
+2026-09-08在当前API、UI、UniApp三仓做同状态只读A/B，v0.22 compact相对v0.21的JSON字节数分别下降52.4%、51.1%和52.1%；三仓任务、依赖、证明状态和唯一下一动作仍保留。该结果只证明状态载荷改善，不替代候选版Live Agent或真实项目验收。
+
+候选Live验证最终保留二十三个场景各两次、共46次非零模型输出，并按同一最终合同统一重评分为46/46通过。这些证据由已通过场景和针对失败场景的定向重跑组成，不是一条未中断的命令；所有原始输出都保留并用最终合同重评分。过程中发现一个真实质量缺口：Agent在迁移场景中正确停止远程写入并完成隔离演练，却曾留下已批准范围内仍不安全的`preflight.sql`和`release-plan.md`；v0.22明确“安全停止不是本地修复完成”，要求同时修复计划/检查并增加回归。其他中间失败来自旧场景与Direct规则冲突、合成验证脚本只写死结果，以及中文否定、空格和同义表达的评分误报；没有选择性删除失败Transcript。

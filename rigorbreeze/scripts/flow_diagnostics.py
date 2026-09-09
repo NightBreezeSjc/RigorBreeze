@@ -1,6 +1,7 @@
 """Installation, baseline, lifecycle, status, and doctor projections for RigorBreeze."""
 
 from __future__ import annotations
+import hashlib
 import json
 import re
 import sys
@@ -321,7 +322,9 @@ def current_task_lifecycle(
     if active and flow_state.is_git_repo(root):
         try:
             entry = flow_parallel.load_registry(root)["tasks"].get(active["id"], {})
-            if entry and flow_parallel.is_integrated(root, entry):
+            integrated = entry and flow_parallel.is_integrated(root, entry)
+            own_stream = flow_parallel.branch_name(root) == active.get("baseBranch")
+            if integrated and not own_stream:
                 return (
                     "integrated-unclosed",
                     {
@@ -483,50 +486,66 @@ def worktree_status_projection(
 
 
 def compact_all_status(payload: dict[str, Any]) -> dict[str, Any]:
-    """Project the active coordination facts without historical task detail."""
-    task_keys = (
-        "taskId",
-        "title",
-        "risk",
-        "lifecycle",
-        "readiness",
-        "phase",
-        "worktree",
-        "branch",
-        "baseBranch",
-        "worktreeExists",
-        "dependsOn",
-        "waitingOn",
-        "allowedScope",
-        "runtimeClaims",
-        "runtimeConflicts",
-        "baselineStale",
-        "verification",
-        "fullProfile",
-        "head",
-        "nextAction",
-        "workflowBypass",
-        "automation",
-        "issues",
-    )
-    tasks = [
-        {key: item[key] for key in task_keys if key in item}
-        for item in payload.get("tasks", [])
-        if item.get("lifecycle") not in {"closed", "integrated"}
-    ]
+    task_keys = """taskId risk lifecycle readiness dependsOn runtimeConflicts verification fullProfile head nextAction issues""".split()
+    tasks = []
+    for item in payload.get("tasks", []):
+        if item.get("lifecycle") in {"closed", "integrated"}:
+            continue
+        projected = {key: item[key] for key in task_keys if key in item}
+        scopes = sorted(str(scope) for scope in item.get("allowedScope", []))
+        projected["scopeSummary"] = {
+            "count": len(scopes),
+            "digest": hashlib.sha256("\0".join(scopes).encode()).hexdigest(),
+            "preview": scopes[:3],
+        }
+        tasks.append(projected)
     active_ids = {str(item.get("taskId")) for item in tasks if item.get("taskId")}
+    worktree_keys = "worktree branch activeTaskIds runnerVersion installationStatus cleanupStatus".split()
     worktrees = [
-        item
+        {
+            **{key: item.get(key) for key in worktree_keys},
+            "historyCount": max(
+                len(item.get("taskIds", [])) - len(item.get("activeTaskIds", [])), 0
+            ),
+        }
         for item in payload.get("worktrees", [])
         if active_ids.intersection(str(value) for value in item.get("taskIds", []))
     ]
     cleanup = payload.get("cleanup", {})
-    evolution = payload.get("evolution", {})
+    baseline = payload.get("workflowBaseline") or {}
+    removable_tasks = {x["taskId"] for x in cleanup.get("removableWorktrees", [])}
+    closeout_tasks = sorted(
+        (
+            item
+            for item in tasks
+            if item.get("lifecycle") == "integrated-unclosed"
+            and (item.get("nextAction") or {}).get("command")
+            and item.get("taskId") in removable_tasks
+        ),
+        key=lambda item: str(item.get("taskId") or ""),
+    )
+    action = closeout_tasks[0]["nextAction"] if closeout_tasks else None
+    closeout_action = None
+    if action:
+        closeout_action = dict(
+            actor="codex",
+            kind="repair",
+            summary=action.get("reason"),
+            command=action.get("command"),
+        )
     return {
         "workflowVersion": payload.get("workflowVersion"),
         "executionRunner": payload.get("executionRunner"),
         "installation": payload.get("installation"),
-        "workflowBaseline": payload.get("workflowBaseline"),
+        "workflowBaseline": {
+            **{
+                key: baseline.get(key)
+                for key in ("status", "baseBranch", "safeToCommit", "nextAction")
+            },
+            "trackedCount": len(baseline.get("tracked", [])),
+            "untrackedCount": len(baseline.get("untracked", [])),
+            "modifiedCount": len(baseline.get("modified", [])),
+        },
         "overview": payload.get("overview", {}),
         "issues": payload.get("issues", []),
         "tasks": tasks,
@@ -542,9 +561,14 @@ def compact_all_status(payload: dict[str, Any]) -> dict[str, Any]:
             "retainedBranches": len(cleanup.get("retainedBranches", [])),
             "staleRegistryEntries": len(cleanup.get("staleRegistryEntries", [])),
         },
+        "closeout": {
+            "pending": len(closeout_tasks),
+            "taskIds": [item["taskId"] for item in closeout_tasks],
+            "nextAction": closeout_action,
+        },
         "evolution": {
-            "candidateCount": evolution.get("candidateCount", 0),
-            "command": evolution.get("command"),
+            "candidateCount": payload.get("evolution", {}).get("candidateCount", 0),
+            "command": payload.get("evolution", {}).get("command"),
         },
     }
 
@@ -661,7 +685,14 @@ def command_status(
         if json_output:
             if compact:
                 payload = compact_all_status(payload)
-            print(json.dumps(payload, ensure_ascii=False, sort_keys=True))
+            print(
+                json.dumps(
+                    payload,
+                    ensure_ascii=False,
+                    sort_keys=True,
+                    separators=(",", ":") if compact else None,
+                )
+            )
             return
         overview = payload["overview"]
         print(

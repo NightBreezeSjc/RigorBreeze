@@ -28,6 +28,24 @@ RigorBreeze 的重要变更都会记录在本文档中。
 - 使用双语引导、明确的安全边界和完整首次任务示例，重新组织面向首次使用者的仓库文档。
 - 增加精简的贡献指南、安全策略和 MIT 许可证。
 
+## [0.22.0] - 保持正常关闭并压缩协调上下文
+
+### 修复
+
+- 同一活动integration流上的checkpoint提交继续进入验证、验收、复盘和completed归档，不再过早建议历史reconciled。
+- 进入不同基准分支或通过完整补丁等价证明集成的任务仍正确显示为`integrated-unclosed`。
+
+### 变更
+
+- `status --all --compact --json`不再返回完整Allowed Scope，改为确定性的数量、SHA-256摘要和最多三项预览；完整状态保持不变。
+- 对干净且机器已证明集成的任务只投影一个安全`closeout`动作；脏或外部状态不确定的任务不会进入可执行收口。
+- Agent先查看Reference目录并只读取一次相关章节；确定性行为场景增加到二十三个。
+- 迁移安全停止后，只要已批准本地预检、操作计划或恢复测试仍不安全就不得视为完成；保持远程写入停止，并通过回归修复本地产物。
+
+### 兼容性
+
+- 需要完整Allowed Scope的compact调用方应改用`status --all --json`。公共命令、状态/配置schema v5、evidence schema v4、automation journal v1、质量门禁和Git权限保持不变。
+
 ## [0.21.0] - 保持迁移检查兼容两个Schema阶段
 
 ### 变更

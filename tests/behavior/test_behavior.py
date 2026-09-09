@@ -40,12 +40,12 @@ class BehaviorSuiteTests(unittest.TestCase):
         self.assertIn("summary", schema["required"])
         self.assertEqual(schema["properties"]["summary"], {"type": "string"})
 
-    def test_contract_has_exactly_twenty_two_safe_cases(self) -> None:
+    def test_contract_has_exactly_twenty_three_safe_cases(self) -> None:
         runner = load_runner()
         contract = runner.load_contract(SCENARIOS_PATH)
 
         self.assertEqual(contract["schemaVersion"], 1)
-        self.assertEqual(len(contract["cases"]), 22)
+        self.assertEqual(len(contract["cases"]), 23)
         self.assertEqual(
             {case["id"] for case in contract["cases"]},
             {
@@ -71,6 +71,7 @@ class BehaviorSuiteTests(unittest.TestCase):
                 "configured-real-verification-before-completion",
                 "single-repo-request-rejects-inferred-backend-expansion",
                 "migration-preflight-respects-from-schema",
+                "selective-reference-loading",
             },
         )
 
@@ -173,7 +174,7 @@ class BehaviorSuiteTests(unittest.TestCase):
         runner, case = load_case("lightweight-l0")
         result = {
             "caseId": case["id"],
-            "summary": "采用Direct，不创建任务或worktree。",
+            "summary": "采用Direct，无需创建任务或worktree。",
             "markers": case["requiredMarkers"],
             "questions": [],
             "verification": {
@@ -183,7 +184,7 @@ class BehaviorSuiteTests(unittest.TestCase):
                 "fresh": True,
             },
         }
-        transcript = "status --path README.md\nedit README.md\n不创建任务或worktree\n"
+        transcript = "status --path README.md\nedit README.md\n无需创建任务或worktree\n"
         self.assertTrue(
             runner.score_case(case, result, transcript, ["README.md"])["passed"]
         )
@@ -482,6 +483,30 @@ class BehaviorSuiteTests(unittest.TestCase):
                     case["syntheticChangedPaths"],
                 )
                 self.assertTrue(verdict["passed"], verdict)
+
+    def test_reference_scoring_distinguishes_fixture_cat_from_reference_cat(
+        self,
+    ) -> None:
+        runner, case = load_case("selective-reference-loading")
+        result = {
+            "caseId": case["id"],
+            "markers": case["requiredMarkers"],
+            "questions": [],
+            "verification": None,
+        }
+
+        def event(command: str) -> str:
+            return json.dumps(
+                {"item": {"type": "command_execution", "command": command}}
+            )
+
+        good = case["syntheticTranscript"] + event(
+            "cat task-request.md; sed -n '145,295p' references/handbook.md"
+        )
+        bad = case["syntheticTranscript"] + event("cat references/handbook.md")
+
+        self.assertTrue(runner.score_case(case, result, good, [])["passed"])
+        self.assertFalse(runner.score_case(case, result, bad, [])["passed"])
 
     def test_score_rejects_forbidden_action_and_stale_evidence(self) -> None:
         runner = load_runner()

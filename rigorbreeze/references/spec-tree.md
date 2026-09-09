@@ -142,7 +142,7 @@ restore. Existing evidence candidates are summarized by task ID with the
 copyable `$rigorbreeze 汇总这个项目的演进候选` instruction; status never mutates
 that evidence while projecting the reminder.
 
-`status --all --compact --json` is the normal machine handoff for parallel work. It keeps active task ownership, dependencies, blockers, next actions, and aggregate cleanup counts while omitting closed-task detail. The complete `status --all --json` also includes runtime claims/conflicts and a detailed `cleanup` projection. It lists
+`status --all --compact --json` is the normal machine handoff for parallel work. It keeps active task ownership, dependencies, blockers, next actions, and aggregate cleanup counts while omitting closed-task detail. Each compact task replaces full `allowedScope` with `scopeSummary`: the sorted entry count, SHA-256 over NUL-joined entries, and at most three preview entries. `closeout` exposes only clean, machine-proven `integrated-unclosed` tasks and one Codex-owned action; dirty or uncertain work remains non-actionable. The complete `status --all --json` retains full scopes, runtime claims/conflicts, and detailed cleanup. It lists
 managed integrated worktrees that are removable, entries retained with a safety
 reason, unregistered Git worktrees, and local task branches preserved by policy.
 Candidates include cleanliness, integration proof, expected HEAD, and whether one-time confirmation is required. Unmanaged removal never deletes its branch.
