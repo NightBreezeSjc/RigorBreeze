@@ -1323,6 +1323,11 @@ def task_readiness(
     return "ready"
 
 
+def is_local_integration_checkpoint(task: dict[str, Any]) -> bool:
+    branch = task.get("branch")
+    return bool(task.get("worktreeExists") and branch == task.get("baseBranch"))
+
+
 def aggregate(root: Path) -> dict[str, Any]:
     registry = load_registry(root)
     tasks = registry["tasks"]
@@ -1355,14 +1360,18 @@ def aggregate(root: Path) -> dict[str, Any]:
         if observed_head and observed_head.returncode == 0:
             item["head"] = observed_head.stdout.strip()
         item["readiness"] = task_readiness(root, item, tasks)
-        base = item.get("baseBranch")
-        base_head = git(root, "rev-parse", base) if base else None
-        item["baselineStale"] = bool(
-            base_head
-            and base_head.returncode == 0
-            and item.get("baseSha")
-            and base_head.stdout.strip() != item.get("baseSha")
-        )
+        base, recorded = item.get("baseBranch"), item.get("baseSha")
+        if is_local_integration_checkpoint(item) and recorded:
+            ancestry = git(worktree, "merge-base", "--is-ancestor", recorded, "HEAD")
+            item["baselineStale"] = ancestry.returncode != 0
+        else:
+            base_head = git(root, "rev-parse", base) if base else None
+            item["baselineStale"] = bool(
+                base_head
+                and base_head.returncode == 0
+                and recorded
+                and base_head.stdout.strip() != recorded
+            )
         missing_active = bool(
             not item["worktreeExists"]
             and not item.get("worktreeRemoved")
@@ -1403,7 +1412,11 @@ def aggregate(root: Path) -> dict[str, Any]:
                 ),
             }
             errors.append(f"{task_id} active task contract is missing: {task_file}")
-        elif item["readiness"] == "integrated" and not item.get("archived"):
+        elif (
+            item["readiness"] == "integrated"
+            and not item.get("archived")
+            and not is_local_integration_checkpoint(item)
+        ):
             item["lifecycle"] = "integrated-unclosed"
             item["baselineStale"] = False
             item["nextAction"] = {

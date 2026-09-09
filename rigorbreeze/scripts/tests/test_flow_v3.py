@@ -144,10 +144,26 @@ command = ["python3", "-c", "print('secret ok')"]
             compact_tasks["TASK-102"]["nextAction"],
             tasks["TASK-102"]["nextAction"],
         )
+        self.assertNotIn("allowedScope", compact_tasks["TASK-102"])
+        expected_scopes = sorted(tasks["TASK-102"]["allowedScope"])
         self.assertEqual(
-            compact_tasks["TASK-102"]["allowedScope"],
-            tasks["TASK-102"]["allowedScope"],
+            compact_tasks["TASK-102"]["scopeSummary"],
+            {
+                "count": len(expected_scopes),
+                "digest": hashlib.sha256(
+                    "\0".join(expected_scopes).encode()
+                ).hexdigest(),
+                "preview": expected_scopes[:3],
+            },
         )
+        self.assertEqual(
+            compact["closeout"],
+            {"pending": 0, "taskIds": [], "nextAction": None},
+        )
+        self.assertNotIn("tracked", compact["workflowBaseline"])
+        self.assertNotIn("untracked", compact["workflowBaseline"])
+        self.assertEqual(compact["workflowBaseline"]["trackedCount"], 11)
+        self.assertEqual(compact["workflowBaseline"]["untrackedCount"], 0)
         self.assertEqual(compact["overview"], payload["overview"])
         self.assertEqual(
             compact["cleanup"]["removableWorktrees"],
@@ -155,6 +171,7 @@ command = ["python3", "-c", "print('secret ok')"]
         )
         self.assertNotIn("createdAt", compact_tasks["TASK-101"])
         self.assertLess(len(compact_result.stdout), len(json.dumps(payload)))
+        self.assertLess(len(compact_result.stdout.encode()), 8192)
 
         for item in tasks.values():
             worktree = Path(item["worktree"])
@@ -1408,6 +1425,30 @@ artifacts = ["artifacts/app.bin"]
             status["cleanup"]["removableWorktrees"][0]["integrationStatus"],
             "patch-equivalent",
         )
+        compact = json.loads(
+            self.run_flow("status", "--all", "--compact", "--json").stdout
+        )
+        self.assertEqual(compact["closeout"]["pending"], 1)
+        self.assertEqual(compact["closeout"]["taskIds"], ["TASK-413"])
+        self.assertEqual(
+            compact["closeout"]["nextAction"],
+            {
+                "actor": "codex",
+                "kind": "repair",
+                "summary": "The task is integrated but its workflow record is still open.",
+                "command": task["nextAction"]["command"],
+            },
+        )
+        dirty = worktree / "src" / "uncommitted.txt"
+        dirty.write_text("not safe to close\n", encoding="utf-8")
+        blocked = json.loads(
+            self.run_flow("status", "--all", "--compact", "--json").stdout
+        )
+        self.assertEqual(
+            blocked["closeout"],
+            {"pending": 0, "taskIds": [], "nextAction": None},
+        )
+        dirty.unlink()
 
         archived = subprocess.run(
             [
@@ -1593,7 +1634,7 @@ artifacts = ["artifacts/app.bin"]
         root_version = self.root / "scripts/flow_state.py"
         root_version.write_text(
             root_version.read_text(encoding="utf-8").replace(
-                'TOOL_VERSION = "0.21.0"', 'TOOL_VERSION = "0.13.0"'
+                'TOOL_VERSION = "0.22.0"', 'TOOL_VERSION = "0.13.0"'
             ),
             encoding="utf-8",
         )
@@ -1608,10 +1649,21 @@ artifacts = ["artifacts/app.bin"]
         self.assertEqual(len(grouped), 1)
         self.assertEqual(grouped[0]["taskIds"], ["TASK-415", "TASK-415-OLD"])
         self.assertEqual(grouped[0]["activeTaskIds"], ["TASK-415"])
-        self.assertEqual(grouped[0]["runnerVersion"], "0.21.0")
+        self.assertEqual(grouped[0]["runnerVersion"], "0.22.0")
         self.assertEqual(payload["installation"]["runnerVersion"], "0.13.0")
-        self.assertEqual(payload["executionRunner"]["version"], "0.21.0")
+        self.assertEqual(payload["executionRunner"]["version"], "0.22.0")
         self.assertEqual(payload["executionRunner"]["source"], "bundled")
+        compact = json.loads(
+            self.run_flow("status", "--all", "--compact", "--json").stdout
+        )
+        compact_group = next(
+            item
+            for item in compact["worktrees"]
+            if item["worktree"] == str(worktree.resolve())
+        )
+        self.assertNotIn("taskIds", compact_group)
+        self.assertEqual(compact_group["activeTaskIds"], ["TASK-415"])
+        self.assertEqual(compact_group["historyCount"], 1)
 
     def test_cleanup_projection_deduplicates_shared_worktree(self) -> None:
         self.init_git()

@@ -496,6 +496,72 @@ Operational-Modes: N/A - no conditional runtime behavior
         self.assertEqual(scope["status"], "violated")
         self.assertEqual(scope["outOfScope"], ["outside.txt"])
 
+    def test_checkpoint_on_its_integration_branch_keeps_normal_closeout(self) -> None:
+        self.initialize_versioned_project()
+        self.git_output("switch", "-c", "integration/initiative")
+        self.configure_base("integration/initiative")
+        self.git_output("add", "rigorbreeze.toml")
+        self.git_output("commit", "-m", "configure integration stream")
+        self.run_flow(
+            "new",
+            "TASK-510",
+            "--title",
+            "Checkpoint without completing",
+            "--risk",
+            "L0",
+        )
+        self.task_file("TASK-510").write_text(
+            """# TASK-510: Checkpoint without completing
+
+Risk: L0
+Depends-On: none
+Task-Origin: current-request
+Waiting-On: none
+Runtime-Claims: none
+Operational-Modes: N/A - no conditional runtime behavior
+
+## Authoritative inputs
+- Requirement: keep the task active after a local checkpoint
+
+## Allowed scope
+- checkpoint.txt
+
+## Forbidden scope
+- unrelated files
+
+## Acceptance criteria
+- REQ-001: a local commit is not task completion
+
+## Test seams
+- Seam: status lifecycle
+- Independent oracle: current task state
+
+## Verification commands
+- configured affected profile
+
+## Conditional risks
+- Runtime/UI: N/A
+- Security/migration/release: N/A
+- Stop conditions: task completion is explicitly archived
+""",
+            encoding="utf-8",
+        )
+        self.run_flow("approve", "task")
+        (self.root / "checkpoint.txt").write_text("saved\n", encoding="utf-8")
+        self.git_output("add", "checkpoint.txt")
+        self.git_output("commit", "-m", "save checkpoint")
+
+        current = json.loads(self.run_flow("status", "--json").stdout)
+        self.assertEqual(current["lifecycle"], "active")
+        self.assertNotIn("reconciled", current["nextAction"]["command"])
+
+        status = json.loads(self.run_flow("status", "--all", "--json").stdout)
+        task = next(item for item in status["tasks"] if item["taskId"] == "TASK-510")
+
+        self.assertEqual(task["lifecycle"], "active")
+        self.assertNotIn("reconciled", task["nextAction"]["command"])
+        self.assertIn("verify --profile affected", task["nextAction"]["command"])
+
     def test_historical_active_task_uses_base_sha_as_start_fallback(self) -> None:
         state = flow_state.initial_state()
         state["activeTask"] = {"id": "LEGACY", "baseSha": "legacy-base"}

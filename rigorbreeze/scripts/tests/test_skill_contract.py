@@ -570,6 +570,8 @@ class SkillContractTests(unittest.TestCase):
         self.assertIn("新Schema断言", chinese)
         self.assertIn("from-schema preflight", ci)
         self.assertIn("from-schema preflight", spec_tree)
+        self.assertIn("safe stop does not excuse", skill.lower())
+        self.assertIn("faulty preflight", handbook.lower())
 
     def test_skill_routes_read_only_work_and_freezes_release_scope(self) -> None:
         skill = (SKILL_DIR / "SKILL.md").read_text(encoding="utf-8").lower()
@@ -750,6 +752,9 @@ class SkillContractTests(unittest.TestCase):
         self.assertIn("status --all --compact --json", skill)
         self.assertIn("one write phase", skill)
         self.assertIn("bounded failure tail", skill)
+        self.assertIn("reference Contents", skill)
+        self.assertIn("safety never justifies the bundle", skill)
+        self.assertIn("checkpoint commit never completes", skill)
         self.assertNotIn(
             "Before writing—including after compaction—run the bundled "
             "`python <skill-dir>/scripts/flow.py --root <project> status --all --json`",

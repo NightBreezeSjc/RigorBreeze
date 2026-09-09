@@ -5,16 +5,16 @@ description: Run RigorBreeze, a risk-adaptive idea-to-delivery workflow for solo
 
 # RigorBreeze
 
-Deliver one observable outcome per task. Match interaction to risk and machine-generate evidence. One worktree has one writer; Git automation defaults to `manual`.
+Deliver one outcome per task. Match risk; generate evidence. One worktree/one writer; Git defaults `manual`.
 
 ## Enter with the smallest sufficient context
 
 1. Resolve root. Use the **no-task path** for status/logs/screenshots/recommendations; give the read-only answer despite stale state.
 2. Before writing—including **after compaction**—run bundled status. Direct locates targets read-only, then runs `python3 scripts/rigorbreeze.py status --json --path <target>`; never `--path .` or global status. Reuse for one write phase until HEAD, contract, ownership, external state, or runner changes. Reserve `status --all --compact --json` for concurrency/dependencies/handoff and full global detail for repair/cleanup/evolution.
 3. If uninitialized, `init`, configure `rigorbreeze.toml`, then `doctor --json`. Never replace a runner mid-task; migrate Git state only through it.
-4. Read configuration, contract, index, and affected sources. Writes need approval and a worktree claim. For missing L2/Emergency records, restore the authoritative record or create an explicit Emergency contract; never use an informal task card. Neither supplies missing product intent; stop product writes and ask.
+4. Read affected sources plus config/contract/index. Writes need approval and ownership. For missing L2/Emergency records, restore the authoritative record or use an explicit Emergency contract, never an informal task card; neither supplies missing product intent.
 
-Read [handbook.md](references/handbook.md) for advanced flows, [spec-tree.md](references/spec-tree.md) for record contracts, and [ci-gates.md](references/ci-gates.md) for enforced delivery. Use `--help` for omitted command forms.
+Read facts first. Use one reference Contents once: [handbook.md](references/handbook.md) execution; [spec-tree.md](references/spec-tree.md) records/storage; [ci-gates.md](references/ci-gates.md) CI/delivery. Direct loads none; safety never justifies the bundle unless auditing RigorBreeze.
 
 ## Recover intent before creating work
 
@@ -68,7 +68,7 @@ Run separate standards and spec passes. Standards checks correctness, simplicity
 
 Validate the real product. After UAT/runtime/follow-up, writes rerun status and scope: same-result feedback invalidates proof; forbidden/new results become a successor or handoff. Pending observations grant no acceptance. Prove route/menu/role/account/device or record N/A plus the replacement method actually used. After two identical login/token/browser/channel failures, preserve safety and switch methods. New visual language or three-plus screens needs one visual tracer unless reusing an approved component. The writer runs a cheap check; use a read-only independent Verifier only for judgment-heavy, expensive, high-impact, or multi-page proof against current HEAD.
 
-Migration runs **from-schema preflight** against deployed objects, then **migrate once**, then **to-schema assertions**. Guard new objects with detection; resume after completion, never replay it. Preserve rehearsal/backup/recovery. Release uses one SHA/artifact, **freeze the approved operation scope**, and records stage/one resume action. Unrelated infrastructure becomes a **separate governance task**. AI cannot approve visual, security, legal, or production conclusions.
+Migration: guard new objects during **from-schema preflight** → **migrate once** → **to-schema assertions**. Safe stop does not excuse an unsafe in-scope check/plan: repair with regression; preserve rehearsal/backup/recovery; never replay migration. Release uses one SHA/artifact, **freeze the approved operation scope**, and records stage/one resume action. Unrelated infrastructure becomes a **separate governance task**. AI cannot approve visual, security, legal, or production conclusions.
 
 Before external writes, reconstruct the **observed current state**: completed steps, immutable identifiers, one action, and stop conditions. Never repeat completed work from an old plan. Synthetic credentials prove buildability only.
 
@@ -84,4 +84,4 @@ After delivery, reconcile from the base worktree. Missing historical worktrees a
 
 Clean first-pass L1 may machine-retrospect; friction and every L2/Emergency need prefilled human review. Extra green runs do not repeat unchanged judgment; changed facts invalidate it. A reusable defect becomes a separate Skill task, never business expansion. Ordinary failures need two comparable occurrences; a high-risk escape needs one. Promote a rule only when the same fixture shows the candidate beats the prior Skill without regression. Review private candidates with `$rigorbreeze 汇总这个项目的演进候选`; create no second log or relaxed gate.
 
-Codex runs internal commands. Close in order: verify, accept, review, retrospective, archive, guarded delivery, reconcile. L0 requires affected; L1/L2 require full plus applicable acceptance/review. Use `abandoned` for clean cancellation and `reconciled` only for proven external integration; never invent success. Release requires an active release-ready task. Before commit, archive, or fixed/passed/complete claims, cite **fresh verification**: command, status, scope. History or another Agent cannot substitute. After L2, cross-repository work, or context compaction, give one short handoff prompt recommending a new Codex task for the next independent feature; never block continuation.
+Codex runs internal commands. Close in order: verify, accept, review, retrospective, archive, guarded delivery, reconcile. A checkpoint commit never completes work or permits a successor. L0 requires affected; L1/L2 require full plus applicable acceptance/review. Use `abandoned` for clean cancellation and `reconciled` only for proven external integration; never invent success. Release requires an active release-ready task. Before commit, archive, or fixed/passed/complete claims, cite **fresh verification**: command, status, scope. History/other Agents cannot substitute. After L2, cross-repository work, or context compaction, give one short handoff prompt recommending a new Codex task for the next independent feature; never block continuation.

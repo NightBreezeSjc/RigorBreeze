@@ -63,6 +63,8 @@ Codex runs `new`, approval, RED, verification, evidence, gate, and archive comma
 
 Git and release automation remain `manual` unless the project explicitly selects a higher standing level. `manual` grants no unattended authority, but a user's explicit current-message request may authorize one guarded commit or push. Skill upgrades never increase authority.
 
+Reference retrieval is also risk-adaptive. Inspect a reference's Contents first, load only the headings needed by the current gate, and reuse an unchanged section for the current task. Direct loads no advanced reference. Reading the complete handbook, Spec Tree, and CI gates together is reserved for exact global repair or workflow evolution, not ordinary L1/L2 work.
+
 ## 2. Risk lanes
 
 | Lane | Examples | Minimum close gate |
@@ -220,7 +222,7 @@ Compatibility is a product property, not a universal yes/no rule. Code with no d
 - `archive --outcome reconciled --reason <reason> --expected-head <sha>` closes a historical task whose code is already integrated. It requires exact HEAD plus ancestry or complete patch-equivalence (or explicit same-base-branch confirmation with no product changes), records the original phase and missing verification honestly, and never fabricates GREEN, acceptance, or release success.
 - `release` is evaluated only after an explicit release request.
 
-The normal delivery order is verify/full → acceptance → two-pass review → retrospective → archive → guarded commit/push/merge → reconcile → cleanup. A clear L1 request is sufficient approval once its compact contract is complete. A clean first-pass L1 records a machine retrospective and closes automatically; failures, bypass, rework, unreasonable blocks, and every L2/Emergency retain human review. Release authority is never inherited from ordinary archive.
+The normal delivery order is verify/full → acceptance → two-pass review → retrospective → archive → guarded commit/push/merge → reconcile → cleanup. A checkpoint commit on the task's own integration stream preserves work but never completes acceptance, closes the task, or permits its successor. `reconciled` remains for proven historical/external integration. A clear L1 request is sufficient approval once its compact contract is complete. A clean first-pass L1 records a machine retrospective and closes automatically; failures, bypass, rework, unreasonable blocks, and every L2/Emergency retain human review. Release authority is never inherited from ordinary archive.
 
 UAT and review are not hidden implementation phases. If their feedback requires
 another product write, re-read current status, ownership, approval, and scope.
@@ -296,6 +298,8 @@ Before assigning manual acceptance, confirm the actual route, menu, role, accoun
 Every migration uses three distinct phases: **from-schema preflight → migrate once → to-schema assertions**. The preflight runs against the schema currently deployed in production. It may reference a new table, column, index, or constraint only behind explicit catalog/object detection; otherwise that rule belongs after migration. Do not solve the problem by moving all safety checks after migration: retain old-schema health, backup, capacity, secret, and release-identity checks before the first write.
 
 Rehearsal starts from a clone of the real from-schema and representative data, applies the migration once, then runs the full new-schema and data invariants. Record the phase reached in the existing operation result. If migration succeeds but candidate startup or a later assertion fails, resume at the first incomplete post-migration phase; never replay a completed migration merely because an old plan still lists it. Preserve backup/restore or forward-fix proof and the existing production authority boundary.
+
+Stopping before an unsafe remote write is necessary but not sufficient when the approved local scope still contains the faulty preflight, operation plan, or recovery test. Repair those local artifacts, prove the phase order with a regression, and leave the remote operation stopped; do not report completion while the known unsafe check remains unchanged.
 
 ### Optional project verification pack
 
