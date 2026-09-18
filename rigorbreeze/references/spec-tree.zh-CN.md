@@ -92,6 +92,8 @@ accepted → release-ready → protected release gate
 
 私有 `state.json`、records 和公共注册表是机器门禁输入，不是产品需求源。不要提交或手工修改它们绕过门禁。`doctor --all --repair` 只在明确请求时重建注册表。
 
+当前worktree的`status --json`包含两个兼容的任务级投影。`records`显示tracked或Git-common私有存储，并给出合同、Evidence、Archive的机器可定位路径和存在状态；私有路径相对Git common目录，不暴露用户绝对路径。`handoff`显示活动任务、worktree、分支、HEAD、阶段、当前脏路径、等待条件和同一唯一`nextAction`。没有活动任务时二者均为`null`，不能凭空产生续接权限。它们只是现有state和records的摘要，不是新事实源或Schema。
+
 `status --json` 包含 `installation`、`workflowBaseline`、`workflowBypass`、生命周期、`scope`、`evolution` 和 `interaction`。文本只显示已完成、当前和唯一真实用户动作；`actor=codex` 的内部动作继续由 Codex 完成。其余状态继续证明安装、基线、范围与绕过，不能生成虚假批准、RED、GREEN、验收或替代基线。
 
 `scope.status` 可以是 `preexisting-dirt`、`current`、`violated` 或 `not-applicable`。首次 L1/L2 批准前，`preexisting-dirt` 列出全部非任务记录的工作树路径，并用 `foreign-work` 或 `cache-hygiene` 说明原因；批准后，从基线到 `HEAD` 的提交与当前工作树共同形成 `new-out-of-scope`。兼容的 `outOfScope` 继续保留，可选 `cause` 与 `dirtyPaths` 只用于给出唯一修复动作。

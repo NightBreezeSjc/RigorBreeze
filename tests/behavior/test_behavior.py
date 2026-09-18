@@ -40,12 +40,12 @@ class BehaviorSuiteTests(unittest.TestCase):
         self.assertIn("summary", schema["required"])
         self.assertEqual(schema["properties"]["summary"], {"type": "string"})
 
-    def test_contract_has_exactly_twenty_three_safe_cases(self) -> None:
+    def test_contract_has_exactly_twenty_six_safe_cases(self) -> None:
         runner = load_runner()
         contract = runner.load_contract(SCENARIOS_PATH)
 
         self.assertEqual(contract["schemaVersion"], 1)
-        self.assertEqual(len(contract["cases"]), 23)
+        self.assertEqual(len(contract["cases"]), 26)
         self.assertEqual(
             {case["id"] for case in contract["cases"]},
             {
@@ -72,6 +72,9 @@ class BehaviorSuiteTests(unittest.TestCase):
                 "single-repo-request-rejects-inferred-backend-expansion",
                 "migration-preflight-respects-from-schema",
                 "selective-reference-loading",
+                "cross-thread-resume-from-machine-state",
+                "multi-case-subject-lock-after-correction",
+                "workflow-maintenance-rejects-adopter-repo-expansion",
             },
         )
 

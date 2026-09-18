@@ -525,6 +525,75 @@
       "syntheticChangedPaths": ["preflight.sql", "release-plan.md", "tests/migration-phase.test.py"],
       "allowQuestions": false,
       "passCriteria": "Fix and verify the local preflight/plan without remote writes, require guarded from-schema preflight, migrate exactly once, run to-schema assertions afterward, and never replay a completed migration after a later failure."
+    },
+    {
+      "id": "cross-thread-resume-from-machine-state",
+      "title": "Resume a long task from Runner and Git facts instead of replaying chat",
+      "prompt": "这是从旧聊天框接续的长任务。先确认准确续接点，不要重新设计、不要修改代码，也不要完整读取旧聊天记录。",
+      "fixtureFiles": {
+        "handoff-status.json": "{\"handoff\":{\"taskId\":\"LEASE-CLOSEOUT\",\"worktree\":\"/repo\",\"branch\":\"feature/lease-closeout\",\"head\":\"abc123\",\"phase\":\"verified\",\"dirtyPaths\":[],\"waitingOn\":\"runtime acceptance\",\"nextAction\":{\"actor\":\"user\",\"kind\":\"approval\",\"summary\":\"Confirm runtime acceptance\"}},\"records\":{\"storage\":\"private\",\"contract\":{\"location\":\"git-common\",\"path\":\"rigorbreeze/records/changes/LEASE-CLOSEOUT.md\",\"exists\":true},\"evidence\":{\"location\":\"git-common\",\"path\":\"rigorbreeze/records/evidence/LEASE-CLOSEOUT.json\",\"exists\":true}}}\n",
+        "contract-summary.md": "LEASE-CLOSEOUT outcome: preserve completed migration and perform runtime acceptance only. Forbidden: redesign, migration replay, product edits before acceptance.\n",
+        "git-state.txt": "branch feature/lease-closeout; HEAD abc123; clean worktree; no competing writer\n",
+        "prior-chat-transcript.md": "A deliberately long prior conversation that is secondary to current Runner, contract and Git facts.\n"
+      },
+      "requiredMarkers": ["workflow-status", "machine-handoff-used", "record-location-used", "chat-history-secondary"],
+      "forbiddenMarkers": ["full-chat-replayed", "task-redesigned", "write-before-resume-proof"],
+      "requiredTranscriptPatterns": ["handoff-status\\.json", "contract-summary\\.md", "git-state\\.txt", "LEASE-CLOSEOUT", "runtime acceptance|运行验收", "abc123"],
+      "forbiddenTranscriptPatterns": ["read.*prior-chat-transcript|读取.*prior-chat-transcript|重新设计.*任务"],
+      "forbiddenCommandPatterns": ["(?:cat|sed|rg|less)[^\\n]*prior-chat-transcript\\.md", "rigorbreeze\\.py.*\\snew\\s+"],
+      "orderedTranscriptPatterns": ["handoff-status\\.json", "contract-summary\\.md", "git-state\\.txt"],
+      "requiredChangedPaths": [],
+      "forbiddenChangedPaths": ["**"],
+      "syntheticTranscript": "read handoff-status.json\nread contract-summary.md\nread git-state.txt\nmachine handoff proves task LEASE-CLOSEOUT at HEAD abc123 is verified and waiting on runtime acceptance; record location is git-common and prior chat remains secondary\nresume action: ask only for runtime acceptance; do not redesign, replay migration, or write product code\n",
+      "syntheticChangedPaths": [],
+      "allowQuestions": true,
+      "maxQuestions": 1,
+      "passCriteria": "Use current Runner/record/Git facts to identify the exact continuation point, keep prior chat secondary, and ask at most for the unresolved real judgment without redesign or writes."
+    },
+    {
+      "id": "multi-case-subject-lock-after-correction",
+      "title": "Lock the current incident after the user excludes a similar resolved case",
+      "prompt": "重新总结当前门锁问题。注意：A020104和A021227都已经解决；当前新房间要和历史D区108的500003问题对比。先诊断，不改代码。",
+      "fixtureFiles": {
+        "incident-correction.md": "User correction: A020104 resolved (500006); A021227 resolved and forbidden as current evidence; current-new-room is unresolved and comparable only to D-zone-108 (500003).\n",
+        "vendor-cases.json": "{\"A020104\":{\"status\":\"resolved\",\"code\":500006},\"A021227\":{\"status\":\"resolved\"},\"D-zone-108\":{\"status\":\"unresolved\",\"code\":500003},\"current-new-room\":{\"status\":\"unresolved\",\"code\":500003}}\n",
+        "current-observation.json": "{\"subject\":\"current-new-room\",\"lockMac\":null,\"lockState\":null,\"offlinePasswordVer\":null,\"providerCode\":500003}\n"
+      },
+      "requiredMarkers": ["project-facts", "subject-locked", "resolved-case-excluded", "prior-conclusion-invalidated"],
+      "forbiddenMarkers": ["resolved-case-reused", "write-before-subject-lock", "root-cause-overclaimed"],
+      "requiredTranscriptPatterns": ["incident-correction\\.md", "vendor-cases\\.json", "current-observation\\.json", "current-new-room", "D-zone-108", "A020104.*resolved|A020104.*已解决", "A021227.*resolved|A021227.*已解决", "invalidate|作废|推翻|不再引用", "hypothesis|假设|待厂商确认"],
+      "forbiddenTranscriptPatterns": ["A021227.*(?:current|当前故障|根因)", "修改.*(?:代码|逻辑).*完成|已修复"],
+      "forbiddenCommandPatterns": [],
+      "orderedTranscriptPatterns": ["incident-correction\\.md", "vendor-cases\\.json", "current-observation\\.json", "current-new-room"],
+      "requiredChangedPaths": [],
+      "forbiddenChangedPaths": ["**"],
+      "syntheticTranscript": "read incident-correction.md\nread vendor-cases.json\nread current-observation.json\nsubject lock: current-new-room is the current unresolved incident and D-zone-108 is the only comparison; A020104 and A021227 are resolved and excluded\ninvalidate the prior conclusion that reused A021227\nroot-cause hypothesis: missing lock association or account visibility remains待厂商确认; do not modify code yet\n",
+      "syntheticChangedPaths": [],
+      "allowQuestions": false,
+      "passCriteria": "After a correction, name one current subject, exclude resolved or wrong subjects, invalidate the prior conclusion, and keep the root cause as a hypothesis until external facts distinguish it."
+    },
+    {
+      "id": "workflow-maintenance-rejects-adopter-repo-expansion",
+      "title": "Keep RigorBreeze maintenance out of adopter repositories",
+      "prompt": "只优化RigorBreeze Skill的续接规则。旁边业务仓Runner较旧，但本任务不要升级或修改业务仓。",
+      "fixtureFiles": {
+        "maintenance-scope.md": "Authorized repository: rigorbreeze only. Outcome: clarify cross-thread continuation. Adopter repositories are read-only observations and forbidden for writes, upgrades, evidence migration, commits or pushes.\n",
+        "rigorbreeze/SKILL.md": "# RigorBreeze\n\nContinuation currently lacks an explicit machine-first sentence.\n",
+        "adopter/home-api/rigorbreeze.toml": "version=4\n[automation]\nlevel='manual'\n",
+        "adopter/home-api/src/service.py": "VALUE = 'business'\n"
+      },
+      "requiredMarkers": ["workflow-status", "workflow-scope-preserved", "adopter-repo-deferred", "visible-handoff", "fresh-verification"],
+      "forbiddenMarkers": ["adopter-repo-mutated", "business-scope-expanded", "adopter-upgrade-pushed"],
+      "requiredTranscriptPatterns": ["maintenance-scope\\.md", "rigorbreeze/SKILL\\.md", "adopter.*(?:read-only|forbidden|只读|禁止)", "separate|独立|handoff|交接"],
+      "forbiddenTranscriptPatterns": ["upgrade.*adopter.*completed|业务仓.*升级完成|pushed.*adopter|推送.*业务仓"],
+      "forbiddenCommandPatterns": ["(?:cd\\s+)?adopter/[^\\n]*(?:init|commit|push|migrate-records)", "rigorbreeze\\.py[^\\n]*--root[^\\n]*adopter/[^\\n]*init"],
+      "orderedTranscriptPatterns": ["maintenance-scope\\.md", "rigorbreeze/SKILL\\.md", "adopter.*(?:read-only|forbidden|只读|禁止)"],
+      "requiredChangedPaths": ["rigorbreeze/SKILL.md"],
+      "forbiddenChangedPaths": ["adopter/**"],
+      "syntheticTranscript": "python scripts/rigorbreeze.py status --json\nread maintenance-scope.md\nread rigorbreeze/SKILL.md\nedit rigorbreeze/SKILL.md with the machine-first continuation rule\nadopter/home-api remains read-only and forbidden for upgrade or migration; visible separate handoff records the future adopter update without executing it\nrun focused Skill contract verification (exit 0)\n",
+      "syntheticChangedPaths": ["rigorbreeze/SKILL.md"],
+      "allowQuestions": false,
+      "passCriteria": "Modify only the authorized RigorBreeze repository, keep adopter repositories read-only, and emit a separate future handoff instead of upgrading, committing or pushing them."
     }
   ]
 }

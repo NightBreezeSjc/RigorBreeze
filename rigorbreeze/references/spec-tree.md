@@ -118,6 +118,16 @@ Private `state.json`, records, and the common registry are machine gate inputs,
 not product requirement sources. Do not commit linked-worktree state or edit it
 to bypass a gate. `doctor --all --repair` may rebuild the registry explicitly.
 
+Current-worktree `status --json` includes two compatible task-scoped
+projections. `records` reports tracked versus Git-common private storage plus
+machine-resolvable contract, evidence, and archive paths and existence; private
+paths are relative to the Git common directory and never expose an absolute
+user path. `handoff` reports the active task, worktree, branch, HEAD, phase,
+current dirty paths, waiting condition, and the same unique `nextAction`. Both
+are `null` without an active task, so status cannot invent continuation
+authority. They summarize existing state and records; neither is a new source
+of truth or schema.
+
 `status --json` includes `installation`, `workflowBaseline`, `workflowBypass`, lifecycle, `scope`, compact `evolution`, and `interaction` projections. The text view is limited to completed, current, and the one genuine user action; `actor=codex` work stays internal. Installation
 compares the bundled Skill with the project runner and reports `current`,
 `outdated`, `missing`, or `unmanaged`, missing/modified components, and upgrade safety. `workflowBaseline` proves managed files on the real base branch and reports `current`, `missing`, `partial`, `modified`, or `blocked`. Lifecycle prioritizes `integrated-unclosed` and `closure-pending` over stale-baseline advice. Scope is `preexisting-dirt`, `current`, `violated`, or `not-applicable`. Before first L1/L2 approval, `preexisting-dirt` reports every non-record worktree path and classifies it as `foreign-work` or `cache-hygiene`. After approval, committed changes from the baseline through `HEAD` plus current worktree changes produce `new-out-of-scope` when they escape Allowed Scope. Existing `outOfScope` remains compatible; optional `cause` and `dirtyPaths` explain the unique repair action.
