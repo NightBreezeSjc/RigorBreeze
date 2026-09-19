@@ -28,6 +28,23 @@ The project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). 
 - Reframed the repository for first-time adopters with bilingual onboarding, explicit safety boundaries, and a complete first-task walkthrough.
 - Added concise contribution and security policies plus an MIT license.
 
+## [0.23.0] - Resume from machine truth and lock corrected subjects
+
+### Added
+
+- Add compatible task-scoped `handoff` and `records` projections to current-worktree `status --json`, including the exact checkout/HEAD/phase/dirty paths/next action and machine-resolvable tracked or Git-common record locations.
+- Add deterministic Agent cases for machine-first cross-thread continuation, multi-case subject correction, and keeping Skill maintenance out of adopter repositories; coverage increases to twenty-six scenarios.
+
+### Changed
+
+- Treat prior chat as secondary context after compaction or task transfer; resume from Runner, contract and Git facts without replaying the conversation.
+- When similar incidents or identifiers coexist, lock one current subject, exclude resolved or wrong cases, and invalidate conclusions derived from them before further writes.
+- Require RigorBreeze maintenance and release work to leave adopter repositories read-only unless the user explicitly authorizes that repository as an outcome.
+
+### Compatibility
+
+- No public command, state/config schema, evidence schema, Automation Journal, risk gate, or Git authority changes. Idle status returns null task-scoped projections rather than inventing continuation authority.
+
 ## [0.22.0] - Preserve normal completion while shrinking coordination context
 
 ### Fixed

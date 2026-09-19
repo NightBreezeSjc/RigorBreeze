@@ -153,6 +153,51 @@ def workflow_bypass_action() -> dict[str, str]:
     }
 
 
+def task_records_projection(root: Path, state: dict[str, Any]) -> dict[str, Any] | None:
+    active = state.get("activeTask") or {}
+    task_id = active.get("id")
+    if not task_id:
+        return None
+    storage = str(flow_state.record_settings(root)["storage"])
+    location = "worktree" if storage == "tracked" else "git-common"
+    base = root if storage == "tracked" else flow_parallel.git_common_dir(root)
+    base = (base or root).resolve()
+
+    def item(path: Path) -> dict[str, Any]:
+        resolved = path.resolve()
+        try:
+            relative = resolved.relative_to(base).as_posix()
+        except ValueError:
+            relative = path.name
+        return {"location": location, "path": relative, "exists": path.is_file()}
+
+    return {
+        "taskId": str(task_id),
+        "storage": storage,
+        "contract": item(flow_state.task_path(root, str(task_id))),
+        "evidence": item(flow_state.evidence_path(root, str(task_id))),
+        "archive": item(flow_state.archive_path(root, str(task_id))),
+    }
+
+
+def handoff_projection(
+    root: Path, state: dict[str, Any], action: dict[str, Any]
+) -> dict[str, Any] | None:
+    active = state.get("activeTask") or {}
+    if not active.get("id"):
+        return None
+    return {
+        "taskId": str(active["id"]),
+        "worktree": str(root.resolve()),
+        "branch": flow_parallel.branch_name(root),
+        "head": flow_state.current_head(root),
+        "phase": state.get("phase"),
+        "dirtyPaths": flow_state.working_tree_paths(root),
+        "waitingOn": active.get("waitingOn") or "none",
+        "nextAction": action,
+    }
+
+
 def orphaned_record_action(task_id: str) -> dict[str, str]:
     return {
         "reason": (
@@ -739,6 +784,8 @@ def command_status(
             "automation": None,
             "evolution": evolution_projection([root]),
         }
+        payload["records"] = task_records_projection(root, state)
+        payload["handoff"] = handoff_projection(root, state, action)
         payload["interaction"] = interaction_projection(state, payload, action)
         if json_output:
             print(json.dumps(payload, ensure_ascii=False, sort_keys=True))
@@ -792,6 +839,8 @@ def command_status(
         "workflowBypass": workflow_bypass,
         "evolution": evolution_projection([root]),
     }
+    payload["records"] = task_records_projection(root, state)
+    payload["handoff"] = handoff_projection(root, state, action)
     payload["interaction"] = interaction_projection(state, payload, action)
     if active and flow_state.task_path(root, active["id"]).is_file():
         payload.update(

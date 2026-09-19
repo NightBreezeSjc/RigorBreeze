@@ -47,6 +47,12 @@ ready work and names the unresolved decision or upstream event for an
 intentional prepared draft. A waiting draft cannot be approved, and lack of
 implementation is not evidence that the draft is accidental or disposable.
 
+When similar entities, incidents, identifiers, or legacy/current cases coexist,
+lock one current subject before drawing conclusions. A user correction excludes
+resolved or wrong subjects and invalidates conclusions derived from them. Keep
+the root cause as a hypothesis until current evidence distinguishes it; never
+preserve a convenient conclusion by silently changing its subject.
+
 `Runtime-Claims` names only exclusive resources actually used by the task: `port`, `service`, `process`, `app`, or `environment`; use `none` otherwise. Worktree isolation does not isolate these resources, so active claim conflicts block approval and window ownership. RigorBreeze reports conflicts but never kills processes, closes tools, or takes ports.
 
 For conditional L2 integrations, `Operational-Modes` maps `enabled`, `disabled`, and `unavailable` to declared acceptance IDs. Each mapped behavior must close through current RED/GREEN or requirement-bound real-runtime evidence. Use `N/A - <reason>` when no conditional runtime behavior exists.
@@ -375,6 +381,12 @@ giant contract or multiply PRs/worktrees merely to mirror task records.
 
 Keep a stable `RIGORBREEZE_SESSION_ID` per Codex window. A second live session cannot claim the same worktree. A possible Direct change uses `status --json --path <relative>` and receives only relevant writers; routine task writes use current-worktree `status --json`. Concurrent windows and optional orchestrators use compact all-project status, while full all-project status is reserved for exact repair, cleanup, or evolution. Missing integrated worktrees are stale-registry cleanup candidates, not crashes or overlap blockers. An integrated HEAD with uncommitted same-path changes remains a writer until clean.
 
+After compaction or in a new Codex task, resume from current `handoff` and
+`records`, their contract, and Git facts. These identify the task, checkout,
+HEAD, phase, dirty paths, waiting condition, next action, and record locations.
+Prior chat is supporting context, never continuation authority; do not replay a
+long conversation when machine facts already identify the safe resume point.
+
 An approved task may record read-only `runtime`, `device`, `wechat-device`, or `authoritative-observation` evidence such as `production-role-permission-matrix` before verification. The record is pending and cannot advance acceptance; matching verification binds it only when task digest, project fingerprint, HEAD, and evidence file remain unchanged. Review, product-review, artifact, release, and every external write still require fresh verification.
 
 Sequential initiative work reuses one designated integration worktree per
@@ -430,5 +442,7 @@ For an explicit current-task request, Codex may run `automate commit --once` or 
 - Do not perform unsolicited Git or production actions while automation is `manual`; an explicit one-time commit/push is the only exception.
 - Do not make workflow metrics a delivery goal of their own.
 - Do not add a permanent abstraction for a one-off problem.
+- Do not let Skill maintenance or release work mutate adopter repositories unless
+  that repository is an explicit user-authorized outcome; emit a separate handoff.
 
 Change the shared Skill only after real use establishes the need. Prefer project configuration, an optional adapter, or a better prompt when those solve the problem without raising the fixed cost for every user.

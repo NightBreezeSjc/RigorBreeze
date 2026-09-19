@@ -43,6 +43,8 @@
 
 `Task-Origin` 保存一个精简且可定位的来源，例如当前需求、已批准的项目塑形简报或前置任务。准备就绪时 `Waiting-On` 为 `none`；有意预建的草稿则记录尚未解决的决策或上游事件。等待中的草稿不能批准，尚无实现也不能作为“它是意外残留、可以删除”的证据。
 
+当多个相似对象、事故、编号或新旧案例同时存在时，必须先锁定唯一当前对象再下结论。用户纠正后，要明确排除已经解决或引用错误的对象，并使基于它们的旧结论失效。当前证据尚未真正区分前，根因仍是“假设”；不得通过悄悄更换对象来保留原结论。
+
 `Runtime-Claims` 只声明任务实际使用的独占资源：`port`、`service`、`process`、`app` 或 `environment`；其余情况使用 `none`。worktree 只能隔离文件，无法隔离这些资源，因此活动声明冲突会阻断批准和窗口认领。RigorBreeze 只报告冲突，不杀进程、不关闭工具、不抢占端口。
 
 对于条件化 L2 外部集成，`Operational-Modes` 将 `enabled`、`disabled`、`unavailable` 映射到合同中已声明的验收 ID。每个模式必须通过当前 RED/GREEN 或绑定该需求的真实运行证据闭合。没有条件化运行行为时填写 `N/A - <原因>`。
@@ -344,6 +346,8 @@ integration 流上包含多个可独立验证的顺序任务；每个切片先�
 
 每个 Codex 窗口保持稳定的 `RIGORBREEZE_SESSION_ID`。第二个存活 Session 不能认领同一 worktree。可能的 Direct 只用 `status --json --path <相对路径>` 查询相关写者；普通任务读取当前 worktree 状态，并发/依赖/交接才读取 compact 全局状态，精确修复、清理或演进才加载完整全局状态。已集成但路径已不存在的历史 worktree 是 stale-registry 清理候选，不得让聚合状态崩溃或触发 overlap；已集成 HEAD 的 worktree 若仍有同路径未提交改动，则继续视为活动写者。
 
+上下文压缩或切换到新Codex任务后，先读取当前`handoff`和`records`、对应合同及Git事实。它们给出准确任务、工作区、HEAD、阶段、脏路径、等待条件、下一动作和记录位置。旧聊天只能作为补充线索，不能成为续接权限；机器事实已经能确定安全续接点时，不得重新加载整段历史对话。
+
 有效批准后，可在 verification 前登记只读 `runtime`、`device`、`wechat-device` 或 `authoritative-observation`（例如 `production-role-permission-matrix`）。记录保持 pending，不能提前形成 accepted；只有 task digest、project fingerprint、HEAD 和证据文件均未变化时，后续验证才自动绑定。review、product-review、artifact、release 和所有外部写操作仍要求新鲜 verification。
 
 顺序推进的项目在每个仓库复用一个指定 integration worktree。只有真正并发的写任务
@@ -393,5 +397,6 @@ integration 流上包含多个可独立验证的顺序任务；每个切片先�
 - automation 为 `manual` 时不执行未经用户明确要求的 Git 或生产动作；单次 commit/push 是唯一例外；
 - 不把流程指标本身当成交付目标；
 - 不为一次问题建立永久抽象。
+- Skill维护或发布任务不得顺手修改采用方业务仓，除非该仓库是用户明确授权的结果；否则只做独立交接。
 
 只有真实使用证明必要时才修改共享 Skill。能通过项目配置、可选适配器或更好提示解决的问题，不应增加所有用户的固定成本。

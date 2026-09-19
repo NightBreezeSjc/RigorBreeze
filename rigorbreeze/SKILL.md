@@ -5,12 +5,12 @@ description: Run RigorBreeze, a risk-adaptive idea-to-delivery workflow for solo
 
 # RigorBreeze
 
-Deliver one outcome per task. Match risk; generate evidence. One worktree/one writer; Git defaults `manual`.
+One outcome/task; risk-matched evidence; one worktree/writer; Git `manual`.
 
 ## Enter with the smallest sufficient context
 
 1. Resolve root. Use the **no-task path** for status/logs/screenshots/recommendations; give the read-only answer despite stale state.
-2. Before writing—including **after compaction**—run bundled status. Direct locates targets read-only, then runs `python3 scripts/rigorbreeze.py status --json --path <target>`; never `--path .` or global status. Reuse for one write phase until HEAD, contract, ownership, external state, or runner changes. Reserve `status --all --compact --json` for concurrency/dependencies/handoff and full global detail for repair/cleanup/evolution.
+2. Before writing/after compaction run bundled status. Direct locates targets, then uses `status --json --path <target>`, never `--path .` or global status. Continuations consume `handoff`/`records` before chat. Reuse for one write phase until HEAD, contract, ownership, external state, or runner changes. Reserve `status --all --compact --json` for concurrency/handoff and detail for repair/evolution.
 3. If uninitialized, `init`, configure `rigorbreeze.toml`, then `doctor --json`. Never replace a runner mid-task; migrate Git state only through it.
 4. Read affected sources plus config/contract/index. Writes need approval and ownership. For missing L2/Emergency records, restore the authoritative record or use an explicit Emergency contract, never an informal task card; neither supplies missing product intent.
 
@@ -22,7 +22,7 @@ Recover **recoverable project facts** from code, tests, Git, interfaces, data, p
 
 Use initiative shaping only for a new product, new business domain, broad legacy migration, or unshaped initiative; ordinary bounded work skips it. Do not create a delivery task while shaping. Keep a decision frontier of at most three questions, each with recommendation/impact. Compare two or three viable approaches by evidence, value, usability, feasibility, and viability, no-gos, then choose the first vertical slice. A prototype answers one decision question, never acceptance.
 
-For ordinary work, preserve the exact user-stated outcome/source and label Agent-inferred options. Inference cannot add a repository, backend, database, payment, permission, or external boundary without outcome approval. Record freshness/fallback/version/ambiguity; classify wrong/missing data, config, or missing capability; map observable atoms to acceptance/exclusion and separate correction from optional prevention.
+For ordinary work, preserve the exact user outcome/source and label inferred options. Inference cannot add a repository or protected boundary without outcome approval. On correction or similar subjects, lock the current identity, exclude resolved/wrong cases, and invalidate prior conclusions. Classify wrong/missing data, config, or missing capability; map observable atoms to acceptance/exclusion and separate correction from optional prevention.
 
 ## Choose the risk lane and isolation
 
@@ -82,6 +82,6 @@ After delivery, reconcile from the base worktree. Missing historical worktrees a
 
 ## Learn and complete
 
-Clean first-pass L1 may machine-retrospect; friction and every L2/Emergency need prefilled human review. Extra green runs do not repeat unchanged judgment; changed facts invalidate it. A reusable defect becomes a separate Skill task, never business expansion. Ordinary failures need two comparable occurrences; a high-risk escape needs one. Promote a rule only when the same fixture shows the candidate beats the prior Skill without regression. Review private candidates with `$rigorbreeze 汇总这个项目的演进候选`; create no second log or relaxed gate.
+Clean first-pass L1 may machine-retrospect; friction and every L2/Emergency need prefilled review. Changed facts, not extra green runs, repeat judgment. A reusable defect becomes a separate Skill task; Skill maintenance cannot mutate adopter repositories without explicit authority. Ordinary failures need two comparable occurrences; a high-risk escape needs one. Promote only when the same fixture beats the prior Skill without regression. Review private candidates with `$rigorbreeze 汇总这个项目的演进候选`; create no second log or relaxed gate.
 
 Codex runs internal commands. Close in order: verify, accept, review, retrospective, archive, guarded delivery, reconcile. A checkpoint commit never completes work or permits a successor. L0 requires affected; L1/L2 require full plus applicable acceptance/review. Use `abandoned` for clean cancellation and `reconciled` only for proven external integration; never invent success. Release requires an active release-ready task. Before commit, archive, or fixed/passed/complete claims, cite **fresh verification**: command, status, scope. History/other Agents cannot substitute. After L2, cross-repository work, or context compaction, give one short handoff prompt recommending a new Codex task for the next independent feature; never block continuation.
