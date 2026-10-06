@@ -230,11 +230,11 @@ Compatibility is a product property, not a universal yes/no rule. Code with no d
 
 The normal delivery order is verify/full → acceptance → two-pass review → retrospective → archive → guarded commit/push/merge → reconcile → cleanup. A checkpoint commit on the task's own integration stream preserves work but never completes acceptance, closes the task, or permits its successor. `reconciled` remains for proven historical/external integration. A clear L1 request is sufficient approval once its compact contract is complete. A clean first-pass L1 records a machine retrospective and closes automatically; failures, bypass, rework, unreasonable blocks, and every L2/Emergency retain human review. Release authority is never inherited from ordinary archive.
 
-UAT and review are not hidden implementation phases. If their feedback requires
-another product write, re-read current status, ownership, approval, and scope.
-Same-result feedback inside Allowed Scope resumes implementation and invalidates
-old verification/acceptance. A forbidden path, active owner, or new user result
-becomes a successor task or visible handoff before any edit.
+UAT and review are not hidden implementation phases. Route follow-up work again
+by consequence: a deterministic taskless correction remains Direct and queries
+only its target path; existing-task writes re-read status, ownership, approval,
+and scope and invalidate old proof. A forbidden path, active owner, or new user
+result becomes a successor task or visible handoff before any edit.
 
 L0 may archive after configured verification. L1/L2 retain current full verification, applicable acceptance, and two review passes; only the retrospective interaction is conditional for a clean L1.
 
