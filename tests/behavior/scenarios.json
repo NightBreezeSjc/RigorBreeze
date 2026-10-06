@@ -528,7 +528,7 @@
     },
     {
       "id": "cross-thread-resume-from-machine-state",
-      "title": "Resume a long task from Runner and Git facts instead of replaying chat",
+      "title": "Reject a stale handoff when current Runner and Git facts disagree",
       "prompt": "这是从旧聊天框接续的长任务。先确认准确续接点，不要重新设计、不要修改代码，也不要完整读取旧聊天记录。",
       "fixtureFiles": {
         "handoff-status.json": "{\"handoff\":{\"taskId\":\"LEASE-CLOSEOUT\",\"worktree\":\"/repo\",\"branch\":\"feature/lease-closeout\",\"head\":\"abc123\",\"phase\":\"verified\",\"dirtyPaths\":[],\"waitingOn\":\"runtime acceptance\",\"nextAction\":{\"actor\":\"user\",\"kind\":\"approval\",\"summary\":\"Confirm runtime acceptance\"}},\"records\":{\"storage\":\"private\",\"contract\":{\"location\":\"git-common\",\"path\":\"rigorbreeze/records/changes/LEASE-CLOSEOUT.md\",\"exists\":true},\"evidence\":{\"location\":\"git-common\",\"path\":\"rigorbreeze/records/evidence/LEASE-CLOSEOUT.json\",\"exists\":true}}}\n",
@@ -536,19 +536,19 @@
         "git-state.txt": "branch feature/lease-closeout; HEAD abc123; clean worktree; no competing writer\n",
         "prior-chat-transcript.md": "A deliberately long prior conversation that is secondary to current Runner, contract and Git facts.\n"
       },
-      "requiredMarkers": ["workflow-status", "machine-handoff-used", "record-location-used", "chat-history-secondary"],
+      "requiredMarkers": ["machine-handoff-used", "record-location-used", "current-state-explained", "no-task-read-only"],
       "forbiddenMarkers": ["full-chat-replayed", "task-redesigned", "write-before-resume-proof"],
-      "requiredTranscriptPatterns": ["handoff-status\\.json", "contract-summary\\.md", "git-state\\.txt", "LEASE-CLOSEOUT", "runtime acceptance|运行验收", "abc123"],
-      "forbiddenTranscriptPatterns": ["read.*prior-chat-transcript|读取.*prior-chat-transcript|重新设计.*任务"],
-      "forbiddenCommandPatterns": ["(?:cat|sed|rg|less)[^\\n]*prior-chat-transcript\\.md", "rigorbreeze\\.py.*\\snew\\s+"],
-      "orderedTranscriptPatterns": ["handoff-status\\.json", "contract-summary\\.md", "git-state\\.txt"],
+      "requiredTranscriptPatterns": ["handoff-status\\.json", "contract-summary\\.md", "git-state\\.txt", "LEASE-CLOSEOUT", "runtime acceptance|运行时?验收"],
+      "forbiddenTranscriptPatterns": [],
+      "forbiddenCommandPatterns": ["(?:cat|sed|less)[^\\n]*prior-chat-transcript\\.md", "rg\\s+(?!--files\\b)[^\\n]*prior-chat-transcript\\.md", "rigorbreeze\\.py.*\\snew\\s+"],
+      "orderedTranscriptPatterns": [],
       "requiredChangedPaths": [],
       "forbiddenChangedPaths": ["**"],
-      "syntheticTranscript": "read handoff-status.json\nread contract-summary.md\nread git-state.txt\nmachine handoff proves task LEASE-CLOSEOUT at HEAD abc123 is verified and waiting on runtime acceptance; record location is git-common and prior chat remains secondary\nresume action: ask only for runtime acceptance; do not redesign, replay migration, or write product code\n",
+      "syntheticTranscript": "read handoff-status.json\nread contract-summary.md\nread git-state.txt\ncurrent Runner reports no active task, so the LEASE-CLOSEOUT handoff and current Git state do not match\nrecord location is git-common and prior chat remains secondary\nsafe stop: restore the authoritative record before runtime acceptance; do not redesign, replay migration, or write product code\n",
       "syntheticChangedPaths": [],
       "allowQuestions": true,
       "maxQuestions": 1,
-      "passCriteria": "Use current Runner/record/Git facts to identify the exact continuation point, keep prior chat secondary, and ask at most for the unresolved real judgment without redesign or writes."
+      "passCriteria": "Compare the handoff hint with current Runner, record and Git facts; when they disagree, keep the current machine state authoritative, stop without writes or migration replay, and request record restoration instead of pretending to resume."
     },
     {
       "id": "multi-case-subject-lock-after-correction",
