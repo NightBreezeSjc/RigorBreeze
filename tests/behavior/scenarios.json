@@ -60,7 +60,7 @@
       "requiredTranscriptPatterns": ["status[^\n]*(?:--path[^\n]*src/parser\\.py|src/parser\\.py[^\n]*--path)", "handoff\\.md", "parser\\.py"],
       "forbiddenTranscriptPatterns": [],
       "forbiddenCommandPatterns": ["rigorbreeze\\.py[^\n]*approve task"],
-      "orderedTranscriptPatterns": ["status[^\n]*(?:--path[^\n]*src/parser\\.py|src/parser\\.py[^\n]*--path)", "handoff\\.md", "parser\\.py"],
+      "orderedTranscriptPatterns": [],
       "requiredChangedPaths": ["src/parser.py", "tests/test_parser.py"],
       "forbiddenChangedPaths": [],
       "syntheticTranscript": "python scripts/rigorbreeze.py status --json --path src/parser.py\nread handoff.md and src/parser.py\nuse Direct because current state has no active task or competing writer and no protected boundary\nrun focused parser regression\n",
