@@ -40,6 +40,7 @@ The project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). 
 - Treat prior chat as secondary context after compaction or task transfer; resume from Runner, contract and Git facts without replaying the conversation.
 - When similar incidents or identifiers coexist, lock one current subject, exclude resolved or wrong cases, and invalidate conclusions derived from them before further writes.
 - Require RigorBreeze maintenance and release work to leave adopter repositories read-only unless the user explicitly authorizes that repository as an outcome.
+- Re-route follow-up work by consequence so a deterministic taskless correction stays Direct instead of creating an L1 task merely because it follows UAT, review, or an earlier conversation.
 
 ### Compatibility
 
