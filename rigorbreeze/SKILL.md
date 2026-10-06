@@ -28,7 +28,7 @@ For ordinary work, preserve the exact user outcome/source and label inferred opt
 
 **Risk follows consequence**, not diff size:
 
-- `Direct`: one deterministic low-consequence result in one repository; no ambiguity/writer or API/persisted-data/auth/permission/payment/lock/migration/dependency/production-config/external-state/release boundary. Backend, follow-up/compaction/handoff, prior failure, or regression tests do not raise risk. If path status proves no writer/protected boundary, stay Direct: never `new`/`approve`; use focused proof/compile, no task/evidence/full. Extend existing seam unless unusable. **Do not promote merely because configured profiles are absent or incomplete.** Unrelated dirt may use a short-lived clean worktree; remove only clean+contained.
+- `Direct`: one deterministic low-consequence result/repository; no ambiguity/writer or API/persisted-data/auth/permission/payment/lock/migration/dependency/production-config/external-state/release boundary. Backend, follow-up/compaction/handoff, prior failure, or regression tests do not raise risk. If path status proves no writer/protected boundary, stay Direct: never `new`/`approve`; behavior fixes extend the executable test seam before focused proof/compile—no task/evidence/full. **Do not promote merely because configured profiles are absent or incomplete.** Unrelated dirt may use a short-lived clean worktree; remove only clean+contained.
 - `L0`: coordinated documentation or isolated non-behavioral/visual change.
 - `L1`: normal feature, fix, or user flow.
 - `L2`: sensitive data, permissions, migration, payment, external integration, architecture, or production release.

@@ -613,6 +613,9 @@ class SkillContractTests(unittest.TestCase):
             with self.subTest(boundary=boundary):
                 self.assertIn(boundary, direct)
         self.assertIn("ambiguity/writer", direct)
+        self.assertIn("follow-up/compaction/handoff", direct)
+        self.assertIn("never `new`/`approve`", direct)
+        self.assertIn("executable test seam", direct)
 
     def test_skill_documents_runtime_affordances_hypotheses_and_visual_tracers(
         self,
