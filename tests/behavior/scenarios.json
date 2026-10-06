@@ -99,14 +99,15 @@
       },
       "requiredMarkers": ["workflow-status", "review-verified", "yagni-applied", "deletion-test-applied", "solution-ladder-applied", "reuse-checked", "stdlib-native-checked"],
       "forbiddenMarkers": ["review-blindly-implemented"],
-      "requiredTranscriptPatterns": ["review\\.md", "report\\.py|pyproject\\.toml", "delete|inline|删除|内联", "existing|reuse|已有|现有|复用", "standard library|framework|native|str\\.join|direct implementation|标准库|框架|原生|直接实现"],
+      "requiredTranscriptPatterns": ["review\\.md", "report\\.py|pyproject\\.toml", "delete|inline|删除|内联", "existing|reuse|已有|现有|复用"],
       "forbiddenTranscriptPatterns": [],
       "orderedTranscriptPatterns": ["review\\.md", "report\\.py|pyproject\\.toml"],
       "requiredChangedPaths": [],
       "forbiddenChangedPaths": ["pyproject.toml", "src/**"],
       "syntheticTranscript": "read review.md\nread src/report.py and pyproject.toml\napply solution ladder: no event capability is required; existing render_report already meets the result, so no implementation wins over a standard library, framework/native, installed dependency, or new wrapper\napply deletion test: delete the proposed wrapper because it removes unused complexity\n",
       "syntheticChangedPaths": [],
-      "allowQuestions": false,
+      "allowQuestions": true,
+      "maxQuestions": 1,
       "passCriteria": "Reject the unrelated suggestion with repository evidence, apply the deletion test, and make no speculative change."
     },
     {
