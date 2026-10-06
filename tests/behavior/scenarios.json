@@ -559,41 +559,40 @@
         "vendor-cases.json": "{\"A020104\":{\"status\":\"resolved\",\"code\":500006},\"A021227\":{\"status\":\"resolved\"},\"D-zone-108\":{\"status\":\"unresolved\",\"code\":500003},\"current-new-room\":{\"status\":\"unresolved\",\"code\":500003}}\n",
         "current-observation.json": "{\"subject\":\"current-new-room\",\"lockMac\":null,\"lockState\":null,\"offlinePasswordVer\":null,\"providerCode\":500003}\n"
       },
-      "requiredMarkers": ["project-facts", "subject-locked", "resolved-case-excluded", "prior-conclusion-invalidated"],
+      "requiredMarkers": ["project-facts", "subject-locked", "resolved-case-excluded", "no-task-read-only"],
       "forbiddenMarkers": ["resolved-case-reused", "write-before-subject-lock", "root-cause-overclaimed"],
-      "requiredTranscriptPatterns": ["incident-correction\\.md", "vendor-cases\\.json", "current-observation\\.json", "current-new-room", "D-zone-108", "A020104.*resolved|A020104.*已解决", "A021227.*resolved|A021227.*已解决", "invalidate|作废|推翻|不再引用", "hypothesis|假设|待厂商确认"],
-      "forbiddenTranscriptPatterns": ["A021227.*(?:current|当前故障|根因)", "修改.*(?:代码|逻辑).*完成|已修复"],
+      "requiredTranscriptPatterns": ["incident-correction\\.md", "vendor-cases\\.json", "current-observation\\.json", "current-new-room", "D-zone-108", "A020104.*resolved|A020104.*已解决", "A021227.*resolved|A021227.*已解决", "excluded|排除", "cannot prove|不能证明"],
+      "forbiddenTranscriptPatterns": ["修改.*(?:代码|逻辑).*完成|已修复"],
       "forbiddenCommandPatterns": [],
       "orderedTranscriptPatterns": ["incident-correction\\.md", "vendor-cases\\.json", "current-observation\\.json", "current-new-room"],
       "requiredChangedPaths": [],
       "forbiddenChangedPaths": ["**"],
-      "syntheticTranscript": "read incident-correction.md\nread vendor-cases.json\nread current-observation.json\nsubject lock: current-new-room is the current unresolved incident and D-zone-108 is the only comparison; A020104 and A021227 are resolved and excluded\ninvalidate the prior conclusion that reused A021227\nroot-cause hypothesis: missing lock association or account visibility remains待厂商确认; do not modify code yet\n",
+      "syntheticTranscript": "read incident-correction.md\nread vendor-cases.json\nread current-observation.json\nsubject lock: current-new-room is the current unresolved incident and D-zone-108 is the only comparison; A020104 and A021227 are resolved and excluded\nthe prior conclusion that reused A021227 is excluded; the same error code不能证明the same root cause without distinguishing evidence\ndo not modify code yet\n",
       "syntheticChangedPaths": [],
       "allowQuestions": false,
-      "passCriteria": "After a correction, name one current subject, exclude resolved or wrong subjects, invalidate the prior conclusion, and keep the root cause as a hypothesis until external facts distinguish it."
+      "passCriteria": "After a correction, name one current subject, explicitly exclude every resolved or wrong subject, and state that similar symptoms do not prove the same root cause until distinguishing evidence exists."
     },
     {
       "id": "workflow-maintenance-rejects-adopter-repo-expansion",
       "title": "Keep RigorBreeze maintenance out of adopter repositories",
-      "prompt": "只优化RigorBreeze Skill的续接规则。旁边业务仓Runner较旧，但本任务不要升级或修改业务仓。",
+      "prompt": "只优化RigorBreeze Skill的续接规则。目标源码是仓库内 rigorbreeze/SKILL.md；.agents/skills/rigorbreeze 是安装后的只读执行副本，只能读取。旁边业务仓Runner较旧，但本任务不要升级或修改业务仓。",
       "fixtureFiles": {
-        "maintenance-scope.md": "Authorized repository: rigorbreeze only. Outcome: clarify cross-thread continuation. Adopter repositories are read-only observations and forbidden for writes, upgrades, evidence migration, commits or pushes.\n",
         "rigorbreeze/SKILL.md": "# RigorBreeze\n\nContinuation currently lacks an explicit machine-first sentence.\n",
         "adopter/home-api/rigorbreeze.toml": "version=4\n[automation]\nlevel='manual'\n",
         "adopter/home-api/src/service.py": "VALUE = 'business'\n"
       },
-      "requiredMarkers": ["workflow-status", "workflow-scope-preserved", "adopter-repo-deferred", "visible-handoff", "fresh-verification"],
+      "requiredMarkers": ["workflow-scope-preserved", "fresh-verification"],
       "forbiddenMarkers": ["adopter-repo-mutated", "business-scope-expanded", "adopter-upgrade-pushed"],
-      "requiredTranscriptPatterns": ["maintenance-scope\\.md", "rigorbreeze/SKILL\\.md", "adopter.*(?:read-only|forbidden|只读|禁止)", "separate|独立|handoff|交接"],
+      "requiredTranscriptPatterns": ["rigorbreeze/SKILL\\.md"],
       "forbiddenTranscriptPatterns": ["upgrade.*adopter.*completed|业务仓.*升级完成|pushed.*adopter|推送.*业务仓"],
-      "forbiddenCommandPatterns": ["(?:cd\\s+)?adopter/[^\\n]*(?:init|commit|push|migrate-records)", "rigorbreeze\\.py[^\\n]*--root[^\\n]*adopter/[^\\n]*init"],
-      "orderedTranscriptPatterns": ["maintenance-scope\\.md", "rigorbreeze/SKILL\\.md", "adopter.*(?:read-only|forbidden|只读|禁止)"],
+      "forbiddenCommandPatterns": ["cd\\s+adopter/[^\\s;&]+[^\\n]*(?:\\binit\\b|\\bcommit\\b|\\bpush\\b|migrate-records)", "git\\s+-C\\s+adopter/[^\\s;&]+\\s+(?:commit|push)\\b", "rigorbreeze\\.py[^\\n]*--root[^\\n]*adopter/[^\\n]*(?:init|migrate-records)"],
+      "orderedTranscriptPatterns": [],
       "requiredChangedPaths": ["rigorbreeze/SKILL.md"],
       "forbiddenChangedPaths": ["adopter/**"],
-      "syntheticTranscript": "python scripts/rigorbreeze.py status --json\nread maintenance-scope.md\nread rigorbreeze/SKILL.md\nedit rigorbreeze/SKILL.md with the machine-first continuation rule\nadopter/home-api remains read-only and forbidden for upgrade or migration; visible separate handoff records the future adopter update without executing it\nrun focused Skill contract verification (exit 0)\n",
+      "syntheticTranscript": "python scripts/rigorbreeze.py status --json\nread rigorbreeze/SKILL.md\nedit rigorbreeze/SKILL.md with the machine-first continuation rule\nadopter/home-api remains unchanged; no upgrade, migration, commit or push command is executed there\nrun focused Skill contract verification (exit 0)\n",
       "syntheticChangedPaths": ["rigorbreeze/SKILL.md"],
       "allowQuestions": false,
-      "passCriteria": "Modify only the authorized RigorBreeze repository, keep adopter repositories read-only, and emit a separate future handoff instead of upgrading, committing or pushing them."
+      "passCriteria": "Modify and freshly verify only the authorized RigorBreeze source while proving through changed paths and executed commands that the adopter repository was not upgraded, committed, pushed or otherwise mutated."
     }
   ]
 }
