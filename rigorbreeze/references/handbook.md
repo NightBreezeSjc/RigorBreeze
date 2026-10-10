@@ -217,6 +217,8 @@ After confirming the requirement and real call path, move through one ladder in 
 
 Preserve the smallest working vertical path, then extract a cohesive boundary only when separate change pressure, a public contract, or safety requires it. Standards Review classifies avoidable complexity as `delete`, `reuse`, `stdlib`, `native`, `yagni`, or `shrink`. Apply the deletion test before retaining a helper, adapter, wrapper, configuration layer, or shared abstraction: if deleting it removes complexity, delete it; if proven complexity merely spreads across callers or weakens safety, keep it. This is contextual, not a universal “two implementations” rule. Record intentionally accepted capacity limits and re-evaluation triggers in Lore `Directive`, not a new debt system.
 
+When one result introduces two or more independent mechanisms, optimizations, or abstractions, Standards Review also performs a bounded ablation: isolate, benchmark, or remove each contribution against the same acceptance threshold. Keep the mechanism that is necessary or carries a durable invariant; reject low-contribution complexity in Lore `Rejected`. A single implementation, ordinary CRUD, Direct work, and mandatory permission, security, data-protection, migration, rollback, accessibility, or compatibility controls do not gain this extra step.
+
 Compatibility is a product property, not a universal yes/no rule. Code with no declared compatibility promise may remove a proven-dead path when callers, data, and Git history support that conclusion. Public APIs, persisted data, upgrade paths, and production migrations require an explicit transition, verification, and rollback or forward-fix strategy. A pre-1.0 version by itself does not authorize destructive changes when real users or data exist.
 
 ### Verify and close
@@ -297,6 +299,8 @@ Accept the capability that actually changed:
 - migration: cloned-data rehearsal, before/after assertions, backup/restore or forward-fix proof;
 - external integration: prefer sanitized real responses or provider-sandbox fixtures; cover enabled, disabled, and unavailable modes plus failure behavior. Verify wire serialization, text-form JSON, URL-encoding count, database-dialect semantics, and order-creation or other business preconditions where applicable. Mock or temporary credentials prove only a local contract/build, never real acceptance.
 
+The acceptance oracle comes from authoritative requirements, approved acceptance IDs, and explicit user corrections. UI, API, database, log, and Trace output are observation evidence: observations cannot redefine acceptance, even when implementation, tests, and runtime all agree with the same wrong result. Preserve the mismatch as defect evidence and fix the product or test; never rewrite an approved contract to make a failing system appear correct.
+
 Before assigning manual acceptance, confirm the actual route, menu, role, account, and device entry that will be used. If one of those affordances is unavailable, say so honestly as `N/A - <reason>` and substitute equivalent runtime/API evidence instead of pretending a human can click a path that does not exist.
 
 ### Migration phase compatibility
@@ -309,7 +313,7 @@ Stopping before an unsafe remote write is necessary but not sufficient when the 
 
 ### Optional project verification pack
 
-When real-runtime validation repeatedly becomes the bottleneck, create a tracked `verification/` pack through a separate, explicitly approved task. Its README defines Launch, Doctor, Drive, Evidence, and Cleanup; its first map covers only three to five high-risk or frequent features. Project scripts must work before the pack is accepted. Reports, screenshots, traces, and temporary data remain ignored runtime artifacts.
+When real-runtime validation repeatedly becomes the bottleneck, create a tracked `verification/` pack through a separate, explicitly approved task. Its README defines Launch, Prepare, Doctor, Drive, Inspect, Evidence, and Cleanup/Reset; its first map covers only three to five high-risk or frequent features. Prepare creates only owned synthetic accounts, roles, permissions, and test data. Inspect uses bounded read-only database/log/Trace access with explicit query scope, row limit, timeout, and redaction. Cleanup/Reset runs after success, failure, and timeout and removes only resources owned by the drive. Project scripts must work before the pack is accepted. Reports, screenshots, traces, and temporary data remain ignored runtime artifacts.
 
 An `acceptance` check may opt into `verification_report = true`, name `verification_root`, and require one of `typecheck`, `unit`, `integration`, `live-runtime`, or `device`. The report must bind to the current HEAD and current Feature Map digest, name only mapped features, point to non-empty repository-relative evidence, and show passed Doctor and Cleanup. The runner stores report and evidence digests in existing task evidence; it does not create another evidence system. Projects without this configuration retain the existing manual runtime/device path and no extra calls.
 

@@ -44,13 +44,14 @@ python3 -B tests/behavior/run.py validate
 python3 -B -m unittest discover -s tests/behavior -v
 ```
 
-Before a release candidate, run all twenty-six synthetic scenarios twice with a locally installed Codex. Run any newly added high-risk scenario twice first, then the complete suite when preparing a release candidate. This is an explicit maintainer action; ordinary commits, configured `full`, and CI never invoke it:
+For a Public Preview minor candidate, run every affected Live scenario twice with a locally installed Codex after the complete deterministic suite passes. Do not rerun unchanged Live cases merely because the version changed. Run the complete 27×2 Live matrix only for a v1.0 RC or a broad change to global risk routing, Git authority, migration, or release governance. This is an explicit maintainer action; ordinary commits, configured `full`, and CI never invoke it:
 
 ```bash
-python3 -B tests/behavior/run.py run --version 0.23.0 --repetitions 2
+python3 -B tests/behavior/run.py run --version 0.24.0 --case acceptance-oracle-independence --repetitions 2
+python3 -B tests/behavior/run.py run --version 0.24.0 --case review-skepticism --repetitions 2
 ```
 
-Any hard-rule failure blocks the candidate. Inspect only the redacted Git-private results under `.git/rigorbreeze/behavior-evals/0.23.0/`; do not commit them or use real credentials and services in a fixture. Each result also records cached/uncached input, output and reasoning tokens, workflow-only runner calls, evidence bytes, and product/test line deltas. Compare fixed-model arms by median; never advertise savings from one run or relax a safety rule to meet a Token target.
+Any affected-case hard-rule failure blocks the candidate. Inspect only the redacted Git-private results under `.git/rigorbreeze/behavior-evals/0.24.0/`; do not commit them or use real credentials and services in a fixture. Each result also records cached/uncached input, output and reasoning tokens, workflow-only runner calls, evidence bytes, and product/test line deltas. Compare fixed-model arms by median; never advertise savings from one run or relax a safety rule to meet a Token target.
 
 The source repository must retain its regression and behavior-contract tests. The distributable Skill ZIP excludes maintainer tests, caches, and bytecode; verify that boundary with the contract suite instead of deleting test assets. Maintainer task contracts, machine evidence, and archives stay local and ignored in this source repository; commits, the changelog, tests, and CI are the public contribution record.
 
