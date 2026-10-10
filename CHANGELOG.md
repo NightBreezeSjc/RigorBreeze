@@ -28,6 +28,20 @@ The project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). 
 - Reframed the repository for first-time adopters with bilingual onboarding, explicit safety boundaries, and a complete first-task walkthrough.
 - Added concise contribution and security policies plus an MIT license.
 
+## [0.24.0] - Keep acceptance independent and make live proof reproducible
+
+### Changed
+
+- Treat approved requirements, acceptance IDs, and explicit user corrections as the acceptance oracle; matching code, tests, and runtime observations cannot redefine a conflicting expected result.
+- Expand the opt-in Verification Pack template to Launch, Prepare, Doctor, Drive, Inspect, Evidence, and Cleanup/Reset without changing Verification Report schema v1.
+- Apply bounded ablation only when one outcome introduces two or more independent mechanisms, while preserving mandatory safety and compatibility controls.
+- Limit Public Preview Live Codex candidate runs to affected scenarios twice; reserve the complete 27×2 matrix for v1.0 RC or broad governance changes.
+- Extend deterministic Agent behavior coverage to twenty-seven scenarios.
+
+### Compatibility
+
+- Public CLI, state/config schema v5, evidence schema v4, Verification Report v1, Automation Journal v1, default Git authority, Direct, and projects without a Verification Pack remain unchanged.
+
 ## [0.23.0] - Resume from machine truth and lock corrected subjects
 
 ### Added

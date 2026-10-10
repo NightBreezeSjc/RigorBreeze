@@ -270,12 +270,37 @@ class SkillContractTests(unittest.TestCase):
         feature = (assets / "feature.template.md").read_text(encoding="utf-8")
         report = json.loads((assets / "report.example.json").read_text())
 
-        for section in ("Launch", "Doctor", "Drive", "Evidence", "Cleanup"):
+        for section in (
+            "Launch",
+            "Prepare",
+            "Doctor",
+            "Drive",
+            "Inspect",
+            "Evidence",
+            "Cleanup / Reset",
+        ):
             self.assertIn(f"## {section}", readme)
         self.assertIn("three to five", readme)
-        for section in ("Sub-features", "How to get to it", "Observable proof"):
+        for phrase in (
+            "synthetic accounts, roles, permissions, and test data",
+            "read-only",
+            "row limit",
+            "timeout",
+            "redact",
+            "success, failure, and timeout",
+        ):
+            self.assertIn(phrase, readme)
+        for section in (
+            "Sub-features",
+            "How to get to it",
+            "Authoritative acceptance oracle",
+            "Observation channels and limits",
+            "Observed result and honest gaps",
+        ):
             self.assertIn(section, feature)
         self.assertEqual(report["schemaVersion"], 1)
+        for unchanged_key in ("prepare", "inspect", "reset"):
+            self.assertNotIn(unchanged_key, report)
 
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -293,6 +318,34 @@ class SkillContractTests(unittest.TestCase):
                 check=True,
             )
             self.assertFalse((root / "verification").exists())
+
+    def test_acceptance_oracle_and_conditional_ablation_stay_compact(self) -> None:
+        skill = (SKILL_DIR / "SKILL.md").read_text(encoding="utf-8")
+        handbook = (SKILL_DIR / "references" / "handbook.md").read_text(
+            encoding="utf-8"
+        )
+        chinese = (SKILL_DIR / "references" / "handbook.zh-CN.md").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertEqual(current_tool_version(), "0.24.0")
+        self.assertIn("Observation is evidence, never the acceptance oracle", skill)
+        self.assertIn("two or more independent mechanisms", skill)
+        self.assertIn("ablation", skill.lower())
+        self.assertIn("observations cannot redefine acceptance", handbook)
+        self.assertIn("观察结果不能反向定义验收", chinese)
+        self.assertLessEqual(len(skill.split()), 1650)
+
+    def test_public_preview_live_evaluation_is_affected_and_bounded(self) -> None:
+        english = (REPO_ROOT / "CONTRIBUTING.md").read_text(encoding="utf-8")
+        chinese = (REPO_ROOT / "CONTRIBUTING.zh-CN.md").read_text(encoding="utf-8")
+
+        for text, phrases in (
+            (english, ("affected", "twice", "27×2", "v1.0 RC")),
+            (chinese, ("受影响", "两次", "27×2", "v1.0 RC")),
+        ):
+            for phrase in phrases:
+                self.assertIn(phrase, text)
 
     def test_distribution_archive_excludes_maintainer_tests_and_caches(self) -> None:
         config = tomllib.loads(

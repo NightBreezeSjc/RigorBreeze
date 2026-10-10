@@ -28,6 +28,20 @@ RigorBreeze 的重要变更都会记录在本文档中。
 - 使用双语引导、明确的安全边界和完整首次任务示例，重新组织面向首次使用者的仓库文档。
 - 增加精简的贡献指南、安全策略和 MIT 许可证。
 
+## [0.24.0] - 保持验收独立并让真实证明可复现
+
+### 变更
+
+- 将已批准需求、验收ID和用户明确纠正视为验收Oracle；即使代码、测试和运行观察一致，也不能反向改写冲突的预期结果。
+- 按需Verification Pack模板扩展为Launch、Prepare、Doctor、Drive、Inspect、Evidence和Cleanup/Reset，Verification Report schema v1保持不变。
+- 只在同一结果引入两个以上独立机制时执行有界消融，同时保留必需安全和兼容控制。
+- Public Preview候选只将受影响Live Codex场景各运行两次；完整27×2矩阵保留给v1.0 RC或广泛治理改动。
+- 确定性Agent行为覆盖扩展到二十七个场景。
+
+### 兼容性
+
+- 公共CLI、状态/配置schema v5、evidence schema v4、Verification Report v1、Automation Journal v1、默认Git权限、Direct以及未配置Verification Pack的项目均保持不变。
+
 ## [0.23.0] - 从机器事实续接并锁定纠正后的对象
 
 ### 新增

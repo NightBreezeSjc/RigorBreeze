@@ -604,3 +604,11 @@ v0.22.0只修复这条链：任务在自己的integration分支上checkpoint后�
 v0.23.0因此不增加命令或文档树，只在当前`status --json`增加任务级`handoff`和`records`投影：前者给出任务、worktree、分支、HEAD、阶段、脏路径、等待条件和唯一下一动作；后者给出tracked/Git-common存储及合同、Evidence、Archive的机器相对路径。没有活动任务时二者为null。Skill规则只增加两个窄触发：相似对象或用户纠正时锁定唯一当前对象、排除错误对象并使旧结论失效；Skill维护或发布任务保持采用方仓库只读，除非用户明确授权该仓库作为结果。三个脱敏失败fixture将确定性行为覆盖增加到二十六个场景。
 
 workflow bypass、reconciled比例和验证轮数暂不继续加入新门禁，因为近期业务仓主要使用v0.11～v0.21 Runner。应先让v0.22/v0.23在新真实任务中验证checkpoint关闭、在线压缩和单次full复用，再决定是否需要新的切片压力投影。浏览器route丢失、厂商门锁绑定、Node依赖、AppID/HTTPS和项目UAT产物问题继续归类为Codex运行面或项目适配器问题，不进入通用核心。
+
+### 第三十次外部实践与真实项目交叉复核：验收Oracle、Harness准备度与消融（v0.24.0）
+
+2026-10-10维护者提供了一篇2026-10-09发布的AI Coding Harness实践长文全文（本次未提供可放入仓库的稳定公开URL，因此不虚构链接或身份归因）。文章强调轻量分流、真实端到端环境、验收标准独立于系统返回值、优化机制消融和Skill定期做减法。对照v0.23后，风险分流、决策前沿、TDD、并发worktree、机器handoff、解决方案阶梯、删除测试、按需Verifier和Verification Report已有对应能力，不再复制多Skill或多模型编排。
+
+真正需要补齐的通用缺口只有三项。第一，权威需求、已批准验收ID和用户明确纠正定义正确结果；UI、API、数据库、日志和Trace只能提供观察证据，即使它们与当前代码和测试全部一致，也不得改写冲突验收。第二，按需Verification Pack从Launch→Doctor→Drive→Evidence→Cleanup扩展为Launch→Prepare→Doctor→Drive→Inspect→Evidence→Cleanup/Reset；Prepare只创建本次拥有的合成数据，Inspect使用有范围只读查询和脱敏输出。第三，同一结果引入两个以上独立机制时才触发有界消融，保留能独立证明贡献或承载长期不变量的部分，不得删除权限、安全、数据、迁移、回滚、无障碍和兼容边界。
+
+为避免重复v0.23候选阶段的高Token循环，Public Preview小版本只将受影响Live场景各运行两次，全部确定性合同仍由CI完整覆盖；27×2连续Live矩阵保留给v1.0 RC或广泛改动。本版不增加CLI、Schema、依赖或运行时步骤；Direct、未配置验证包的项目和单机制普通L1保持原有成本。
