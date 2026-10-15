@@ -71,7 +71,7 @@ class FlowV19KernelBoundaryTests(FlowTestCase):
 
         self.assertGreaterEqual(flow_lines, 1200)
         self.assertLessEqual(flow_lines, 1500)
-        self.assertLessEqual(production_lines, 9020)
+        self.assertLessEqual(production_lines, 9140)
 
     def test_init_installs_every_kernel_helper_without_bytecode(self) -> None:
         self.init_git()

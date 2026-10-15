@@ -328,7 +328,7 @@ class SkillContractTests(unittest.TestCase):
             encoding="utf-8"
         )
 
-        self.assertEqual(current_tool_version(), "0.24.0")
+        self.assertEqual(current_tool_version(), "0.25.0")
         self.assertIn("Observation is evidence, never the acceptance oracle", skill)
         self.assertIn("two or more independent mechanisms", skill)
         self.assertIn("ablation", skill.lower())
@@ -336,13 +336,57 @@ class SkillContractTests(unittest.TestCase):
         self.assertIn("观察结果不能反向定义验收", chinese)
         self.assertLessEqual(len(skill.split()), 1650)
 
+    def test_operational_readiness_and_platform_doctor_stay_project_owned(
+        self,
+    ) -> None:
+        skill = (SKILL_DIR / "SKILL.md").read_text(encoding="utf-8")
+        readme = (
+            SKILL_DIR / "assets" / "verification" / "README.template.md"
+        ).read_text(encoding="utf-8")
+        feature = (
+            SKILL_DIR / "assets" / "verification" / "feature.template.md"
+        ).read_text(encoding="utf-8")
+        report = json.loads(
+            (SKILL_DIR / "assets" / "verification" / "report.example.json").read_text(
+                encoding="utf-8"
+            )
+        )
+
+        self.assertEqual(current_tool_version(), "0.25.0")
+        for phrase in (
+            "OS/architecture",
+            "locale, timezone, and encoding",
+            "temporary directory",
+            "font and critical resource digests",
+            "test concurrency and timeout",
+            "must not print secret values",
+        ):
+            self.assertIn(phrase, readme)
+        for phrase in (
+            "Operational readiness matrix",
+            "Code implemented",
+            "Configuration saved",
+            "Configuration published",
+            "Credential/provider ready",
+            "User entry visible",
+            "Local/test runtime verified",
+            "Real-provider/production UAT",
+            "passed | pending | blocked | not-applicable",
+        ):
+            self.assertIn(phrase, feature)
+        self.assertEqual(report["schemaVersion"], 1)
+        self.assertNotIn("operationalReadiness", report)
+        self.assertIn("one corrected root/path retry", skill)
+        self.assertIn("read-only coverage matrix", skill)
+        self.assertLessEqual(len(skill.split()), 1650)
+
     def test_public_preview_live_evaluation_is_affected_and_bounded(self) -> None:
         english = (REPO_ROOT / "CONTRIBUTING.md").read_text(encoding="utf-8")
         chinese = (REPO_ROOT / "CONTRIBUTING.zh-CN.md").read_text(encoding="utf-8")
 
         for text, phrases in (
-            (english, ("affected", "twice", "27×2", "v1.0 RC")),
-            (chinese, ("受影响", "两次", "27×2", "v1.0 RC")),
+            (english, ("affected", "twice", "28×2", "v1.0 RC")),
+            (chinese, ("受影响", "两次", "28×2", "v1.0 RC")),
         ):
             for phrase in phrases:
                 self.assertIn(phrase, text)

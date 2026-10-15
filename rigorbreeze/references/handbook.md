@@ -71,6 +71,8 @@ Git and release automation remain `manual` unless the project explicitly selects
 
 Reference retrieval is also risk-adaptive. Inspect a reference's Contents first, load only the headings needed by the current gate, and reuse an unchanged section for the current task. Direct loads no advanced reference. Reading the complete handbook, Spec Tree, and CI gates together is reserved for exact global repair or workflow evolution, not ordinary L1/L2 work.
 
+For `status --path`, set `--root` to the worktree that owns the target. Repository-relative paths and concrete absolute paths inside that root normalize to the same query. Root-wide `.`, `..` escapes, absolute globs, sibling worktrees, and outside paths stop with one corrected root/path command. If that retry still fails, stop product writes. Compact aggregate status is a bounded handoff summary, not authority for an omitted task; use full status or a target-path query for exact repair.
+
 ## 2. Risk lanes
 
 | Lane | Examples | Minimum close gate |
@@ -315,9 +317,15 @@ Stopping before an unsafe remote write is necessary but not sufficient when the 
 
 When real-runtime validation repeatedly becomes the bottleneck, create a tracked `verification/` pack through a separate, explicitly approved task. Its README defines Launch, Prepare, Doctor, Drive, Inspect, Evidence, and Cleanup/Reset; its first map covers only three to five high-risk or frequent features. Prepare creates only owned synthetic accounts, roles, permissions, and test data. Inspect uses bounded read-only database/log/Trace access with explicit query scope, row limit, timeout, and redaction. Cleanup/Reset runs after success, failure, and timeout and removes only resources owned by the drive. Project scripts must work before the pack is accepted. Reports, screenshots, traces, and temporary data remain ignored runtime artifacts.
 
+Each mapped feature keeps an operational-readiness matrix separate from acceptance: code implemented, configuration saved, configuration published, credential/provider ready, user entry visible, local/test runtime verified, and real-provider/production UAT. Use only `passed`, `pending`, `blocked`, or `not-applicable`, with a resolvable reference or blocker. A Gateway or route proves code presence only; a draft does not prove publication, and a visible button does not prove provider integration. Report the result in four groups: completed without rework, user configuration required, development required, and explicitly deferred.
+
+The project Doctor adapter also proves the target OS/architecture, locale/timezone/encoding, temporary directory, font and critical-resource digests, test concurrency/timeout, and presence of required environment variables without printing their values. These checks stay project-owned; the core does not embed Java, Node, mini-app, provider, or host-specific logic.
+
 An `acceptance` check may opt into `verification_report = true`, name `verification_root`, and require one of `typecheck`, `unit`, `integration`, `live-runtime`, or `device`. The report must bind to the current HEAD and current Feature Map digest, name only mapped features, point to non-empty repository-relative evidence, and show passed Doctor and Cleanup. The runner stores report and evidence digests in existing task evidence; it does not create another evidence system. Projects without this configuration retain the existing manual runtime/device path and no extra calls.
 
 The writing Agent runs cheap deterministic checks itself. Use an independent read-only verifier only for judgment-heavy, expensive, high-impact, or multi-page acceptance, and bind its conclusion to the current SHA. A changed SHA invalidates the conclusion. This is a trust ladder, not permission for default auto-merge: Git automation remains manual unless separately configured, and L2 production writes still require human authority.
+
+A multi-page or multi-path verification campaign may share one read-only coverage matrix. It is not one giant delivery task: every discovered product write is re-routed by consequence as Direct, L1, or L2. After two identical native-tool attempts produce no real result, preserve the safe environment and issue one ordered manual checklist; H5, mocked events, SDK acknowledgements, or component callbacks cannot impersonate native proof.
 
 Humans approve visual baselines. Never update screenshots only to remove a failure.
 

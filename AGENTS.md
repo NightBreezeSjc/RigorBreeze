@@ -1,7 +1,7 @@
 <!-- rigorbreeze:start -->
 ## RigorBreeze
 
-Before writes, including after compaction, invoke `$rigorbreeze`. Direct resolves targets and runs `python3 scripts/rigorbreeze.py status --json --path <target>` before each read/write; tasks run `status --json`. Use `status --all --compact --json` only for concurrency, dependencies, or handoff. Require the real base, valid approval, and window claim.
+Before writes, including after compaction, invoke `$rigorbreeze`. Resolve the owning worktree, then run `status --json --path <target>` with a repository-relative or in-root absolute target. After one corrected root/path retry, unresolved status stops writes. `status --all --compact --json` is bounded handoff, never write authority. Require the real base, approval, and claim.
 
 Direct is taskless for one deterministic low-consequence result with no writer or API, data, auth, permission, payment, lock, migration, dependency, production-config, external-state, or release boundary. Run focused proof, never full. Crossing a boundary creates L1/L2; restore missing high-risk records or use explicit Emergency.
 
@@ -11,9 +11,9 @@ Before approval, perform semantic self-review for placeholders, contradictions, 
 
 Feature, task, branch/worktree, and PR are separate. One feature/PR may contain multiple independently verified sequential tasks on one clean integration stream; archive and locally commit each while batching human interaction. Never compress verification frontiers or create a PR/worktree per slice.
 
-Preflight tools, dependencies, and fixtures before observed RED. Use public seams, independent oracles, affected during development, and one final full; reuse unchanged verification. Pending read-only evidence grants no acceptance. Verify review feedback. Use the solution ladder and deletion test; after three failed hypotheses make an architecture stop. Never shrink security, permission, data, migration, rollback, accessibility, or compatibility.
+Preflight tools, dependencies, and fixtures before observed RED. Keep code, saved/published config, credentials, entry, runtime, and provider UAT distinct. A read-only coverage matrix may span checks; each defect write reroutes Direct/L1/L2. Use public seams, affected, one final full, solution ladder, and deletion test. Three failed hypotheses trigger an architecture stop. Never shrink protected boundaries.
 
-After UAT, runtime/visual review, or follow-up, product writes rerun status and scope. In-scope same-result feedback resumes implementation and invalidates proof; forbidden/new-result work becomes a successor or visible handoff. AI cannot approve visual, security, legal, or production conclusions. External writes reconstruct completed steps, identifiers, one action, and stop conditions; never replay stale plans.
+After UAT, runtime/visual review, or follow-up, product writes rerun status and scope. In-scope feedback invalidates proof; forbidden/new-result work becomes a successor or visible handoff. Treat review feedback as a hypothesis. AI cannot approve visual, security, legal, or production conclusions. External writes reconstruct completed steps, identifiers, one action, and stop conditions; never replay stale plans.
 
 Records default Git-private; never silently move legacy records. Git automation stays manual unless configured or explicitly authorized. Reconcile only proven clean+contained worktrees and safe local branches; never delete remote or uncertain state.
 

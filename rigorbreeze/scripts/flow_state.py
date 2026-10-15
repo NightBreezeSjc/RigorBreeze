@@ -18,7 +18,7 @@ import flow_parallel
 
 VERSION = 5
 EVIDENCE_VERSION = 4
-TOOL_VERSION = "0.24.0"
+TOOL_VERSION = "0.25.0"
 KERNEL_HELPER_NAMES = (
     "flow_state",
     "flow_parallel",
@@ -669,15 +669,15 @@ def agents_block() -> str:
     return f"""{AGENTS_START}
 ## RigorBreeze
 
-Before writes/after compaction invoke `$rigorbreeze`. Locate Direct targets read-only, then run `python3 scripts/rigorbreeze.py status --json --path <target>`; never `--path .`. Tasks use `status --json`; use `status --all --compact --json` only for concurrency/dependencies/handoff. Require real base, approval, and window claim.
+Before writes/after compaction invoke `$rigorbreeze`. Resolve the owning worktree, then run `status --json --path <target>` with a repository-relative or in-root absolute target. After one corrected root/path retry, unresolved status stops writes. `status --all --compact --json` is bounded handoff, never write authority. Require real base, approval, and claim.
 
-Direct is taskless only for a deterministic low-consequence result without writer/API/data/auth/permission/payment/lock/migration/dependency/production-config/external-state/release impact. Use focused proof, no full; otherwise L1/L2. Missing high-risk state needs restoration/Emergency; neither supplies product intent, so stop product writes and ask.
+Direct is taskless for one deterministic low-consequence result without writer/API/data/auth/permission/payment/lock/migration/dependency/production-config/external-state/release impact. Use focused proof, no full; otherwise L1/L2. Missing high-risk state needs restoration/Emergency; neither supplies product intent; stop writes.
 
-Recover facts from authoritative requirements, code, tests, Git, and runtime. Label Agent-inferred options; they cannot add repositories or protected boundaries without outcome approval. Ask only outcome-changing intent. Shaping uses a decision frontier of at most three questions; a prototype answers one decision question, never acceptance. Distinguish current defect from desired result and map observable atoms to acceptance.
+Recover facts from requirements, code, tests, Git, and runtime. Agent-inferred options cannot add repositories or protected boundaries without outcome approval. Ask only outcome-changing intent. Use a decision frontier of three questions; a prototype answers one decision question, never acceptance. Distinguish current defect from desired result and map observable atoms to acceptance.
 
 Before approval, perform semantic self-review for placeholders, contradictions, oversized scope, and source/fallback ambiguity. Consequence selects gates; outcomes get task branches, `--worktree auto` requires a concurrent writer, and ordering gets a DAG. One worktree has one writer.
 
-Preflight tools/fixtures before observed RED. Use public seams, independent oracles, affected, one final full, and current evidence. A configured `verification/` pack requires Doctor, mapped drive, evidence, Cleanup, and current SHA; unit tests cannot replace it. Verify review feedback with the deletion test; after three failed hypotheses make an architecture stop. Never weaken security/permission/data/migration/rollback/accessibility/compatibility.
+Preflight tools/fixtures before observed RED. Keep code, saved/published config, credentials, entry, runtime, and provider UAT distinct. A read-only coverage matrix may span checks; each defect write reroutes Direct/L1/L2. Configured verification requires Doctor, mapped drive, evidence, Cleanup, and current SHA. Verify review feedback with deletion tests; three failed hypotheses trigger an architecture stop. Never weaken protected boundaries.
 
 Migration: from-schema preflight → migrate once → to-schema assertions; detect new objects and never replay completed migration.
 

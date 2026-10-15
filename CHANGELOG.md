@@ -28,6 +28,21 @@ The project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). 
 - Reframed the repository for first-time adopters with bilingual onboarding, explicit safety boundaries, and a complete first-task walkthrough.
 - Added concise contribution and security policies plus an MIT license.
 
+## [0.25.0] - Bound status context and distinguish operational readiness
+
+### Changed
+
+- Accept concrete absolute `status --path` targets inside the selected root by normalizing them to repository-relative paths; reject roots, absolute globs, traversal, sibling worktrees, and outside paths with one corrective command.
+- Bound compact all-project status to the eight highest-priority tasks, eight relevant worktrees, and five issues, with deterministic totals, omitted counts, lifecycle/readiness/risk groups, and unchanged top-level action priority.
+- Add a project-owned operational-readiness matrix that separates code, saved and published configuration, credential/provider readiness, visible entry points, local runtime proof, and real-provider or production UAT.
+- Extend Verification Pack Doctor guidance for target OS/architecture, locale/timezone/encoding, temporary directories, font/resource digests, test concurrency/timeouts, and secret-safe environment presence checks.
+- Separate read-only coverage campaigns from product-fix tasks: each discovered defect is routed independently to Direct, L1, or L2, and repeated native-tool failures become one honest manual checklist rather than simulated proof.
+- Extend deterministic Agent behavior coverage to twenty-eight scenarios.
+
+### Compatibility
+
+- Full `status --all --json`, public CLI spelling, state/config schema v5, evidence schema v4, Verification Report v1, Automation Journal v1, default Git authority, and projects without a Verification Pack remain unchanged. Compact consumers must treat omitted entries as summary-only, never as write authorization.
+
 ## [0.24.0] - Keep acceptance independent and make live proof reproducible
 
 ### Changed
