@@ -10,7 +10,7 @@ One outcome/task; risk-matched evidence; one worktree/writer; Git `manual`.
 ## Enter with the smallest sufficient context
 
 1. Resolve root. Use the **no-task path** for status/logs/screenshots/recommendations; give the read-only answer despite stale state.
-2. Before writing/after compaction run bundled status. Direct locates targets, then uses `status --json --path <target>`, never `--path .` or global status. Continuations consume `handoff`/`records` before chat. Reuse for one write phase until HEAD, contract, ownership, external state, or runner changes. Reserve `status --all --compact --json` for concurrency/handoff and detail for repair/evolution.
+2. Before writes/after compaction run bundled `status --json`. Direct sets `--root` to the owning worktree and queries a repo-relative or in-root absolute target; after **one corrected root/path retry**, failure stops writes. Continuations use `handoff`/`records`. Reuse for one write phase until HEAD, contract, ownership, external state, or runner changes. `status --all --compact --json` is bounded handoff, never write authority; use full detail for repair/evolution.
 3. If uninitialized, `init`, configure `rigorbreeze.toml`, then `doctor --json`. Never replace a runner mid-task; migrate Git state only through it.
 4. Read affected sources plus config/contract/index. Writes need approval and ownership. For missing L2/Emergency records, restore the authoritative record or use an explicit Emergency contract, never an informal task card; neither supplies missing product intent.
 
@@ -48,13 +48,13 @@ L1/L2 approval requires a clean task worktree: only task records/private state m
 
 ## Implement and prove
 
-Use configured storage. Private v5 records stay in `.git/rigorbreeze/records`; tracked mode remains compatible. Never silently move legacy records. Integrated L1 compacts; L2/Emergency retains private proof and configured sanitized audit.
+Private v5 records stay in `.git/rigorbreeze/records`; tracked remains compatible. Integrated L1 compacts; L2/Emergency retains private proof/sanitized audit. Never move legacy implicitly.
 
 For L1/L2/Emergency, preflight tests/command/runtime/dependencies and optional `environment` adapter; tooling failures are not RED. Bind a real acceptance ID, independent failure, command, **exit status**, baseline, and test digest. Source searches prove static contracts only. Iterate failing test → minimum public-seam GREEN → refactor → affected. Run full once at the final fingerprint; reuse unless `--force` is explicit.
 
-Keep output proportional: success retains command/code/scope/report digest; read a bounded failure tail only for diagnosis. Batch machine phases; return only for failure, safety-stop, or judgment.
+Success retains command/code/scope/report digest; inspect a bounded failure tail only. Batch machine phases; return only for failure, safety-stop, or judgment.
 
-Create tracked `verification/` in a separate task for repeated bottlenecks. Features: Launch → Prepare → Doctor → Drive → Inspect → Evidence → Cleanup/Reset; ignore reports. **Observation is evidence, never the acceptance oracle**: approved requirements/IDs/corrections define correctness despite matching observations. Report v1 binds live level/SHA/features/evidence/Doctor/Cleanup; compilation/source search/unit/cached screenshots/Agent claims cannot replace it. Direct/no-pack gains no step.
+Create tracked `verification/` only for repeated bottlenecks; project assets own phases/reports. Keep code/config-saved/config-published/credential/entry/runtime/provider-UAT readiness distinct. A **read-only coverage matrix** may span checks; each defect write reroutes Direct/L1/L2. **Observation is evidence, never the acceptance oracle**: approved requirements/IDs/corrections define correctness despite matching observations. Report v1 binds live level/SHA/features/evidence/Doctor/Cleanup; compilation/source search/unit/cached screenshots/Agent claims cannot replace it. Direct/no-pack gains no step.
 
 If only tests evolve while contract/acceptance stay unchanged, use approved-baseline replay: overlay test paths only and clean the temporary worktree. Changed outcome, production, dependency, config, migration, or failure mode requires contract change or successor.
 

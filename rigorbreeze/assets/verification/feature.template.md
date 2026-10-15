@@ -15,6 +15,21 @@
 - Expected end state: {{EXPECTED_END_STATE}}
 - Must remain absent: {{FORBIDDEN_RESULT}}
 
+## Operational readiness matrix
+
+Use only `passed | pending | blocked | not-applicable` and attach a resolvable
+reference for every non-N/A row.
+
+| Dimension | Status | Evidence or blocker |
+|---|---|---|
+| Code implemented | {{CODE_STATUS}} | {{CODE_REFERENCE}} |
+| Configuration saved | {{CONFIG_SAVED_STATUS}} | {{CONFIG_SAVED_REFERENCE}} |
+| Configuration published | {{CONFIG_PUBLISHED_STATUS}} | {{CONFIG_PUBLISHED_REFERENCE}} |
+| Credential/provider ready | {{PROVIDER_STATUS}} | {{PROVIDER_REFERENCE}} |
+| User entry visible | {{ENTRY_STATUS}} | {{ENTRY_REFERENCE}} |
+| Local/test runtime verified | {{RUNTIME_STATUS}} | {{RUNTIME_REFERENCE}} |
+| Real-provider/production UAT | {{UAT_STATUS}} | {{UAT_REFERENCE}} |
+
 ## Driving it with {{HARNESS}}
 
 1. {{DETERMINISTIC_USER_ACTION}}

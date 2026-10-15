@@ -1,12 +1,15 @@
 """Installation, baseline, lifecycle, status, and doctor projections for RigorBreeze."""
 
 from __future__ import annotations
+
+import glob
 import hashlib
 import json
 import re
 import sys
 from pathlib import Path
 from typing import Any
+
 import flow_automation
 import flow_parallel
 import flow_policy
@@ -15,6 +18,14 @@ import flow_state
 import flow_verification
 
 FlowError = flow_state.FlowError
+
+COMPACT_TASK_LIMIT = 8
+COMPACT_WORKTREE_LIMIT = 8
+COMPACT_ISSUE_LIMIT = 5
+STATUS_PATH_HINT = (
+    "run: python scripts/rigorbreeze.py --root <owning-worktree> "
+    "status --json --path <repository-relative-path>"
+)
 
 
 def entrypoint_source_path() -> Path:
@@ -530,23 +541,96 @@ def worktree_status_projection(
     return projected
 
 
-def compact_all_status(payload: dict[str, Any]) -> dict[str, Any]:
-    task_keys = """taskId risk lifecycle readiness dependsOn runtimeConflicts verification fullProfile head nextAction issues""".split()
-    tasks = []
+def _group_counts(items: list[dict[str, Any]], key: str) -> dict[str, int]:
+    counts: dict[str, int] = {}
+    for item in items:
+        value = str(item.get(key) or "unknown")
+        counts[value] = counts.get(value, 0) + 1
+    return dict(sorted(counts.items()))
+
+
+def _bounded_summary(
+    items: list[dict[str, Any]], included: int, group_keys: tuple[str, ...]
+) -> dict[str, Any]:
+    result: dict[str, Any] = {
+        "total": len(items),
+        "included": included,
+        "omitted": max(len(items) - included, 0),
+        "truncated": len(items) > included,
+    }
+    result.update(
+        {
+            f"by{key[0].upper()}{key[1:]}": _group_counts(items, key)
+            for key in group_keys
+        }
+    )
+    return result
+
+
+def _task_priority(item: dict[str, Any], root: Path) -> tuple[int, str]:
+    if item.get("worktree") and Path(str(item["worktree"])).resolve() == root.resolve():
+        rank = 0
+    elif (
+        item.get("readiness") == "blocked"
+        or item.get("lifecycle") in {"missing-worktree", "orphaned-record"}
+        or item.get("issues")
+        or (item.get("workflowBypass") or {}).get("status") == "detected"
+    ):
+        rank = 1
+    else:
+        rank = {"user": 2, "codex": 3}.get(
+            (item.get("nextAction") or {}).get("actor"),
+            4 if item.get("lifecycle") == "integrated-unclosed" else 5,
+        )
+    return (rank, str(item.get("taskId") or ""))
+
+
+def _worktree_priority(
+    item: dict[str, Any], root: Path, blocking_task_ids: set[str]
+) -> tuple[int, str]:
+    path = str(item.get("worktree") or "")
+    if path and Path(path).resolve() == root.resolve():
+        rank = 0
+    elif set(map(str, item.get("activeTaskIds", []))).intersection(blocking_task_ids):
+        rank = 1
+    elif item.get("activeTaskIds"):
+        rank = 2
+    elif item.get("installationStatus") in {"missing", "outdated", "unmanaged"}:
+        rank = 3
+    else:
+        rank = 4 if item.get("cleanupStatus") in {"stale-registry", "retained"} else 5
+    return (rank, path)
+
+
+def compact_all_status(payload: dict[str, Any], root: Path) -> dict[str, Any]:
+    task_keys = """taskId risk lifecycle readiness dependsOn runtimeConflicts verification fullProfile head nextAction""".split()
+    task_pairs: list[tuple[dict[str, Any], dict[str, Any]]] = []
     for item in payload.get("tasks", []):
         if item.get("lifecycle") in {"closed", "integrated"}:
             continue
         projected = {key: item[key] for key in task_keys if key in item}
+        projected["issueCount"] = len(item.get("issues", []))
         scopes = sorted(str(scope) for scope in item.get("allowedScope", []))
         projected["scopeSummary"] = {
             "count": len(scopes),
             "digest": hashlib.sha256("\0".join(scopes).encode()).hexdigest(),
             "preview": scopes[:3],
         }
-        tasks.append(projected)
-    active_ids = {str(item.get("taskId")) for item in tasks if item.get("taskId")}
+        task_pairs.append((item, projected))
+    task_pairs.sort(key=lambda pair: _task_priority(pair[0], root))
+    all_task_items = [item for item, _ in task_pairs]
+    selected_pairs = task_pairs[:COMPACT_TASK_LIMIT]
+    tasks = [projected for _, projected in selected_pairs]
+    selected_ids = {
+        str(item.get("taskId")) for item, _ in selected_pairs if item.get("taskId")
+    }
+    blocking_ids = {
+        str(item.get("taskId"))
+        for item in all_task_items
+        if item.get("taskId") and _task_priority(item, root)[0] <= 1
+    }
     worktree_keys = "worktree branch activeTaskIds runnerVersion installationStatus cleanupStatus".split()
-    worktrees = [
+    all_worktrees = [
         {
             **{key: item.get(key) for key in worktree_keys},
             "historyCount": max(
@@ -554,15 +638,16 @@ def compact_all_status(payload: dict[str, Any]) -> dict[str, Any]:
             ),
         }
         for item in payload.get("worktrees", [])
-        if active_ids.intersection(str(value) for value in item.get("taskIds", []))
     ]
+    all_worktrees.sort(key=lambda item: _worktree_priority(item, root, blocking_ids))
+    worktrees = all_worktrees[:COMPACT_WORKTREE_LIMIT]
     cleanup = payload.get("cleanup", {})
     baseline = payload.get("workflowBaseline") or {}
     removable_tasks = {x["taskId"] for x in cleanup.get("removableWorktrees", [])}
     closeout_tasks = sorted(
         (
             item
-            for item in tasks
+            for item in [projected for _, projected in task_pairs]
             if item.get("lifecycle") == "integrated-unclosed"
             and (item.get("nextAction") or {}).get("command")
             and item.get("taskId") in removable_tasks
@@ -592,13 +677,29 @@ def compact_all_status(payload: dict[str, Any]) -> dict[str, Any]:
             "modifiedCount": len(baseline.get("modified", [])),
         },
         "overview": payload.get("overview", {}),
-        "issues": payload.get("issues", []),
+        "issues": payload.get("issues", [])[:COMPACT_ISSUE_LIMIT],
+        "issuesSummary": {
+            "total": len(payload.get("issues", [])),
+            "included": min(len(payload.get("issues", [])), COMPACT_ISSUE_LIMIT),
+            "omitted": max(len(payload.get("issues", [])) - COMPACT_ISSUE_LIMIT, 0),
+            "truncated": len(payload.get("issues", [])) > COMPACT_ISSUE_LIMIT,
+        },
         "tasks": tasks,
+        "taskSummary": _bounded_summary(
+            all_task_items,
+            len(tasks),
+            ("lifecycle", "readiness", "risk"),
+        ),
         "worktrees": worktrees,
+        "worktreeSummary": _bounded_summary(
+            all_worktrees,
+            len(worktrees),
+            ("installationStatus", "cleanupStatus"),
+        ),
         "topologicalOrder": [
             task_id
             for task_id in payload.get("topologicalOrder", [])
-            if str(task_id) in active_ids
+            if str(task_id) in selected_ids
         ],
         "cleanup": {
             "removableWorktrees": len(cleanup.get("removableWorktrees", [])),
@@ -608,7 +709,7 @@ def compact_all_status(payload: dict[str, Any]) -> dict[str, Any]:
         },
         "closeout": {
             "pending": len(closeout_tasks),
-            "taskIds": [item["taskId"] for item in closeout_tasks],
+            "taskIds": [item["taskId"] for item in closeout_tasks[:COMPACT_TASK_LIMIT]],
             "nextAction": closeout_action,
         },
         "evolution": {
@@ -616,6 +717,38 @@ def compact_all_status(payload: dict[str, Any]) -> dict[str, Any]:
             "command": payload.get("evolution", {}).get("command"),
         },
     }
+
+
+def normalize_status_paths(root: Path, paths: list[str]) -> list[str]:
+    normalized: list[str] = []
+    for raw in paths:
+        value = raw.strip()
+        candidate = Path(value)
+        if not value or value in {".", "./"} or ".." in candidate.parts:
+            raise FlowError(f"status --path is not bounded; {STATUS_PATH_HINT}")
+        if candidate.is_absolute():
+            if glob.has_magic(value):
+                raise FlowError(
+                    f"absolute status globs are not supported; {STATUS_PATH_HINT}"
+                )
+            resolved = candidate.resolve(strict=False)
+            if resolved == root.resolve():
+                raise FlowError(f"status --path is not bounded; {STATUS_PATH_HINT}")
+            try:
+                value = resolved.relative_to(root.resolve()).as_posix()
+            except ValueError as exc:
+                raise FlowError(
+                    f"status --path is outside --root; {STATUS_PATH_HINT}"
+                ) from exc
+        else:
+            value = candidate.as_posix()
+        try:
+            flow_policy.validate_scope_entries(root, [value])
+        except FlowError as exc:
+            raise FlowError(f"status --path is invalid; {STATUS_PATH_HINT}") from exc
+        normalized.append(value)
+    normalized = list(dict.fromkeys(normalized))
+    return normalized
 
 
 def command_status(
@@ -631,7 +764,7 @@ def command_status(
             raise FlowError(
                 "status --path requires --json and cannot use --all/--compact"
             )
-        flow_policy.validate_scope_entries(root, path_queries)
+        path_queries = normalize_status_paths(root, path_queries)
         payload = flow_parallel.path_writer_status(root, path_queries)
         if payload["activeWriters"]:
             payload["nextAction"] = {
@@ -729,7 +862,7 @@ def command_status(
         }
         if json_output:
             if compact:
-                payload = compact_all_status(payload)
+                payload = compact_all_status(payload, root)
             print(
                 json.dumps(
                     payload,

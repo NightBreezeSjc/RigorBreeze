@@ -22,7 +22,11 @@ coverage.
 
 Run `{{DOCTOR_ARGV}}` before the first drive and after surprising behavior. It
 must prove the expected build/SHA, process, environment, authentication, and
-exclusive runtime resources. A failed Doctor means do not drive this instance.
+exclusive runtime resources. The project adapter also records OS/architecture;
+locale, timezone, and encoding; the temporary directory; font and critical resource digests;
+test concurrency and timeout; and whether required environment
+variables exist. It must not print secret values. A failed Doctor means do not
+drive this instance.
 
 ## Drive
 
