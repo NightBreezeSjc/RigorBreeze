@@ -37,7 +37,10 @@ The project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). 
 - Add a project-owned operational-readiness matrix that separates code, saved and published configuration, credential/provider readiness, visible entry points, local runtime proof, and real-provider or production UAT.
 - Extend Verification Pack Doctor guidance for target OS/architecture, locale/timezone/encoding, temporary directories, font/resource digests, test concurrency/timeouts, and secret-safe environment presence checks.
 - Separate read-only coverage campaigns from product-fix tasks: each discovered defect is routed independently to Direct, L1, or L2, and repeated native-tool failures become one honest manual checklist rather than simulated proof.
-- Extend deterministic Agent behavior coverage to twenty-eight scenarios.
+- Regression-lock source-first `ADD/REMOVE/RETAIN` scope behavior so recoverable original-material facts are not asked back and adjacent inferred edits remain optional.
+- Document project-owned verification-cost ordering: fast changed-path and old-contract checks precede slow final acceptance matrices, while changed fingerprints still invalidate old proof unless an adapter validates a complete input digest.
+- Document evidence-grounded progress and read-only monitoring boundaries without adding another Runner state or user step.
+- Extend deterministic Agent behavior coverage to thirty scenarios.
 
 ### Compatibility
 

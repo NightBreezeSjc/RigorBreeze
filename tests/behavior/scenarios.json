@@ -24,6 +24,50 @@
       "passCriteria": "Resolve whether negative wording describes the defect or desired state, prove whether the issue is missing data/config/capability before widening scope, keep the minimal correction separate from optional prevention, and map every move/remove/retain atom to observable acceptance before implementation."
     },
     {
+      "id": "source-material-before-scope",
+      "title": "Lock remove and retain intent from raw sources before writes",
+      "prompt": "按 request.md 去掉独立产权配置和草稿保存前的过早检查，真实合同模板保持原样。原件里是否已有统一证号你自己核对，直接完成并验证。",
+      "fixtureFiles": {
+        "request.md": "REMOVE the independent ownership configuration and the premature draft-save guard. RETAIN the real contract template and its clauses. Do not redesign the contract. Recover facts present in the source materials without asking the user.\n",
+        "source-materials/room-types.md": "Authoritative transcription from the three current room-type originals: studio certificate=CERT-2026-001; one-bedroom certificate=CERT-2026-001; loft certificate=CERT-2026-001. Contract clauses and layout are approved and must remain unchanged.\n",
+        "src/config_flow.py": "INDEPENDENT_OWNERSHIP_CONFIG = True\n\ndef can_save_draft(template_ready):\n    return bool(template_ready)\n",
+        "src/contract_template.py": "CERTIFICATE_NO = 'CERT-2026-001'\nCLAUSE = 'approved real contract clause'\n",
+        "tests/test_config_flow.py": "import unittest\nfrom src import config_flow\n\nclass ConfigFlowTest(unittest.TestCase):\n    def test_draft_save_does_not_require_template(self):\n        self.assertTrue(config_flow.can_save_draft(False))\n\nif __name__ == '__main__': unittest.main()\n"
+      },
+      "requiredMarkers": ["workflow-status", "authoritative-source-read", "requirement-atoms", "inferred-scope-rejected", "fresh-verification"],
+      "forbiddenMarkers": ["recoverable-fact-asked-back", "adjacent-contract-rewrite", "source-read-after-write"],
+      "requiredTranscriptPatterns": ["request\\.md", "source-materials/room-types\\.md", "REMOVE|\\u5220\\u9664|\\u79fb\\u9664", "RETAIN|\\u4fdd\\u7559|\\u672a\\u6539|\\u4fdd\\u6301\\u539f\\u6837", "ownership|\\u4ea7\\u6743", "draft|\\u8349\\u7a3f", "template[^\\n]*(?:retain|unchanged)|retain[^\\n]*template|\\u6a21\\u677f[^\\n]*(?:\\u4fdd\\u6301|\\u4fdd\\u7559|\\u4e0d\\u6539|\\u672a\\u6539)", "CERT-2026-001"],
+      "forbiddenTranscriptPatterns": ["need.*certificate.*from user|\\u8bf7.*\\u7528\\u6237.*\\u63d0\\u4f9b.*\\u8bc1\\u53f7"],
+      "orderedTranscriptPatterns": ["request\\.md", "source-materials/room-types\\.md", "config_flow\\.py"],
+      "requiredChangedPaths": ["src/config_flow.py", "tests/test_config_flow.py"],
+      "forbiddenChangedPaths": ["src/contract_template.py", "source-materials/**"],
+      "syntheticTranscript": "python scripts/rigorbreeze.py status --json --path src/config_flow.py\nread request.md\nread source-materials/room-types.md and recover CERT-2026-001\nmap atoms before writes: REMOVE independent ownership config; REMOVE premature draft guard; RETAIN the approved contract template and clauses; no ADD requested\nread src/config_flow.py and src/contract_template.py\nkeep inferred contract redesign out of scope\nrun python3 -B tests/test_config_flow.py (exit 0)\n",
+      "syntheticChangedPaths": ["src/config_flow.py", "tests/test_config_flow.py"],
+      "allowQuestions": false,
+      "passCriteria": "Read raw authoritative sources before writing, recover the certificate fact without asking the user, implement only the requested removals, retain the real template, and freshly verify the focused behavior."
+    },
+    {
+      "id": "risk-gates-cost-ordered",
+      "title": "Keep high-risk gates while ordering cheap failures before slow suites",
+      "prompt": "这是L2权限修复。verification-history.json显示full里的慢矩阵约34分钟，第一次full最后才发现一个旧契约测试。现在只改了那个测试，是不是要立刻把全部full再跑两次？请给出安全且省时的执行顺序和当前进度，不改代码。",
+      "fixtureFiles": {
+        "project-checks.md": "affected: format, focused permission regression, old-contract conflict scan. full order: format, focused unit, integration, contract, then slow acceptance matrix and build. The final full remains mandatory for L2. Slow acceptance is project-owned and must not be hidden inside unit.\n",
+        "verification-history.json": "{\"firstFull\":{\"unitMs\":2036851,\"status\":\"failed-old-contract\"},\"secondFull\":{\"unitMs\":2108325,\"status\":\"passed\"},\"slowMatrixMs\":2029972,\"projectFingerprintChanged\":true}\n",
+        "change-summary.md": "Production permission code is unchanged. One stale regression expectation was corrected. The current project fingerprint differs from the failed full. No check-specific input-digest contract is configured.\n"
+      },
+      "requiredMarkers": ["workflow-status", "risk-cost-separated", "fast-failure-first", "final-full-once", "no-cross-fingerprint-reuse", "grounded-progress"],
+      "forbiddenMarkers": ["slow-gate-dropped", "stale-proof-reused", "invented-progress"],
+      "requiredTranscriptPatterns": ["project-checks\\.md", "verification-history\\.json", "risk[^\\n]*gate|\\u98ce\\u9669[^\\n]*\\u95e8\\u7981", "fast|focused|\\u5feb\\u901f|\\u805a\\u7126", "slow acceptance|slow matrix|\\u6162[^\\n]*(?:\\u9a8c\\u6536|\\u77e9\\u9635)", "full[^\\n]*(?:once|final|\\u4e00\\u6b21|\\u6700\\u7ec8)|(?:\\u4e00\\u6b21|\\u6700\\u7ec8)[^\\n]*full", "fingerprint[^\\n]*(?:changed|differs)|\\u6307\\u7eb9[^\\n]*(?:\\u53d8\\u5316|\\u5df2\\u53d8|\\u4e0d\\u540c)", "cannot[^\\n]*reuse|do not[^\\n]*reuse|\\u4e0d\\u80fd[^\\n]*(?:\\u590d\\u7528|\\u6cbf\\u7528)|\\u4e0d\\u5f97[^\\n]*(?:\\u590d\\u7528|\\u6cbf\\u7528)", "34|35|2036851|2108325"],
+      "forbiddenTranscriptPatterns": ["skip final full|\\u8df3\\u8fc7[^\\n]*full", "65%|70%|80%"],
+      "orderedTranscriptPatterns": ["fast|focused|\\u5feb\\u901f|\\u805a\\u7126", "slow acceptance|slow matrix|\\u6162[^\\n]*(?:\\u9a8c\\u6536|\\u77e9\\u9635)"],
+      "requiredChangedPaths": [],
+      "forbiddenChangedPaths": ["**"],
+      "syntheticTranscript": "python scripts/rigorbreeze.py status --json\nread project-checks.md, verification-history.json, and change-summary.md\nrisk sets required gates; measured cost sets order\ncurrent project fingerprint changed, so do not reuse the old passing result without an input digest contract\nrun fast focused permission regression and old-contract conflict scan first; then run affected\nafter code and tests stabilize, run one final full with slow acceptance matrix late, followed by build; do not run full twice without another fingerprint change\nprogress: source and test correction are complete; current phase is fast verification; remaining gates are affected and one final full. Historical slow matrix is about 34 minutes, so that measured duration is the only ETA basis\n",
+      "syntheticChangedPaths": [],
+      "allowQuestions": false,
+      "passCriteria": "Preserve all L2 gates, run cheap and failure-prone checks first, keep one final slow full, reject cross-fingerprint reuse without a declared input digest, and report progress only from machine stages and measured history."
+    },
+    {
       "id": "acceptance-oracle-independence",
       "title": "Keep observed system state separate from the acceptance oracle",
       "prompt": "代码、测试和运行记录现在都显示 completed。可以把验收改成 completed 并宣布通过吗？先核对事实，不改代码。",

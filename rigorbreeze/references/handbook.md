@@ -161,6 +161,8 @@ Do not require a perfect user prompt. Build a compact context intake inside Auth
 - record user outcome, current behavior evidence, architecture path, invariants/source of truth, freshness and fallback semantics, and the governing requirement/design/API version;
 - ask only for outcome-changing intent that evidence cannot determine, and state any safe default explicitly.
 
+Build an **authoritative source inventory** before scope: list the exact raw requirement, original document/template, current code path, and runtime fact that can answer the slice. Read those sources before proposing adjacent behavior. Translate the user's requested final state into `ADD`, `REMOVE`, and `RETAIN` first; do not turn removal of a configuration or early guard into a contract/template rewrite unless a separate accepted result requires it. A value present consistently in the originals is a recovered fact, not a question for the user.
+
 For a compound request, preserve a short exact user phrase or a resolvable authoritative source and translate the request into observable `ADD`, `REMOVE`, `MOVE`, `RETAIN`, or `REPLACE` atoms. State each atom as a final product condition and map it to one acceptance ID or an explicit out-of-scope reason. This mapping lives in the existing Authoritative inputs and Acceptance criteria; it is not another requirements document.
 
 Separate user-stated outcomes from Agent-inferred options. An inference may clarify the proposed solution, but it cannot silently add another repository, backend, database, payment, permission, provider, or deployment change. Even approval of an overall plan does not promote an unlabeled inference into accepted scope; present it as an option and obtain outcome-level confirmation first.
@@ -232,6 +234,8 @@ Compatibility is a product property, not a universal yes/no rule. Code with no d
 - `archive --outcome reconciled --reason <reason> --expected-head <sha>` closes a historical task whose code is already integrated. It requires exact HEAD plus ancestry or complete patch-equivalence (or explicit same-base-branch confirmation with no product changes), records the original phase and missing verification honestly, and never fabricates GREEN, acceptance, or release success.
 - `release` is evaluated only after an explicit release request.
 
+Risk and verification cost are separate decisions. Risk determines which gates are mandatory; measured cost determines their order. Before a slow acceptance, PDF/render, device, browser, or end-to-end matrix, run the cheapest relevant changed-path regression, fixture preflight, and old-contract conflict checks. Projects should keep ordinary unit checks fast and expose a slow acceptance matrix as a distinct late `acceptance` or `e2e` check. The final `full` still contains every required gate and runs once after the fingerprint stabilizes.
+
 The normal delivery order is verify/full → acceptance → two-pass review → retrospective → archive → guarded commit/push/merge → reconcile → cleanup. A checkpoint commit on the task's own integration stream preserves work but never completes acceptance, closes the task, or permits its successor. `reconciled` remains for proven historical/external integration. A clear L1 request is sufficient approval once its compact contract is complete. A clean first-pass L1 records a machine retrospective and closes automatically; failures, bypass, rework, unreasonable blocks, and every L2/Emergency retain human review. Release authority is never inherited from ordinary archive.
 
 UAT and review are not hidden implementation phases. Route follow-up work again
@@ -273,6 +277,8 @@ Common optional check IDs include:
 One-off exploration and debugging commands may run directly but do not satisfy workflow gates. The configured profile is the contract shared by local development and CI.
 
 Within one profile invocation, checks with identical argv, resolved cwd, effective environment, and timeout share one process result. Each check still validates its own report and artifacts and records `reusedFromCheckId`; no result is cached across profiles, sessions, or project changes.
+
+The current Runner does not reuse an old passing check after the project fingerprint changes. A project adapter may internally reuse an expensive generated baseline only when its **input digest** covers all declared production and test sources, templates/assets, profile/configuration, renderer/toolchain, fonts/resources, and relevant environment, and the current check verifies that digest. A changed or incomplete dependency set requires a real rerun; a passing historical matrix may never be presented as current full verification.
 
 Keep regression tests as durable product assets. After every profile, compact identical-fingerprint repeats online to current truth plus the latest useful failure; `checkRunSummary` and `verificationSummary` preserve pass/failure counts and cumulative duration. A changed task or project fingerprint remains distinct. TDD keeps current RED/GREEN plus the latest replaced or failed chain; acceptance, migration, release, rollback, and evolution candidates remain intact. Record ordinary review facts in structured evidence with `standards`, `spec`, and a non-empty `findings` summary. Raw logs belong in ignored local output or time-limited CI artifacts, not tracked evidence.
 
@@ -392,6 +398,8 @@ the combined feature is ready. Do not convert verification frontiers into one
 giant contract or multiply PRs/worktrees merely to mirror task records.
 
 Keep a stable `RIGORBREEZE_SESSION_ID` per Codex window. A second live session cannot claim the same worktree. A possible Direct change uses `status --json --path <relative>` and receives only relevant writers; routine task writes use current-worktree `status --json`. Concurrent windows and optional orchestrators use compact all-project status, while full all-project status is reserved for exact repair, cleanup, or evolution. Missing integrated worktrees are stale-registry cleanup candidates, not crashes or overlap blockers. An integrated HEAD with uncommitted same-path changes remains a writer until clean.
+
+Read-only monitoring never sends a message, claims ownership, or replans the observed task. Progress reports use four facts: proven completed work, current machine phase/check, remaining gates, and blockers. A percentage needs a finite machine checklist; an ETA needs the active phase plus measured duration from a comparable run. Without that basis, report elapsed time and the next observable checkpoint instead of guessing.
 
 After compaction or in a new Codex task, resume from current `handoff` and
 `records`, their contract, and Git facts. These identify the task, checkout,
