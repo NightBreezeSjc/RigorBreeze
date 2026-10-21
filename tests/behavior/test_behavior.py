@@ -40,12 +40,12 @@ class BehaviorSuiteTests(unittest.TestCase):
         self.assertIn("summary", schema["required"])
         self.assertEqual(schema["properties"]["summary"], {"type": "string"})
 
-    def test_contract_has_exactly_twenty_eight_safe_cases(self) -> None:
+    def test_contract_has_exactly_thirty_safe_cases(self) -> None:
         runner = load_runner()
         contract = runner.load_contract(SCENARIOS_PATH)
 
         self.assertEqual(contract["schemaVersion"], 1)
-        self.assertEqual(len(contract["cases"]), 28)
+        self.assertEqual(len(contract["cases"]), 30)
         self.assertEqual(
             {case["id"] for case in contract["cases"]},
             {
@@ -77,7 +77,70 @@ class BehaviorSuiteTests(unittest.TestCase):
                 "cross-thread-resume-from-machine-state",
                 "multi-case-subject-lock-after-correction",
                 "workflow-maintenance-rejects-adopter-repo-expansion",
+                "source-material-before-scope",
+                "risk-gates-cost-ordered",
             },
+        )
+
+    def test_source_and_cost_cases_reject_scope_and_gate_shortcuts(self) -> None:
+        runner, source_case = load_case("source-material-before-scope")
+        source_result = {
+            "caseId": source_case["id"],
+            "summary": "raw sources lock remove and retain boundaries before writes",
+            "markers": source_case["requiredMarkers"],
+            "questions": [],
+            "verification": {
+                "command": "read sources then run focused regression",
+                "exitCode": 0,
+                "scope": "configuration guard only; templates retained",
+                "fresh": True,
+            },
+        }
+        self.assertTrue(
+            runner.score_case(
+                source_case,
+                source_result,
+                source_case["syntheticTranscript"],
+                source_case["syntheticChangedPaths"],
+            )["passed"]
+        )
+        self.assertFalse(
+            runner.score_case(
+                source_case,
+                source_result,
+                source_case["syntheticTranscript"] + "\nmodify contract template\n",
+                [*source_case["syntheticChangedPaths"], "src/contract_template.py"],
+            )["passed"]
+        )
+
+        runner, cost_case = load_case("risk-gates-cost-ordered")
+        cost_result = {
+            "caseId": cost_case["id"],
+            "summary": "risk keeps full quality while measured cost orders fast checks first",
+            "markers": cost_case["requiredMarkers"],
+            "questions": [],
+            "verification": {
+                "command": "read project-checks.md and verification-history.json",
+                "exitCode": 0,
+                "scope": "verification plan only",
+                "fresh": True,
+            },
+        }
+        self.assertTrue(
+            runner.score_case(
+                cost_case,
+                cost_result,
+                cost_case["syntheticTranscript"],
+                [],
+            )["passed"]
+        )
+        self.assertFalse(
+            runner.score_case(
+                cost_case,
+                cost_result,
+                cost_case["syntheticTranscript"] + "\nskip final full to save time\n",
+                [],
+            )["passed"]
         )
 
     def test_acceptance_oracle_rejects_contract_rewrite_to_match_runtime(

@@ -51,6 +51,10 @@ Inside one profile invocation only, an identical argv, resolved cwd, effective e
 
 Once a successful `full` result is bound to the unchanged task digest, project fingerprint, configuration digest, and HEAD, later `verify`, archive, commit, and merge gates reuse it. An explicit `verify --force` is the only unchanged-fingerprint rerun. A workflow phase transition alone never reruns `full`; code, contract, ownership, configuration, or external-state change invalidates the snapshot and only the affected repository repeats verification. Environment preflight failures are tooling facts, not RED or business rework.
 
+Order checks from cheap/high-signal to slow: format and changed-path/old-contract tests, ordinary unit/integration/contract checks, then slow acceptance or E2E matrices and build. High risk keeps the final slow gate; it does not require that gate on every development loop. Keep slow render/device suites out of a catch-all unit command so a stale fixture can fail before the expensive matrix starts.
+
+After a project fingerprint change, RigorBreeze **does not reuse** the previous passing check. A project-owned cache or generated baseline is trustworthy only when the current adapter validates an **input digest** covering source/tests, templates/assets, configuration/profile, renderer/toolchain, fonts/resources, and relevant environment. Without that complete dependency proof, rerun the check and report the real duration.
+
 ## GitLab
 
 Adapt `assets/ci/gitlab-ci.yml` into the existing `.gitlab-ci.yml`. Configure

@@ -44,10 +44,11 @@ python3 -B tests/behavior/run.py validate
 python3 -B -m unittest discover -s tests/behavior -v
 ```
 
-Public Preview 小版本候选发布时，全部确定性场景通过后，只使用本机 Codex 将受影响的 Live 场景各运行两次，不因版本变化重跑未受影响场景。完整 28×2 Live 矩阵只用于 v1.0 RC，或全局风险分流、Git 权限、迁移或发布治理的广泛改动。这一步需要明确手动触发，普通提交、配置化 `full` 和 CI 都不会运行：
+Public Preview 小版本候选发布时，全部确定性场景通过后，只使用本机 Codex 将受影响的 Live 场景各运行两次，不因版本变化重跑未受影响场景。完整 30×2 Live 矩阵只用于 v1.0 RC，或全局风险分流、Git 权限、迁移或发布治理的广泛改动。这一步需要明确手动触发，普通提交、配置化 `full` 和 CI 都不会运行：
 
 ```bash
-python3 -B tests/behavior/run.py run --version 0.25.0 --case operational-readiness-not-code-readiness --repetitions 2
+python3 -B tests/behavior/run.py run --version 0.25.0 --case source-material-before-scope --repetitions 2
+python3 -B tests/behavior/run.py run --version 0.25.0 --case risk-gates-cost-ordered --repetitions 2
 ```
 
 任一受影响场景违反硬规则都阻断候选版本。只检查 `.git/rigorbreeze/behavior-evals/0.25.0/` 下的脱敏 Git 私有结果；不得提交这些结果，也不得在 fixture 中使用真实凭证或服务。每次结果还记录缓存/非缓存输入、输出与推理 Token、纯流程 Runner 调用数、evidence 字节数及产品/测试行数变化。固定模型的不同 arm 必须比较中位数，不能用一次运行宣传节省比例，也不能为了 Token 目标放宽安全规则。

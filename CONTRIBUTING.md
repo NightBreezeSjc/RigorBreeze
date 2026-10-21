@@ -44,10 +44,11 @@ python3 -B tests/behavior/run.py validate
 python3 -B -m unittest discover -s tests/behavior -v
 ```
 
-For a Public Preview minor candidate, run every affected Live scenario twice with a locally installed Codex after the complete deterministic suite passes. Do not rerun unchanged Live cases merely because the version changed. Run the complete 28×2 Live matrix only for a v1.0 RC or a broad change to global risk routing, Git authority, migration, or release governance. This is an explicit maintainer action; ordinary commits, configured `full`, and CI never invoke it:
+For a Public Preview minor candidate, run every affected Live scenario twice with a locally installed Codex after the complete deterministic suite passes. Do not rerun unchanged Live cases merely because the version changed. Run the complete 30×2 Live matrix only for a v1.0 RC or a broad change to global risk routing, Git authority, migration, or release governance. This is an explicit maintainer action; ordinary commits, configured `full`, and CI never invoke it:
 
 ```bash
-python3 -B tests/behavior/run.py run --version 0.25.0 --case operational-readiness-not-code-readiness --repetitions 2
+python3 -B tests/behavior/run.py run --version 0.25.0 --case source-material-before-scope --repetitions 2
+python3 -B tests/behavior/run.py run --version 0.25.0 --case risk-gates-cost-ordered --repetitions 2
 ```
 
 Any affected-case hard-rule failure blocks the candidate. Inspect only the redacted Git-private results under `.git/rigorbreeze/behavior-evals/0.25.0/`; do not commit them or use real credentials and services in a fixture. Each result also records cached/uncached input, output and reasoning tokens, workflow-only runner calls, evidence bytes, and product/test line deltas. Compare fixed-model arms by median; never advertise savings from one run or relax a safety rule to meet a Token target.

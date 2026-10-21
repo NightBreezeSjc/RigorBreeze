@@ -380,13 +380,32 @@ class SkillContractTests(unittest.TestCase):
         self.assertIn("read-only coverage matrix", skill)
         self.assertLessEqual(len(skill.split()), 1650)
 
+    def test_source_intent_and_verification_cost_are_independent(self) -> None:
+        skill = (SKILL_DIR / "SKILL.md").read_text(encoding="utf-8")
+        handbook = (SKILL_DIR / "references" / "handbook.md").read_text(
+            encoding="utf-8"
+        )
+        gates = (SKILL_DIR / "references" / "ci-gates.md").read_text(encoding="utf-8")
+
+        self.assertIn(
+            "Read every authoritative requirement, prototype, design, API, or runtime source",
+            skill,
+        )
+        self.assertIn("Run full once at the final fingerprint", skill)
+        self.assertIn("authoritative source inventory", handbook)
+        self.assertIn("slow acceptance", handbook)
+        self.assertIn("finite machine checklist", handbook)
+        self.assertIn("input digest", gates)
+        self.assertIn("does not reuse", gates)
+        self.assertLessEqual(len(skill.split()), 1650)
+
     def test_public_preview_live_evaluation_is_affected_and_bounded(self) -> None:
         english = (REPO_ROOT / "CONTRIBUTING.md").read_text(encoding="utf-8")
         chinese = (REPO_ROOT / "CONTRIBUTING.zh-CN.md").read_text(encoding="utf-8")
 
         for text, phrases in (
-            (english, ("affected", "twice", "28×2", "v1.0 RC")),
-            (chinese, ("受影响", "两次", "28×2", "v1.0 RC")),
+            (english, ("affected", "twice", "30×2", "v1.0 RC")),
+            (chinese, ("受影响", "两次", "30×2", "v1.0 RC")),
         ):
             for phrase in phrases:
                 self.assertIn(phrase, text)
