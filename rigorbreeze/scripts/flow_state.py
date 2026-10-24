@@ -1119,6 +1119,9 @@ def configured_generated_paths(root: Path) -> set[str]:
 
 def safe_files(root: Path) -> Iterable[Path]:
     generated = configured_generated_paths(root)
+    generated.update(
+        git(root, "ls-files", "-oi", "--exclude-standard", "-z").stdout.split("\0")
+    )
     for base, dirs, names in os.walk(root):
         base_path = Path(base)
         dirs[:] = [

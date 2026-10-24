@@ -9,16 +9,16 @@ One outcome/task; risk-matched evidence; one worktree/writer; Git `manual`.
 
 ## Enter with the smallest sufficient context
 
-1. Resolve root. Use the **no-task path** for status/logs/screenshots/recommendations; give the read-only answer despite stale state.
+1. Resolve root. Use the **no-task path** for status/logs/screenshots/recommendations; give read-only answer despite stale state.
 2. Before writes/after compaction run bundled `status --json`. Direct sets `--root` to the owning worktree and queries a repo-relative or in-root absolute target; after **one corrected root/path retry**, failure stops writes. Continuations use `handoff`/`records`. Reuse for one write phase until HEAD, contract, ownership, external state, or runner changes. `status --all --compact --json` is bounded handoff, never write authority; use full detail for repair/evolution.
 3. If uninitialized, `init`, configure `rigorbreeze.toml`, then `doctor --json`. Never replace a runner mid-task; migrate Git state only through it.
 4. Read affected sources plus config/contract/index. Writes need approval and ownership. For missing L2/Emergency records, restore the authoritative record or use an explicit Emergency contract, never an informal task card; neither supplies missing product intent.
 
-Read facts first. Use one reference Contents once: [handbook.md](references/handbook.md) execution; [spec-tree.md](references/spec-tree.md) records/storage; [ci-gates.md](references/ci-gates.md) CI/delivery. Direct loads none; safety never justifies the bundle unless auditing RigorBreeze.
+Use reference Contents: [handbook.md](references/handbook.md) execution; [spec-tree.md](references/spec-tree.md) records/storage; [ci-gates.md](references/ci-gates.md) CI/delivery. Direct loads none; safety never justifies the bundle unless auditing RigorBreeze.
 
 ## Recover intent before creating work
 
-Recover **recoverable project facts** from code, tests, Git, interfaces, data, permissions, and runtime. **Read every authoritative requirement, prototype, design, API, or runtime source** for the slice; ask only unprovable **outcome-changing intent**. Personas are not evidence; trace the slice, not the repository.
+Recover **recoverable project facts** from code, tests, Git, interfaces, data, permissions, and runtime. **Read every authoritative requirement, prototype, design, API, or runtime source** for the slice; ask unprovable **outcome-changing intent**. Personas are not evidence; trace the slice, not the repository.
 
 Use initiative shaping only for a new product, new business domain, broad legacy migration, or unshaped initiative; ordinary bounded work skips it. Do not create a delivery task while shaping. Keep a decision frontier of at most three questions, each with recommendation/impact. Compare two or three viable approaches by evidence, value, usability, feasibility, and viability, no-gos, then choose the first vertical slice. A prototype answers one decision question, never acceptance.
 
@@ -28,7 +28,7 @@ For ordinary work, preserve the exact user outcome/source and label inferred opt
 
 **Risk follows consequence**, not diff size:
 
-- `Direct`: one deterministic low-consequence result/repository; no ambiguity/writer or API/persisted-data/auth/permission/payment/lock/migration/dependency/production-config/external-state/release boundary. Backend, follow-up/compaction/handoff, prior failure, or regression tests do not raise risk. If path status proves no writer/protected boundary, stay Direct: never `new`/`approve`; behavior fixes extend the executable test seam before focused proof/compile—no task/evidence/full. **Do not promote merely because configured profiles are absent or incomplete.** Unrelated dirt may use a short-lived clean worktree; remove only clean+contained.
+- `Direct`: one deterministic low-consequence result/repository; no ambiguity/writer or API/persisted-data/auth/permission/payment/lock/migration/dependency/production-config/external-state/release boundary. Backend, follow-up/compaction/handoff, prior failure, or regression tests do not raise risk. Approved style reuse stays Direct; new language/behavior reroutes. If path status proves no writer/protected boundary, stay Direct: never `new`/`approve`; behavior fixes extend the executable test seam before focused proof/compile—no task/evidence/full. **Do not promote merely because configured profiles are absent or incomplete.** Unrelated dirt may use a short-lived clean worktree; remove only clean+contained.
 - `L0`: coordinated documentation or isolated non-behavioral/visual change.
 - `L1`: normal feature, fix, or user flow.
 - `L2`: sensitive data, permissions, migration, payment, external integration, architecture, or production release.
@@ -36,9 +36,9 @@ For ordinary work, preserve the exact user outcome/source and label inferred opt
 
 Except Direct, one independently verifiable outcome is one task. **Consequence sets gates; each independent outcome gets one short-lived task branch. Only a genuinely concurrent writer may use `new --worktree auto`; sequential work stays in the current clean worktree.** One feature/PR may contain several tasks: **sequential initiative work** reuses a clean integration stream, closes/commits each task, batches human interaction, then opens one PR. Never compress verification frontiers, multiply worktree/PRs, stack unrelated work, or share writers.
 
-Ordinary tasks have no DAG. For real ordering, propose outcomes, `Depends-On`, scope, acceptance, and parallel-ready nodes; create tasks after one approval. Contracts remain the DAG. Cross-repository dependencies are authoritative-input references, not global state.
+Ordinary tasks have no DAG. For ordering, propose outcomes, `Depends-On`, scope, acceptance, and parallel-ready nodes; create tasks after one approval. Contracts remain the DAG. Cross-repository dependencies are authoritative-input references, not global state.
 
-For one cross-repository result, keep repository-local scope/SHA/RED/checks; promise one combined approval, one end-to-end acceptance, and one retrospective even when blocked. Read each status once; only changed repositories repeat work. Do not duplicate background/raw evidence.
+For one cross-repository result, keep repository-local scope/SHA/RED/checks but one combined approval, one end-to-end acceptance, and one retrospective. Read each status once; repeat only changed repos; never duplicate raw evidence.
 
 Contracts declare relative scope, unique acceptance IDs, public seam, independent oracle, commands, and risks. Declare exclusive runtime resources or `none`; conflicts block. Conditional L2 modes map enabled/disabled/unavailable to acceptance.
 
@@ -52,7 +52,7 @@ Private v5 records stay in `.git/rigorbreeze/records`; tracked remains compatibl
 
 For L1/L2/Emergency, preflight tests/command/runtime/dependencies and optional `environment` adapter; tooling failures are not RED. Bind a real acceptance ID, independent failure, command, **exit status**, baseline, and test digest. Source searches prove static contracts only. Iterate failing test → minimum public-seam GREEN → refactor → affected. Run full once at the final fingerprint; reuse unless `--force` is explicit.
 
-Success retains command/code/scope/report digest; inspect a bounded failure tail only. Batch machine phases; return only for failure, safety-stop, or judgment.
+Success retains compact command/exit/scope/report index; inspect a bounded failure tail only. Report product/test/workflow separately; cite one index, runner version, and cause class; never copy private records/raw logs. Batch phases; return for failure, safety-stop, or judgment.
 
 Create tracked `verification/` only for repeated bottlenecks; project assets own phases/reports. Keep code/config-saved/config-published/credential/entry/runtime/provider-UAT readiness distinct. A **read-only coverage matrix** may span checks; each defect write reroutes Direct/L1/L2. **Observation is evidence, never the acceptance oracle**: approved requirements/IDs/corrections define correctness despite matching observations. Report v1 binds live level/SHA/features/evidence/Doctor/Cleanup; compilation/source search/unit/cached screenshots/Agent claims cannot replace it. Direct/no-pack gains no step.
 
@@ -84,4 +84,4 @@ After delivery, reconcile from the base worktree. Missing historical worktrees a
 
 Clean first-pass L1 may machine-retrospect; friction and every L2/Emergency need prefilled review. Changed facts, not extra green runs, repeat judgment. A reusable defect becomes a separate Skill task; Skill maintenance cannot mutate adopter repositories without explicit authority. Ordinary failures need two comparable occurrences; a high-risk escape needs one. Promote only when the same fixture beats the prior Skill without regression. Review private candidates with `$rigorbreeze 汇总这个项目的演进候选`; create no second log or relaxed gate.
 
-Codex runs internal commands. Close in order: verify, accept, review, retrospective, archive, guarded delivery, reconcile. A checkpoint commit never completes work or permits a successor. L0 requires affected; L1/L2 require full plus applicable acceptance/review. Use `abandoned` for clean cancellation and `reconciled` only for proven external integration; never invent success. Release requires an active release-ready task. Before commit, archive, or fixed/passed/complete claims, cite **fresh verification**: command, status, scope. History/other Agents cannot substitute. After L2, cross-repository work, or context compaction, give one short handoff prompt recommending a new Codex task for the next independent feature; never block continuation.
+Codex runs internal commands. Close in order: verify, accept, review, retrospective, archive, guarded delivery, reconcile. A checkpoint commit never completes work or permits a successor. L0 requires affected; L1/L2 require full plus applicable acceptance/review. Use `abandoned` for clean cancellation and `reconciled` only for proven external integration; never invent success. Release requires an active release-ready task. Before commit, archive, or fixed/passed/complete claims, cite **fresh verification**: command, status, scope. History/other Agents cannot substitute. After L2, cross-repository work, or compaction, give a short handoff for the next independent feature without blocking continuation.

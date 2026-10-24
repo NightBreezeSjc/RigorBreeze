@@ -10,6 +10,8 @@ The project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). 
 
 ### Changed
 
+- Keep exact reuse of an approved visual style on the Direct lane with focused render/shared-isolation proof; final reports now separate product, test, and workflow changes and reference one compact evidence index instead of duplicating private machine records.
+- Require workflow-friction reports to name the executing/installed Runner versions and distinguish core behavior from project adapters, environment, and executor choices.
 - Keep RigorBreeze-maintainer task contracts, evidence, and archives local to the source checkout; public release proof now stays in commits, the changelog, regression tests, and CI without changing initialized projects' evidence behavior.
 - Renamed the project, Skill ID, invocation, runner, configuration, Git-private state, and task-branch prefix from Codex Production Flow to RigorBreeze before the first public release. No legacy alias is retained.
 - Require inspection of the standard library, framework, and current dependency set before adding custom code or packages; new dependencies and abstractions need current acceptance or a durable invariant.
@@ -17,6 +19,7 @@ The project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). 
 
 ### Fixed
 
+- Exclude Git-ignored generated files from project fingerprints while preserving invalidation for tracked and non-ignored source, test, configuration, dependency, and migration changes.
 - Freeze current-worktree tasks against the configured sequential integration branch and its resolved Git SHA; fail before writing task records when that baseline is missing.
 - Use a side-effect-free native Windows process query for worktree ownership checks instead of the POSIX-only `os.kill(pid, 0)` probe.
 - Preserve repeated RED observations for audit while evaluating only the latest current chain per acceptance ID at closure gates.

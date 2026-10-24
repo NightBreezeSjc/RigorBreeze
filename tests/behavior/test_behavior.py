@@ -40,12 +40,12 @@ class BehaviorSuiteTests(unittest.TestCase):
         self.assertIn("summary", schema["required"])
         self.assertEqual(schema["properties"]["summary"], {"type": "string"})
 
-    def test_contract_has_exactly_thirty_safe_cases(self) -> None:
+    def test_contract_has_exactly_thirty_one_safe_cases(self) -> None:
         runner = load_runner()
         contract = runner.load_contract(SCENARIOS_PATH)
 
         self.assertEqual(contract["schemaVersion"], 1)
-        self.assertEqual(len(contract["cases"]), 30)
+        self.assertEqual(len(contract["cases"]), 31)
         self.assertEqual(
             {case["id"] for case in contract["cases"]},
             {
@@ -79,6 +79,7 @@ class BehaviorSuiteTests(unittest.TestCase):
                 "workflow-maintenance-rejects-adopter-repo-expansion",
                 "source-material-before-scope",
                 "risk-gates-cost-ordered",
+                "approved-visual-style-reuse-direct",
             },
         )
 
@@ -820,6 +821,39 @@ class BehaviorSuiteTests(unittest.TestCase):
 
         self.assertTrue(tracer["passed"], tracer)
         self.assertFalse(fanout["passed"])
+
+    def test_approved_visual_reuse_rejects_task_full_and_evidence_duplication(
+        self,
+    ) -> None:
+        runner, case = load_case("approved-visual-style-reuse-direct")
+        result = {
+            "caseId": case["id"],
+            "markers": case["requiredMarkers"],
+            "questions": [],
+            "verification": None,
+        }
+
+        self.assertTrue(
+            runner.score_case(
+                case,
+                result,
+                case["syntheticTranscript"],
+                case["syntheticChangedPaths"],
+            )["passed"]
+        )
+        for extra in (
+            "python scripts/rigorbreeze.py new RB-STYLE --title style --risk L1",
+            "python scripts/rigorbreeze.py verify --profile full",
+            "cat spec/evidence/RB-STYLE.json into the final report",
+        ):
+            with self.subTest(extra=extra):
+                verdict = runner.score_case(
+                    case,
+                    result,
+                    case["syntheticTranscript"] + "\n" + extra,
+                    case["syntheticChangedPaths"],
+                )
+                self.assertFalse(verdict["passed"])
 
     def test_migration_phase_case_stops_unsafe_preflight_and_replay(self) -> None:
         runner, case = load_case("migration-preflight-respects-from-schema")

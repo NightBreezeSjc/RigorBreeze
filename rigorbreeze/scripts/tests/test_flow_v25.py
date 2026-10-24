@@ -9,6 +9,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import flow_diagnostics
+import flow_policy
 from flow_test_support import FlowTestCase
 
 
@@ -60,6 +61,30 @@ class FlowV25BoundedStatusTests(FlowTestCase):
                 result = self.run_flow("status", "--json", "--path", path, expected=2)
                 self.assertIn("--root <owning-worktree>", result.stderr)
                 self.assertIn("--path <repository-relative-path>", result.stderr)
+
+    def test_project_fingerprint_ignores_gitignored_generated_files_only(self) -> None:
+        self.initialize_project()
+        source = self.root / "src" / "view.ts"
+        source.parent.mkdir()
+        source.write_text("export const value = 1\n", encoding="utf-8")
+        (self.root / ".gitignore").write_text(
+            "components.generated.d.ts\n", encoding="utf-8"
+        )
+        self.commit_all("add tracked source and generated-file ignore")
+        baseline = flow_policy.project_fingerprint(self.root)
+
+        (self.root / "components.generated.d.ts").write_text(
+            "declare const generated: true\n", encoding="utf-8"
+        )
+        self.assertEqual(baseline, flow_policy.project_fingerprint(self.root))
+
+        untracked = self.root / "src" / "new-view.ts"
+        untracked.write_text("export const next = 2\n", encoding="utf-8")
+        self.assertNotEqual(baseline, flow_policy.project_fingerprint(self.root))
+        untracked.unlink()
+
+        source.write_text("export const value = 3\n", encoding="utf-8")
+        self.assertNotEqual(baseline, flow_policy.project_fingerprint(self.root))
 
     def synthetic_aggregate(self) -> dict[str, object]:
         tasks: list[dict[str, object]] = []

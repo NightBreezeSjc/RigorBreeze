@@ -477,6 +477,29 @@
       "passCriteria": "Implement and verify one representative visual tracer, request its visual approval, and defer the remaining related screens unless the change is an exact reuse of an already approved component."
     },
     {
+      "id": "approved-visual-style-reuse-direct",
+      "title": "Keep approved multi-page style reuse on the Direct lane",
+      "prompt": "七个邻舍后台页面已经批准统一复用现有 linshe-statistics 视觉样式。只改展示样式，不改统计口径、请求、权限或数据。请完成修改和验证，并说明这次各类改动量。",
+      "fixtureFiles": {
+        "workflow-status.json": "{\"activeWriter\":null,\"protectedBoundary\":false,\"result\":\"approved style reuse\"}\n",
+        "design-anchor.md": "The linshe-statistics component and spacing are already approved. Reuse them exactly; do not introduce a new visual language or behavior.\n",
+        "src/styles/linshe-statistics.scss": ".linshe-statistics { gap: 12px; }\n",
+        "tests/linshe-statistics-isolation.test.ts": "// Focused render and shared-component isolation seam.\n"
+      },
+      "requiredMarkers": ["workflow-status", "direct-lane", "approved-style-reuse", "focused-visual-proof", "partitioned-change-report", "single-evidence-index"],
+      "forbiddenMarkers": ["task-created", "full-profile", "duplicated-evidence", "visual-tracer-required"],
+      "requiredTranscriptPatterns": ["workflow-status\\.json", "design-anchor\\.md", "Direct", "focused|定向|聚焦", "render|渲染", "isolation|隔离", "product code|产品代码", "tests|测试", "workflow records|流程记录", "evidence index|证据索引"],
+      "forbiddenTranscriptPatterns": ["status --all", "new RB-|approve task", "verify --profile full", "cat .*spec/evidence|复制.*evidence|完整.*evidence"],
+      "orderedTranscriptPatterns": ["workflow-status\\.json", "design-anchor\\.md", "Direct", "focused|定向|聚焦", "product code|产品代码"],
+      "requiredChangedPaths": ["src/pages/contracts.vue", "src/pages/bills.vue", "src/pages/rooms.vue", "src/pages/repairs.vue", "src/pages/services.vue", "src/pages/rent-map.vue", "src/pages/overview.vue", "tests/linshe-statistics-isolation.test.ts"],
+      "forbiddenChangedPaths": ["src/api/**", "src/store/**", "spec/**"],
+      "syntheticTranscript": "read workflow-status.json\nread design-anchor.md\nuse Direct because this is one deterministic approved-style reuse with no writer or protected boundary\nedit seven presentation pages and tests/linshe-statistics-isolation.test.ts\nrun focused render and shared-component isolation test (exit 0)\nfinal report: product code 7 presentation files; tests 1 focused isolation file; workflow records 0; evidence index: focused test command, exit 0, and changed-path digest only\n",
+      "syntheticChangedPaths": ["src/pages/contracts.vue", "src/pages/bills.vue", "src/pages/rooms.vue", "src/pages/repairs.vue", "src/pages/services.vue", "src/pages/rent-map.vue", "src/pages/overview.vue", "tests/linshe-statistics-isolation.test.ts"],
+      "allowQuestions": false,
+      "maxQuestions": 0,
+      "passCriteria": "Reuse the approved visual style through Direct with focused render and shared-isolation proof; do not create task/evidence/full or duplicate machine records, and report product, test, and workflow changes separately."
+    },
+    {
       "id": "one-pr-multiple-slices",
       "title": "Split independent verification frontiers without multiplying pull requests",
       "prompt": "企业账单分为企业配置、开房入住、计费引擎、旧页面入口与UAT四批，但最终只提一个PR。当前UAT又发现旧台账入口需要修改，而该文件在本切片Forbidden Scope且由另一个任务占用。不要让我确认四次，也不要创建四个worktree；继续完成一个安全执行方案。",

@@ -178,7 +178,7 @@ Within one profile invocation, `checkRuns[*].reusedFromCheckId` may identify the
 
 After each profile, repeated successful details are compacted online without changing gate truth. Check runs group by `(profile, checkId, taskDigest, projectFingerprint)` and keep the current result plus the latest useful failure; optional `checkRunSummary` preserves total/pass/fail counts and cumulative duration. Profile results follow the same current-plus-failure rule in optional `verificationSummary`. A changed task or project fingerprint is a distinct group and is never merged into current proof. TDD keeps the current RED/GREEN and latest useful replaced or failed chain per acceptance ID, with aggregate counts in optional `tddSummary`; acceptance, artifacts, migration, release, rollback, practice, and evolution candidates are never removed. Completed L1 may compact further under retention policy. Evidence without summary fields remains valid.
 
-The repository keeps regression tests, one compact task contract, and its compact evidence as versioned engineering records. Raw logs, generated reports, caches, and behavior-evaluation transcripts stay ignored or in CI/Git-private artifacts. The distributable Skill archive excludes maintainer tests and caches, but the source repository does not delete them. A second local-only evidence store is intentionally deferred: it would create another authority, migration path, and cleanup policy before repeated real use proves that cost worthwhile.
+Schema-v5 projects keep the full task contract and evidence in Git-common `.git/rigorbreeze/records/`; L2/Emergency may publish only the bounded sanitized audit summary. Legacy tracked projects remain compatible until an explicit idle migration. Regression tests stay versioned product assets, while raw logs, generated reports, source manifests, caches, and behavior-evaluation transcripts stay ignored or in CI/Git-private artifacts. A final report references the existing compact evidence index rather than creating another copy or authority.
 
 Stable schema-v4 sections are `baseline`, `checkRuns`, `tddChain`,
 `artifacts`, `acceptance`, `release`, `automation`, `practice`, `red`, and
@@ -204,12 +204,15 @@ Do not store credentials, production data, full logs containing personal data, o
 ## Invalidation
 
 Changing the approved task invalidates task approval and all downstream
-evidence. Changing source, tests, dependency files, configuration, migrations,
-or `rigorbreeze.toml` invalidates verification, acceptance, artifacts, and
-release evidence. Generated state, evidence, configured reports, and configured
-artifacts are excluded from the source fingerprint so proof does not invalidate
-itself. Evidence is current only when task digest, project fingerprint, and
-configuration digest match as applicable.
+evidence. Changing tracked or non-ignored source, tests, dependency files,
+configuration, migrations, or `rigorbreeze.toml` invalidates verification,
+acceptance, artifacts, and release evidence. Git-ignored generated files,
+generated state, evidence, configured reports, and configured artifacts are
+excluded from the source fingerprint so proof does not invalidate itself.
+Per-check fingerprints may differ when a check creates excluded output; the
+final verification binds the post-profile fingerprint and never hides a real
+delivery-input change. Evidence is current only when task digest, project
+fingerprint, and configuration digest match as applicable.
 
 An enabled Verification Report is additionally current only while its Git SHA,
 Feature Map digest, mapped IDs, and non-empty repository-relative evidence
